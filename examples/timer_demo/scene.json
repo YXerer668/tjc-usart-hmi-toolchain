@@ -1,0 +1,30 @@
+{
+  "project": {
+    "name": "timer-demo",
+    "default_page": "page0"
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "tm0",
+          "type": "timer",
+          "value": 400,
+          "style": {
+            "enabled": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "project": {
+    "name": "page1-button-event-minimal",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "p1title",
+          "type": "text",
+          "x": 72,
+          "y": 64,
+          "w": 320,
+          "h": 58,
+          "text": "PAGE1",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "back0",
+          "type": "button",
+          "x": 72,
+          "y": 154,
+          "w": 180,
+          "h": 64,
+          "text": "BACK",
+          "events": {
+            "up": [
+              "page 0"
+            ]
+          },
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0
+          }
+        }
+      ]
+    }
+  ]
+}

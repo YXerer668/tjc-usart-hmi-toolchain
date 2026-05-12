@@ -1,0 +1,42 @@
+{
+  "name": "new_controls_demo_live_expectations",
+  "page_id": 0,
+  "expectations": [
+    {
+      "target": "bar1.val",
+      "expected": 68
+    },
+    {
+      "target": "slider1.val",
+      "expected": 42
+    },
+    {
+      "target": "sw0.val",
+      "expected": 1
+    },
+    {
+      "target": "va0.val",
+      "expected": 123
+    },
+    {
+      "target": "gauge1.val",
+      "expected": 75
+    },
+    {
+      "target": "c0.val",
+      "expected": 1
+    },
+    {
+      "target": "r0.val",
+      "expected": 1
+    },
+    {
+      "target": "qr1.txt",
+      "expected": "USART HMI"
+    },
+    {
+      "target": "g0.txt",
+      "expected": "SCROLLING TEXT"
+    }
+  ]
+}

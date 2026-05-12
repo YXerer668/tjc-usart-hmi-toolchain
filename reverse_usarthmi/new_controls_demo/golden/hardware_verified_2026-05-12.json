@@ -1,0 +1,43 @@
+{
+  "status": "verified_on_hardware",
+  "verified_at": "2026-05-12T22:12:53.0373377+08:00",
+  "screen": {
+    "port": "COM36",
+    "app_baud": 9600,
+    "model": "TJC8048X543_011C",
+    "connect_ascii": "comok 2,1089-0,TJC8048X543_011C,277,10501,FC8B3401B1A6086E,128974848-0"
+  },
+  "upload": {
+    "download_baud": 921600,
+    "chunk_size": 4096,
+    "file_size": 11423220,
+    "chunks_sent": 2789,
+    "bytes_sent": 11423220,
+    "elapsed_s": 209.125
+  },
+  "tft_checksum": {
+    "stored_hex": "0x0B0D83BC",
+    "calculated_hex": "0x0B0D83BC",
+    "valid": true
+  },
+  "artifacts": {
+    "scene": "examples/new_controls_demo/scene.json",
+    "normalized_scene": "reverse_usarthmi/new_controls_demo/local_build/scene.normalized.json",
+    "output_hmi": "reverse_usarthmi/new_controls_demo/local_build/output.hmi",
+    "output_tft": "reverse_usarthmi/new_controls_demo/local_build/output.tft",
+    "preview_png": "reverse_usarthmi/new_controls_demo/local_build/preview.png",
+    "camera_frame": "reverse_usarthmi/new_controls_demo/live_probe/after_highspeed_value_fix_upload.jpg"
+  },
+  "sha256": {
+    "output_tft": "1DCD405514AEC4A0B05374D1A60DC030612FEA57EE6F9FFFA61258AF7B90A588",
+    "output_hmi": "D86E42932217FA6F107F1C1A7180433C1362214836088B216EF2701A14182E56",
+    "scene_normalized_json": "5B53A2EDEEAA44E92D1B3181741D846B24F0A55F539AB885CEDC37A081A7B241",
+    "camera_frame": "C734064F28EB9F5416883335C2037849ECCD0354ADB8948AA87F588BB24E4AA9"
+  },
+  "runtime_expectations": "reverse_usarthmi/new_controls_demo/golden/expected_runtime.json",
+  "notes": [
+    "This is the first mixed-control live canary with generated progress, slider, gauge, QR code, scrolling text, dual button, state button, checkbox, radio, hotspot, crop image, variable, and waveform objects.",
+    "The value-slot fixes are verified by live get responses for bar1.val, slider1.val, sw0.val, va0.val, gauge1.val, c0.val, and r0.val.",
+    "Normal uploads should keep chunk_size=4096; non-4096 chunks are only for deliberate bootloader probes."
+  ]
+}

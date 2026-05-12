@@ -1,0 +1,156 @@
+{
+  "project": {
+    "name": "new-controls-demo",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "bar1",
+          "type": "progress",
+          "x": 40,
+          "y": 36,
+          "w": 260,
+          "h": 28,
+          "value": 68,
+          "style": {
+            "background_color": 48631,
+            "foreground_color": 1024
+          }
+        },
+        {
+          "id": "slider1",
+          "type": "slider",
+          "x": 40,
+          "y": 88,
+          "w": 260,
+          "h": 40,
+          "value": 42,
+          "style": {
+            "minval": 0,
+            "maxval": 100,
+            "background_color": 1024,
+            "foreground_color": 16384
+          }
+        },
+        {
+          "id": "gauge1",
+          "type": "gauge",
+          "x": 350,
+          "y": 24,
+          "w": 180,
+          "h": 180,
+          "value": 75
+        },
+        {
+          "id": "qr1",
+          "type": "qrcode",
+          "x": 590,
+          "y": 28,
+          "w": 160,
+          "h": 160,
+          "text": "USART HMI"
+        },
+        {
+          "id": "g0",
+          "type": "scrolling-text",
+          "x": 40,
+          "y": 158,
+          "w": 300,
+          "h": 34,
+          "text": "SCROLLING TEXT",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "tim": 120,
+            "en": 1
+          }
+        },
+        {
+          "id": "bt0",
+          "type": "dual-button",
+          "x": 40,
+          "y": 226,
+          "w": 96,
+          "h": 64,
+          "text": "DUAL",
+          "value": 0
+        },
+        {
+          "id": "sw0",
+          "type": "state-button",
+          "x": 170,
+          "y": 226,
+          "w": 120,
+          "h": 42,
+          "text": "False/True",
+          "value": 1
+        },
+        {
+          "id": "c0",
+          "type": "checkbox",
+          "x": 332,
+          "y": 236,
+          "w": 24,
+          "h": 24,
+          "value": 1
+        },
+        {
+          "id": "r0",
+          "type": "radio",
+          "x": 392,
+          "y": 236,
+          "w": 24,
+          "h": 24,
+          "value": 1
+        },
+        {
+          "id": "m0",
+          "type": "hotspot",
+          "x": 450,
+          "y": 220,
+          "w": 90,
+          "h": 70
+        },
+        {
+          "id": "q0",
+          "type": "crop-image",
+          "x": 590,
+          "y": 230,
+          "w": 80,
+          "h": 80,
+          "resources": {
+            "picc": 0
+          }
+        },
+        {
+          "id": "va0",
+          "type": "variable",
+          "text": "hidden-var",
+          "value": 123
+        },
+        {
+          "id": "s0",
+          "type": "waveform",
+          "x": 40,
+          "y": 330,
+          "w": 320,
+          "h": 110
+        }
+      ]
+    }
+  ]
+}

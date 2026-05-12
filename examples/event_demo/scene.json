@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "event-demo",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "events": {
+        "load": [
+          "printh 23 02 50 01"
+        ]
+      },
+      "widgets": [
+        {
+          "id": "evtbtn",
+          "type": "button",
+          "x": 300,
+          "y": 190,
+          "w": 200,
+          "h": 96,
+          "text": "EVENT TEST",
+          "style": {
+            "font_id": 0,
+            "background_color": 21130,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "up": [
+              "printh 23 02 54 45"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
