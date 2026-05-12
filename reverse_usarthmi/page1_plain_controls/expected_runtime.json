@@ -1,0 +1,66 @@
+{
+  "name": "page1_plain_controls_live_expectations",
+  "select_page": 0,
+  "page_id": 0,
+  "restore_page": 1,
+  "expectations": [
+    {
+      "target": "p1t.txt",
+      "expected": "P1"
+    },
+    {
+      "target": "p1b.txt",
+      "expected": "BTN"
+    },
+    {
+      "target": "n1.val",
+      "expected": 123
+    },
+    {
+      "target": "bar1.val",
+      "expected": 68
+    },
+    {
+      "target": "slider1.val",
+      "expected": 42
+    },
+    {
+      "target": "gauge1.val",
+      "expected": 75
+    }
+  ],
+  "set_expectations": [
+    {
+      "target": "n1.val",
+      "expected": 321
+    },
+    {
+      "target": "bar1.val",
+      "expected": 35
+    },
+    {
+      "target": "slider1.val",
+      "expected": 77
+    },
+    {
+      "target": "gauge1.val",
+      "expected": 88
+    },
+    {
+      "target": "n1.val",
+      "expected": 123
+    },
+    {
+      "target": "bar1.val",
+      "expected": 68
+    },
+    {
+      "target": "slider1.val",
+      "expected": 42
+    },
+    {
+      "target": "gauge1.val",
+      "expected": 75
+    }
+  ]
+}

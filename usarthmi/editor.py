@@ -52,6 +52,7 @@ RESOURCE_FIELD_ALIASES = {
     "pressed": "pic2",
     "crop": "picc",
 }
+PAGE1_PLAIN_WIDGET_TYPES = {"text", "button", "number", "progress", "slider", "gauge"}
 
 
 def import_asset(source: str | Path, out_dir: str | Path) -> dict[str, Any]:
@@ -277,6 +278,7 @@ def build_hmi(
         page,
         scene.pages[1:],
         button_proto=button_proto,
+        number_proto=number_proto,
         text_proto=text_proto,
         advanced_protos=advanced_protos,
         manifest_assets=manifest_assets,
@@ -297,6 +299,7 @@ def _build_extra_page_entries(
     extra_pages,
     *,
     button_proto,
+    number_proto,
     text_proto,
     advanced_protos,
     manifest_assets: dict[str, Any],
@@ -325,7 +328,7 @@ def _build_extra_page_entries(
                 next_id,
                 button_proto=button_proto,
                 picture_proto=None,
-                number_proto=None,
+                number_proto=number_proto,
                 timer_proto=None,
                 text_proto=text_proto,
                 advanced_protos=advanced_protos,
@@ -333,7 +336,8 @@ def _build_extra_page_entries(
             )
             if widget_block is None:
                 raise EditorError(
-                    "Multi-page HMI/TFT build V1 extra pages currently support only text/button widgets"
+                    "Multi-page HMI/TFT build V1 extra pages currently support only "
+                    "text/button/number/progress/slider/gauge widgets"
                 )
             generated_blocks.append(widget_block)
         page.blocks = [block, *generated_blocks]
@@ -727,11 +731,13 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
         raise EditorError("Multi-page build V1 requires page0 to keep the seed object layout unchanged")
     if scene.pages[1].events:
         raise EditorError("Multi-page build V1 does not support page1 events yet")
-    supported_page1_types = {"text", "button"}
     seen_ids = {"page0", "page1"}
     for widget in scene.pages[1].widgets:
-        if widget.type not in supported_page1_types:
-            raise EditorError("Multi-page build V1 page1 supports only text/button widgets")
+        if widget.type not in PAGE1_PLAIN_WIDGET_TYPES:
+            raise EditorError(
+                "Multi-page build V1 page1 supports only "
+                "text/button/number/progress/slider/gauge widgets"
+            )
         if widget.id in seen_ids:
             raise EditorError(f"Multi-page build V1 page1 object name conflicts with {widget.id!r}")
         seen_ids.add(widget.id)

@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "page1-plain-controls",
+    "default_page": "page0"
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "p1t",
+          "type": "text",
+          "x": 40,
+          "y": 30,
+          "w": 160,
+          "h": 40,
+          "text": "P1",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "p1b",
+          "type": "button",
+          "x": 220,
+          "y": 30,
+          "w": 120,
+          "h": 50,
+          "text": "BTN",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "n1",
+          "type": "number",
+          "x": 40,
+          "y": 100,
+          "w": 120,
+          "h": 40,
+          "value": 123
+        },
+        {
+          "id": "bar1",
+          "type": "progress",
+          "x": 40,
+          "y": 160,
+          "w": 220,
+          "h": 28,
+          "value": 68,
+          "style": {
+            "background_color": 48631,
+            "foreground_color": 1024
+          }
+        },
+        {
+          "id": "slider1",
+          "type": "slider",
+          "x": 40,
+          "y": 220,
+          "w": 220,
+          "h": 40,
+          "value": 42,
+          "style": {
+            "minval": 0,
+            "maxval": 100,
+            "background_color": 1024,
+            "foreground_color": 16384
+          }
+        },
+        {
+          "id": "gauge1",
+          "type": "gauge",
+          "x": 360,
+          "y": 80,
+          "w": 160,
+          "h": 160,
+          "value": 75
+        }
+      ]
+    }
+  ]
+}

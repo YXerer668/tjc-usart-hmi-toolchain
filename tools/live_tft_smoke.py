@@ -30,6 +30,7 @@ def main() -> int:
     parser.add_argument("--out-dir", required=True, help="Directory for smoke_result.json and optional capture.")
     parser.add_argument("--expect-json", help="JSON expectation file, either {target: value} or a list of entries.")
     parser.add_argument("--expect", action="append", default=[], help="Runtime expectation as target=value, repeatable.")
+    parser.add_argument("--set-expect", action="append", default=[], help="Write then verify target=value, repeatable.")
     parser.add_argument("--port", default="COM36")
     parser.add_argument("--baud", type=int, default=9600)
     parser.add_argument("--download-baud", type=int, default=DEFAULT_DOWNLOAD_BAUD)
@@ -39,7 +40,9 @@ def main() -> int:
     parser.add_argument("--prepare-delay-ms", type=int, default=1000)
     parser.add_argument("--prepare-wait-ms", type=int, default=800)
     parser.add_argument("--post-upload-wait-s", type=float, default=2.0)
-    parser.add_argument("--expected-page-id", type=int, default=0)
+    parser.add_argument("--select-page", help="Optional page command value to send before runtime checks, for example 1.")
+    parser.add_argument("--restore-page", help="Optional page command value to send after runtime checks, for example 0.")
+    parser.add_argument("--expected-page-id", type=int)
     parser.add_argument("--upload", action="store_true")
     parser.add_argument("--known-current", help="Trusted current TFT for exact-file upload skipping.")
     parser.add_argument("--skip-if-identical", action="store_true")
@@ -64,7 +67,9 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    expectation_config = _load_expectation_config(args.expect_json)
     expectations = _load_expectations(args.expect_json, args.expect)
+    set_expectations = _load_set_expectations(args.expect_json, args.set_expect)
     upload_result = None
     known_current = Path(args.known_current).resolve() if args.known_current else None
     if args.upload:
@@ -84,12 +89,25 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         ).to_dict()
         time.sleep(max(0.0, args.post_upload_wait_s))
 
+    select_page = args.select_page
+    if select_page is None and "select_page" in expectation_config:
+        select_page = str(expectation_config["select_page"])
+    restore_page = args.restore_page
+    if restore_page is None and "restore_page" in expectation_config:
+        restore_page = str(expectation_config["restore_page"])
+    expected_page_id = args.expected_page_id
+    if expected_page_id is None:
+        expected_page_id = int(expectation_config.get("page_id", 0))
+
     serial_checks = _run_serial_checks(
         expectations,
         port=args.port,
         baud=args.baud,
         timeout_ms=args.timeout_ms,
-        expected_page_id=args.expected_page_id,
+        expected_page_id=expected_page_id,
+        select_page=select_page,
+        set_expectations=set_expectations,
+        restore_page=restore_page,
     )
     camera = _capture_frame(args, out_dir) if args.capture else None
     checks_ok = all(item["ok"] for item in serial_checks)
@@ -104,6 +122,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
         "upload": upload_result,
         "expectations": [{"target": item.target, "expected": item.expected} for item in expectations],
+        "set_expectations": [{"target": item.target, "expected": item.expected} for item in set_expectations],
         "serial_checks": serial_checks,
         "camera": camera,
         "summary": {
@@ -114,6 +133,13 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
             "camera_captured": camera is not None,
         },
     }
+
+
+def _load_expectation_config(expect_json: str | None) -> dict[str, Any]:
+    if not expect_json:
+        return {}
+    raw = json.loads(Path(expect_json).read_text(encoding="utf-8"))
+    return raw if isinstance(raw, dict) else {}
 
 
 def _load_expectations(expect_json: str | None, inline: list[str]) -> list[RuntimeExpectation]:
@@ -141,6 +167,26 @@ def _load_expectations(expect_json: str | None, inline: list[str]) -> list[Runti
     return expectations
 
 
+def _load_set_expectations(expect_json: str | None, inline: list[str]) -> list[RuntimeExpectation]:
+    expectations: list[RuntimeExpectation] = []
+    if expect_json:
+        raw = json.loads(Path(expect_json).read_text(encoding="utf-8"))
+        if isinstance(raw, dict):
+            items = raw.get("set_expectations", [])
+            if isinstance(items, dict):
+                expectations.extend(RuntimeExpectation(str(key), value) for key, value in items.items())
+            elif isinstance(items, list):
+                expectations.extend(_expectation_from_entry(entry) for entry in items)
+            else:
+                raise ValueError("set_expectations must be an object or list")
+    for item in inline:
+        target, sep, raw_value = item.partition("=")
+        if not sep:
+            raise ValueError(f"--set-expect requires target=value: {item}")
+        expectations.append(RuntimeExpectation(target.strip(), _parse_expected_value(raw_value.strip())))
+    return expectations
+
+
 def _expectation_from_entry(entry: Any) -> RuntimeExpectation:
     if not isinstance(entry, dict):
         raise ValueError(f"Expectation entry must be an object: {entry!r}")
@@ -164,12 +210,15 @@ def _run_serial_checks(
     baud: int,
     timeout_ms: int,
     expected_page_id: int,
+    select_page: str | None,
+    set_expectations: list[RuntimeExpectation],
+    restore_page: str | None,
 ) -> list[dict[str, Any]]:
     config = SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms)
-    checks = [
-        _transact_check(config, "connect", expected_kind="connect"),
-        _transact_check(config, "sendme", expected_kind="page_id", expected_value=expected_page_id),
-    ]
+    checks = [_connect_check(config)]
+    if select_page is not None:
+        checks.append(_transact_check(config, f"page {select_page}", label=f"page {select_page}"))
+    checks.append(_transact_check(config, "sendme", expected_kind="page_id", expected_value=expected_page_id))
     for item in expectations:
         checks.append(
             _transact_check(
@@ -179,6 +228,18 @@ def _run_serial_checks(
                 label=item.target,
             )
         )
+    for item in set_expectations:
+        checks.append(_transact_check(config, f"{item.target}={item.expected}", label=f"set {item.target}"))
+        checks.append(
+            _transact_check(
+                config,
+                build_get(item.target),
+                expected_value=item.expected,
+                label=f"verify {item.target}",
+            )
+        )
+    if restore_page is not None:
+        checks.append(_transact_check(config, f"page {restore_page}", label=f"restore page {restore_page}"))
     return checks
 
 
@@ -222,6 +283,25 @@ def _transact_check(
             "expected_kind": expected_kind,
             "expected_value": expected_value,
         }
+
+
+def _connect_check(config: SerialConfig, *, attempts: int = 3, delay_s: float = 0.5) -> dict[str, Any]:
+    last: dict[str, Any] | None = None
+    history: list[dict[str, Any]] = []
+    for attempt in range(1, attempts + 1):
+        check = _transact_check(config, "connect", expected_kind="connect", label="connect")
+        check["attempt"] = attempt
+        history.append(check)
+        if check.get("ok"):
+            if attempt > 1:
+                check["retry_history"] = history[:-1]
+            return check
+        last = check
+        if attempt < attempts:
+            time.sleep(delay_s)
+    assert last is not None
+    last["retry_history"] = history[:-1]
+    return last
 
 
 def _capture_frame(args: argparse.Namespace, out_dir: Path) -> dict[str, Any]:

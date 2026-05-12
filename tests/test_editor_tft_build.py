@@ -6,8 +6,10 @@ import unittest
 
 from usarthmi.editor import build_scene
 from usarthmi.hmi_inspect import inspect_hmi
+from usarthmi.object_hash import object_name_hash
 from usarthmi.page_format import load_page_file
 from usarthmi.scene import validate_scene
+from usarthmi.tft_patch import TYPE_RECORD_LENGTHS, _record_header_flag
 from usarthmi.tft_reverse import reverse_tft_tail
 from usarthmi.tft_toolchain import inspect_tft
 
@@ -423,6 +425,71 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual([block.type_code for block in page1.blocks], ["y", "t", "b"])
             self.assertIn("1.pa", {entry.name for entry in inspect_hmi(manifest["output_hmi"]).entries})
 
+    def test_scene_build_emits_page1_plain_control_tft(self) -> None:
+        page1_widgets = [
+            {"id": "p1t", "type": "text", "x": 40, "y": 30, "w": 160, "h": 40, "text": "P1"},
+            {"id": "p1b", "type": "button", "x": 220, "y": 30, "w": 120, "h": 50, "text": "BTN"},
+            {"id": "n1", "type": "number", "x": 40, "y": 100, "w": 120, "h": 40, "value": 123},
+            {"id": "bar1", "type": "progress", "x": 40, "y": 160, "w": 220, "h": 28, "value": 68},
+            {"id": "slider1", "type": "slider", "x": 40, "y": 220, "w": 220, "h": 40, "value": 42},
+            {"id": "gauge1", "type": "gauge", "x": 360, "y": 80, "w": 160, "h": 160, "value": 75},
+        ]
+        for widgets in (page1_widgets, list(reversed(page1_widgets))):
+            scene = validate_scene(
+                {
+                    "project": {"name": "multi-page-page1-plain-controls", "default_page": "page0"},
+                    "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                    "assets": {},
+                    "pages": [
+                        {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                        {"id": "page1", "layout": {"type": "absolute"}, "widgets": widgets},
+                    ],
+                }
+            )
+
+            with self.subTest(order=[item["id"] for item in widgets]), tempfile.TemporaryDirectory() as temp_dir:
+                manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+                self.assertTrue(Path(manifest["output_tft"]).exists())
+                self.assertTrue(manifest["tft_checksum"]["valid"])
+                self.assertEqual(manifest["tft_patch"]["mode"], "experimental_multi_page_tft_patch")
+                self.assertEqual(manifest["tft_patch"]["page_count"], 2)
+                self.assertEqual(manifest["tft_patch"]["object_count"], 11)
+
+                page1_path = Path(manifest["target_pages"][1])
+                page1 = load_page_file(page1_path)
+                self.assertEqual([block.objname for block in page1.blocks], ["page1", *[item["id"] for item in widgets]])
+                self.assertEqual(
+                    _compiled_page_hash_ids(Path(manifest["output_tft"]), page1_path),
+                    {block.objname: _field_int(block, "id") for block in page1.blocks},
+                )
+                checks = {
+                    "n1": ("6", 0x44, 4, 123),
+                    "bar1": ("j", 0x3A, 1, 68),
+                    "slider1": ("\x01", 0x42, 2, 42),
+                    "gauge1": ("z", 0x3C, 2, 75),
+                }
+                for name, (type_code, offset, width, expected) in checks.items():
+                    with self.subTest(name=name):
+                        self.assertEqual(
+                            _compiled_page_primary_value(
+                                Path(manifest["output_tft"]),
+                                page1_path,
+                                name,
+                                type_code,
+                                offset,
+                                width,
+                            ),
+                            expected,
+                        )
+                self.assertEqual(
+                    _compiled_page1_mirror_headers(Path(manifest["output_tft"]), page1),
+                    [
+                        bytes([ord(block.type_code), _field_int(block, "id"), 0, _record_header_flag(block.type_code)])
+                        for block in page1.blocks
+                    ],
+                )
+
     def test_scene_build_emits_experimental_page1_button_event_tft_when_enabled(self) -> None:
         scene = validate_scene(
             {
@@ -527,12 +594,12 @@ class EditorTftBuildTests(unittest.TestCase):
                         "widgets": [
                             {
                                 "id": "later",
-                                "type": "number",
+                                "type": "qrcode",
                                 "x": 10,
                                 "y": 10,
                                 "w": 100,
                                 "h": 32,
-                                "value": 123,
+                                "text": "NOPE",
                             }
                         ],
                     },
@@ -541,7 +608,7 @@ class EditorTftBuildTests(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with self.assertRaisesRegex(Exception, "page1 supports only text/button"):
+            with self.assertRaisesRegex(Exception, "page1 supports only text/button/number/progress/slider/gauge"):
                 build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
 
     def test_scene_build_can_move_seed_objects_offscreen(self) -> None:
@@ -1094,6 +1161,95 @@ def _compiled_primary_value(
     if position < 0:
         raise AssertionError(f"compiled primary record for {object_name!r} was not found")
     return int.from_bytes(raw[position + offset : position + offset + width], "little")
+
+
+def _compiled_page_hash_ids(tft_path: Path, pa_path: Path) -> dict[str, int]:
+    page = load_page_file(pa_path)
+    hash_data = _compiled_page_hash_data(tft_path, page)
+    ids_by_hash = {
+        int.from_bytes(hash_data[offset : offset + 4], "little"): int.from_bytes(hash_data[offset + 4 : offset + 6], "little")
+        for offset in range(0, len(hash_data), 6)
+    }
+    return {
+        block.objname: ids_by_hash[object_name_hash(block.objname)]
+        for block in page.blocks
+        if block.objname
+    }
+
+
+def _compiled_page_primary_value(
+    tft_path: Path,
+    pa_path: Path,
+    object_name: str,
+    type_code: str,
+    offset: int,
+    width: int,
+) -> int:
+    page = load_page_file(pa_path)
+    primary = _compiled_page_primary_data(tft_path, page)
+    block_index = next(index for index, block in enumerate(page.blocks) if block.objname == object_name)
+    record_start = int.from_bytes(primary[block_index * 4 : block_index * 4 + 4], "little") - 0x10
+    if record_start < 0:
+        raise AssertionError(f"invalid primary record offset for {object_name!r}")
+    if offset + width > TYPE_RECORD_LENGTHS[type_code]:
+        raise AssertionError(f"primary value read exceeds known record length for {object_name!r}")
+    return int.from_bytes(primary[record_start + offset : record_start + offset + width], "little")
+
+
+def _compiled_page_primary_data(tft_path: Path, page) -> bytes:
+    raw = tft_path.read_bytes()
+    object_start = _tft_object_start(tft_path)
+    tail = raw[object_start:]
+    hash_data = _expected_page_hash_data(page)
+    marker = len(hash_data).to_bytes(4, "little") + hash_data
+    hash_offset = tail.find(marker)
+    if hash_offset < 0:
+        raise AssertionError(f"compiled hash block for {page.page_name!r} was not found")
+    primary_offset = hash_offset + len(marker)
+    primary_size = int.from_bytes(tail[primary_offset : primary_offset + 4], "little")
+    start = primary_offset + 4
+    return tail[start : start + primary_size]
+
+
+def _compiled_page_hash_data(tft_path: Path, page) -> bytes:
+    raw = tft_path.read_bytes()
+    object_start = _tft_object_start(tft_path)
+    tail = raw[object_start:]
+    hash_data = _expected_page_hash_data(page)
+    marker = len(hash_data).to_bytes(4, "little") + hash_data
+    hash_offset = tail.find(marker)
+    if hash_offset < 0:
+        raise AssertionError(f"compiled hash block for {page.page_name!r} was not found")
+    return tail[hash_offset + 4 : hash_offset + 4 + len(hash_data)]
+
+
+def _expected_page_hash_data(page) -> bytes:
+    entries = []
+    for block in page.blocks:
+        if not block.objname:
+            raise AssertionError("page block without objname cannot be hashed")
+        entries.append((object_name_hash(block.objname), _field_int(block, "id")))
+    entries.sort(key=lambda item: item[0])
+    return b"".join(value.to_bytes(4, "little") + object_id.to_bytes(2, "little") for value, object_id in entries)
+
+
+def _tft_object_start(tft_path: Path) -> int:
+    header2 = inspect_tft(tft_path)["parsed"]["Header2"]
+    return _header2_int(header2, "unknown_objects_address")
+
+
+def _compiled_page1_mirror_headers(tft_path: Path, page) -> list[bytes]:
+    raw = tft_path.read_bytes()
+    header2 = inspect_tft(tft_path)["parsed"]["Header2"]
+    object_start = _header2_int(header2, "unknown_objects_address")
+    mirror_start = _header2_int(header2, "pictures_address") - object_start
+    tail = raw[object_start:]
+    record_len = 0x38 + 41 * 2
+    records_start = mirror_start + 0x20
+    return [
+        tail[records_start + index * record_len : records_start + index * record_len + 4]
+        for index, _block in enumerate(page.blocks)
+    ]
 
 
 def _hmi_entry_data(path: Path, entry_name: str) -> bytes:

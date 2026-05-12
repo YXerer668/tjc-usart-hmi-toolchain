@@ -304,8 +304,8 @@ class MultiPagePatchResult:
     def to_dict(self) -> dict[str, Any]:
         warnings = [
             "Experimental multi-page V1 supports the official case31 page-order layout.",
-            "Non-seed-page controls are limited to text/button while more official fixtures are collected.",
-            "Do not use this yet for arbitrary multi-page layouts.",
+            "Non-seed-page controls are limited to no-event text/button/number/progress/slider/gauge.",
+            "Do not use this yet for page events, timers, resources, waveform, or arbitrary multi-page layouts.",
         ]
         if self.experimental_events:
             warnings.append(
@@ -622,6 +622,7 @@ def patch_multi_page_tft(
     _validate_supported_multi_pages(pages, allow_experimental_events=allow_experimental_events)
 
     seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, seed_page)
+    _augment_seed_templates(seed, {block.type_code for page in pages for block in page.blocks})
     tail, sections = _build_multi_page_tail(seed, pages)
     payload = bytearray(seed.raw[: seed.object_start] + tail)
 
@@ -676,8 +677,10 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
         for block_index, block in enumerate(page.blocks):
             if block_index == 0:
                 continue
-            if block.type_code not in {"t", "b"}:
-                raise TftToolchainError("Multi-page V1 page1 supports only text/button controls")
+            if block.type_code not in {"t", "b", "6", "j", "\x01", "z"}:
+                raise TftToolchainError(
+                    "Multi-page V1 page1 supports only text/button/number/progress/slider/gauge controls"
+                )
             if any(lines for lines in _events_by_prefix(block).values()) and not (
                 allow_experimental_events and _is_supported_page1_button_event_block(block)
             ):
@@ -1187,6 +1190,8 @@ def _build_multi_page_tail(
     extra_page_blocks = [block for blocks in extra_pages for block in blocks]
     extra_page_objects = [blocks[0] for blocks in extra_pages]
     all_user_blocks = [*extra_page_blocks, *page0_blocks]
+    mirror_descriptor_sequence = seed.mirror_descriptor_sequences[""]
+    mirror_value_count = len(mirror_descriptor_sequence)
 
     prefix_head = _multi_page_prefix_head(seed.prefix_head, extra_page_objects)
     event_context = _build_event_compile_context([*page0_blocks, *extra_page_blocks])
@@ -1245,6 +1250,8 @@ def _build_multi_page_tail(
             page0_event_offsets=page0_info["event_offsets"],
             page0_event_callbacks=page0_info["event_callbacks"],
             first_user_offset=user_offset,
+            mirror_value_count=mirror_value_count,
+            mirror_descriptor_sequence=mirror_descriptor_sequence,
         )
     )
     padding_offset = len(out)
@@ -1356,6 +1363,8 @@ def _build_multi_page_mirror_records(
     page0_event_offsets: list[int],
     page0_event_callbacks: list[dict[str, int]],
     first_user_offset: int,
+    mirror_value_count: int,
+    mirror_descriptor_sequence: list[bytes],
 ) -> bytes:
     out = bytearray()
     user_cursor = first_user_offset
@@ -1379,6 +1388,8 @@ def _build_multi_page_mirror_records(
                 info["value_offsets"],
                 info["event_offsets"],
                 info["event_callbacks"],
+                mirror_value_count=mirror_value_count,
+                mirror_descriptor_sequence=mirror_descriptor_sequence,
             )
         )
     out.extend(
@@ -1388,6 +1399,8 @@ def _build_multi_page_mirror_records(
             page0_value_offsets,
             page0_event_offsets,
             page0_event_callbacks,
+            mirror_value_count=mirror_value_count,
+            mirror_descriptor_sequence=mirror_descriptor_sequence,
         )
     )
     return bytes(out)
@@ -1408,10 +1421,12 @@ def _build_multi_page_mirror_page_records(
     value_offsets: list[int],
     event_offsets: list[int],
     event_callbacks: list[dict[str, int]],
+    *,
+    mirror_value_count: int,
+    mirror_descriptor_sequence: list[bytes],
 ) -> bytes:
     out = bytearray()
     slot_start = 0
-    mirror_value_count = MIRROR_VALUE_COUNT
     for index, (block, value_base) in enumerate(zip(blocks, value_offsets)):
         type_code = block.type_code
         object_id = _required_field_int(block, "id")
@@ -1431,7 +1446,7 @@ def _build_multi_page_mirror_page_records(
             image_button_layout=False,
             mirror_layout_type=None,
             mirror_value_count=mirror_value_count,
-            descriptor_sequence=None,
+            descriptor_sequence=mirror_descriptor_sequence,
         ):
             value = 0xFFFF if item is None else slot_start + item
             record.extend(value.to_bytes(2, "little"))
