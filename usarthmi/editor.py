@@ -765,7 +765,7 @@ def _is_supported_experimental_page1_event_widget(widget) -> bool:
     if event_name not in {"down", "up"} or len(lines) != 1:
         return False
     line = lines[0].strip().lower()
-    return line in {"page 0", "page page0"}
+    return line in {"page 1", "page page0"}
 
 
 def _field3_template(entries, suffix: str) -> int:

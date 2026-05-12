@@ -24,6 +24,15 @@ class RuntimeExpectation:
     expected: Any
 
 
+@dataclass(slots=True)
+class RuntimeStep:
+    command: str
+    label: str | None = None
+    expected_kind: str | None = None
+    expected_value: Any | None = None
+    delay_ms: int = 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Upload and/or runtime-smoke a TFT on a live USART HMI screen.")
     parser.add_argument("--file", required=True, help="TFT file to upload when --upload is set.")
@@ -70,6 +79,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     expectation_config = _load_expectation_config(args.expect_json)
     expectations = _load_expectations(args.expect_json, args.expect)
     set_expectations = _load_set_expectations(args.expect_json, args.set_expect)
+    runtime_steps = _load_runtime_steps(args.expect_json)
     upload_result = None
     known_current = Path(args.known_current).resolve() if args.known_current else None
     if args.upload:
@@ -107,6 +117,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         expected_page_id=expected_page_id,
         select_page=select_page,
         set_expectations=set_expectations,
+        runtime_steps=runtime_steps,
         restore_page=restore_page,
     )
     camera = _capture_frame(args, out_dir) if args.capture else None
@@ -123,6 +134,16 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "upload": upload_result,
         "expectations": [{"target": item.target, "expected": item.expected} for item in expectations],
         "set_expectations": [{"target": item.target, "expected": item.expected} for item in set_expectations],
+        "runtime_steps": [
+            {
+                "command": item.command,
+                "label": item.label,
+                "expected_kind": item.expected_kind,
+                "expected_value": item.expected_value,
+                "delay_ms": item.delay_ms,
+            }
+            for item in runtime_steps
+        ],
         "serial_checks": serial_checks,
         "camera": camera,
         "summary": {
@@ -187,6 +208,33 @@ def _load_set_expectations(expect_json: str | None, inline: list[str]) -> list[R
     return expectations
 
 
+def _load_runtime_steps(expect_json: str | None) -> list[RuntimeStep]:
+    config = _load_expectation_config(expect_json)
+    items = config.get("steps", [])
+    if not items:
+        return []
+    if not isinstance(items, list):
+        raise ValueError("steps must be a list")
+    steps: list[RuntimeStep] = []
+    for entry in items:
+        if not isinstance(entry, dict):
+            raise ValueError(f"Step entry must be an object: {entry!r}")
+        command = entry.get("command")
+        if not command:
+            raise ValueError(f"Step entry is missing command: {entry!r}")
+        expected_value = entry.get("expected_value", entry.get("expected"))
+        steps.append(
+            RuntimeStep(
+                command=str(command),
+                label=str(entry["label"]) if entry.get("label") is not None else None,
+                expected_kind=str(entry["expected_kind"]) if entry.get("expected_kind") is not None else None,
+                expected_value=expected_value,
+                delay_ms=int(entry.get("delay_ms", 0)),
+            )
+        )
+    return steps
+
+
 def _expectation_from_entry(entry: Any) -> RuntimeExpectation:
     if not isinstance(entry, dict):
         raise ValueError(f"Expectation entry must be an object: {entry!r}")
@@ -212,6 +260,7 @@ def _run_serial_checks(
     expected_page_id: int,
     select_page: str | None,
     set_expectations: list[RuntimeExpectation],
+    runtime_steps: list[RuntimeStep],
     restore_page: str | None,
 ) -> list[dict[str, Any]]:
     config = SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms)
@@ -238,6 +287,18 @@ def _run_serial_checks(
                 label=f"verify {item.target}",
             )
         )
+    for item in runtime_steps:
+        checks.append(
+            _transact_check(
+                config,
+                item.command,
+                expected_kind=item.expected_kind,
+                expected_value=item.expected_value,
+                label=item.label,
+            )
+        )
+        if item.delay_ms > 0:
+            time.sleep(item.delay_ms / 1000.0)
     if restore_page is not None:
         checks.append(_transact_check(config, f"page {restore_page}", label=f"restore page {restore_page}"))
     return checks

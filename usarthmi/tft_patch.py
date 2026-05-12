@@ -309,10 +309,7 @@ class MultiPagePatchResult:
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 button events are an opt-in experiment and are not byte-for-byte validated against an official fixture yet."
-            )
-            warnings.append(
-                "Do not flash page1-event builds to hardware until an official page1-event fixture matches; an early live probe black-screened the panel."
+                "Page1 normal-button release events are opt-in and currently hardware-verified only for a single page 1 jump back to page0."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
@@ -702,7 +699,7 @@ def _is_supported_page1_button_event_block(block: PageBlock) -> bool:
     prefix, lines = event_items[0]
     if prefix not in {"codesdown-", "codesup-"} or len(lines) != 1:
         return False
-    return lines[0].strip().lower() in {"page 0", "page page0"}
+    return lines[0].strip().lower() in {"page 1", "page page0"}
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:

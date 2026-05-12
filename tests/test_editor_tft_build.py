@@ -523,7 +523,7 @@ class EditorTftBuildTests(unittest.TestCase):
                                 "w": 180,
                                 "h": 64,
                                 "text": "BACK",
-                                "events": {"up": ["page 0"]},
+                                "events": {"up": ["page 1"]},
                             },
                         ],
                     },
@@ -546,7 +546,7 @@ class EditorTftBuildTests(unittest.TestCase):
             page1 = load_page_file(manifest["target_pages"][1])
             back_button = next(block for block in page1.blocks if block.objname == "back0")
             self.assertIn("codesup-1", back_button.event_tokens)
-            self.assertIn("page 0", back_button.event_tokens)
+            self.assertIn("page 1", back_button.event_tokens)
 
     def test_scene_build_rejects_page1_events_without_experimental_flag(self) -> None:
         bad_scene = validate_scene(
@@ -568,7 +568,7 @@ class EditorTftBuildTests(unittest.TestCase):
                                 "w": 120,
                                 "h": 48,
                                 "text": "BACK",
-                                "events": {"up": ["page 0"]},
+                                "events": {"up": ["page 1"]},
                             }
                         ],
                     },

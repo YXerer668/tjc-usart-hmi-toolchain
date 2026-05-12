@@ -27,6 +27,11 @@ reverse_usarthmi/new_controls_demo/golden/*
 reverse_usarthmi/page1_plain_controls/*
 !reverse_usarthmi/page1_plain_controls/README.md
 !reverse_usarthmi/page1_plain_controls/expected_runtime.json
+!reverse_usarthmi/page1_button_event_minimal/
+reverse_usarthmi/page1_button_event_minimal/*
+!reverse_usarthmi/page1_button_event_minimal/README.md
+!reverse_usarthmi/page1_button_event_minimal/expected_runtime.json
+!reverse_usarthmi/page1_button_event_minimal/hardware_verified_2026-05-12.json
 github_refs/
 github_tjc_screen_for_codex/
 

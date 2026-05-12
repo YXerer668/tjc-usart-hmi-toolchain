@@ -1,0 +1,45 @@
+{
+  "name": "page1_button_event_minimal_live_expectations",
+  "select_page": 0,
+  "page_id": 0,
+  "restore_page": 1,
+  "expectations": [
+    {
+      "target": "p1title.txt",
+      "expected": "PAGE1"
+    },
+    {
+      "target": "back0.txt",
+      "expected": "BACK"
+    }
+  ],
+  "steps": [
+    {
+      "label": "press back0",
+      "command": "click back0,1",
+      "delay_ms": 120
+    },
+    {
+      "label": "release back0",
+      "command": "click back0,0",
+      "delay_ms": 500
+    },
+    {
+      "label": "sendme after back0 release",
+      "command": "sendme",
+      "expected_kind": "page_id",
+      "expected": 1
+    },
+    {
+      "label": "back0 hidden after jump",
+      "command": "get back0.txt",
+      "expected_kind": "invalid_reference"
+    },
+    {
+      "label": "page0 visible after jump",
+      "command": "get page0.bco",
+      "expected_kind": "number",
+      "expected": 65535
+    }
+  ]
+}
