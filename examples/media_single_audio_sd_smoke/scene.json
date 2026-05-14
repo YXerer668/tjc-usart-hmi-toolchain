@@ -1,0 +1,68 @@
+{
+  "project": {
+    "name": "media-single-audio-sd-smoke",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 2153
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 36,
+          "y": 28,
+          "w": 520,
+          "h": 48,
+          "text": "SINGLE AUDIO SD",
+          "style": {
+            "font_id": 0,
+            "background_color": 2153,
+            "foreground_color": 65503,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "hint",
+          "type": "text",
+          "x": 80,
+          "y": 360,
+          "w": 640,
+          "h": 42,
+          "text": "wav0 tail + runtime fields smoke",
+          "style": {
+            "font_id": 0,
+            "background_color": 4261,
+            "foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "wav0",
+          "type": "audio",
+          "resources": {
+            "path": "sd0/music/official_0.wav"
+          },
+          "style": {
+            "en": 0,
+            "loop": 0,
+            "fps": 1,
+            "dis": 100
+          }
+        }
+      ]
+    }
+  ]
+}

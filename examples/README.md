@@ -8,6 +8,7 @@
 - `external_picture_demo`: 外部图片控件的默认活屏样例，已经在当前 `TJC8048X543_011C` 上验证过 `sendme`、`get exp0.path`、`get guard.txt` 和摄像头显示。
 - `media_single_gmov_smoke`: 当前推荐的动画控件最小烧录样例，只验证一个内部 GMOV，边界最稳。
 - `media_single_video_sd_smoke`: 单个 SD 视频控件的最小烧录样例，验证 video 对象 tail 和运行时可读字段；不承诺所有视频编码都能播放。
+- `media_single_audio_sd_smoke`: 单个 SD 音频控件的最小烧录样例，验证 wav/audio 对象 tail 和运行时可读字段；不承诺扬声器/音量链路。
 - `media_widgets_demo`: 动画、视频、音频控件的第一版 authoring 样例，目前主要承诺 HMI/预览；视频和音频还不作为独立 TFT 烧录路径。
 - `page1_button_event_minimal`: page1 普通按钮跳回 page0 的最小事件样例，需要显式打开 `experimental_multi_page_events`。
 - `event_demo`: `printh` 事件字节码探针，用于继续逆向事件调度，不要直接当稳定交互 demo。
@@ -22,7 +23,7 @@
 - `tft checksum` 通过。
 - 活屏测试至少能跑 `sendme` 和关键 `get obj.attr`。
 
-如果一个样例只生成 `output.hmi` 和 preview，那它就是 authoring/逆向样例，不应该直接当作稳定烧录入口。动画控件目前优先用 `media_single_gmov_smoke`，SD 视频对象最小验证用 `media_single_video_sd_smoke`；不要把视频、音频和 GMOV 混在同一个 live TFT 里赌运气。
+如果一个样例只生成 `output.hmi` 和 preview，那它就是 authoring/逆向样例，不应该直接当作稳定烧录入口。动画控件目前优先用 `media_single_gmov_smoke`，SD 视频对象最小验证用 `media_single_video_sd_smoke`，SD 音频对象最小验证用 `media_single_audio_sd_smoke`；不要把视频、音频和 GMOV 混在同一个 live TFT 里赌运气。
 
 为了稳定，当前不推荐追官方“相同块跳过下载”的 smart download。全量串口上传慢一点，但行为更可控，也更适合开源用户复现。
 

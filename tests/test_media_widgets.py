@@ -361,6 +361,28 @@ class MediaWidgetTests(unittest.TestCase):
                 self.assertEqual(int.from_bytes(record[0x3E:0x40], "little"), 100)
 
     @unittest.skipUnless(
+        SEED_HMI.exists() and (CASE_ROOT / "case_00_baseline" / "lcd_test.tft").exists(),
+        "seed HMI or baseline TFT is not available",
+    )
+    def test_single_sd_media_smoke_examples_build_tfts(self) -> None:
+        examples = [
+            ("media_single_video_sd_smoke", "v0", "\x03"),
+            ("media_single_audio_sd_smoke", "wav0", "\x04"),
+        ]
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        for example_name, object_name, type_code in examples:
+            with self.subTest(example=example_name), tempfile.TemporaryDirectory() as temp_dir:
+                scene = load_scene(Path(__file__).resolve().parents[1] / "examples" / example_name / "scene.json")
+                manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=baseline_tft)
+
+                self.assertIsNotNone(manifest["output_tft"])
+                self.assertTrue(manifest["tft_checksum"]["valid"])
+                page = load_page_file(Path(manifest["target_pa"]))
+                generated = {block.objname: block for block in page.blocks}
+                self.assertEqual(generated[object_name].type_code, type_code)
+                self.assertIn("path", {field.name for field in generated[object_name].fields})
+
+    @unittest.skipUnless(
         all(
             (CASE_ROOT / case / "official_compile" / "source_raw.run").exists()
             and (CASE_ROOT / case / "official_wiki" / "extract" / "0.pa").exists()
