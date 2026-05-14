@@ -1,13 +1,17 @@
 [project]
 name = "usarthmi"
 version = "0.1.0"
-description = "USART HMI CLI for TJC/USART HMI displays"
+description = "Scriptable TJC/USART HMI serial, scene, preview, and experimental TFT tooling"
 requires-python = ">=3.10"
 dependencies = [
   "Pillow>=10.0",
   "PyYAML>=6.0",
   "pyserial>=3.5",
 ]
+
+[project.urls]
+Homepage = "https://github.com/YXerer668/tjc-usart-hmi-toolchain"
+Repository = "https://github.com/YXerer668/tjc-usart-hmi-toolchain"
 
 [project.scripts]
 usarthmi = "usarthmi.cli:main"

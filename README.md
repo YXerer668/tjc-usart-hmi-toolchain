@@ -1,11 +1,70 @@
 # usarthmi
 
-Experimental Python tooling for TJC / USART HMI serial screens.
+`usarthmi` is an experimental, scriptable toolchain for TJC / USART HMI serial
+screens. It started from live reverse engineering of a `TJC8048X543_011C`
+800x480 panel and the official `USART HMI` editor, then grew into a Python CLI
+for serial control, `.HMI` inspection, scene authoring, preview rendering, and
+narrow-but-real independent `.TFT` generation.
 
-This repository started from a live reverse-engineering session around a
-`TJC8048X543_011C` 800x480 screen and the `USART HMI` editor. The practical
-goal is to control the screen from the command line and progressively replace
-the GUI-only workflow with scriptable HMI/TFT tooling.
+The project is intentionally evidence-driven. Features are marked as
+flashable only after they have at least one concrete proof point: fixture
+byte-comparison, checksum validation, serial readback, or a photo/camera check
+on the real panel.
+
+## Why This Exists
+
+The official editor is useful, but it is GUI-first and hard to automate. This
+repository explores a more hackable workflow:
+
+1. describe a page as JSON/YAML;
+2. render a local preview;
+3. build an `.HMI` for inspection or official-editor fallback;
+4. when the feature is recovered, build a flashable `.TFT` directly;
+5. upload through the public serial protocol and verify with live `get` /
+   `sendme` commands.
+
+This is not a complete replacement for `USART HMI` yet. It is a practical,
+open research toolchain with strict guardrails around the parts that are known
+to work.
+
+## Status At A Glance
+
+Stable enough for local use:
+
+- Serial CLI for normal runtime commands.
+- `.HMI` extraction/inspection and page preview.
+- Scene JSON/YAML validation, layout solving, and PNG preview.
+- Appended page0 TFT generation for the current 800x480 seed project.
+- Text, button, number, image, picture resources, two-state image buttons,
+  custom `.zi` fonts, xfloat, combobox, external-picture, and several basic
+  controls covered by fixtures/tests.
+
+Experimental but useful:
+
+- Multi-page page0/page1 generation with limited plain controls.
+- Event bytecode assembly for a small set of commands; live scheduling is not
+  fully solved.
+- Single internal GMOV/animation smoke builds for the current resource layout.
+
+Known unstable / research-only:
+
+- Video and audio independent TFT resource scheduling.
+- Official-editor smart/sparse download behavior. The recommended upload path
+  is the slower full serial upload, because it is much easier to reason about
+  and has been more reliable on the test machine.
+
+## Safety Notes
+
+- Keep generated `.TFT`, `.HMI`, `.zi`, screenshots, official binaries, and
+  large fixtures out of git. The repository `.gitignore` is set up for that.
+- Prefer full `tft upload` over trying to reuse the official editor's
+  "skip unchanged blocks" downloader. The latter was observed to leave Windows
+  USB/PnP in a ghost-COM state on the development machine.
+- Do not copy official `work\a-*\output\*.tft` while the official serial
+  download is actively transferring. Copy it before starting transfer or after
+  the transfer has fully finished.
+- A `LICENSE` file has not been selected in this workspace yet. Pick one
+  before treating the GitHub repository as truly open source.
 
 ## Current Capabilities
 
@@ -42,6 +101,20 @@ the GUI-only workflow with scriptable HMI/TFT tooling.
 - Experimental multi-state image-button packing: normal/pressed button assets
   can be packed into TFT picture resources and written into the compiled button
   background slots for live-screen testing.
+- Fixture-backed official widgets can be authored from scenes and compiled into
+  the current page0 TFT tail, including virtual float / `xfloat` (`type=';'`),
+  combo box / `combobox` (`type='='`), touch capture (`type=0x05`), and the
+  current-editor external-picture record shape (`type='<'`). External-picture
+  is live-proven when compiled against the healthy `case_00_baseline` resource
+  layout; `case_46_expicture_current_gui` remains the tail/reference fixture,
+  not the recommended live baseline.
+- First-pass media widget authoring is available for animation / `gmov`
+  (`type=0x02`), video (`type=0x03`), and audio / `wav` (`type=0x04`) in HMI and
+  preview outputs. Single internal GMOV builds are available for the current
+  smoke-test layout; video/audio resource scheduling is still research-only.
+- `tools/probe_official_widget_support.py` can clone one object from a
+  downloaded official/sample HMI into the current seed and ask the official
+  compiler whether the current target actually emits that extra object.
 
 ## What Is Not Included
 
@@ -63,6 +136,16 @@ python -m pip install -e .
 ```
 
 Dependencies are declared in `pyproject.toml`.
+
+## Project Layout
+
+- `usarthmi/`: Python package and CLI implementation.
+- `examples/`: small scene files that demonstrate recovered controls.
+- `tests/`: unit and fixture-backed regression tests. Some tests skip
+  automatically when private/local fixtures are absent.
+- `tools/`: local helper scripts for live smoke tests, official-editor fixture
+  capture, camera capture, and widget probes.
+- `SCENE_BUILDER.md`: scene authoring and build examples.
 
 ## Serial Examples
 
@@ -93,6 +176,15 @@ python -m usarthmi --json tft build `
   --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI `
   --baseline-tft C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft `
   --out reverse_usarthmi\live_scene_build
+python -m usarthmi --json scene build examples\external_picture_demo\scene.json `
+  --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI `
+  --baseline-tft C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft `
+  --out reverse_usarthmi\external_picture_demo_build
+python tools\external_picture_demo_runner.py
+python tools\external_picture_demo_runner.py --skip-build --smoke --capture
+python -m usarthmi --json scene build examples\media_widgets_demo\scene.json `
+  --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI `
+  --out reverse_usarthmi\media_widgets_demo_build
 ```
 
 `inspect-hmi` reports raw strings plus parsed page/object event scripts such as
@@ -202,6 +294,30 @@ The local development session verified:
 - a mixed JPG + transparent PNG + image-button stress scene was flashed to the
   real panel; an initial resource-table ordering bug swapped images on-screen,
   then sorting TFT picture records by `pic` id fixed the live display.
+- `case_36_xfloat` is reproduced at compiled-tail level against the official
+  GUI output, with `val/vvs0/vvs1` primary-record offsets locked by tests. This
+  case is now live-flashed on `COM36` in the `xfloat_combobox_demo` smoke scene,
+  with `get xval.val` returning `123456`.
+- `case_37_combobox` is reproduced at compiled-tail level against the official
+  GUI output, including compact primary-string layout and dual `txt/path`
+  pointers. This case is now live-flashed in the same smoke scene, with
+  `get cbval.val` returning `2` and `get cbval.txt` returning `80V`.
+- `case_46_expicture_current_gui` supersedes the older grafted
+  `case_40_expicture` sample as the real current-editor "外部图片" tail fixture:
+  its object record and `path` string slot are reproduced byte-for-byte against
+  official GUI output. Live flashing later proved the control itself works on
+  the current X543 panel when compiled from the healthy 11.4 MB
+  `case_00_baseline` resource layout: `sendme` returned page `0`,
+  `get exp0.path` returned `sd0/1.jpg`, and the SD image was visible on camera.
+  The compact `case_46` resource/header baseline still makes the panel return
+  the short `66 FF FF FF` `sendme` frame, so it is kept as a reference fixture
+  only, not a runtime baseline.
+- `case_38_text_select`, `case_39_touchcap`, `case_40_expicture`,
+  `case_41_sltext`, `case_42_datarecord`, `case_43_filebrowser`, and
+  `case_44_filestream` were grafted into the current X543 seed `.HMI` and
+  compiled with the official GUI. The compiler emitted only the original four
+  seed objects in the generated TFT, so these controls are recorded as
+  current-target unsupported/dropped rather than pending TFT-writer work.
 - local test suite passed with the available fixtures.
 
 See `USART_HMI_STATUS_2026-05-04.md` for the detailed working log.

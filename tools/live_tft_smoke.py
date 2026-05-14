@@ -57,6 +57,18 @@ def main() -> int:
     parser.add_argument("--skip-if-identical", action="store_true")
     parser.add_argument("--progress", action="store_true")
     parser.add_argument("--capture", action="store_true")
+    parser.add_argument(
+        "--capture-method",
+        choices=["ffmpeg-dshow", "opencv"],
+        default="ffmpeg-dshow",
+        help="Camera capture backend. ffmpeg-dshow is the known-good path for the local USB Cam.",
+    )
+    parser.add_argument("--camera-device", default="USB Cam", help="DirectShow camera device name for ffmpeg-dshow.")
+    parser.add_argument("--camera-width", type=int, default=2560)
+    parser.add_argument("--camera-height", type=int, default=1440)
+    parser.add_argument("--camera-framerate", type=int, default=30)
+    parser.add_argument("--camera-pixel-format", default="yuyv422")
+    parser.add_argument("--camera-warmup-s", type=float, default=1.0)
     parser.add_argument("--camera-index", type=int, default=1)
     parser.add_argument("--camera-backend", choices=["default", "dshow", "msmf"], default="dshow")
     parser.add_argument("--camera-warmup-frames", type=int, default=20)
@@ -122,6 +134,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     )
     camera = _capture_frame(args, out_dir) if args.capture else None
     checks_ok = all(item["ok"] for item in serial_checks)
+    camera_ok = camera is None or bool(camera.get("ok"))
 
     return {
         "tft_file": str(tft_path),
@@ -147,11 +160,12 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "serial_checks": serial_checks,
         "camera": camera,
         "summary": {
-            "ok": (not args.upload or upload_result is not None) and checks_ok,
+            "ok": (not args.upload or upload_result is not None) and checks_ok and camera_ok,
             "uploaded": bool(upload_result and not upload_result.get("skipped")),
             "upload_skipped": bool(upload_result and upload_result.get("skipped")),
             "serial_checks_ok": checks_ok,
-            "camera_captured": camera is not None,
+            "camera_captured": bool(camera and camera.get("ok")),
+            "camera_ok": camera_ok,
         },
     }
 
@@ -366,6 +380,57 @@ def _connect_check(config: SerialConfig, *, attempts: int = 3, delay_s: float = 
 
 
 def _capture_frame(args: argparse.Namespace, out_dir: Path) -> dict[str, Any]:
+    if args.capture_method == "ffmpeg-dshow":
+        return _capture_frame_ffmpeg_dshow(args, out_dir)
+    return _capture_frame_opencv(args, out_dir)
+
+
+def _capture_frame_ffmpeg_dshow(args: argparse.Namespace, out_dir: Path) -> dict[str, Any]:
+    capture_path = out_dir / "camera_after_smoke.jpg"
+    video_size = f"{args.camera_width}x{args.camera_height}"
+    cmd = [
+        "ffmpeg",
+        "-hide_banner",
+        "-y",
+        "-f",
+        "dshow",
+        "-pixel_format",
+        args.camera_pixel_format,
+        "-video_size",
+        video_size,
+        "-framerate",
+        str(args.camera_framerate),
+        "-i",
+        f"video={args.camera_device}",
+    ]
+    if args.camera_warmup_s > 0:
+        cmd.extend(["-ss", str(args.camera_warmup_s)])
+    cmd.extend(["-frames:v", "1", "-update", "1", str(capture_path)])
+
+    completed = subprocess.run(cmd, text=True, capture_output=True, check=False)
+    ok = completed.returncode == 0 and capture_path.exists()
+    payload: dict[str, Any] = {
+        "capture_method": "ffmpeg-dshow",
+        "path": str(capture_path.resolve()),
+        "device": args.camera_device,
+        "width": args.camera_width,
+        "height": args.camera_height,
+        "framerate": args.camera_framerate,
+        "pixel_format": args.camera_pixel_format,
+        "warmup_s": args.camera_warmup_s,
+        "returncode": completed.returncode,
+        "ok": ok,
+    }
+    if capture_path.exists():
+        payload["bytes"] = capture_path.stat().st_size
+    if completed.stderr.strip():
+        payload["stderr"] = completed.stderr.strip()
+    if completed.stdout.strip():
+        payload["stdout"] = completed.stdout.strip()
+    return payload
+
+
+def _capture_frame_opencv(args: argparse.Namespace, out_dir: Path) -> dict[str, Any]:
     capture_path = out_dir / "camera_after_smoke.jpg"
     cmd = [
         sys.executable,
@@ -390,6 +455,8 @@ def _capture_frame(args: argparse.Namespace, out_dir: Path) -> dict[str, Any]:
     payload["returncode"] = completed.returncode
     if completed.stderr.strip():
         payload["stderr"] = completed.stderr.strip()
+    payload["capture_method"] = "opencv"
+    payload["ok"] = completed.returncode == 0 and bool(payload.get("path"))
     return payload
 
 

@@ -128,6 +128,16 @@ class SceneLayoutTests(unittest.TestCase):
             with Image.open(target) as image:
                 self.assertEqual(image.size, (800, 480))
 
+    def test_external_picture_demo_preview_renders_png(self) -> None:
+        base = Path(__file__).resolve().parents[1] / "examples" / "external_picture_demo"
+        scene = load_scene(base / "scene.json")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "external_picture_preview.png"
+            render_scene_preview(scene, target)
+            self.assertTrue(target.exists())
+            with Image.open(target) as image:
+                self.assertEqual(image.size, (800, 480))
+
     def test_page_preview_renders_png(self) -> None:
         page = PageFile(
             magic=0x1AB9451B,

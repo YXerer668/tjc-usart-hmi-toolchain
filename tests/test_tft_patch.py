@@ -365,10 +365,12 @@ class TftPatchTests(unittest.TestCase):
             "case_28_checkbox",
             "case_29_radio",
             "case_30_crop_image",
+            "case_45_touchcap_current_gui",
+            "case_46_expicture_current_gui",
         )),
         "local new-control fixtures are not available",
     )
-    def test_added_object_patch_accepts_new_case22_to_case30_controls(self) -> None:
+    def test_added_object_patch_accepts_known_extra_controls(self) -> None:
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
         baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
         for case_name in (
@@ -381,6 +383,8 @@ class TftPatchTests(unittest.TestCase):
             "case_28_checkbox",
             "case_29_radio",
             "case_30_crop_image",
+            "case_45_touchcap_current_gui",
+            "case_46_expicture_current_gui",
         ):
             with self.subTest(case=case_name), tempfile.TemporaryDirectory() as temp_dir:
                 out = Path(temp_dir) / "new_control.tft"
@@ -395,6 +399,54 @@ class TftPatchTests(unittest.TestCase):
                 self.assertGreaterEqual(result["added_count"], 1)
                 info = inspect_tft_checksum(out)
                 self.assertTrue(info["valid"])
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_45_touchcap_current_gui" / "lcd_test.tft").exists()
+        and (CASE_ROOT / "case_45_touchcap_current_gui" / "official_compile_baseline" / "lcd_test.run").exists()
+        and (CASE_ROOT / "case_45_touchcap_current_gui" / "extract_baseline_seed" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_45_touchcap_current_gui" / "extract" / "0.pa").exists(),
+        "local touch-capture fixture is not available",
+    )
+    def test_added_object_patch_reproduces_touch_capture_case_exactly_from_matching_seed(self) -> None:
+        case_dir = CASE_ROOT / "case_45_touchcap_current_gui"
+        baseline_tft = case_dir / "official_compile_baseline" / "lcd_test.run"
+        baseline_pa = case_dir / "extract_baseline_seed" / "0.pa"
+        target_pa = EXTRACT_ROOT / "case_45_touchcap_current_gui" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out = Path(temp_dir) / "case_45_touchcap_current_gui.tft"
+
+            patch_added_object_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pa=target_pa,
+                out_tft=out,
+            )
+
+            self.assertEqual(out.read_bytes(), (case_dir / "lcd_test.tft").read_bytes())
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_46_expicture_current_gui" / "lcd_test.tft").exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run").exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "extract_baseline_seed" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_46_expicture_current_gui" / "extract" / "0.pa").exists(),
+        "local external-picture fixture is not available",
+    )
+    def test_added_object_patch_reproduces_external_picture_case_exactly_from_matching_seed(self) -> None:
+        case_dir = CASE_ROOT / "case_46_expicture_current_gui"
+        baseline_tft = case_dir / "official_compile_baseline" / "lcd_test.run"
+        baseline_pa = case_dir / "extract_baseline_seed" / "0.pa"
+        target_pa = EXTRACT_ROOT / "case_46_expicture_current_gui" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out = Path(temp_dir) / "case_46_expicture_current_gui.tft"
+
+            patch_added_object_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pa=target_pa,
+                out_tft=out,
+            )
+
+            self.assertEqual(out.read_bytes(), (case_dir / "lcd_test.tft").read_bytes())
 
     @unittest.skipUnless(
         (CASE_ROOT / "case_23_dual_state_button" / "lcd_test.tft").exists()

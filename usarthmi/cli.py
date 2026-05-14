@@ -34,7 +34,7 @@ from .protocol import (
     parse_response,
 )
 from .runtime_preview import build_scene_runtime_commands, push_scene_runtime_preview
-from .scene import SceneError, WidgetSpec, load_scene, save_scene_json
+from .scene import SceneError, WidgetSpec, load_scene, save_scene_json, validate_scene
 from .tft_download import DEFAULT_DOWNLOAD_BAUD, PUBLIC_WHMI_CHUNK_SIZE, plan_upload, upload_tft
 from .tft_case_diff import compare_case_folder
 from .tft_checksum import inspect_tft_checksum
@@ -191,12 +191,37 @@ def _build_parser() -> argparse.ArgumentParser:
     hmi_import.add_argument("source", help="PNG/JPG file")
     hmi_import.add_argument("--out", required=True, help="Asset output directory")
 
-    for name in ("add-text", "add-image", "add-button", "add-number", "add-timer"):
+    hmi_add_widget = hmi_sub.add_parser("add-widget", help="Append any supported widget type to a scene file")
+    hmi_add_widget.add_argument("--scene", required=True, help="Scene JSON file to modify")
+    hmi_add_widget.add_argument("--page", default="page0", help="Target page id")
+    hmi_add_widget.add_argument("--id", required=True, help="Widget id")
+    hmi_add_widget.add_argument("--type", required=True, help="Widget type or alias such as text, sltext, expicture, gmov")
+    hmi_add_widget.add_argument("--x", type=int, help="Widget x")
+    hmi_add_widget.add_argument("--y", type=int, help="Widget y")
+    hmi_add_widget.add_argument("--w", type=int, help="Widget width")
+    hmi_add_widget.add_argument("--h", type=int, help="Widget height")
+    hmi_add_widget.add_argument("--text", help="Widget text")
+    hmi_add_widget.add_argument("--value", type=int, help="Widget numeric value")
+    hmi_add_widget.add_argument("--style", action="append", help="Add style key=value; JSON, bool, and int values are accepted")
+    hmi_add_widget.add_argument("--resource", action="append", help="Add resource key=value; JSON, bool, and int values are accepted")
+    hmi_add_widget.add_argument("--binding", action="append", help="Add binding key=value; JSON, bool, and int values are accepted")
+
+    media_patch_commands = {"add-animation", "add-video", "add-audio"}
+    for name in (
+        "add-text",
+        "add-image",
+        "add-button",
+        "add-number",
+        "add-timer",
+        "add-animation",
+        "add-video",
+        "add-audio",
+    ):
         patch_parser = hmi_sub.add_parser(name, help=f"Append a {name[4:]} widget to a scene file")
         patch_parser.add_argument("--scene", required=True, help="Scene JSON file to modify")
         patch_parser.add_argument("--page", default="page0", help="Target page id")
         patch_parser.add_argument("--id", required=True, help="Widget id")
-        geometry_required = name != "add-timer"
+        geometry_required = name not in {"add-timer", "add-audio"}
         patch_parser.add_argument("--x", type=int, required=geometry_required, help="Widget x")
         patch_parser.add_argument("--y", type=int, required=geometry_required, help="Widget y")
         patch_parser.add_argument("--w", type=int, required=geometry_required, help="Widget width")
@@ -208,6 +233,15 @@ def _build_parser() -> argparse.ArgumentParser:
             patch_parser.add_argument("--tim", type=int, help="Timer interval in milliseconds")
             patch_parser.add_argument("--enabled", action="store_true", help="Set timer en=1")
             patch_parser.add_argument("--disabled", action="store_true", help="Set timer en=0")
+        if name in media_patch_commands:
+            patch_parser.add_argument("--enabled", action="store_true", help="Set media en=1")
+            patch_parser.add_argument("--disabled", action="store_true", help="Set media en=0")
+            patch_parser.add_argument("--path", help="Runtime media path such as sd0/video/demo.video")
+            patch_parser.add_argument("--vid", type=int, help="Internal media resource id when using embedded media resources")
+            patch_parser.add_argument("--loop", type=int, choices=(0, 1), help="Set media loop property")
+            patch_parser.add_argument("--dis", type=int, help="Set media display mode property")
+            if name == "add-video":
+                patch_parser.add_argument("--fps", type=int, help="Set video frame-rate property")
 
     hmi_set_page = hmi_sub.add_parser("set-page", help="Update canvas metadata in a scene file")
     hmi_set_page.add_argument("--scene", required=True, help="Scene JSON/YAML file")
@@ -425,13 +459,64 @@ def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
     if args.hmi_command == "import-image":
         return import_asset(args.source, args.out)
 
-    if args.hmi_command in {"add-text", "add-image", "add-button", "add-number", "add-timer"}:
+    if args.hmi_command == "add-widget":
+        scene = load_scene(args.scene)
+        page = next((item for item in scene.pages if item.id == args.page), None)
+        if page is None:
+            raise SceneError(f"Page '{args.page}' not found in scene")
+        page.widgets.append(
+            WidgetSpec(
+                id=args.id,
+                type=args.type,
+                x=args.x,
+                y=args.y,
+                w=args.w,
+                h=args.h,
+                text=args.text,
+                value=args.value,
+                resources=_parse_cli_map(args.resource, "--resource"),
+                style=_parse_cli_map(args.style, "--style"),
+                bindings=_parse_cli_map(args.binding, "--binding"),
+            )
+        )
+        scene = validate_scene(scene.to_dict())
+        save_scene_json(scene, args.scene)
+        normalized_page = next(item for item in scene.pages if item.id == args.page)
+        normalized_widget = normalized_page.widgets[-1]
+        return {"scene_path": str(Path(args.scene).resolve()), "added_widget": {"id": args.id, "type": normalized_widget.type}}
+
+    media_patch_commands = {"add-animation", "add-video", "add-audio"}
+    widget_patch_commands = {
+        "add-text",
+        "add-image",
+        "add-button",
+        "add-number",
+        "add-timer",
+        *media_patch_commands,
+    }
+    if args.hmi_command in widget_patch_commands:
         scene = load_scene(args.scene)
         page = next((item for item in scene.pages if item.id == args.page), None)
         if page is None:
             raise SceneError(f"Page '{args.page}' not found in scene")
         style: dict[str, Any] = {}
+        resources: dict[str, Any] = {}
         value = args.value
+        if args.asset:
+            resources["asset"] = args.asset
+        if args.hmi_command in media_patch_commands:
+            if args.enabled and args.disabled:
+                raise SceneError(f"{args.hmi_command} accepts only one of --enabled or --disabled")
+            if args.enabled or args.disabled:
+                style["en"] = 1 if args.enabled else 0
+            if args.path:
+                resources["path"] = args.path
+            if args.vid is not None:
+                resources["vid"] = args.vid
+            for key in ("loop", "dis", "fps"):
+                raw_value = getattr(args, key, None)
+                if raw_value is not None:
+                    style[key] = raw_value
         if args.hmi_command == "add-timer":
             if args.enabled and args.disabled:
                 raise SceneError("add-timer accepts only one of --enabled or --disabled")
@@ -449,7 +534,7 @@ def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
                 h=args.h,
                 text=args.text,
                 value=value,
-                resources={"asset": args.asset} if args.asset else {},
+                resources=resources,
                 style=style,
                 bindings={},
             )
@@ -723,6 +808,44 @@ def _parse_preview_font_args(values: list[str] | None) -> dict[int, Path]:
         fonts[font_id] = Path(path).resolve()
         next_id = max(next_id, font_id + 1)
     return fonts
+
+
+def _parse_cli_map(values: list[str] | None, option_name: str) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for item in values or []:
+        if "=" not in item:
+            raise SceneError(f"{option_name} expects key=value, got '{item}'")
+        key, raw_value = item.split("=", 1)
+        key = key.strip()
+        if not key:
+            raise SceneError(f"{option_name} key cannot be empty")
+        result[key] = _coerce_cli_value(raw_value.strip())
+    return result
+
+
+def _coerce_cli_value(raw_value: str) -> Any:
+    lowered = raw_value.lower()
+    if lowered == "true":
+        return True
+    if lowered == "false":
+        return False
+    if lowered == "null":
+        return None
+    try:
+        return int(raw_value, 0)
+    except ValueError:
+        pass
+    if "." in raw_value:
+        try:
+            return float(raw_value)
+        except ValueError:
+            pass
+    if raw_value.startswith(("{", "[", '"')):
+        try:
+            return json.loads(raw_value)
+        except json.JSONDecodeError:
+            pass
+    return raw_value
 
 
 def _print_human_result(command_name: str, result: dict[str, Any]) -> None:

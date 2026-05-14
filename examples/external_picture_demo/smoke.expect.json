@@ -1,0 +1,13 @@
+{
+  "page_id": 0,
+  "expectations": [
+    {
+      "target": "exp0.path",
+      "expected": "sd0/1.jpg"
+    },
+    {
+      "target": "guard.txt",
+      "expected": "guard.txt ok"
+    }
+  ]
+}

@@ -27,6 +27,66 @@ Validate a scene file:
 python -m usarthmi scene validate examples\menu_demo\scene.yaml
 ```
 
+Build the live-safe SD external-picture demo:
+
+```powershell
+python -m usarthmi --json scene build examples\external_picture_demo\scene.json `
+  --seed "D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI" `
+  --baseline-tft "C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft" `
+  --out reverse_usarthmi\external_picture_demo_build
+```
+
+Or use the dedicated runner. It builds and verifies the TFT checksum by default,
+without opening the serial port:
+
+```powershell
+python tools\external_picture_demo_runner.py
+```
+
+Replay the live serial checks for that flashed demo:
+
+```powershell
+python tools\live_tft_smoke.py `
+  --file reverse_usarthmi\external_picture_demo_build\output.tft `
+  --out-dir reverse_usarthmi\external_picture_demo_build\smoke `
+  --expect-json examples\external_picture_demo\smoke.expect.json
+```
+
+Add `--capture` to the same command when visual evidence is needed. The default
+capture backend is the known-good DirectShow `USB Cam` path on this workstation.
+
+Build the first-pass media widget HMI/preview demo:
+
+```powershell
+python -m usarthmi --json scene build examples\media_widgets_demo\scene.json `
+  --seed "D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI" `
+  --out reverse_usarthmi\media_widgets_demo_build
+```
+
+Append media widgets to an existing scene file:
+
+```powershell
+python -m usarthmi --json hmi add-animation --scene my_scene.json `
+  --id gm0 --x 40 --y 80 --w 300 --h 170 `
+  --path sd0/anim/official_0.gmov --enabled --loop 1
+
+python -m usarthmi --json hmi add-video --scene my_scene.json `
+  --id v0 --x 420 --y 80 --w 300 --h 170 `
+  --path sd0/video/official_0.video --enabled
+
+python -m usarthmi --json hmi add-audio --scene my_scene.json `
+  --id wav0 --path sd0/music/official_0.wav --disabled
+```
+
+For controls that do not have a dedicated `hmi add-*` helper yet, use the
+generic authoring entrypoint:
+
+```powershell
+python -m usarthmi --json hmi add-widget --scene my_scene.json `
+  --id exp0 --type expic --x 20 --y 260 --w 180 --h 120 `
+  --resource path=sd0/1.jpg --style path_m=24
+```
+
 Normalize a single image asset:
 
 ```powershell
@@ -37,10 +97,19 @@ python -m usarthmi hmi import-image .\examples\menu_demo\assets\play.png --out .
 
 - `canvas.width/height` are fixed to `800x480` for the current workflow.
 - `project.clean_seed_objects: true` keeps seed objects in the compiled table
-  for compatibility but moves them offscreen, leaving the generated scene visually
-  clean.
+  for compatibility but shrinks them to a 1x1 in-bounds placeholder, leaving the
+  generated scene visually clean without producing off-screen coordinates.
 - `assets` can define `normal`, `pressed`, and optional `disabled` image variants.
 - `button` widgets map those image states to `pic`, `picc`, and `pic2/picc2`.
+- `external-picture` / `expicture` widgets use a runtime path such as
+  `sd0/1.jpg`; for live builds, keep `case_00_baseline/lcd_test.tft` as the
+  resource baseline. `case_46_expicture_current_gui` is a tail/reference
+  fixture only and its compact resource layout is not a safe live baseline for
+  the current X543 panel.
+- `animation`/`gmov`, `video`, and `audio`/`wav` are available as HMI/preview
+  authoring controls. The single-GMOV smoke path can emit a TFT for the current
+  recovered layout; mixed GMOV/video/audio scheduling is still not closed, so
+  do not pass `--baseline-tft` for `media_widgets_demo`.
 - Layout authoring supports `absolute`, `row`, `column`, `grid`, `stack`, and `anchor`.
 - Output files are:
   - `output.hmi`

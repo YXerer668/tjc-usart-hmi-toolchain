@@ -15,7 +15,8 @@ from .preview import render_scene_preview
 from .scene import SceneModel, save_scene_json, widget_to_dict
 from .tft_checksum import inspect_tft_checksum
 from .tft_images import compile_hmi_picture_resource, pack_picture_resources_into_tft
-from .tft_patch import DEFAULT_CASE_ROOT, TYPE_RECORD_LENGTHS, patch_added_object_tft, patch_multi_page_tft
+from .tft_media import pack_gmov_resources_into_tft
+from .tft_patch import DEFAULT_CASE_ROOT, TYPE_RECORD_LENGTHS, patch_added_object_tft, patch_multi_page_tft, patch_rebuild_page_tft
 
 
 class EditorError(RuntimeError):
@@ -23,6 +24,8 @@ class EditorError(RuntimeError):
 
 
 FIXTURE_WIDGET_TEMPLATE_CASES = {
+    "animation": ("case_47_gmov", "\x02"),
+    "audio": ("case_49_audio", "\x04"),
     "slider": ("case_17_slider", "\x01"),
     "gauge": ("case_18_gauge", "z"),
     "progress": ("case_20_progress", "j"),
@@ -37,8 +40,13 @@ FIXTURE_WIDGET_TEMPLATE_CASES = {
     "checkbox": ("case_28_checkbox", "8"),
     "radio": ("case_29_radio", "9"),
     "crop-image": ("case_30_crop_image", "q"),
+    "xfloat": ("case_36_xfloat", ";"),
+    "combobox": ("case_37_combobox", "="),
+    "touch-capture": ("case_45_touchcap_current_gui", "\x05"),
+    "external-picture": ("case_46_expicture_current_gui", "<"),
+    "video": ("case_48_video", "\x03"),
 }
-NON_VISUAL_WIDGET_TYPE_CODES = {"3", "4"}
+NON_VISUAL_WIDGET_TYPE_CODES = {"3", "4", "\x04", "\x05"}
 STYLE_FIELD_ALIASES = {
     "background_color": "bco",
     "foreground_color": "pco",
@@ -53,6 +61,7 @@ RESOURCE_FIELD_ALIASES = {
     "crop": "picc",
 }
 PAGE1_PLAIN_WIDGET_TYPES = {"text", "button", "number", "progress", "slider", "gauge"}
+MEDIA_WIDGET_TYPE_CODES = {"\x02", "\x03", "\x04"}
 
 
 def import_asset(source: str | Path, out_dir: str | Path) -> dict[str, Any]:
@@ -113,6 +122,7 @@ def build_scene(
     for asset_key, asset in scene.assets.items():
         manifest_assets[asset_key] = _import_scene_asset(asset, asset_dir)
     packed_picture_ids = _assign_tft_picture_resource_ids(seed_path, normalized_scene, manifest_assets)
+    gmov_sources = _collect_tft_gmov_sources(normalized_scene)
 
     output_hmi = build_dir / "output.hmi"
     hmi_picture_resources = build_hmi(normalized_scene, manifest_assets, seed_path, output_hmi)
@@ -130,6 +140,7 @@ def build_scene(
     tft_patch = None
     tft_checksum = None
     tft_picture_pack = None
+    tft_gmov_pack = None
     resource_seed_tft = None
     warnings = [
         "Image assets are normalized and assigned resource ids; TFT image resource packing is experimental.",
@@ -148,15 +159,33 @@ def build_scene(
             tft_seed_path = resource_seed_tft_path
             resource_seed_tft = str(resource_seed_tft_path)
             tft_picture_pack = pack_result.to_dict()
+        if gmov_sources:
+            resource_seed_tft_path = build_dir / "resource_seed_gmov.tft"
+            pack_result = pack_gmov_resources_into_tft(
+                tft_seed_path,
+                gmov_sources,
+                out_tft=resource_seed_tft_path,
+            )
+            tft_seed_path = resource_seed_tft_path
+            resource_seed_tft = str(resource_seed_tft_path)
+            tft_gmov_pack = pack_result.to_dict()
         output_tft_path = build_dir / "output.tft"
         if len(target_pages) == 1:
-            _validate_tft_target_support(baseline_pa, target_pa, packed_picture_ids=packed_picture_ids)
-            patch_result = patch_added_object_tft(
-                tft_seed_path,
-                baseline_pa=baseline_pa,
-                target_pa=target_pa,
-                out_tft=output_tft_path,
-            )
+            if normalized_scene.project.get("drop_seed_objects"):
+                patch_result = patch_rebuild_page_tft(
+                    tft_seed_path,
+                    seed_pa=baseline_pa,
+                    target_pa=target_pa,
+                    out_tft=output_tft_path,
+                )
+            else:
+                _validate_tft_target_support(baseline_pa, target_pa, packed_picture_ids=packed_picture_ids)
+                patch_result = patch_added_object_tft(
+                    tft_seed_path,
+                    baseline_pa=baseline_pa,
+                    target_pa=target_pa,
+                    out_tft=output_tft_path,
+                )
         else:
             if packed_picture_ids:
                 raise EditorError("Multi-page TFT scene build does not support new image resources yet")
@@ -186,6 +215,7 @@ def build_scene(
         "output_hmi": str(output_hmi),
         "output_tft": output_tft,
         "tft_picture_pack": tft_picture_pack,
+        "tft_gmov_pack": tft_gmov_pack,
         "hmi_picture_resources": hmi_picture_resources,
         "preview_png": str(preview_png),
         "tft_patch": tft_patch,
@@ -220,8 +250,10 @@ def build_hmi(
 
     seed_page_block = next(block.clone() for block in page.blocks if block.type_code == "y")
     unknown_blocks = [block.clone() for block in page.blocks if block.type_code not in {"y"}]
-    if scene.project.get("clean_seed_objects"):
-        _move_seed_objects_offscreen(
+    if scene.project.get("drop_seed_objects"):
+        unknown_blocks = []
+    elif scene.project.get("clean_seed_objects"):
+        _minimize_seed_objects_in_bounds(
             unknown_blocks,
             width=int(scene.canvas["width"]),
             height=int(scene.canvas["height"]),
@@ -253,7 +285,7 @@ def build_hmi(
     page0 = next(page for page in scene.pages if page.id == "page0")
     _apply_event_fields(seed_page_block, page0.events, owner="page0")
 
-    next_id = max((_block_int(block, "id") or 0) for block in page.blocks) + 1
+    next_id = 1 if scene.project.get("drop_seed_objects") else max((_block_int(block, "id") or 0) for block in page.blocks) + 1
     generated_blocks = []
     for widget in page0.widgets:
         block = _build_widget_block(
@@ -430,9 +462,11 @@ def _apply_geometry_fields(block, widget) -> None:
     block.set_int("endy", int(widget.y or 0) + int(widget.h or 0) - 1, width=2)
 
 
-def _move_seed_objects_offscreen(blocks, *, width: int, height: int) -> None:
-    x = max(width + 32, 0)
-    y = max(height + 32, 0)
+def _minimize_seed_objects_in_bounds(blocks, *, width: int, height: int) -> None:
+    # Keep placeholder seed objects inside the panel bounds. Some firmware builds
+    # reject a page whose compiled object table contains off-screen coordinates.
+    x = max(min(width - 1, width), 0)
+    y = max(min(height - 1, height), 0)
     for block in blocks:
         if block.type_code == "y":
             continue
@@ -473,7 +507,7 @@ def _load_case_last_block(case_name: str):
 
 
 def _load_case_block_of_type(case_name: str, type_code: str):
-    hmi_path = DEFAULT_CASE_ROOT / case_name / "lcd_test.HMI"
+    hmi_path = _case_hmi_fixture_path(case_name)
     if not hmi_path.exists():
         raise EditorError(
             f"Widget template fixture is missing: {hmi_path}. "
@@ -487,6 +521,13 @@ def _load_case_block_of_type(case_name: str, type_code: str):
         if block.type_code == type_code:
             return block.clone()
     raise EditorError(f"Fixture {hmi_path} does not contain widget type {type_code!r}")
+
+
+def _case_hmi_fixture_path(case_name: str) -> Path:
+    direct = DEFAULT_CASE_ROOT / case_name / "lcd_test.HMI"
+    if direct.exists():
+        return direct
+    return DEFAULT_CASE_ROOT / case_name / "official_wiki" / "source_raw.HMI"
 
 
 def _apply_textual_fields(block, widget) -> None:
@@ -632,7 +673,7 @@ def _apply_resource_fields(block, widget, manifest_assets: dict[str, Any]) -> No
     if asset_ref:
         _apply_asset_fields(block, widget, manifest_assets)
 
-    handled = {"asset", "disabled_pic"}
+    handled = {"asset", "disabled_pic", "source", "sources", "gmov", "file"}
     for raw_name, raw_value in widget.resources.items():
         if raw_name in handled:
             continue
@@ -641,6 +682,9 @@ def _apply_resource_fields(block, widget, manifest_assets: dict[str, Any]) -> No
             raise EditorError(
                 f"Resource field {raw_name!r} is not supported by widget {widget.id!r} ({widget.type})"
             )
+        if isinstance(raw_value, str):
+            block.set_string(field_name, raw_value, encoding="ascii")
+            continue
         _set_existing_int_field(block, field_name, int(raw_value), owner=widget.id)
 
 
@@ -788,15 +832,38 @@ def _rebuild_hmi_container(
     page_additions = [item for item in additions if item.get("kind") == "page"]
     last_source_index = _last_entry_index(entries, ".is")
     last_image_index = _last_entry_index(entries, ".i")
+    appended_replacements: list[dict[str, Any]] = []
 
     specs: list[dict[str, Any]] = []
     for index, entry in enumerate(entries):
         if entry.name == "0.pa":
             specs.extend(page_additions)
         data = replacements.get(entry.name)
+        name_bytes = bytes.fromhex(entry.name_hex)
+        field3 = entry.field3
+        if entry.name == "0.pa" and "0.pa" in replacements:
+            # Official USART HMI keeps old page revisions as shadow "\0.pa"
+            # entries and appends the active named "0.pa" at the end.
+            data = seed_bytes[entry.data_offset : entry.data_offset + entry.length]
+            name_bytes = b"\x00" + b".pa" + b"\x00" * 12
+            field3 = int(entry.field3) | 1
+            appended_replacements.append(
+                {
+                    "name": "0.pa",
+                    "data": replacements["0.pa"],
+                    "field3": 0x05111600,
+                }
+            )
         if data is None:
             data = seed_bytes[entry.data_offset : entry.data_offset + entry.length]
-        specs.append({"name": entry.name, "data": data, "field3": entry.field3})
+        specs.append(
+            {
+                "name": entry.name,
+                "name_bytes": name_bytes,
+                "data": data,
+                "field3": field3,
+            }
+        )
         if index == last_source_index:
             specs.extend(source_additions)
         if index == last_image_index:
@@ -806,6 +873,7 @@ def _rebuild_hmi_container(
         specs.extend(source_additions)
     if last_image_index < 0:
         specs.extend(image_additions)
+    specs.extend(appended_replacements)
 
     directory_end = 4 + len(specs) * 28
     if directory_end > data_start:
@@ -820,7 +888,10 @@ def _rebuild_hmi_container(
     cursor = data_start
     for index, spec in enumerate(specs):
         base = 4 + index * 28
-        name = str(spec["name"]).encode("ascii", errors="ignore")
+        if "name_bytes" in spec:
+            name = bytes(spec["name_bytes"])
+        else:
+            name = str(spec["name"]).encode("ascii", errors="ignore")
         if len(name) > 16:
             raise EditorError(f"HMI entry name is too long: {spec['name']!r}")
         data = bytes(spec["data"])
@@ -885,6 +956,13 @@ def _validate_tft_target_support(
     packed_pics = set(packed_picture_ids or set())
     allowed_pics = existing_pics | packed_pics
     added_blocks = target_page.blocks[len(baseline_page.blocks) :]
+    media_blocks = [block for block in added_blocks if block.type_code in MEDIA_WIDGET_TYPE_CODES]
+    if len(media_blocks) > 1:
+        names = ", ".join(repr(block.objname) for block in media_blocks)
+        raise EditorError(
+            "TFT scene build media widgets path supports only one media fixture per page in this pass: "
+            f"{names}. Split GMOV/video/audio smoke tests into separate TFTs until mixed-media scheduling is proven."
+        )
     for block in added_blocks:
         if block.type_code not in TYPE_RECORD_LENGTHS:
             raise EditorError(
@@ -985,6 +1063,56 @@ def _collect_tft_picture_sources(
             if picture_id in packed_picture_ids:
                 sources.append((picture_id, str(variant["source"])))
     return sources
+
+
+def _collect_tft_gmov_sources(scene: SceneModel) -> list[str]:
+    source_dir = Path(scene.project.get("_source_dir") or ".").resolve()
+    sources: list[str] = []
+    seen: dict[str, int] = {}
+    for page in scene.pages:
+        for widget in page.widgets:
+            if widget.type != "animation":
+                continue
+            raw_sources = _widget_gmov_sources(widget)
+            if not raw_sources:
+                continue
+            first_index: int | None = None
+            for raw_source in raw_sources:
+                path = _resolve_resource_source(raw_source, source_dir)
+                key = str(path)
+                if key not in seen:
+                    seen[key] = len(sources)
+                    sources.append(key)
+                if first_index is None:
+                    first_index = seen[key]
+            if first_index is not None and "vid" not in widget.resources:
+                widget.resources["vid"] = first_index
+    return sources
+
+
+def _widget_gmov_sources(widget) -> list[str]:
+    value = widget.resources.get("sources")
+    if value is not None:
+        if not isinstance(value, list) or not all(isinstance(item, str) and item for item in value):
+            raise EditorError(f"Widget {widget.id!r} resources.sources must be a list of paths")
+        return list(value)
+    for key in ("source", "gmov", "file"):
+        value = widget.resources.get(key)
+        if value is not None:
+            if not isinstance(value, str) or not value:
+                raise EditorError(f"Widget {widget.id!r} resources.{key} must be a non-empty path")
+            return [value]
+    return []
+
+
+def _resolve_resource_source(value: str, source_dir: Path) -> Path:
+    path = Path(value)
+    if not path.is_absolute():
+        path = source_dir / path
+    path = path.resolve()
+    if not path.exists():
+        raise EditorError(f"GMOV resource source not found: {path}")
+    return path
 
 
 def _image_to_rgb565(image: Image.Image) -> bytes:

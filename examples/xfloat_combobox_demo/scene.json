@@ -1,0 +1,103 @@
+{
+  "project": {
+    "name": "xfloat-combobox-demo",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 48,
+          "y": 34,
+          "w": 380,
+          "h": 44,
+          "text": "XFLOAT + COMBO",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "xval",
+          "type": "xfloat",
+          "x": 48,
+          "y": 128,
+          "w": 260,
+          "h": 60,
+          "value": 123456,
+          "style": {
+            "vvs0": 0,
+            "vvs1": 3,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "cbval",
+          "type": "combobox",
+          "x": 48,
+          "y": 230,
+          "w": 210,
+          "h": 48,
+          "text": "80V",
+          "value": 2,
+          "style": {
+            "down": 1,
+            "qty": 3,
+            "background_color": 65535,
+            "foreground_color": 0
+          },
+          "resources": {
+            "path": "40V\r\n60V\r\n80V"
+          }
+        },
+        {
+          "id": "hint",
+          "type": "text",
+          "x": 340,
+          "y": 132,
+          "w": 360,
+          "h": 46,
+          "text": "xval.val = 123456",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "hint2",
+          "type": "text",
+          "x": 340,
+          "y": 232,
+          "w": 360,
+          "h": 46,
+          "text": "cbval.val = 2",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        }
+      ]
+    }
+  ]
+}

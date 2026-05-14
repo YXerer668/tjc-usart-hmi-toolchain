@@ -1,0 +1,144 @@
+{
+  "project": {
+    "name": "external-picture-demo",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 2244
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 34,
+          "y": 26,
+          "w": 470,
+          "h": 50,
+          "text": "SD EXTERNAL PICTURE",
+          "style": {
+            "font_id": 0,
+            "background_color": 2244,
+            "foreground_color": 65503,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "badge",
+          "type": "text",
+          "x": 592,
+          "y": 30,
+          "w": 160,
+          "h": 40,
+          "text": "LIVE READY",
+          "style": {
+            "font_id": 0,
+            "background_color": 5588,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "frame",
+          "type": "text",
+          "x": 42,
+          "y": 112,
+          "w": 420,
+          "h": 300,
+          "text": "",
+          "style": {
+            "font_id": 0,
+            "background_color": 65503,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "exp0",
+          "type": "external-picture",
+          "x": 62,
+          "y": 132,
+          "w": 380,
+          "h": 260,
+          "resources": {
+            "path": "sd0/1.jpg"
+          }
+        },
+        {
+          "id": "status",
+          "type": "text",
+          "x": 492,
+          "y": 126,
+          "w": 270,
+          "h": 72,
+          "text": "object alive",
+          "style": {
+            "font_id": 0,
+            "background_color": 6471,
+            "foreground_color": 42906,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "pathbox",
+          "type": "text",
+          "x": 492,
+          "y": 220,
+          "w": 270,
+          "h": 72,
+          "text": "path: sd0/1.jpg",
+          "style": {
+            "font_id": 0,
+            "background_color": 6471,
+            "foreground_color": 64996,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "guard",
+          "type": "text",
+          "x": 492,
+          "y": 314,
+          "w": 270,
+          "h": 72,
+          "text": "guard.txt ok",
+          "style": {
+            "font_id": 0,
+            "background_color": 6471,
+            "foreground_color": 65503,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "footer",
+          "type": "text",
+          "x": 42,
+          "y": 430,
+          "w": 700,
+          "h": 34,
+          "text": "case_00 live baseline. case_46 tail fixture only.",
+          "style": {
+            "font_id": 0,
+            "background_color": 2244,
+            "foreground_color": 38167,
+            "xcen": 0,
+            "ycen": 1
+          }
+        }
+      ]
+    }
+  ]
+}

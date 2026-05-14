@@ -20,7 +20,14 @@ TYPE_RECORD_LENGTHS = {
     "t": 0x54,
     "b": 0x54,
     "p": 0x3C,
+    "\x02": 0x68,  # GMOV animation
+    "\x03": 0x68,  # video
+    "\x04": 0x68,  # audio
+    "\x05": 0x24,  # touch capture
+    "<": 0x44,  # external picture / SD image
     "\x00": 0x5C,  # waveform
+    ";": 0x50,  # virtual float / xfloat
+    "=": 0x90,  # combo box
     "4": 0x10,  # variable
     "5": 0x58,  # dual-state button
     "6": 0x54,  # number
@@ -41,7 +48,14 @@ TYPE_USER_SLOT_COUNTS = {
     "t": 41,
     "b": 42,
     "p": 28,
+    "\x02": 39,
+    "\x03": 38,
+    "\x04": 20,
+    "\x05": 10,
+    "<": 29,
     "\x00": 41,
+    ";": 39,
+    "=": 57,
     "4": 11,
     "5": 42,
     "6": 41,
@@ -66,7 +80,12 @@ TEXT_POINTER_RECORD_OFFSETS = {
     ":": 0x44,
 }
 KNOWN_EXTRA_TYPE_CASES = {
+    "\x02": "case_47_gmov",
+    "\x03": "case_48_video",
+    "\x04": "case_49_audio",
     "\x00": "case_27_waveform_basic",
+    ";": "case_36_xfloat",
+    "=": "case_37_combobox",
     "4": "case_26_variable_numeric_string",
     "5": "case_23_dual_state_button",
     "6": "case_16_number_basic",
@@ -79,6 +98,8 @@ KNOWN_EXTRA_TYPE_CASES = {
     "C": "case_24_state_button",
     "m": "case_25_hotspot_touch_area",
     "q": "case_30_crop_image",
+    "\x05": "case_45_touchcap_current_gui",
+    "<": "case_46_expicture_current_gui",
     "j": "case_20_progress",
     ":": "case_21_qrcode",
 }
@@ -90,10 +111,12 @@ IMAGE_BUTTON_MIRROR_EXTRA_INDEX = 17
 IMAGE_BUTTON_PREFIX_INSERT_OFFSET = 0x86
 IMAGE_BUTTON_PREFIX_INSERT = bytes.fromhex("92 48 C9 76")
 PREFIX_DESCRIPTOR_START = 0x3E
+PREFIX_SYSTEM_EVENT_LAYOUT_SIZE = 0x5F
 TIMER_TYPE_CODE = "3"
 VARIABLE_TYPE_CODE = "4"
-NON_VISUAL_COORD_TYPES = {TIMER_TYPE_CODE, VARIABLE_TYPE_CODE}
-COMPACT_STRING_LAYOUT_TYPES = {TIMER_TYPE_CODE, "5", "6", "7", "8", "C", "m", "q"}
+MEDIA_TYPE_CODES = {"\x02", "\x03", "\x04"}
+NON_VISUAL_COORD_TYPES = {TIMER_TYPE_CODE, VARIABLE_TYPE_CODE, "\x04", "\x05"}
+COMPACT_STRING_LAYOUT_TYPES = {TIMER_TYPE_CODE, "\x05", "<", "5", "6", "7", "8", "C", "m", "q", "="}
 MIXED_COMPACT_PRIMARY_TYPES = {"5", "6", "7", "8", "m", "q"}
 MIXED_DESCRIPTOR_LAYOUT_KEY = "__mixed__"
 TIMER_AUTORUN_DESCRIPTOR_LAYOUT_KEY = "__timer_autorun__"
@@ -102,10 +125,32 @@ OFFICIAL_MIXED_DESCRIPTOR_LAYOUTS = {
     TIMER_AUTORUN_DESCRIPTOR_LAYOUT_KEY: "case_32_timer_autorun_witness",
 }
 TYPE_RECORD_HEADER_FLAGS = {
+    "\x04": 0x27,
+    "\x05": 0x27,
     TIMER_TYPE_CODE: 0x27,
     VARIABLE_TYPE_CODE: 0x07,
 }
 EVENT_FIELD_USER_SLOTS = {
+    "\x02": {
+        "vid": 20,
+        "en": 23,
+        "loop": 24,
+        "dis": 25,
+    },
+    "\x03": {
+        "vid": 20,
+        "en": 21,
+        "loop": 22,
+        "fps": 23,
+        "dis": 24,
+    },
+    "\x04": {
+        "vid": 8,
+        "en": 9,
+        "loop": 10,
+        "fps": 11,
+        "dis": 12,
+    },
     # Recovered from official timer-control TFTs:
     #   tm0.en=1  -> 01 <slot_start+8> 00 00 00 3d 31
     #   n0.val++  -> 01 <slot_start+27> 00 00 00 2b 2b
@@ -115,6 +160,11 @@ EVENT_FIELD_USER_SLOTS = {
     },
     "6": {
         "val": 27,
+    },
+    ";": {
+        "val": 27,
+        "vvs0": 28,
+        "vvs1": 29,
     },
 }
 EVENT_ASSIGN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
@@ -359,6 +409,9 @@ class _TailSeed:
     mirror_templates: dict[str, list[int | None]]
     mirror_layout_templates: dict[str, dict[str, list[int | None]]]
     mirror_descriptor_sequences: dict[str, list[bytes]]
+    primary_final_markers: dict[str, bytes]
+    primary_string_prefix_paddings: dict[str, int]
+    primary_string_suffix_paddings: dict[str, int]
     hash_by_name: dict[str, int]
 
 
@@ -555,6 +608,9 @@ def patch_rebuild_page_tft(
 
     seed = _load_tail_seed(baseline_tft_path, seed_pa_path, seed_page)
     _augment_seed_templates(seed, {block.type_code for block in target_page.blocks})
+    # The baseline TFT is still the source of truth for encrypted headers,
+    # resource tables, and per-type binary templates. The target .pa owns only
+    # the rebuilt page/object tail, which keeps this path narrow and repeatable.
     tail, sections = _build_added_object_tail(seed, target_page.blocks)
     payload = bytearray(seed.raw[: seed.object_start] + tail)
     image_button_layout = _uses_full_image_button_layout(target_page.blocks)
@@ -620,6 +676,9 @@ def patch_multi_page_tft(
 
     seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, seed_page)
     _augment_seed_templates(seed, {block.type_code for page in pages for block in page.blocks})
+    # Multi-page support is intentionally fixture-shaped: page directories and
+    # object sections are rebuilt only for the recovered two-page layout, while
+    # event scheduling stays fail-closed unless explicitly enabled for probes.
     tail, sections = _build_multi_page_tail(seed, pages)
     payload = bytearray(seed.raw[: seed.object_start] + tail)
 
@@ -699,7 +758,7 @@ def _is_supported_page1_button_event_block(block: PageBlock) -> bool:
     prefix, lines = event_items[0]
     if prefix not in {"codesdown-", "codesup-"} or len(lines) != 1:
         return False
-    return lines[0].strip().lower() in {"page 1", "page page0"}
+    return lines[0].strip().lower() in {"page 0", "page 1", "page page0", "page page1"}
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:
@@ -814,9 +873,8 @@ def _augment_seed_templates(seed: _TailSeed, needed_types: set[str]) -> None:
         case_seed = loaded_roots.get(case_name)
         if case_seed is None:
             case_dir = case_root / case_name
-            case_tft = case_dir / "lcd_test.tft"
-            case_hmi = case_dir / "lcd_test.HMI"
-            if not case_tft.exists() or not case_hmi.exists():
+            case_tft, case_hmi = _case_fixture_paths(case_dir)
+            if case_tft is None or case_hmi is None:
                 unresolved.append(type_code)
                 continue
             case_page = _load_hmi_page0(case_hmi)
@@ -835,7 +893,13 @@ def _augment_seed_templates(seed: _TailSeed, needed_types: set[str]) -> None:
                 for key, value in case_seed.mirror_templates.items()
             }
             seed.mirror_descriptor_sequences[type_code] = _prefix_descriptor_sequence(case_seed.compiled_prefix)
-            if type_code == VARIABLE_TYPE_CODE:
+            seed.primary_final_markers[type_code] = case_seed.primary_final_markers.get(
+                "",
+                b"\x00\x00\x00\x00",
+            )
+            seed.primary_string_prefix_paddings[type_code] = case_seed.primary_string_prefix_paddings.get("", 0)
+            seed.primary_string_suffix_paddings[type_code] = case_seed.primary_string_suffix_paddings.get("", 0)
+            if type_code == VARIABLE_TYPE_CODE or type_code in MEDIA_TYPE_CODES:
                 seed.prefix_inserts[type_code] = []
             else:
                 seed.prefix_inserts[type_code] = _derive_prefix_insertions_for_case(seed, case_seed, case_page)
@@ -848,6 +912,17 @@ def _augment_seed_templates(seed: _TailSeed, needed_types: set[str]) -> None:
             "Missing compiled TFT templates for object type(s): "
             f"{readable}. Provide official case fixtures under {case_root} or avoid these controls."
         )
+
+
+def _case_fixture_paths(case_dir: Path) -> tuple[Path | None, Path | None]:
+    candidates = [
+        (case_dir / "lcd_test.tft", case_dir / "lcd_test.HMI"),
+        (case_dir / "official_compile" / "source_raw.run", case_dir / "official_wiki" / "source_raw.HMI"),
+    ]
+    for case_tft, case_hmi in candidates:
+        if case_tft.exists() and case_hmi.exists():
+            return case_tft, case_hmi
+    return None, None
 
 
 def _load_hmi_page0(hmi_path: Path):
@@ -886,9 +961,6 @@ def _load_tail_seed(
     if len(tail) < 0x187:
         raise TftToolchainError("Baseline TFT object tail is too short for current seed template extraction")
 
-    prefix_head = tail[:0x145]
-    page_event = tail[0x145:0x16D]
-    object_event = tail[0x16D:0x187]
     by_id = {_field_int(block, "id"): block.objname for block in baseline_page.blocks}
     expected_hash_by_id = {
         object_id: _object_name_hash_or_error(name)
@@ -897,6 +969,10 @@ def _load_tail_seed(
     }
     baseline_hash_offset, hash_data = _find_hash_block(tail, expected_hash_by_id)
     compiled_prefix = tail[:baseline_hash_offset]
+    prefix_head_end = _prefix_event_layout_start(compiled_prefix)
+    prefix_head = tail[:prefix_head_end]
+    page_event = tail[prefix_head_end : prefix_head_end + 0x28]
+    object_event = tail[prefix_head_end + 0x28 : prefix_head_end + 0x42]
     hash_by_name: dict[str, int] = {}
     for offset in range(0, len(hash_data), 6):
         object_hash = int.from_bytes(hash_data[offset : offset + 4], "little")
@@ -916,6 +992,7 @@ def _load_tail_seed(
     primary_data_start = primary_block_offset + 4
     if primary_data_start + primary_size > len(tail):
         raise TftToolchainError("Baseline TFT primary object block is truncated")
+    primary_data = tail[primary_data_start : primary_data_start + primary_size]
 
     value_offsets = [
         int.from_bytes(tail[primary_data_start + index * 4 : primary_data_start + index * 4 + 4], "little")
@@ -931,6 +1008,13 @@ def _load_tail_seed(
         length = TYPE_RECORD_LENGTHS[type_code]
         primary_templates.setdefault(type_code, bytes(tail[cursor : cursor + length]))
         cursor += length
+    primary_final_marker = primary_data[-4:] if len(primary_data) >= 4 else b"\x00\x00\x00\x00"
+    prefix_padding, suffix_padding = _recover_primary_string_padding(
+        primary_data,
+        baseline_page.blocks,
+        record_start - primary_data_start,
+        primary_final_marker,
+    )
 
     user_header = tail[attr_start:user_start]
     if len(user_header) != 0x24:
@@ -947,8 +1031,16 @@ def _load_tail_seed(
             if record == b"\x00" * 24:
                 continue
             words = [int.from_bytes(record[index : index + 4], "little") for index in range(0, 24, 4)]
-            if words[5] in {0x0B3F, 0x193F} or (type_code == ":" and words[5] == 0x1F3F):
+            if (
+                words[5] in {0x0B3F, 0x193F}
+                or (type_code == "b" and words[5] in {0x1F3F, 0x333F})
+                or (type_code == ":" and words[5] == 0x1F3F)
+                or (type_code == "=" and words[5] == 0x213F)
+            ):
                 word1_mode = "text_pointer"
+                word1_delta = words[1] - value_base
+            elif (type_code == "=" and words[5] == 0x1013F) or (type_code == "<" and words[5] == 0x1003F):
+                word1_mode = "path_pointer"
                 word1_delta = words[1] - value_base
             elif type_code == "m" and words[1] < value_base:
                 word1_mode = "absolute"
@@ -1011,6 +1103,9 @@ def _load_tail_seed(
         mirror_templates=mirror_templates,
         mirror_layout_templates={},
         mirror_descriptor_sequences={"": _prefix_descriptor_sequence(compiled_prefix)},
+        primary_final_markers={"": primary_final_marker},
+        primary_string_prefix_paddings={"": prefix_padding},
+        primary_string_suffix_paddings={"": suffix_padding},
         hash_by_name=hash_by_name,
     )
 
@@ -1049,6 +1144,63 @@ def _prefix_descriptor_sequence(prefix: bytes) -> list[bytes]:
     ]
 
 
+def _prefix_event_layout_start(prefix: bytes) -> int:
+    descriptor_sentinel_offset = int.from_bytes(prefix[:4], "little")
+    event_start = descriptor_sentinel_offset + 4 + PREFIX_SYSTEM_EVENT_LAYOUT_SIZE
+    if event_start > len(prefix):
+        raise TftToolchainError("TFT prefix event layout start exceeds compiled prefix length")
+    return event_start
+
+
+def _recover_primary_string_padding(
+    primary_data: bytes,
+    blocks: list[PageBlock],
+    offset_table_size: int,
+    final_marker: bytes,
+) -> tuple[int, int]:
+    if not primary_data or len(primary_data) < offset_table_size:
+        return 0, 0
+    value_offsets = [
+        int.from_bytes(primary_data[index : index + 4], "little")
+        for index in range(0, offset_table_size, 4)
+    ]
+    if len(value_offsets) != len(blocks):
+        return 0, 0
+    record_end = max(
+        (
+            value_offset - 0x10 + TYPE_RECORD_LENGTHS.get(block.type_code, 0)
+            for block, value_offset in zip(blocks, value_offsets)
+        ),
+        default=offset_table_size,
+    )
+    string_start = record_end + 4
+    marker_start = len(primary_data) - len(final_marker)
+    if string_start > marker_start:
+        return 0, 0
+
+    encoded_text_offsets: list[int] = []
+    expected_string_slots = 0
+    for block in blocks:
+        for field_name, _pointer_offset, slot_len in _string_pointer_fields(block):
+            expected_string_slots += slot_len
+            text = _field_text(block, field_name) or ""
+            encoded = _encode_display_text(text)
+            if not encoded:
+                continue
+            found = primary_data.find(encoded, string_start, marker_start)
+            if found >= 0:
+                encoded_text_offsets.append(found)
+
+    if not expected_string_slots:
+        return 0, 0
+    prefix_padding = 0
+    if encoded_text_offsets:
+        prefix_padding = max(0, min(encoded_text_offsets) - string_start)
+    suffix_start = string_start + prefix_padding + expected_string_slots
+    suffix_padding = max(0, marker_start - suffix_start)
+    return prefix_padding, suffix_padding
+
+
 def _find_mirror_record_offsets(tail: bytes, mirror_start: int, blocks: list[PageBlock]) -> list[int]:
     offsets: list[int] = []
     cursor = mirror_start + 0x10
@@ -1075,13 +1227,22 @@ def _build_added_object_tail(
     if _uses_mixed_compact_primary_layout(seed, target_blocks):
         _augment_official_mixed_layout(seed)
     mirror_layout_type = _mirror_layout_type_for_blocks(seed, target_blocks)
+    descriptor_sequence = _single_media_descriptor_sequence(seed, target_blocks)
     prefix_head = _prefix_head_for_layout(
         seed.prefix_head,
         image_button_layout=image_button_layout,
         extra_insertions=_prefix_insertions_for_blocks(seed, target_blocks),
+        descriptor_sequence=descriptor_sequence,
     )
-    descriptor_sequence = _prefix_descriptor_sequence(prefix_head) if mirror_layout_type is not None else None
-    event_layout = _build_event_layout(target_blocks, len(prefix_head), image_button_layout=image_button_layout)
+    if descriptor_sequence is None and mirror_layout_type is not None:
+        descriptor_sequence = _prefix_descriptor_sequence(prefix_head)
+    post_primary_page_load = _uses_post_primary_page_load(target_blocks)
+    event_layout = _build_event_layout(
+        target_blocks,
+        len(prefix_head),
+        image_button_layout=image_button_layout,
+        post_primary_page_load=post_primary_page_load,
+    )
     prefix = prefix_head + event_layout.data
     hash_offset = len(prefix)
     hash_entries = []
@@ -1107,18 +1268,36 @@ def _build_added_object_tail(
         event_callbacks=event_layout.callbacks,
     )
     out.extend(_code_block(primary_data))
-    if any(block.type_code in {"\x00", "\x01", "7", TIMER_TYPE_CODE} for block in target_blocks):
+    post_primary_event_context = _build_event_compile_context(target_blocks)
+    post_primary_page_event = _build_post_primary_page_event(
+        target_blocks,
+        context=post_primary_event_context,
+    )
+    if post_primary_page_event:
+        out.extend(post_primary_page_event)
+    elif any(block.type_code in MEDIA_TYPE_CODES for block in target_blocks):
+        out.extend(_code_block(bytes.fromhex("09 1f 04 31")))
+        out.extend(_code_block(b"\x09\x30\x08"))
+        out.extend(_code_block(b""))
+    elif any(block.type_code in {"\x00", "\x01", "\x05", "7", "=", TIMER_TYPE_CODE} for block in target_blocks):
         marker = "35" if (
             _uses_mixed_compact_primary_layout(seed, target_blocks)
             and any(block.type_code == TIMER_TYPE_CODE for block in target_blocks)
         ) else "34"
         out.extend(_code_block(bytes.fromhex(f"09 1f 04 {marker}")))
-    if _uses_mixed_compact_primary_layout(seed, target_blocks) and any(
-        block.type_code == "\x00" for block in target_blocks
-    ):
-        out.extend(_code_block(bytes.fromhex("09 1f 04 37")))
-    out.extend(_code_block(b"\x09\x30\x08"))
-    out.extend(_code_block(b""))
+        if _uses_mixed_compact_primary_layout(seed, target_blocks) and any(
+            block.type_code == "\x00" for block in target_blocks
+        ):
+            out.extend(_code_block(bytes.fromhex("09 1f 04 37")))
+        out.extend(_code_block(b"\x09\x30\x08"))
+        out.extend(_code_block(b""))
+    else:
+        if _uses_mixed_compact_primary_layout(seed, target_blocks) and any(
+            block.type_code == "\x00" for block in target_blocks
+        ):
+            out.extend(_code_block(bytes.fromhex("09 1f 04 37")))
+        out.extend(_code_block(b"\x09\x30\x08"))
+        out.extend(_code_block(b""))
 
     attr_offset = len(out)
     user_offset = attr_offset + len(seed.user_header)
@@ -1133,6 +1312,7 @@ def _build_added_object_tail(
         )
     )
 
+    out.extend(_pre_mirror_padding(target_blocks))
     picture_offset = len(out)
     out.extend(
         _build_mirror_records(
@@ -1161,7 +1341,12 @@ def _build_added_object_tail(
     if padding_size:
         padding_byte = (
             b"\xFF"
-            if image_button_layout or any(block.type_code in {"\x00", "\x01", "4", "9", "C", "q", ":", TIMER_TYPE_CODE} for block in target_blocks)
+            if image_button_layout
+            or any(
+                block.type_code in {"\x00", "\x01", "4", "9", "C", "q", ":", "=", TIMER_TYPE_CODE}
+                or block.type_code in MEDIA_TYPE_CODES
+                for block in target_blocks
+            )
             else b"\x00"
         )
         out.extend(padding_byte * padding_size)
@@ -1176,6 +1361,12 @@ def _build_added_object_tail(
         "prefix_delta": int.from_bytes(prefix_head[:4], "little") - int.from_bytes(seed.prefix_head[:4], "little"),
         "tail": len(out),
     }
+
+
+def _pre_mirror_padding(blocks: list[PageBlock]) -> bytes:
+    if any(block.type_code == ";" for block in blocks):
+        return b"\x00" * 0x30
+    return b""
 
 
 def _build_multi_page_tail(
@@ -1463,6 +1654,7 @@ def _build_event_layout(
     base_offset: int,
     *,
     image_button_layout: bool,
+    post_primary_page_load: bool = False,
 ) -> _EventLayout:
     data = bytearray()
     offsets: list[int] = []
@@ -1472,7 +1664,11 @@ def _build_event_layout(
         block_offset = base_offset + len(data)
         offsets.append(block_offset)
         if index == 0:
-            event_data = _build_page_event_table(block, context=context)
+            event_data = _build_page_event_table(
+                block,
+                context=context,
+                include_load_scripts=not post_primary_page_load,
+            )
             event_data = _page_event_for_layout(event_data, image_button_layout=image_button_layout)
             callbacks.append({})
         else:
@@ -1482,10 +1678,15 @@ def _build_event_layout(
     return _EventLayout(data=bytes(data), offsets=offsets, callbacks=callbacks)
 
 
-def _build_page_event_table(block: PageBlock, *, context: _EventCompileContext | None = None) -> bytes:
+def _build_page_event_table(
+    block: PageBlock,
+    *,
+    context: _EventCompileContext | None = None,
+    include_load_scripts: bool = True,
+) -> bytes:
     events = _events_by_prefix(block)
-    load_lines = events.get("codesload-", [])
-    loadend_lines = events.get("codesloadend-", [])
+    load_lines = events.get("codesload-", []) if include_load_scripts else []
+    loadend_lines = events.get("codesloadend-", []) if include_load_scripts else []
     load_phase = _compile_event_script(load_lines, context=context)
     if load_lines or loadend_lines:
         # Official TFTs separate pre-load and post-load page events with this
@@ -1508,6 +1709,14 @@ def _build_object_event_table(block: PageBlock, *, context: _EventCompileContext
     events = _events_by_prefix(block)
     if block.type_code == VARIABLE_TYPE_CODE and not events:
         return _compile_event_script([], context=context)
+    if block.type_code == "\x04":
+        return b"".join(
+            [
+                _compile_event_script([], context=context),
+                _event_item(b"playend"),
+                _compile_event_script(events.get("codesplayend-", []), context=context),
+            ]
+        )
     parts = [
         _compile_event_script([], context=context),
         _event_item(b"down"),
@@ -1528,7 +1737,40 @@ def _build_object_event_table(block: PageBlock, *, context: _EventCompileContext
             _event_item(b"timer"),
             _compile_event_script(events.get("codestimer-", []), context=context),
         ]
+    elif block.type_code in MEDIA_TYPE_CODES:
+        parts.extend(
+            [
+                _event_item(b"playend"),
+                _compile_event_script(events.get("codesplayend-", []), context=context),
+            ]
+        )
     return b"".join(parts)
+
+
+def _uses_post_primary_page_load(target_blocks: list[PageBlock]) -> bool:
+    if not target_blocks or not any(block.type_code in MEDIA_TYPE_CODES for block in target_blocks):
+        return False
+    events = _events_by_prefix(target_blocks[0])
+    return bool(events.get("codesload-", []) or events.get("codesloadend-", []))
+
+
+def _build_post_primary_page_event(
+    target_blocks: list[PageBlock],
+    *,
+    context: _EventCompileContext,
+) -> bytes:
+    if not _uses_post_primary_page_load(target_blocks):
+        return b""
+    events = _events_by_prefix(target_blocks[0])
+    load_lines = events.get("codesload-", [])
+    loadend_lines = events.get("codesloadend-", [])
+    out = bytearray()
+    out.extend(_code_block(bytes.fromhex("09 1f 04 35")))
+    load_script = _compile_event_script(load_lines, context=context)
+    out.extend(load_script[:-4])
+    out.extend(_code_block(b"\x09\x30\x08"))
+    out.extend(_compile_event_script(loadend_lines, context=context))
+    return bytes(out)
 
 
 def _object_event_callback_offsets(
@@ -1550,6 +1792,9 @@ def _object_event_callback_offsets(
     cursor = block_offset
 
     cursor += len(_compile_event_script([], context=context))
+    if block.type_code == "\x04":
+        cursor += len(_event_item(b"playend"))
+        return callbacks
     if block.type_code == TIMER_TYPE_CODE:
         cursor += len(_event_item(b"timer"))
         if _event_script_has_payload(events.get("codestimer-", []), context=context):
@@ -1566,6 +1811,13 @@ def _object_event_callback_offsets(
     up_lines = events.get("codesup-", [])
     if _event_script_has_payload(up_lines, context=context):
         callbacks["codesup-"] = cursor
+
+    if block.type_code in MEDIA_TYPE_CODES:
+        cursor += len(_compile_event_script(up_lines, context=context))
+        cursor += len(_event_item(b"playend"))
+        # The mirror callback cache slot for non-empty media playend scripts is
+        # still unrecovered. Empty playend tables are emitted because official
+        # media objects include the marker unconditionally.
     return callbacks
 
 
@@ -1620,7 +1872,7 @@ def _compile_event_script(lines: list[str], *, context: _EventCompileContext | N
 
 
 def _compile_event_line(line: str, *, context: _EventCompileContext | None = None) -> bytes | None:
-    stripped = line.strip()
+    stripped = _strip_event_comment(line).strip()
     if not stripped or stripped.startswith("//"):
         return None
 
@@ -1653,6 +1905,12 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
             raise TftToolchainError(f"Unsupported empty vis event line: {line!r}")
         return b"\x09\x05\x04" + payload.encode("ascii")
 
+    if lower.startswith("play "):
+        payload = stripped[5:].strip()
+        if not payload:
+            raise TftToolchainError(f"Unsupported empty play event line: {line!r}")
+        return b"\x09\x28\x04" + payload.encode("ascii")
+
     if lower.startswith("rawhex "):
         payload = stripped[7:].strip()
         if not payload:
@@ -1664,12 +1922,21 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
 
     raise TftToolchainError(
         "Unsupported event line for the current minimal logic compiler: "
-        f"{line!r}. Supported V1 event commands are page/printh/click/vis/rawhex "
+        f"{line!r}. Supported V1 event commands are page/printh/click/vis/play/rawhex "
         "and numeric object-field assignment/inc/dec such as tm0.en=1."
     )
 
 
+def _strip_event_comment(line: str) -> str:
+    return line.split("//", 1)[0]
+
+
 def _compile_property_event(line: str, *, context: _EventCompileContext | None) -> bytes | None:
+    global_assign = re.match(r"^volume\s*=\s*(-?\d+)\s*$", line, flags=re.IGNORECASE)
+    if global_assign is not None:
+        value = global_assign.group(1)
+        return b"\x04\x08\x12\x00\x00=" + value.encode("ascii")
+
     assign = EVENT_ASSIGN_RE.match(line)
     if assign is not None:
         object_name, field_name, value = assign.groups()
@@ -1730,7 +1997,14 @@ def _build_primary_block(
     text_slots: list[tuple[str, int]] = []
     text_pointer_by_id: dict[int, int] = {}
     string_cursor = 0
+    consumed_string_suffix_padding = 0
     compact_tail_layout = any(block.type_code in COMPACT_STRING_LAYOUT_TYPES for block in target_blocks)
+    media_layout_type = _primary_media_layout_type(target_blocks)
+    string_prefix_padding = (
+        _primary_media_padding(seed.primary_string_prefix_paddings, media_layout_type)
+        if media_layout_type is not None
+        else 0
+    )
     string_pointer_bias = 0x10 if compact_tail_layout else 0x14
     for index, (block, value_base) in enumerate(zip(target_blocks, value_offsets)):
         type_code = block.type_code
@@ -1745,6 +2019,8 @@ def _build_primary_block(
             _patch_timer_record(record, block)
         elif type_code == VARIABLE_TYPE_CODE:
             pass
+        elif type_code in NON_VISUAL_COORD_TYPES:
+            pass
         else:
             record[0x1C:0x20] = value_base.to_bytes(4, "little")
             record[0x28:0x34] = _coord_payload(block)
@@ -1754,6 +2030,10 @@ def _build_primary_block(
             _patch_button_record(record, block)
         elif type_code == "6":
             _patch_number_record(record, block)
+        elif type_code == ";":
+            _patch_xfloat_record(record, block)
+        elif type_code == "=":
+            _patch_combobox_record(record, block)
         elif type_code == "\x01":
             _patch_slider_record(record, block)
         elif type_code == "z":
@@ -1768,28 +2048,44 @@ def _build_primary_block(
             _patch_radio_record(record, block)
         elif type_code == VARIABLE_TYPE_CODE:
             _patch_variable_record(record, block)
-        if type_code in TEXT_POINTER_RECORD_OFFSETS:
-            text = _field_text(block, "txt") or ""
-            slot_len = _text_slot_len(block)
-            pointer = primary_pre_string_len + string_pointer_bias + string_cursor
-            text_pointer_by_id[object_id] = pointer
-            pointer_offset = TEXT_POINTER_RECORD_OFFSETS[type_code]
-            record[pointer_offset : pointer_offset + 4] = pointer.to_bytes(4, "little")
-            text_slots.append((text, slot_len))
-            string_cursor += slot_len
+        string_fields = _string_pointer_fields(block)
+        if string_fields:
+            pointer_map: dict[str, int] = {}
+            for field_name, pointer_offset, slot_len in string_fields:
+                if media_layout_type == "\x04" and type_code == "t" and field_name == "txt":
+                    extra_slot = _primary_media_padding(seed.primary_string_suffix_paddings, media_layout_type)
+                    slot_len += extra_slot
+                    consumed_string_suffix_padding += extra_slot
+                text = _field_text(block, field_name) or ""
+                pointer = primary_pre_string_len + string_pointer_bias + string_prefix_padding + string_cursor
+                pointer_map[field_name] = pointer
+                record[pointer_offset : pointer_offset + 4] = pointer.to_bytes(4, "little")
+                text_slots.append((text, slot_len))
+                string_cursor += slot_len
+            if set(pointer_map) == {"txt"}:
+                text_pointer_by_id[object_id] = pointer_map["txt"]
+            else:
+                text_pointer_by_id[object_id] = pointer_map
         elif type_code == "p":
             picture_id = _field_int(block, "pic") or 0
             record[0x38:0x3A] = picture_id.to_bytes(2, "little")
+        elif type_code in {"\x02", "\x03", "\x04"}:
+            _patch_media_record(record, block)
         data.extend(record[: _primary_record_length(type_code, mixed_compact=mixed_compact_primary)])
 
     if not compact_tail_layout:
         data.extend(b"\x00\x00\x00\x00")
+        if media_layout_type is not None:
+            data.extend(b"\x00" * string_prefix_padding)
     for text, slot_len in text_slots:
         encoded = _encode_display_text(text)
         if len(encoded) > slot_len:
             raise TftToolchainError(f"Text {text!r} exceeds compiled text slot length {slot_len}")
         data.extend(encoded.ljust(slot_len, b"\x00"))
-    data.extend(_primary_final_marker(target_blocks, value_offsets))
+    if media_layout_type is not None:
+        suffix_padding = _primary_media_padding(seed.primary_string_suffix_paddings, media_layout_type)
+        data.extend(b"\x00" * max(0, suffix_padding - consumed_string_suffix_padding))
+    data.extend(_primary_final_marker(seed, target_blocks, value_offsets))
     _patch_waveform_primary_runtime_anchors(
         data,
         target_blocks,
@@ -1800,13 +2096,34 @@ def _build_primary_block(
     return bytes(data), value_offsets, text_pointer_by_id, mirror_pre_string_len
 
 
-def _primary_final_marker(target_blocks: list[PageBlock], value_offsets: list[int]) -> bytes:
+def _primary_final_marker(
+    seed: _TailSeed,
+    target_blocks: list[PageBlock],
+    value_offsets: list[int],
+) -> bytes:
     for block in target_blocks:
         if block.type_code == "\x00":
             # Official append and mixed fixtures keep this marker stable even
             # when the waveform object's value record moves later in the page.
             return (0x114).to_bytes(4, "little")
+    media_layout_type = _primary_media_layout_type(target_blocks)
+    if media_layout_type is not None:
+        return seed.primary_final_markers.get(
+            media_layout_type,
+            seed.primary_final_markers.get("", b"\x00\x00\x00\x00"),
+        )
     return b"\x00\x00\x00\x00"
+
+
+def _primary_media_padding(paddings: dict[str, int], media_layout_type: str) -> int:
+    return paddings.get(media_layout_type, paddings.get("", 0))
+
+
+def _primary_media_layout_type(target_blocks: list[PageBlock]) -> str | None:
+    for block in target_blocks:
+        if block.type_code in MEDIA_TYPE_CODES:
+            return block.type_code
+    return None
 
 
 def _patch_waveform_primary_runtime_anchors(
@@ -1930,6 +2247,81 @@ def _patch_number_record(record: bytearray, block: PageBlock) -> None:
     _write_record_u16_from_field(record, 0x50, block, "spay")
 
 
+def _patch_xfloat_record(record: bytearray, block: PageBlock) -> None:
+    sta = _field_int(block, "sta")
+    if sta is not None:
+        record[0x38] = sta & 0xFF
+    style = _field_int(block, "style")
+    if style is not None:
+        record[0x39] = style & 0xFF
+
+    _write_record_u16_from_field(record, 0x3A, block, "borderc")
+    _write_record_u8_from_field(record, 0x3D, block, "font")
+
+    if sta == 2:
+        _write_record_u16_from_field(record, 0x3E, block, "pic")
+    elif sta == 0:
+        _write_record_u16_from_field(record, 0x3E, block, "picc")
+    else:
+        _write_record_u16_from_field(record, 0x3E, block, "bco")
+
+    _write_record_u16_from_field(record, 0x40, block, "pco")
+    _write_record_u8_from_field(record, 0x42, block, "xcen")
+    _write_record_u8_from_field(record, 0x43, block, "ycen")
+    value = _field_int(block, "val")
+    if value is not None:
+        record[0x44:0x48] = (value & 0xFFFFFFFF).to_bytes(4, "little")
+    _write_record_u8_from_field(record, 0x48, block, "vvs0")
+    _write_record_u8_from_field(record, 0x49, block, "vvs1")
+    _write_record_u8_from_field(record, 0x4C, block, "isbr")
+    _write_record_u8_from_field(record, 0x4D, block, "spax")
+    _write_record_u8_from_field(record, 0x4E, block, "spay")
+
+
+def _patch_combobox_record(record: bytearray, block: PageBlock) -> None:
+    sta = _field_int(block, "sta")
+    if sta is not None:
+        record[0x38] = sta & 0xFF
+    style = _field_int(block, "style")
+    if style is not None:
+        record[0x39] = style & 0xFF
+
+    _write_record_u16_from_field(record, 0x3A, block, "borderc")
+    _write_record_u8_from_field(record, 0x3D, block, "font")
+
+    if sta == 2:
+        _write_record_u16_from_field(record, 0x3E, block, "pic")
+    elif sta == 0:
+        _write_record_u16_from_field(record, 0x3E, block, "picc")
+    else:
+        _write_record_u16_from_field(record, 0x3E, block, "bco")
+
+    _write_record_u16_from_field(record, 0x40, block, "pco")
+    _write_record_u8_from_field(record, 0x42, block, "xcen")
+    _write_record_u8_from_field(record, 0x43, block, "ycen")
+    _write_record_u8_from_field(record, 0x44, block, "spax")
+    _write_record_u8_from_field(record, 0x45, block, "dis")
+    _write_record_u16_from_field(record, 0x46, block, "txt_maxl")
+    _write_record_u8_from_field(record, 0x4C, block, "up")
+    _write_record_u16_from_field(record, 0x4E, block, "pco3")
+    _write_record_u16_from_field(record, 0x50, block, "pco1")
+    _write_record_u16_from_field(record, 0x52, block, "bco1")
+    _write_record_u16_from_field(record, 0x56, block, "path_m")
+    _write_record_u8_from_field(record, 0x5C, block, "dir")
+    _write_record_u8_from_field(record, 0x5D, block, "qty")
+    _write_record_u8_from_field(record, 0x5E, block, "vvs0")
+    _write_record_u8_from_field(record, 0x5F, block, "val")
+    _write_record_u16_from_field(record, 0x60, block, "bco2")
+    _write_record_u16_from_field(record, 0x62, block, "pco2")
+    _write_record_u8_from_field(record, 0x64, block, "hig")
+    _write_record_u8_from_field(record, 0x65, block, "down")
+    _write_record_u8_from_field(record, 0x66, block, "mode")
+    _write_record_u8_from_field(record, 0x67, block, "wid")
+    _write_record_u8_from_field(record, 0x68, block, "vvs1")
+    _write_record_u8_from_field(record, 0x69, block, "ch")
+    _write_record_u8_from_field(record, 0x6A, block, "drastate")
+
+
 def _patch_timer_record(record: bytearray, block: PageBlock) -> None:
     tim = _field_int(block, "tim")
     if tim is not None:
@@ -1937,6 +2329,17 @@ def _patch_timer_record(record: bytearray, block: PageBlock) -> None:
     en = _field_int(block, "en")
     if en is not None:
         record[0x1E] = en & 0xFF
+
+
+def _patch_media_record(record: bytearray, block: PageBlock) -> None:
+    _write_record_u16_from_field(record, 0x38, block, "vid")
+    _write_record_u8_from_field(record, 0x3A, block, "en")
+    _write_record_u8_from_field(record, 0x3B, block, "loop")
+    _write_record_u8_from_field(record, 0x3C, block, "fps")
+    _write_record_u16_from_field(record, 0x3E, block, "dis")
+    _write_record_u32_from_field(record, 0x40, block, "tim")
+    _write_record_u32_from_field(record, 0x44, block, "stim")
+    _write_record_u32_from_field(record, 0x48, block, "qty")
 
 
 def _patch_slider_record(record: bytearray, block: PageBlock) -> None:
@@ -2036,11 +2439,18 @@ def _write_record_u8_from_field(record: bytearray, offset: int, block: PageBlock
     record[offset] = value & 0xFF
 
 
+def _write_record_u32_from_field(record: bytearray, offset: int, block: PageBlock, field_name: str) -> None:
+    value = _field_int(block, field_name)
+    if value is None:
+        return
+    record[offset : offset + 4] = (value & 0xFFFFFFFF).to_bytes(4, "little")
+
+
 def _build_user_records(
     seed: _TailSeed,
     target_blocks: list[PageBlock],
     value_offsets: list[int],
-    text_pointer_by_id: dict[int, int],
+    text_pointer_by_id: dict[int, Any],
     *,
     max_picture_id: int | None,
 ) -> bytes:
@@ -2053,7 +2463,9 @@ def _build_user_records(
             if template.slot_index >= len(slots):
                 continue
             if template.word1_mode == "text_pointer":
-                word1 = text_pointer_by_id[object_id]
+                word1 = _object_text_pointer(text_pointer_by_id, object_id, "txt")
+            elif template.word1_mode == "path_pointer":
+                word1 = _object_text_pointer(text_pointer_by_id, object_id, "path")
             elif template.word1_mode == "absolute":
                 word1 = template.word1_delta
             else:
@@ -2210,6 +2622,18 @@ def _descriptor_insertions(insertions: list[tuple[int, bytes]]) -> list[tuple[in
     return expanded
 
 
+def _single_media_descriptor_sequence(seed: _TailSeed, blocks: list[PageBlock]) -> list[bytes] | None:
+    media_types = {
+        block.type_code
+        for block in blocks
+        if block.type_code in MEDIA_TYPE_CODES
+    }
+    if len(media_types) != 1:
+        return None
+    media_type = next(iter(media_types))
+    return seed.mirror_descriptor_sequences.get(media_type)
+
+
 def _derive_prefix_insertions_for_case(
     seed: _TailSeed,
     case_seed: _TailSeed,
@@ -2294,8 +2718,13 @@ def _prefix_head_for_layout(
     *,
     image_button_layout: bool,
     extra_insertions: list[tuple[int, bytes]],
+    descriptor_sequence: list[bytes] | None = None,
 ) -> bytes:
     patched = _apply_prefix_insertions(prefix_head, list(extra_insertions))
+    if descriptor_sequence is not None:
+        if image_button_layout:
+            raise TftToolchainError("Descriptor-sequence replacement is not supported with image-button layout yet")
+        patched = _replace_prefix_descriptor_sequence(patched, descriptor_sequence)
     if not image_button_layout:
         return patched
     offset = IMAGE_BUTTON_PREFIX_INSERT_OFFSET + _prefix_inserted_bytes_before(
@@ -2315,6 +2744,22 @@ def _prefix_head_for_layout(
     del out[len(patched) :]
     _add_prefix_u32(out, 0x00, 4)
     _add_prefix_u32(out, 0x24, 4)
+    return bytes(out)
+
+
+def _replace_prefix_descriptor_sequence(prefix: bytes, descriptor_sequence: list[bytes]) -> bytes:
+    end = int.from_bytes(prefix[:4], "little")
+    if end < PREFIX_DESCRIPTOR_START or end > len(prefix):
+        raise TftToolchainError("TFT prefix descriptor table has an invalid end offset")
+    descriptor_bytes = b"".join(descriptor_sequence)
+    old_size = end - PREFIX_DESCRIPTOR_START
+    if old_size == len(descriptor_bytes) and prefix[PREFIX_DESCRIPTOR_START:end] == descriptor_bytes:
+        return prefix
+    out = bytearray(prefix[:PREFIX_DESCRIPTOR_START] + descriptor_bytes + prefix[end:])
+    delta = len(descriptor_bytes) - old_size
+    if delta:
+        _add_prefix_u32(out, 0x00, delta)
+        _add_prefix_u32(out, 0x24, delta)
     return bytes(out)
 
 
@@ -2667,6 +3112,8 @@ def _coord_payload(block: PageBlock) -> bytes:
 
 
 def _mirror_coord_payload(block: PageBlock) -> bytes:
+    if block.type_code == "\x04":
+        return bytes.fromhex("ce ff 00 00 32 00 32 00 ff ff 31 00")
     if block.type_code in NON_VISUAL_COORD_TYPES:
         return bytes.fromhex("00 00 00 00 01 00 01 00 00 00 00 00")
     return _coord_payload(block)
@@ -2707,11 +3154,54 @@ def _compiled_text_offset(block_reverse: dict[str, Any] | None) -> int | None:
 def _text_slot_len(block: PageBlock) -> int:
     txt_maxl = _field_int(block, "txt_maxl")
     if txt_maxl is not None:
+        if block.type_code == "=":
+            return txt_maxl + 4
         if block.type_code == "C":
             return txt_maxl + 4
         return txt_maxl + 2
     text = _field_text(block, "txt")
     return max(len(_encode_display_text(text)) if text else 0, 1)
+
+
+def _path_slot_len(block: PageBlock) -> int:
+    path_m = _field_int(block, "path_m")
+    if path_m is not None:
+        return path_m + 4
+    text = _field_text(block, "path")
+    return max(len(_encode_display_text(text)) if text else 0, 1)
+
+
+def _string_pointer_fields(block: PageBlock) -> list[tuple[str, int, int]]:
+    if block.type_code == "=":
+        return [
+            ("txt", 0x48, _text_slot_len(block)),
+            ("path", 0x58, _path_slot_len(block)),
+        ]
+    if block.type_code == "<":
+        return [("path", 0x3C, _external_picture_path_slot_len(block))]
+    pointer_offset = TEXT_POINTER_RECORD_OFFSETS.get(block.type_code or "")
+    if pointer_offset is None:
+        return []
+    return [("txt", pointer_offset, _text_slot_len(block))]
+
+
+def _external_picture_path_slot_len(block: PageBlock) -> int:
+    path_m = _field_int(block, "path_m")
+    if path_m is not None:
+        # Official external-picture objects reserve path_m+1 bytes; the
+        # default path_m=255 produces a 256-byte runtime path buffer.
+        return path_m + 1
+    text = _field_text(block, "path")
+    return max(len(_encode_display_text(text)) if text else 0, 1)
+
+
+def _object_text_pointer(pointer_map: dict[int, Any], object_id: int, field_name: str) -> int:
+    value = pointer_map[object_id]
+    if isinstance(value, dict):
+        return int(value[field_name])
+    if field_name != "txt":
+        raise TftToolchainError(f"Missing compiled text pointer for object {object_id} field {field_name!r}")
+    return int(value)
 
 
 def _header(inspection: dict[str, Any], name: str) -> dict[str, Any]:

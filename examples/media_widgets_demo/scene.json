@@ -1,0 +1,104 @@
+{
+  "project": {
+    "name": "media-widgets-demo",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 2153
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 36,
+          "y": 28,
+          "w": 520,
+          "h": 48,
+          "text": "MEDIA WIDGETS",
+          "style": {
+            "font_id": 0,
+            "background_color": 2153,
+            "foreground_color": 65503,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "gm0",
+          "type": "animation",
+          "x": 42,
+          "y": 108,
+          "w": 300,
+          "h": 188,
+          "resources": {
+            "path": "sd0/anim/official_0.gmov"
+          },
+          "style": {
+            "en": 0,
+            "loop": 1,
+            "dis": 100
+          }
+        },
+        {
+          "id": "v0",
+          "type": "video",
+          "x": 390,
+          "y": 108,
+          "w": 330,
+          "h": 188,
+          "resources": {
+            "path": "sd0/video/official_0.video"
+          },
+          "style": {
+            "en": 0,
+            "loop": 0,
+            "fps": 1,
+            "dis": 100
+          }
+        },
+        {
+          "id": "wav0",
+          "type": "audio",
+          "x": 42,
+          "y": 336,
+          "w": 330,
+          "h": 72,
+          "resources": {
+            "path": "sd0/music/official_0.wav"
+          },
+          "style": {
+            "en": 0,
+            "loop": 0,
+            "dis": 100
+          }
+        },
+        {
+          "id": "note",
+          "type": "text",
+          "x": 390,
+          "y": 336,
+          "w": 330,
+          "h": 72,
+          "text": "HMI/PREVIEW ONLY",
+          "style": {
+            "font_id": 0,
+            "background_color": 4261,
+            "foreground_color": 65503,
+            "xcen": 0,
+            "ycen": 1
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -217,6 +217,24 @@ def _draw_widget(
             )
         return
 
+    if widget.type == "external-picture":
+        draw.rounded_rectangle((x + 5, y + 7, x + w + 5, y + h + 7), radius=18, fill=shadow)
+        draw.rounded_rectangle((x, y, x + w, y + h), radius=18, fill=background, outline=border, width=2)
+        _draw_external_picture_preview(draw, canvas, widget, (x + 10, y + 10, x + w - 10, y + h - 10), foreground, border, fonts)
+        return
+
+    if widget.type in {"animation", "video"}:
+        label = "GMOV" if widget.type == "animation" else "VIDEO"
+        path = str(widget.resources.get("path") or widget.resources.get("source") or widget.resources.get("vid") or widget.id)
+        _draw_media_frame(draw, canvas, (x, y, x + w, y + h), label, _short_preview_label(path), foreground, border, fonts)
+        return
+
+    if widget.type == "audio":
+        label = str(widget.resources.get("path") or widget.resources.get("source") or widget.resources.get("vid") or widget.id)
+        box = _normalize_audio_preview_box(canvas, (x, y, x + w, y + h))
+        _draw_audio_badge(draw, canvas, box, _short_preview_label(label), foreground, border, fonts)
+        return
+
     if widget.type == "progress":
         value = _clamp_int(widget.value if widget.value is not None else 0, 0, 100)
         draw.rounded_rectangle((x, y, x + w, y + h), radius=max(h // 2, 1), fill=background, outline=border, width=2)
@@ -303,6 +321,79 @@ def _draw_widget(
         return
 
 
+def _draw_media_frame(
+    draw: ImageDraw.ImageDraw,
+    canvas: Image.Image,
+    box: tuple[int, int, int, int],
+    label: str,
+    path: str,
+    foreground: tuple[int, int, int],
+    border: tuple[int, int, int],
+    fonts: dict[int, ZiFont],
+) -> None:
+    x1, y1, x2, y2 = box
+    draw.rounded_rectangle((x1, y1, x2, y2), radius=16, fill=(17, 26, 35), outline=border, width=2)
+    for offset in range(x1 - (y2 - y1), x2, 24):
+        draw.line((offset, y2, offset + (y2 - y1), y1), fill=(31, 48, 63), width=8)
+    draw.polygon(
+        [
+            (x1 + (x2 - x1) // 2 - 16, y1 + (y2 - y1) // 2 - 24),
+            (x1 + (x2 - x1) // 2 - 16, y1 + (y2 - y1) // 2 + 24),
+            (x1 + (x2 - x1) // 2 + 30, y1 + (y2 - y1) // 2),
+        ],
+        fill=(132, 236, 186),
+    )
+    _draw_text(draw, canvas, label, (x1 + 14, y1 + 10, x2 - 14, y1 + 48), foreground, anchor="lt", fonts=fonts)
+    _draw_text(draw, canvas, path, (x1 + 14, y2 - 48, x2 - 14, y2 - 10), (241, 206, 132), anchor="lt", fonts=fonts)
+
+
+def _draw_audio_badge(
+    draw: ImageDraw.ImageDraw,
+    canvas: Image.Image,
+    box: tuple[int, int, int, int],
+    label: str,
+    foreground: tuple[int, int, int],
+    border: tuple[int, int, int],
+    fonts: dict[int, ZiFont],
+) -> None:
+    x1, y1, x2, y2 = box
+    draw.rounded_rectangle((x1, y1, x2, y2), radius=18, fill=(25, 33, 42), outline=border, width=2)
+    cy = (y1 + y2) // 2
+    icon_x = x1 + 18
+    draw.rectangle((icon_x, cy - 10, icon_x + 10, cy + 10), fill=(132, 236, 186))
+    draw.polygon(
+        [(icon_x + 10, cy - 14), (icon_x + 28, cy - 24), (icon_x + 28, cy + 24), (icon_x + 10, cy + 14)],
+        fill=(132, 236, 186),
+    )
+    for radius in (11, 20):
+        draw.arc((icon_x + 22, cy - radius, icon_x + 22 + radius * 2, cy + radius), -45, 45, fill=(132, 236, 186), width=2)
+    _draw_text(draw, canvas, f"AUDIO {label}", (x1 + 70, y1, x2 - 10, y2), foreground, anchor="lt", fonts=fonts)
+
+
+def _normalize_audio_preview_box(canvas: Image.Image, box: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    x1, y1, x2, y2 = box
+    if x2 - x1 >= 120 and y2 - y1 >= 28:
+        return box
+    margin = 24
+    badge_w = min(max(canvas.width - margin * 2, 120), 360)
+    badge_h = 38
+    return (margin, canvas.height - margin - badge_h, margin + badge_w, canvas.height - margin)
+
+
+def _short_preview_label(value: str, max_chars: int = 10) -> str:
+    text = value.replace("\\", "/")
+    if len(text) <= max_chars:
+        return text
+    name = Path(text).name
+    if name and len(name) <= max_chars:
+        return name
+    if name:
+        keep_name = max(max_chars - 3, 1)
+        return name[:keep_name] + "..."
+    keep = max(max_chars - 3, 1)
+    return text[:keep] + "..."
+
+
 def _paste_widget_asset(canvas: Image.Image, widget: WidgetSpec, asset_info: dict[str, Any] | None) -> None:
     if not asset_info:
         return
@@ -333,6 +424,43 @@ def _paste_widget_asset(canvas: Image.Image, widget: WidgetSpec, asset_info: dic
     paste_x = x + (w - image.width) // 2
     paste_y = y + pad + max((target_h - image.height) // 2, 0)
     canvas.alpha_composite(image, (paste_x, paste_y))
+
+
+def _draw_external_picture_preview(
+    draw: ImageDraw.ImageDraw,
+    canvas: Image.Image,
+    widget: WidgetSpec,
+    box: tuple[int, int, int, int],
+    foreground: tuple[int, int, int],
+    border: tuple[int, int, int],
+    fonts: dict[int, ZiFont],
+) -> None:
+    x1, y1, x2, y2 = box
+    source = _external_picture_preview_source(widget)
+    if source is not None:
+        image = Image.open(source).convert("RGBA")
+        image.thumbnail((max(x2 - x1, 1), max(y2 - y1, 1)))
+        paste_x = x1 + max((x2 - x1 - image.width) // 2, 0)
+        paste_y = y1 + max((y2 - y1 - image.height) // 2, 0)
+        canvas.alpha_composite(image, (paste_x, paste_y))
+        return
+
+    draw.rounded_rectangle(box, radius=14, fill=(28, 42, 56), outline=border, width=2)
+    for offset in range(-(y2 - y1), x2 - x1, 18):
+        draw.line((x1 + offset, y2, x1 + offset + (y2 - y1), y1), fill=(42, 66, 82), width=6)
+    path = str(widget.resources.get("path") or widget.resources.get("source") or "sd0/<image>")
+    _draw_text(draw, canvas, "SD IMAGE", (x1 + 16, y1 + 18, x2 - 16, y1 + 64), (167, 243, 208), anchor="lt", fonts=fonts)
+    _draw_text(draw, canvas, path, (x1 + 16, y2 - 54, x2 - 16, y2 - 16), foreground, anchor="lt", fonts=fonts)
+
+
+def _external_picture_preview_source(widget: WidgetSpec) -> Path | None:
+    raw = widget.resources.get("source") or widget.resources.get("preview") or widget.resources.get("path")
+    if not raw:
+        return None
+    path = Path(str(raw))
+    if path.exists():
+        return path
+    return None
 
 
 def _build_asset_lookup(scene: SceneModel, manifest_assets: dict[str, Any]) -> dict[str, Any]:
@@ -477,7 +605,9 @@ def _draw_page_object(
 ) -> None:
     box = _block_box(block)
     if box is None:
-        return
+        if block.type_code != "\x04":
+            return
+        box = (0, 0, 1, 1)
 
     x, y, w, h = box
     if w <= 0 or h <= 0:
@@ -487,6 +617,9 @@ def _draw_page_object(
     y2 = y + h - 1
     type_code = block.type_code or "?"
     name = block.objname or type_code
+
+    label_x = x
+    label_y = y
 
     if type_code == "t":
         fill = _rgb565_to_rgb(_field_int(block, "bco", 65535))
@@ -510,6 +643,15 @@ def _draw_page_object(
             _draw_centered_label(draw, f"pic {pic}", (x, y, x2, y2), fill=(40, 48, 58))
             draw.line((x + 5, y + 5, x2 - 5, y2 - 5), fill=(135, 170, 180), width=1)
             draw.line((x2 - 5, y + 5, x + 5, y2 - 5), fill=(135, 170, 180), width=1)
+    elif type_code in {"\x02", "\x03"}:
+        label = "GMOV" if type_code == "\x02" else "VIDEO"
+        path = _field_text(block, "path") or f"vid={_field_int(block, 'vid', 0)}"
+        _draw_media_frame(draw, canvas, (x, y, x2, y2), label, _short_preview_label(path), (220, 245, 236), (95, 125, 142), fonts)
+    elif type_code == "\x04":
+        path = _field_text(block, "path") or f"vid={_field_int(block, 'vid', 0)}"
+        box = _normalize_audio_preview_box(canvas, (x, y, x2, y2))
+        _draw_audio_badge(draw, canvas, box, _short_preview_label(path), (220, 245, 236), (95, 125, 142), fonts)
+        label_x, label_y = box[0], box[1]
     elif type_code in {"n", "x", "4"}:
         fill = _rgb565_to_rgb(_field_int(block, "bco", 65535))
         border = _rgb565_to_rgb(_field_int(block, "borderc", 0x8410))
@@ -520,7 +662,7 @@ def _draw_page_object(
         _draw_centered_label(draw, f"{name} ({type_code})", (x, y, x2, y2), fill=(120, 45, 20))
 
     if show_labels:
-        _draw_object_label(draw, name, x, y)
+        _draw_object_label(draw, name, label_x, label_y)
 
 
 def _draw_page_text(

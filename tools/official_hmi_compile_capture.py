@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import time
 from pathlib import Path
@@ -62,6 +63,8 @@ def main() -> int:
         "work_run": str(run_path),
         "captured_run": str(target_run),
         "captured_size": target_run.stat().st_size,
+        "compiled_output_size": _compiled_size_from_output(output_text),
+        "captured_size_matches_output": _captured_size_matches_output(target_run, output_text),
         "captured_output_files": copied_output_files,
         "output_before": output_before,
         "output_after": output_text,
@@ -103,7 +106,7 @@ def _click_compile(window) -> None:
     ]
     for control in buttons:
         if control.window_text() == "编译":
-            control.click_input()
+            _activate_control(control)
             return
 
     # Fallback for machines where UIA returns mojibake for the Chinese label:
@@ -121,9 +124,16 @@ def _click_compile(window) -> None:
             continue
         crect = control.rectangle()
         if rect.left + 240 <= crect.left <= rect.left + 360:
-            control.click_input()
+            _activate_control(control)
             return
     raise RuntimeError("Unable to locate the official Compile button")
+
+
+def _activate_control(control) -> None:
+    try:
+        control.invoke()
+    except Exception:
+        control.click_input()
 
 
 def _dismiss_known_dialogs(process_id: int, *, timeout: float) -> None:
@@ -139,7 +149,10 @@ def _dismiss_known_dialogs(process_id: int, *, timeout: float) -> None:
                 continue
             for control in dialog.descendants():
                 try:
-                    if control.element_info.control_type == "Button" and control.window_text() in ok_labels:
+                    if (
+                        control.element_info.control_type in {"Button", "Pane"}
+                        and control.window_text() in ok_labels
+                    ):
                         control.click_input()
                         clicked = True
                         time.sleep(0.5)
@@ -159,12 +172,58 @@ def _wait_for_compile_result(window, work_root: Path, *, after_time: float, befo
         last_text = _read_output_text(window)
         run_path = _latest_run(work_root)
         if run_path is not None and run_path != before_path and run_path.stat().st_mtime >= after_time - 2:
-            if "编译成功" in last_text or time.time() > after_time + 3:
+            if ("编译成功" in last_text or time.time() > after_time + 3) and _run_file_is_stable_or_complete(
+                run_path,
+                last_text,
+                timeout=min(10.0, max(1.0, deadline - time.time())),
+            ):
                 return run_path, last_text
         if "编译失败" in last_text or "错误" in last_text and "0个错误" not in last_text:
             raise RuntimeError(f"Official compile failed: {last_text}")
         time.sleep(0.5)
     raise TimeoutError(f"Timed out waiting for official compile output. Last output: {last_text!r}")
+
+
+def _run_file_is_stable_or_complete(run_path: Path, output_text: str, *, timeout: float) -> bool:
+    expected_size = _compiled_size_from_output(output_text)
+    deadline = time.time() + timeout
+    previous_size: int | None = None
+    stable_observations = 0
+    while time.time() < deadline:
+        try:
+            size = run_path.stat().st_size
+        except OSError:
+            time.sleep(0.25)
+            continue
+        if expected_size is not None and size >= expected_size:
+            return True
+        if size == previous_size and size > 0:
+            stable_observations += 1
+            # Media compiles can report a logical download size larger than the
+            # work/run.run file. Keep the stable partial file as evidence and
+            # flag the mismatch in metadata instead of silently accepting it as
+            # a complete oracle.
+            if stable_observations >= (8 if expected_size is not None else 4):
+                return True
+        else:
+            stable_observations = 0
+        previous_size = size
+        time.sleep(0.25)
+    return stable_observations >= 2
+
+
+def _compiled_size_from_output(output_text: str) -> int | None:
+    matches = re.findall(r"文件大小:([0-9,，]+)", output_text)
+    if not matches:
+        return None
+    return int(matches[-1].replace(",", "").replace("，", ""))
+
+
+def _captured_size_matches_output(run_path: Path, output_text: str) -> bool | None:
+    expected_size = _compiled_size_from_output(output_text)
+    if expected_size is None:
+        return None
+    return run_path.stat().st_size == expected_size
 
 
 def _latest_run(work_root: Path) -> Path | None:

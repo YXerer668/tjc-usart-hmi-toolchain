@@ -8,8 +8,8 @@ from usarthmi.editor import build_scene
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.object_hash import object_name_hash
 from usarthmi.page_format import load_page_file
-from usarthmi.scene import validate_scene
-from usarthmi.tft_patch import TYPE_RECORD_LENGTHS, _record_header_flag
+from usarthmi.scene import load_scene, validate_scene
+from usarthmi.tft_patch import TYPE_RECORD_LENGTHS, TYPE_USER_SLOT_COUNTS, _record_header_flag
 from usarthmi.tft_reverse import reverse_tft_tail
 from usarthmi.tft_toolchain import inspect_tft
 
@@ -27,6 +27,9 @@ CASE_16_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_16_number_basic\
 CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
 CASE_19_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_19_timer\lcd_test.tft")
 CASE_31_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_31_multi_page_navigation\lcd_test.tft")
+CASE_36_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_36_xfloat\lcd_test.tft")
+CASE_37_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_37_combobox\lcd_test.tft")
+CASE_46_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_46_expicture_current_gui\lcd_test.tft")
 CASE_COMPARE_ROOT = Path(__file__).resolve().parents[1] / "reverse_usarthmi" / "case_compare"
 CASE_14_EXTRACT = CASE_COMPARE_ROOT / "case_14_text_plus_image_button" / "extract"
 
@@ -183,6 +186,166 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual(number.type_code, "6")
             self.assertEqual(_field_int(number, "val"), 12345)
 
+    @unittest.skipUnless(CASE_36_TFT.exists(), "local official xfloat fixture is not available")
+    def test_scene_build_matches_official_xfloat_tail_layout(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "xfloat-case36", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "x0",
+                                "type": "xfloat",
+                                "x": 0,
+                                "y": 0,
+                                "w": 100,
+                                "h": 30,
+                                "value": 0,
+                                "style": {"vvs0": 0, "vvs1": 0},
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["added_count"], 1)
+            self.assertEqual(_tft_compiled_tail_without_checksum(output_tft), _tft_compiled_tail_without_checksum(CASE_36_TFT))
+
+            target_page = load_page_file(manifest["target_pa"])
+            xfloat = target_page.blocks[-1]
+            self.assertEqual(xfloat.objname, "x0")
+            self.assertEqual(xfloat.type_code, ";")
+            self.assertEqual(_compiled_primary_value(output_tft, Path(manifest["target_pa"]), "x0", ";", 0x44, 4), 0)
+            self.assertEqual(_compiled_primary_value(output_tft, Path(manifest["target_pa"]), "x0", ";", 0x48, 1), 0)
+            self.assertEqual(_compiled_primary_value(output_tft, Path(manifest["target_pa"]), "x0", ";", 0x49, 1), 0)
+
+    @unittest.skipUnless((CASE_ROOT / "case_36_xfloat" / "lcd_test.HMI").exists(), "local xfloat fixture is not available")
+    def test_scene_build_patches_xfloat_runtime_values(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "xfloat-values", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "xval",
+                                "type": "xfloat",
+                                "x": 308,
+                                "y": 241,
+                                "w": 196,
+                                "h": 45,
+                                "value": 123456,
+                                "style": {"vvs0": 0, "vvs1": 3},
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            target_pa = Path(manifest["target_pa"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x44, 4), 123456)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x48, 1), 0)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x49, 1), 3)
+
+    @unittest.skipUnless(CASE_37_TFT.exists(), "local official combobox fixture is not available")
+    def test_scene_build_matches_official_combobox_tail_layout(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "combobox-case37", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "cb0",
+                                "type": "combobox",
+                                "x": 0,
+                                "y": 0,
+                                "w": 100,
+                                "h": 42,
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["added_count"], 1)
+            self.assertEqual(_tft_compiled_tail_without_checksum(output_tft), _tft_compiled_tail_without_checksum(CASE_37_TFT))
+
+            target_page = load_page_file(manifest["target_pa"])
+            combo = target_page.blocks[-1]
+            self.assertEqual(combo.objname, "cb0")
+            self.assertEqual(combo.type_code, "=")
+            self.assertEqual(_compiled_primary_value(output_tft, Path(manifest["target_pa"]), "cb0", "=", 0x5F, 1), 0)
+
+    @unittest.skipUnless((CASE_ROOT / "case_37_combobox" / "lcd_test.HMI").exists(), "local combobox fixture is not available")
+    def test_scene_build_patches_combobox_runtime_values(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "combobox-values", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "cbval",
+                                "type": "combobox",
+                                "x": 20,
+                                "y": 40,
+                                "w": 160,
+                                "h": 42,
+                                "value": 2,
+                                "style": {"down": 1, "qty": 3},
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            target_pa = Path(manifest["target_pa"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x5F, 1), 2)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x65, 1), 1)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x5D, 1), 3)
+
     @unittest.skipUnless(
         all(
             (CASE_ROOT / case_name / "lcd_test.tft").exists()
@@ -246,6 +409,256 @@ class EditorTftBuildTests(unittest.TestCase):
                 target_page = load_page_file(manifest["target_pa"])
                 self.assertEqual(target_page.blocks[-1].objname, widget_id)
                 self.assertEqual(target_page.blocks[-1].type_code, type_code)
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_45_touchcap_current_gui" / "lcd_test.HMI").exists(),
+        "local touch-capture fixture is not available",
+    )
+    def test_scene_build_emits_touch_capture_widget_without_geometry(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "touch-capture-scene", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {"id": "tc_scene", "type": "touch-capture", "value": 0},
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["added_count"], 1)
+            target_page = load_page_file(manifest["target_pa"])
+            self.assertEqual(target_page.blocks[-1].objname, "tc_scene")
+            self.assertEqual(target_page.blocks[-1].type_code, "\x05")
+
+    @unittest.skipUnless(
+        CASE_46_TFT.exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run").exists(),
+        "local external-picture fixture is not available",
+    )
+    def test_scene_build_matches_official_external_picture_tail_layout(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "external-picture-scene", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "exp0",
+                                "type": "external-picture",
+                                "x": 0,
+                                "y": 0,
+                                "w": 120,
+                                "h": 120,
+                            },
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run",
+            )
+
+            output_tft = Path(manifest["output_tft"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(output_tft.read_bytes(), CASE_46_TFT.read_bytes())
+            target_page = load_page_file(manifest["target_pa"])
+            self.assertEqual(target_page.blocks[-1].objname, "exp0")
+            self.assertEqual(target_page.blocks[-1].type_code, "<")
+
+    @unittest.skipUnless(
+        CASE_46_TFT.exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run").exists(),
+        "local external-picture fixture is not available",
+    )
+    def test_scene_build_emits_external_picture_path_buffer(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "external-picture-path", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "sdpic",
+                                "type": "expicture",
+                                "x": 24,
+                                "y": 32,
+                                "w": 320,
+                                "h": 180,
+                                "resources": {"path": "A001.JPG"},
+                            },
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run",
+            )
+
+            output_tft = Path(manifest["output_tft"])
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertIn(b"A001.JPG", output_tft.read_bytes())
+            target_page = load_page_file(manifest["target_pa"])
+            block = target_page.blocks[-1]
+            self.assertEqual(block.objname, "sdpic")
+            self.assertEqual(block.type_code, "<")
+
+    @unittest.skipUnless(
+        CASE_46_TFT.exists(),
+        "local external-picture fixture is not available",
+    )
+    def test_scene_build_external_picture_keeps_live_healthy_resource_baseline(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "external-picture-good-resource", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "exp0",
+                                "type": "external-picture",
+                                "x": 0,
+                                "y": 0,
+                                "w": 120,
+                                "h": 120,
+                                "resources": {"path": "sd0/1.jpg"},
+                            },
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            baseline_info = inspect_tft(BASELINE_TFT)["parsed"]
+            output_info = inspect_tft(output_tft)["parsed"]
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["added_count"], 1)
+            self.assertIn(b"sd0/1.jpg", output_tft.read_bytes())
+            self.assertEqual(
+                output_info["Header1"]["ressource_files_size"],
+                baseline_info["Header1"]["ressource_files_size"],
+            )
+            self.assertEqual(
+                output_info["Header1"]["ressource_files_crc"],
+                baseline_info["Header1"]["ressource_files_crc"],
+            )
+            self.assertEqual(
+                output_info["Header2"]["unknown_objects_address"],
+                baseline_info["Header2"]["unknown_objects_address"],
+            )
+
+    @unittest.skipUnless(
+        (Path(__file__).resolve().parents[1] / "examples" / "external_picture_demo" / "scene.json").exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "lcd_test.HMI").exists(),
+        "local external-picture demo fixture is not available",
+    )
+    def test_external_picture_demo_builds_with_live_healthy_baseline(self) -> None:
+        scene = load_scene(Path(__file__).resolve().parents[1] / "examples" / "external_picture_demo" / "scene.json")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            output_info = inspect_tft(output_tft)["parsed"]
+            baseline_info = inspect_tft(BASELINE_TFT)["parsed"]
+            target_page = load_page_file(manifest["target_pa"])
+            object_names = [block.objname for block in target_page.blocks]
+            exp0_primary_path = _compiled_page_primary_value(output_tft, target_page, "exp0", "<", 0x3C, 4)
+            exp0_user_path = _compiled_page_user_record_word1(output_tft, target_page, "exp0", slot_index=19)
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertIn("exp0", object_names)
+            self.assertIn("guard", object_names)
+            self.assertIn(b"sd0/1.jpg", output_tft.read_bytes())
+            self.assertEqual(exp0_user_path, exp0_primary_path)
+            self.assertEqual(output_info["Header1"]["ressource_files_size"], baseline_info["Header1"]["ressource_files_size"])
+            self.assertEqual(output_info["Header1"]["ressource_files_crc"], baseline_info["Header1"]["ressource_files_crc"])
+            self.assertEqual(output_info["Header2"]["unknown_objects_address"], baseline_info["Header2"]["unknown_objects_address"])
+
+    @unittest.skipUnless(
+        CASE_46_TFT.exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run").exists(),
+        "local external-picture fixture is not available",
+    )
+    def test_scene_build_external_picture_path_only_changes_path_slot_and_checksum(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "external-picture-path-diff", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "exp0",
+                                "type": "external-picture",
+                                "x": 0,
+                                "y": 0,
+                                "w": 120,
+                                "h": 120,
+                                "resources": {"path": "A001.JPG"},
+                            },
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=CASE_ROOT / "case_46_expicture_current_gui" / "official_compile_baseline" / "lcd_test.run",
+            )
+
+            official = CASE_46_TFT.read_bytes()
+            generated = Path(manifest["output_tft"]).read_bytes()
+            diff_indexes = [index for index, (left, right) in enumerate(zip(official, generated)) if left != right]
+            self.assertEqual(diff_indexes[:8], list(range(0xA80397, 0xA8039F)))
+            self.assertEqual(diff_indexes[8:], list(range(len(generated) - 4, len(generated))))
+            self.assertEqual(generated[0xA80397:0xA8039F], b"A001.JPG")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
 
     @unittest.skipUnless(
         all((CASE_ROOT / case_name / "lcd_test.HMI").exists() for case_name in (
@@ -611,7 +1024,7 @@ class EditorTftBuildTests(unittest.TestCase):
             with self.assertRaisesRegex(Exception, "page1 supports only text/button/number/progress/slider/gauge"):
                 build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
 
-    def test_scene_build_can_move_seed_objects_offscreen(self) -> None:
+    def test_scene_build_can_minimize_seed_objects_in_bounds(self) -> None:
         scene = validate_scene(
             {
                 "project": {"name": "clean-scene", "default_page": "page0", "clean_seed_objects": True},
@@ -646,8 +1059,8 @@ class EditorTftBuildTests(unittest.TestCase):
             )
             target_page = load_page_file(manifest["target_pa"])
             for block in target_page.blocks[1:4]:
-                self.assertGreaterEqual(_field_int(block, "x"), 800)
-                self.assertGreaterEqual(_field_int(block, "y"), 480)
+                self.assertEqual(_field_int(block, "x"), 799)
+                self.assertEqual(_field_int(block, "y"), 479)
                 self.assertEqual(_field_int(block, "w"), 1)
                 self.assertEqual(_field_int(block, "h"), 1)
             self.assertEqual(target_page.blocks[-1].objname, "note1")
@@ -1179,13 +1592,13 @@ def _compiled_page_hash_ids(tft_path: Path, pa_path: Path) -> dict[str, int]:
 
 def _compiled_page_primary_value(
     tft_path: Path,
-    pa_path: Path,
+    pa_path: Path | object,
     object_name: str,
     type_code: str,
     offset: int,
     width: int,
 ) -> int:
-    page = load_page_file(pa_path)
+    page = load_page_file(pa_path) if isinstance(pa_path, Path) else pa_path
     primary = _compiled_page_primary_data(tft_path, page)
     block_index = next(index for index, block in enumerate(page.blocks) if block.objname == object_name)
     record_start = int.from_bytes(primary[block_index * 4 : block_index * 4 + 4], "little") - 0x10
@@ -1194,6 +1607,20 @@ def _compiled_page_primary_value(
     if offset + width > TYPE_RECORD_LENGTHS[type_code]:
         raise AssertionError(f"primary value read exceeds known record length for {object_name!r}")
     return int.from_bytes(primary[record_start + offset : record_start + offset + width], "little")
+
+
+def _compiled_page_user_record_word1(tft_path: Path, page, object_name: str, *, slot_index: int) -> int:
+    raw = tft_path.read_bytes()
+    header2 = inspect_tft(tft_path)["parsed"]["Header2"]
+    object_start = _header2_int(header2, "unknown_objects_address")
+    user_start = object_start + _header2_int(header2, "usercode_address")
+    slot_base = 0
+    for block in page.blocks:
+        if block.objname == object_name:
+            record_start = user_start + (slot_base + slot_index) * 24
+            return int.from_bytes(raw[record_start + 4 : record_start + 8], "little")
+        slot_base += TYPE_USER_SLOT_COUNTS[block.type_code]
+    raise AssertionError(f"user record for {object_name!r} was not found")
 
 
 def _compiled_page_primary_data(tft_path: Path, page) -> bytes:
