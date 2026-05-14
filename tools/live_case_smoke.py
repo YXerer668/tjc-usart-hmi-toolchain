@@ -75,6 +75,11 @@ def main() -> int:
     parser.add_argument("--post-upload-wait-s", type=float, default=2.0)
     parser.add_argument("--upload", action="store_true", help="Upload the generated clean TFT before serial checks.")
     parser.add_argument("--skip-upload-if-identical", action="store_true")
+    parser.add_argument(
+        "--require-model",
+        default="TJC8048X543_011C",
+        help="When uploading, require connect to report this model before whmi-wri. Empty string disables.",
+    )
     parser.add_argument("--capture", action="store_true", help="Capture a camera frame after serial checks.")
     parser.add_argument("--camera-index", type=int, default=0)
     parser.add_argument("--camera-backend", choices=["default", "dshow", "msmf"], default="dshow")
@@ -111,28 +116,53 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         target_pa=clean_pa,
         out_tft=clean_tft,
     ).to_dict()
-    checksum = inspect_tft_checksum(clean_tft)
+    checksum = _inspect_tft_checksum_safe(clean_tft)
+    checksum_ok = bool(checksum.get("valid"))
 
     upload_result = None
+    required_model = str(getattr(args, "require_model", "") or "")
+    model_preflight = None
     known_current = out_dir / "known_current.tft"
     if args.upload:
-        progress = _make_progress() if args.progress else None
-        upload_result = upload_tft(
-            clean_tft,
-            port=args.port,
-            baud=args.baud,
-            download_baud=args.download_baud,
-            timeout_ms=max(args.timeout_ms, 8000),
-            known_current=known_current if known_current.exists() else None,
-            skip_if_identical=bool(args.skip_upload_if_identical and known_current.exists()),
-            progress=progress,
-        ).to_dict()
-        if not upload_result.get("skipped"):
-            known_current.write_bytes(clean_tft.read_bytes())
-        time.sleep(max(0.0, args.post_upload_wait_s))
+        if checksum_ok:
+            if required_model:
+                model_preflight = _model_preflight_check(
+                    port=args.port,
+                    baud=args.baud,
+                    timeout_ms=args.timeout_ms,
+                    required_model=required_model,
+                )
+            if model_preflight is not None and not model_preflight["ok"]:
+                upload_result = {
+                    "skipped": True,
+                    "blocked": True,
+                    "reason": "model_preflight_failed",
+                }
+            else:
+                progress = _make_progress() if args.progress else None
+                upload_result = upload_tft(
+                    clean_tft,
+                    port=args.port,
+                    baud=args.baud,
+                    download_baud=args.download_baud,
+                    timeout_ms=max(args.timeout_ms, 8000),
+                    known_current=known_current if known_current.exists() else None,
+                    skip_if_identical=bool(args.skip_upload_if_identical and known_current.exists()),
+                    progress=progress,
+                ).to_dict()
+                if not upload_result.get("skipped"):
+                    known_current.write_bytes(clean_tft.read_bytes())
+                time.sleep(max(0.0, args.post_upload_wait_s))
+        else:
+            upload_result = {
+                "skipped": True,
+                "blocked": True,
+                "reason": "invalid_tft_checksum",
+            }
 
     serial_checks = []
-    if args.upload:
+    serial_checks_skipped = bool(args.upload and upload_result and upload_result.get("blocked"))
+    if args.upload and not serial_checks_skipped:
         serial_checks = _run_serial_checks(
             port=args.port,
             baud=args.baud,
@@ -162,15 +192,20 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "seed_object_names": seed_object_names,
         "rebuild": rebuild,
         "checksum": checksum,
+        "model_preflight": model_preflight,
         "upload": upload_result,
         "serial_checks": [item.to_dict() for item in serial_checks],
         "camera": camera,
         "summary": {
-            "ok": bool(checksum.get("valid")) and (not args.upload or (upload_result is not None and checks_ok)),
-            "checksum_valid": bool(checksum.get("valid")),
+            "ok": checksum_ok
+            and (not args.upload or (upload_result is not None and not upload_result.get("blocked") and checks_ok)),
+            "checksum_valid": checksum_ok,
+            "model_preflight_ok": None if model_preflight is None else bool(model_preflight["ok"]),
             "uploaded": bool(upload_result and not upload_result.get("skipped")),
+            "upload_blocked": bool(upload_result and upload_result.get("blocked")),
             "upload_skipped": bool(upload_result and upload_result.get("skipped")),
             "serial_checks_ok": checks_ok if args.upload else None,
+            "serial_checks_skipped": serial_checks_skipped,
             "camera_captured": camera is not None,
         },
     }
@@ -469,6 +504,43 @@ def _run_serial_checks(
         break
 
     return checks
+
+
+def _model_preflight_check(
+    *,
+    port: str,
+    baud: int,
+    timeout_ms: int,
+    required_model: str,
+) -> dict[str, Any]:
+    transport = SerialTransport(SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms))
+    check = _transact_check(
+        transport,
+        "connect",
+        lambda response: response.kind == "connect",
+        "connect preflight",
+        attempts=3,
+    )
+    details = check.response.get("details", {}) if isinstance(check.response, dict) else {}
+    actual_model = details.get("model") if isinstance(details, dict) else None
+    return {
+        "required_model": required_model,
+        "actual_model": actual_model,
+        "connect": check.to_dict(),
+        "ok": check.ok and actual_model == required_model,
+    }
+
+
+def _inspect_tft_checksum_safe(tft_path: Path) -> dict[str, Any]:
+    try:
+        return inspect_tft_checksum(tft_path)
+    except Exception as exc:
+        return {
+            "path": str(tft_path),
+            "file_size": tft_path.stat().st_size if tft_path.exists() else None,
+            "valid": False,
+            "error": str(exc),
+        }
 
 
 def _transact_check(
