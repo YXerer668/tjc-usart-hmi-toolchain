@@ -5,31 +5,37 @@
     {
       "target": "wav0.en",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "wav0.vid",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "wav0.loop",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "wav0.fps",
       "expected": 1,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "wav0.dis",
       "expected": 100,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "wav0.tim",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     }
   ],

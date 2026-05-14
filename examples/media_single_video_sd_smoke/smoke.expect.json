@@ -5,31 +5,37 @@
     {
       "target": "v0.en",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "v0.vid",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "v0.loop",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "v0.fps",
       "expected": 1,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "v0.dis",
       "expected": 100,
+      "expected_kind": "number",
       "attempts": 3
     },
     {
       "target": "v0.tim",
       "expected": 0,
+      "expected_kind": "number",
       "attempts": 3
     }
   ],

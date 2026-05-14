@@ -102,7 +102,7 @@ class LiveTftSmokeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             expect_path = Path(temp_dir) / "expect.json"
             expect_path.write_text(
-                '{"expectations":[{"target":"wav0.en","expected":0,"attempts":4}]}',
+                '{"expectations":[{"target":"wav0.en","expected":0,"expected_kind":"number","attempts":4}]}',
                 encoding="utf-8",
             )
 
@@ -111,17 +111,18 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(len(expectations), 1)
         self.assertEqual(expectations[0].target, "wav0.en")
         self.assertEqual(expectations[0].expected, 0)
+        self.assertEqual(expectations[0].expected_kind, "number")
         self.assertEqual(expectations[0].attempts, 4)
 
     def test_runtime_expectation_attempts_are_passed_to_transact_checks(self) -> None:
-        calls: list[tuple[str, int]] = []
+        calls: list[tuple[str, str | None, int]] = []
 
         def fake_connect(_config):  # type: ignore[no-untyped-def]
-            calls.append(("connect", 1))
+            calls.append(("connect", None, 1))
             return {"label": "connect", "ok": True}
 
         def fake_transact(_config, command, **kwargs):  # type: ignore[no-untyped-def]
-            calls.append((command, int(kwargs.get("attempts", 1))))
+            calls.append((command, kwargs.get("expected_kind"), int(kwargs.get("attempts", 1))))
             return {"command": command, "ok": True}
 
         with (
@@ -129,13 +130,13 @@ class LiveTftSmokeTests(unittest.TestCase):
             patch("tools.live_tft_smoke._transact_check", fake_transact),
         ):
             _run_serial_checks(
-                [RuntimeExpectation("wav0.en", 0, attempts=3)],
+                [RuntimeExpectation("wav0.en", 0, expected_kind="number", attempts=3)],
                 port="COM36",
                 baud=9600,
                 timeout_ms=3000,
                 expected_page_id=0,
                 select_page=None,
-                set_expectations=[RuntimeExpectation("wav0.loop", 1, attempts=4)],
+                set_expectations=[RuntimeExpectation("wav0.loop", 1, expected_kind="number", attempts=4)],
                 runtime_steps=[],
                 restore_page=None,
             )
@@ -143,11 +144,11 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(
             calls,
             [
-                ("connect", 1),
-                ("sendme", 1),
-                ("get wav0.en", 3),
-                ("wav0.loop=1", 4),
-                ("get wav0.loop", 4),
+                ("connect", None, 1),
+                ("sendme", "page_id", 1),
+                ("get wav0.en", "number", 3),
+                ("wav0.loop=1", None, 4),
+                ("get wav0.loop", "number", 4),
             ],
         )
 

@@ -4,11 +4,13 @@
     {
       "target": "exp0.path",
       "expected": "sd0/1.jpg",
+      "expected_kind": "string",
       "attempts": 3
     },
     {
       "target": "guard.txt",
       "expected": "guard.txt ok",
+      "expected_kind": "string",
       "attempts": 3
     }
   ]

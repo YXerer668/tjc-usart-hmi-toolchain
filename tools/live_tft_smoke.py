@@ -22,6 +22,7 @@ from usarthmi.transport import SerialConfig, SerialTransport
 class RuntimeExpectation:
     target: str
     expected: Any
+    expected_kind: str | None = None
     attempts: int = 1
 
 
@@ -148,11 +149,21 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
         "upload": upload_result,
         "expectations": [
-            {"target": item.target, "expected": item.expected, "attempts": item.attempts}
+            {
+                "target": item.target,
+                "expected": item.expected,
+                "expected_kind": item.expected_kind,
+                "attempts": item.attempts,
+            }
             for item in expectations
         ],
         "set_expectations": [
-            {"target": item.target, "expected": item.expected, "attempts": item.attempts}
+            {
+                "target": item.target,
+                "expected": item.expected,
+                "expected_kind": item.expected_kind,
+                "attempts": item.attempts,
+            }
             for item in set_expectations
         ],
         "runtime_steps": [
@@ -271,7 +282,13 @@ def _expectation_from_entry(entry: Any) -> RuntimeExpectation:
     attempts = int(entry.get("attempts", 1))
     if attempts < 1:
         raise ValueError(f"Expectation attempts must be >= 1: {entry!r}")
-    return RuntimeExpectation(str(target), entry.get("expected"), attempts=attempts)
+    expected_kind = entry.get("expected_kind")
+    return RuntimeExpectation(
+        str(target),
+        entry.get("expected"),
+        expected_kind=str(expected_kind) if expected_kind is not None else None,
+        attempts=attempts,
+    )
 
 
 def _parse_expected_value(raw: str) -> Any:
@@ -303,6 +320,7 @@ def _run_serial_checks(
             _transact_check(
                 config,
                 build_get(item.target),
+                expected_kind=item.expected_kind,
                 expected_value=item.expected,
                 label=item.target,
                 attempts=item.attempts,
@@ -321,6 +339,7 @@ def _run_serial_checks(
             _transact_check(
                 config,
                 build_get(item.target),
+                expected_kind=item.expected_kind,
                 expected_value=item.expected,
                 label=f"verify {item.target}",
                 attempts=item.attempts,
