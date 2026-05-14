@@ -1,14 +1,38 @@
 {
   "page_id": 0,
   "select_page": 0,
-  "expectations": {
-    "wav0.en": 0,
-    "wav0.vid": 0,
-    "wav0.loop": 0,
-    "wav0.fps": 1,
-    "wav0.dis": 100,
-    "wav0.tim": 0
-  },
+  "expectations": [
+    {
+      "target": "wav0.en",
+      "expected": 0,
+      "attempts": 3
+    },
+    {
+      "target": "wav0.vid",
+      "expected": 0,
+      "attempts": 3
+    },
+    {
+      "target": "wav0.loop",
+      "expected": 0,
+      "attempts": 3
+    },
+    {
+      "target": "wav0.fps",
+      "expected": 1,
+      "attempts": 3
+    },
+    {
+      "target": "wav0.dis",
+      "expected": 100,
+      "attempts": 3
+    },
+    {
+      "target": "wav0.tim",
+      "expected": 0,
+      "attempts": 3
+    }
+  ],
   "steps": [
     {
       "label": "path is not runtime-readable",

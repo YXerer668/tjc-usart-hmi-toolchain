@@ -8,7 +8,14 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from tools.live_tft_smoke import _capture_frame_ffmpeg_dshow
-from tools.live_tft_smoke import RuntimeStep, _load_runtime_steps, _run_serial_checks, _transact_check
+from tools.live_tft_smoke import (
+    RuntimeExpectation,
+    RuntimeStep,
+    _load_expectations,
+    _load_runtime_steps,
+    _run_serial_checks,
+    _transact_check,
+)
 
 
 class LiveTftSmokeTests(unittest.TestCase):
@@ -90,6 +97,59 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(len(steps), 1)
         self.assertEqual(steps[0].command, "get wav0.en")
         self.assertEqual(steps[0].attempts, 3)
+
+    def test_runtime_expectation_attempts_are_loaded_from_expect_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            expect_path = Path(temp_dir) / "expect.json"
+            expect_path.write_text(
+                '{"expectations":[{"target":"wav0.en","expected":0,"attempts":4}]}',
+                encoding="utf-8",
+            )
+
+            expectations = _load_expectations(str(expect_path), [])
+
+        self.assertEqual(len(expectations), 1)
+        self.assertEqual(expectations[0].target, "wav0.en")
+        self.assertEqual(expectations[0].expected, 0)
+        self.assertEqual(expectations[0].attempts, 4)
+
+    def test_runtime_expectation_attempts_are_passed_to_transact_checks(self) -> None:
+        calls: list[tuple[str, int]] = []
+
+        def fake_connect(_config):  # type: ignore[no-untyped-def]
+            calls.append(("connect", 1))
+            return {"label": "connect", "ok": True}
+
+        def fake_transact(_config, command, **kwargs):  # type: ignore[no-untyped-def]
+            calls.append((command, int(kwargs.get("attempts", 1))))
+            return {"command": command, "ok": True}
+
+        with (
+            patch("tools.live_tft_smoke._connect_check", fake_connect),
+            patch("tools.live_tft_smoke._transact_check", fake_transact),
+        ):
+            _run_serial_checks(
+                [RuntimeExpectation("wav0.en", 0, attempts=3)],
+                port="COM36",
+                baud=9600,
+                timeout_ms=3000,
+                expected_page_id=0,
+                select_page=None,
+                set_expectations=[RuntimeExpectation("wav0.loop", 1, attempts=4)],
+                runtime_steps=[],
+                restore_page=None,
+            )
+
+        self.assertEqual(
+            calls,
+            [
+                ("connect", 1),
+                ("sendme", 1),
+                ("get wav0.en", 3),
+                ("wav0.loop=1", 4),
+                ("get wav0.loop", 4),
+            ],
+        )
 
     def test_transact_check_retries_until_expected_value_matches(self) -> None:
         responses = [

@@ -22,6 +22,7 @@ from usarthmi.transport import SerialConfig, SerialTransport
 class RuntimeExpectation:
     target: str
     expected: Any
+    attempts: int = 1
 
 
 @dataclass(slots=True)
@@ -146,8 +147,14 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "chunk_size": args.chunk_size,
         "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
         "upload": upload_result,
-        "expectations": [{"target": item.target, "expected": item.expected} for item in expectations],
-        "set_expectations": [{"target": item.target, "expected": item.expected} for item in set_expectations],
+        "expectations": [
+            {"target": item.target, "expected": item.expected, "attempts": item.attempts}
+            for item in expectations
+        ],
+        "set_expectations": [
+            {"target": item.target, "expected": item.expected, "attempts": item.attempts}
+            for item in set_expectations
+        ],
         "runtime_steps": [
             {
                 "command": item.command,
@@ -261,7 +268,10 @@ def _expectation_from_entry(entry: Any) -> RuntimeExpectation:
     target = entry.get("target") or entry.get("name")
     if not target:
         raise ValueError(f"Expectation entry is missing target: {entry!r}")
-    return RuntimeExpectation(str(target), entry.get("expected"))
+    attempts = int(entry.get("attempts", 1))
+    if attempts < 1:
+        raise ValueError(f"Expectation attempts must be >= 1: {entry!r}")
+    return RuntimeExpectation(str(target), entry.get("expected"), attempts=attempts)
 
 
 def _parse_expected_value(raw: str) -> Any:
@@ -295,16 +305,25 @@ def _run_serial_checks(
                 build_get(item.target),
                 expected_value=item.expected,
                 label=item.target,
+                attempts=item.attempts,
             )
         )
     for item in set_expectations:
-        checks.append(_transact_check(config, f"{item.target}={item.expected}", label=f"set {item.target}"))
+        checks.append(
+            _transact_check(
+                config,
+                f"{item.target}={item.expected}",
+                label=f"set {item.target}",
+                attempts=item.attempts,
+            )
+        )
         checks.append(
             _transact_check(
                 config,
                 build_get(item.target),
                 expected_value=item.expected,
                 label=f"verify {item.target}",
+                attempts=item.attempts,
             )
         )
     for item in runtime_steps:

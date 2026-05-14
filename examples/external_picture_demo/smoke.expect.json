@@ -3,11 +3,13 @@
   "expectations": [
     {
       "target": "exp0.path",
-      "expected": "sd0/1.jpg"
+      "expected": "sd0/1.jpg",
+      "attempts": 3
     },
     {
       "target": "guard.txt",
-      "expected": "guard.txt ok"
+      "expected": "guard.txt ok",
+      "attempts": 3
     }
   ]
 }
