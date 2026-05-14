@@ -1,0 +1,19 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": {
+    "v0.en": 0,
+    "v0.vid": 0,
+    "v0.loop": 0,
+    "v0.fps": 1,
+    "v0.dis": 100,
+    "v0.tim": 0
+  },
+  "steps": [
+    {
+      "label": "path is not runtime-readable",
+      "command": "get v0.path",
+      "expected_kind": "invalid_reference"
+    }
+  ]
+}

@@ -115,8 +115,9 @@ For a clearer implemented / experimental / missing matrix, see
   not the recommended live baseline.
 - First-pass media widget authoring is available for animation / `gmov`
   (`type=0x02`), video (`type=0x03`), and audio / `wav` (`type=0x04`) in HMI and
-  preview outputs. Single internal GMOV builds are available for the current
-  smoke-test layout; video/audio resource scheduling is still research-only.
+  preview outputs. Single internal GMOV builds and a narrow single SD-video
+  object smoke are available for the current layout; broad video/audio resource
+  scheduling is still research-only.
 - `tools/probe_official_widget_support.py` can clone one object from a
   downloaded official/sample HMI into the current seed and ask the official
   compiler whether the current target actually emits that extra object.

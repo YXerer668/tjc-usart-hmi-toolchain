@@ -8,10 +8,10 @@ This is the first-pass authoring demo for the current-editor media widgets:
 
 Current status: this mixed-media demo is HMI and preview support only. The
 independent TFT writer now knows the official primary record sizes and
-user-slot counts for these media types, and the separate
-`media_single_gmov_smoke` example covers the proven single-animation TFT path.
-Mixed GMOV/video/audio resource scheduling is not closed yet, so do not pass
-`--baseline-tft` for this demo.
+user-slot counts for these media types. Use `media_single_gmov_smoke` for the
+proven single-animation path, and `media_single_video_sd_smoke` for the narrow
+single SD-video object smoke. Mixed GMOV/video/audio resource scheduling is not
+closed yet, so do not pass `--baseline-tft` for this demo.
 
 Build and preview:
 

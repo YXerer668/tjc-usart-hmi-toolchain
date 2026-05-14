@@ -288,6 +288,79 @@ class MediaWidgetTests(unittest.TestCase):
             )
 
     @unittest.skipUnless(
+        SEED_HMI.exists()
+        and (CASE_ROOT / "case_00_baseline" / "lcd_test.tft").exists()
+        and all(
+            (CASE_ROOT / case / "official_compile" / "source_raw.run").exists()
+            for case in ("case_48_video", "case_49_audio")
+        ),
+        "seed, baseline TFT, or official video/audio fixtures are not available",
+    )
+    def test_single_video_and_audio_scene_builds_emit_clean_tfts(self) -> None:
+        cases = [
+            (
+                "single-video-sd",
+                {
+                    "id": "v0",
+                    "type": "video",
+                    "x": 80,
+                    "y": 90,
+                    "w": 320,
+                    "h": 180,
+                    "resources": {"path": "sd0/video/official_0.video"},
+                    "style": {"en": 0, "loop": 0, "fps": 1, "dis": 100},
+                },
+                "v0",
+                "\x03",
+                "sd0/video/official_0.video",
+            ),
+            (
+                "single-audio-sd",
+                {
+                    "id": "wav0",
+                    "type": "audio",
+                    "resources": {"path": "sd0/music/official_0.wav"},
+                    "style": {"en": 0, "loop": 0, "fps": 1, "dis": 100},
+                },
+                "wav0",
+                "\x04",
+                "sd0/music/official_0.wav",
+            ),
+        ]
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        for name, widget, object_name, type_code, path in cases:
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temp_dir:
+                scene = validate_scene(
+                    {
+                        "project": {"name": name, "default_page": "page0", "drop_seed_objects": True},
+                        "canvas": {"width": 800, "height": 480, "background_color": 2153},
+                        "assets": {},
+                        "pages": [{"id": "page0", "widgets": [widget]}],
+                    }
+                )
+                manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=baseline_tft)
+
+                self.assertIsNotNone(manifest["output_tft"])
+                self.assertTrue(manifest["tft_checksum"]["valid"])
+                self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+                self.assertEqual(manifest["tft_patch"]["object_count"], 2)
+
+                page, primary_records, _user_records = _compiled_records(
+                    Path(manifest["output_tft"]),
+                    Path(manifest["target_pa"]),
+                )
+                self.assertEqual([block.objname for block in page.blocks], ["page0", object_name])
+                block = page.blocks[1]
+                record, _value_base = primary_records[object_name]
+                self.assertEqual(block.type_code, type_code)
+                self.assertEqual(block.get_field("path").value.decode("ascii"), path)
+                self.assertEqual(record[:4], bytes([ord(type_code), 1, 0, _record_header_flag(type_code)]))
+                self.assertEqual(record[0x3A], 0)
+                self.assertEqual(record[0x3B], 0)
+                self.assertEqual(record[0x3C], 1)
+                self.assertEqual(int.from_bytes(record[0x3E:0x40], "little"), 100)
+
+    @unittest.skipUnless(
         all(
             (CASE_ROOT / case / "official_compile" / "source_raw.run").exists()
             and (CASE_ROOT / case / "official_wiki" / "extract" / "0.pa").exists()
