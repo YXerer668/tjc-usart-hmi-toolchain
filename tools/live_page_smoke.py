@@ -17,7 +17,7 @@ from usarthmi.page_format import PageBlock, PageFile, parse_page_data
 from usarthmi.protocol import ParsedResponse, build_get, build_page, parse_response
 from usarthmi.tft_download import upload_tft
 from usarthmi.transport import SerialConfig, SerialTransport
-from tools.live_case_smoke import _capture_frame, _default_probe_attr
+from tools.live_case_smoke import _capture_frame, _default_probe_attr, _inspect_tft_checksum_safe, _model_preflight_check
 
 
 DEFAULT_CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
@@ -72,6 +72,11 @@ def main() -> int:
     parser.add_argument("--post-upload-wait-s", type=float, default=2.0)
     parser.add_argument("--upload", action="store_true")
     parser.add_argument("--skip-upload-if-identical", action="store_true")
+    parser.add_argument(
+        "--require-model",
+        default="TJC8048X543_011C",
+        help="When uploading, require connect to report this model before whmi-wri. Empty string disables.",
+    )
     parser.add_argument("--capture", action="store_true")
     parser.add_argument("--camera-index", type=int, default=0)
     parser.add_argument("--camera-backend", choices=["default", "dshow", "msmf"], default="dshow")
@@ -92,24 +97,50 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     if not pages:
         raise ValueError(f"No .pa pages found in {hmi_path}")
 
+    checksum = _inspect_tft_checksum_safe(tft_path)
+    checksum_ok = bool(checksum.get("valid"))
     upload_result = None
+    required_model = str(getattr(args, "require_model", "") or "")
+    model_preflight = None
     known_current = out_dir / "known_current.tft"
     if args.upload:
-        upload_result = upload_tft(
-            tft_path,
-            port=args.port,
-            baud=args.baud,
-            download_baud=args.download_baud,
-            timeout_ms=max(args.timeout_ms, 8000),
-            known_current=known_current if known_current.exists() else None,
-            skip_if_identical=bool(args.skip_upload_if_identical and known_current.exists()),
-        ).to_dict()
-        if not upload_result.get("skipped"):
-            known_current.write_bytes(tft_path.read_bytes())
-        time.sleep(max(0.0, args.post_upload_wait_s))
+        if checksum_ok:
+            if required_model:
+                model_preflight = _model_preflight_check(
+                    port=args.port,
+                    baud=args.baud,
+                    timeout_ms=args.timeout_ms,
+                    required_model=required_model,
+                )
+            if model_preflight is not None and not model_preflight["ok"]:
+                upload_result = {
+                    "skipped": True,
+                    "blocked": True,
+                    "reason": "model_preflight_failed",
+                }
+            else:
+                upload_result = upload_tft(
+                    tft_path,
+                    port=args.port,
+                    baud=args.baud,
+                    download_baud=args.download_baud,
+                    timeout_ms=max(args.timeout_ms, 8000),
+                    known_current=known_current if known_current.exists() else None,
+                    skip_if_identical=bool(args.skip_upload_if_identical and known_current.exists()),
+                ).to_dict()
+                if not upload_result.get("skipped"):
+                    known_current.write_bytes(tft_path.read_bytes())
+                time.sleep(max(0.0, args.post_upload_wait_s))
+        else:
+            upload_result = {
+                "skipped": True,
+                "blocked": True,
+                "reason": "invalid_tft_checksum",
+            }
 
     serial_checks: list[SerialCheck] = []
-    if args.upload:
+    serial_checks_skipped = bool(args.upload and upload_result and upload_result.get("blocked"))
+    if args.upload and not serial_checks_skipped:
         serial_checks = _run_page_checks(
             port=args.port,
             baud=args.baud,
@@ -133,14 +164,21 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "tft": str(tft_path),
         "out_dir": str(out_dir),
         "pages": [page.to_dict() for page in pages],
+        "checksum": checksum,
+        "model_preflight": model_preflight,
         "upload": upload_result,
         "serial_checks": [item.to_dict() for item in serial_checks],
         "camera": camera,
         "summary": {
-            "ok": not args.upload or (upload_result is not None and checks_ok),
+            "ok": checksum_ok
+            and (not args.upload or (upload_result is not None and not upload_result.get("blocked") and checks_ok)),
+            "checksum_valid": checksum_ok,
+            "model_preflight_ok": None if model_preflight is None else bool(model_preflight["ok"]),
             "uploaded": bool(upload_result and not upload_result.get("skipped")),
+            "upload_blocked": bool(upload_result and upload_result.get("blocked")),
             "upload_skipped": bool(upload_result and upload_result.get("skipped")),
             "serial_checks_ok": checks_ok if args.upload else None,
+            "serial_checks_skipped": serial_checks_skipped,
             "camera_captured": camera is not None,
         },
     }
