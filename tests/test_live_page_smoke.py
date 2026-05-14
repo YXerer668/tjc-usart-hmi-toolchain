@@ -7,10 +7,39 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from tools.live_page_smoke import run_smoke
+from tools.live_page_smoke import _load_hmi_pages, run_smoke
 
 
 class LivePageSmokeTests(unittest.TestCase):
+    def test_load_hmi_pages_uses_numeric_pa_names_not_container_order(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            hmi_path = Path(temp_dir) / "lcd_test.HMI"
+            hmi_path.write_bytes(b"zero one two shadow")
+            entries = [
+                SimpleNamespace(name="1.pa", in_file=True, data_offset=5, length=3),
+                SimpleNamespace(name="\x000.pa", in_file=True, data_offset=14, length=6),
+                SimpleNamespace(name="0.pa", in_file=True, data_offset=0, length=4),
+                SimpleNamespace(name="2.pa", in_file=True, data_offset=9, length=3),
+            ]
+            parsed_pages = {
+                b"zero": SimpleNamespace(page_name="page0", blocks=[]),
+                b"one": SimpleNamespace(page_name="page1", blocks=[]),
+                b"two": SimpleNamespace(page_name="page2", blocks=[]),
+            }
+
+            def fake_parse(data: bytes):  # type: ignore[no-untyped-def]
+                return parsed_pages[data]
+
+            with (
+                patch("tools.live_page_smoke.inspect_hmi", return_value=SimpleNamespace(entries=entries)),
+                patch("tools.live_page_smoke.parse_page_data", fake_parse),
+            ):
+                pages = _load_hmi_pages(hmi_path)
+
+        self.assertEqual([page.page_id for page in pages], [0, 1, 2])
+        self.assertEqual([page.entry_name for page in pages], ["0.pa", "1.pa", "2.pa"])
+        self.assertEqual([page.page_name for page in pages], ["page0", "page1", "page2"])
+
     def test_run_smoke_blocks_upload_when_tft_checksum_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             args, _hmi_path, _tft_path, _out_dir = _args(Path(temp_dir))

@@ -17,7 +17,12 @@ from usarthmi.page_format import PageBlock, PageFile, parse_page_data
 from usarthmi.protocol import ParsedResponse, build_get, build_page, parse_response
 from usarthmi.tft_download import upload_tft
 from usarthmi.transport import SerialConfig, SerialTransport
-from tools.live_case_smoke import _capture_frame, _default_probe_attr, _inspect_tft_checksum_safe, _model_preflight_check
+from tools.live_case_smoke import (
+    _capture_frame,
+    _default_probe_attr,
+    _inspect_tft_checksum_safe,
+    _model_preflight_check,
+)
 
 
 DEFAULT_CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
@@ -207,19 +212,31 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
     inspection = inspect_hmi(hmi_path)
     raw = hmi_path.read_bytes()
     pages: list[HmiPage] = []
+    page_entries: list[tuple[int, Any]] = []
     for entry in inspection.entries:
-        if not entry.name.endswith(".pa") or not entry.in_file:
+        page_id = _page_id_from_entry_name(entry.name)
+        if page_id is None or not entry.in_file:
             continue
+        page_entries.append((page_id, entry))
+
+    for page_id, entry in sorted(page_entries, key=lambda item: (item[0], item[1].name)):
         page = parse_page_data(raw[entry.data_offset : entry.data_offset + entry.length])
         pages.append(
             HmiPage(
-                page_id=len(pages),
+                page_id=page_id,
                 entry_name=entry.name,
                 page_name=page.page_name,
                 page=page,
             )
         )
     return pages
+
+
+def _page_id_from_entry_name(name: str) -> int | None:
+    path = Path(name)
+    if path.suffix.lower() != ".pa" or not path.stem.isdecimal():
+        return None
+    return int(path.stem)
 
 
 def _run_page_checks(
