@@ -3,6 +3,7 @@ name = "usarthmi"
 version = "0.1.0"
 description = "Scriptable TJC/USART HMI serial, scene, preview, and experimental TFT tooling"
 requires-python = ">=3.10"
+license = { file = "LICENSE" }
 dependencies = [
   "Pillow>=10.0",
   "PyYAML>=6.0",

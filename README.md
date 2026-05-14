@@ -63,8 +63,8 @@ Known unstable / research-only:
 - Do not copy official `work\a-*\output\*.tft` while the official serial
   download is actively transferring. Copy it before starting transfer or after
   the transfer has fully finished.
-- A `LICENSE` file has not been selected in this workspace yet. Pick one
-  before treating the GitHub repository as truly open source.
+- The repository is MIT licensed. Reverse-engineering notes and code are open,
+  but official editor binaries and proprietary payloads still stay out of git.
 
 ## Current Capabilities
 
