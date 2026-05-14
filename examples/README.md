@@ -8,6 +8,8 @@
 - `external_picture_demo`: 外部图片控件的默认活屏样例，已经在当前 `TJC8048X543_011C` 上验证过 `sendme`、`get exp0.path`、`get guard.txt` 和摄像头显示。
 - `media_single_gmov_smoke`: 当前推荐的动画控件最小烧录样例，只验证一个内部 GMOV，边界最稳。
 - `media_widgets_demo`: 动画、视频、音频控件的第一版 authoring 样例，目前主要承诺 HMI/预览；视频和音频还不作为独立 TFT 烧录路径。
+- `page1_button_event_minimal`: page1 普通按钮跳回 page0 的最小事件样例，需要显式打开 `experimental_multi_page_events`。
+- `event_demo`: `printh` 事件字节码探针，用于继续逆向事件调度，不要直接当稳定交互 demo。
 - `all_controls_demo`: 已恢复控件的集合展示页，适合做大范围冒烟测试。
 
 ## 当前稳定边界
