@@ -734,9 +734,9 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
         for block_index, block in enumerate(page.blocks):
             if block_index == 0:
                 continue
-            if block.type_code not in {"t", "b", "6", "p", "j", "\x01", "z"}:
+            if block.type_code not in {"t", "b", "6", "p", "j", "\x01", "z", "8", "9"}:
                 raise TftToolchainError(
-                    "Multi-page V1 page1 supports only text/button/number/image/progress/slider/gauge controls"
+                    "Multi-page V1 page1 supports only text/button/number/image/progress/slider/gauge/checkbox/radio controls"
                 )
             if any(lines for lines in _events_by_prefix(block).values()) and not (
                 allow_experimental_events and _is_supported_page1_button_event_block(block)

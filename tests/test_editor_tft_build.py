@@ -847,6 +847,8 @@ class EditorTftBuildTests(unittest.TestCase):
             {"id": "bar1", "type": "progress", "x": 40, "y": 160, "w": 220, "h": 28, "value": 68},
             {"id": "slider1", "type": "slider", "x": 40, "y": 220, "w": 220, "h": 40, "value": 42},
             {"id": "gauge1", "type": "gauge", "x": 360, "y": 80, "w": 160, "h": 160, "value": 75},
+            {"id": "check1", "type": "checkbox", "x": 560, "y": 80, "w": 28, "h": 28, "value": 1},
+            {"id": "radio1", "type": "radio", "x": 610, "y": 80, "w": 28, "h": 28, "value": 1},
         ]
         for widgets in (page1_widgets, list(reversed(page1_widgets))):
             scene = validate_scene(
@@ -868,7 +870,7 @@ class EditorTftBuildTests(unittest.TestCase):
                 self.assertTrue(manifest["tft_checksum"]["valid"])
                 self.assertEqual(manifest["tft_patch"]["mode"], "experimental_multi_page_tft_patch")
                 self.assertEqual(manifest["tft_patch"]["page_count"], 2)
-                self.assertEqual(manifest["tft_patch"]["object_count"], 12)
+                self.assertEqual(manifest["tft_patch"]["object_count"], 14)
 
                 page1_path = Path(manifest["target_pages"][1])
                 page1 = load_page_file(page1_path)
@@ -883,6 +885,8 @@ class EditorTftBuildTests(unittest.TestCase):
                     "bar1": ("j", 0x3A, 1, 68),
                     "slider1": ("\x01", 0x42, 2, 42),
                     "gauge1": ("z", 0x3C, 2, 75),
+                    "check1": ("8", 0x40, 1, 1),
+                    "radio1": ("9", 0x3C, 1, 1),
                 }
                 for name, (type_code, offset, width, expected) in checks.items():
                     with self.subTest(name=name):
@@ -1034,7 +1038,10 @@ class EditorTftBuildTests(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with self.assertRaisesRegex(Exception, "page1 supports only text/button/number/image/progress/slider/gauge"):
+            with self.assertRaisesRegex(
+                Exception,
+                "page1 supports only text/button/number/image/progress/slider/gauge/checkbox/radio",
+            ):
                 build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
 
     def test_scene_build_rejects_page1_new_image_resources(self) -> None:

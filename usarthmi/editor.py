@@ -67,8 +67,18 @@ RESOURCE_FIELD_ALIASES = {
     "pressed": "pic2",
     "crop": "picc",
 }
-PAGE1_PLAIN_WIDGET_TYPES = {"text", "button", "number", "image", "progress", "slider", "gauge"}
-PAGE1_PLAIN_WIDGET_TYPES_LABEL = "text/button/number/image/progress/slider/gauge"
+PAGE1_PLAIN_WIDGET_TYPES = {
+    "text",
+    "button",
+    "number",
+    "image",
+    "progress",
+    "slider",
+    "gauge",
+    "checkbox",
+    "radio",
+}
+PAGE1_PLAIN_WIDGET_TYPES_LABEL = "text/button/number/image/progress/slider/gauge/checkbox/radio"
 MEDIA_WIDGET_TYPE_CODES = {"\x02", "\x03", "\x04"}
 
 
