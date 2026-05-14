@@ -31,6 +31,7 @@ class RuntimeStep:
     expected_kind: str | None = None
     expected_value: Any | None = None
     delay_ms: int = 0
+    attempts: int = 1
 
 
 def main() -> int:
@@ -154,6 +155,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 "expected_kind": item.expected_kind,
                 "expected_value": item.expected_value,
                 "delay_ms": item.delay_ms,
+                "attempts": item.attempts,
             }
             for item in runtime_steps
         ],
@@ -237,6 +239,9 @@ def _load_runtime_steps(expect_json: str | None) -> list[RuntimeStep]:
         if not command:
             raise ValueError(f"Step entry is missing command: {entry!r}")
         expected_value = entry.get("expected_value", entry.get("expected"))
+        attempts = int(entry.get("attempts", 1))
+        if attempts < 1:
+            raise ValueError(f"Step attempts must be >= 1: {entry!r}")
         steps.append(
             RuntimeStep(
                 command=str(command),
@@ -244,6 +249,7 @@ def _load_runtime_steps(expect_json: str | None) -> list[RuntimeStep]:
                 expected_kind=str(entry["expected_kind"]) if entry.get("expected_kind") is not None else None,
                 expected_value=expected_value,
                 delay_ms=int(entry.get("delay_ms", 0)),
+                attempts=attempts,
             )
         )
     return steps
@@ -311,6 +317,7 @@ def _run_serial_checks(
                 expected_kind=item.expected_kind,
                 expected_value=item.expected_value,
                 label=item.label,
+                attempts=item.attempts,
             )
         )
     if restore_page is not None:
@@ -325,39 +332,58 @@ def _transact_check(
     expected_kind: str | None = None,
     expected_value: Any | None = None,
     label: str | None = None,
+    attempts: int = 1,
 ) -> dict[str, Any]:
-    try:
-        payload, response = SerialTransport(config).transact(command)
-        parsed = parse_response(response).to_dict()
-        actual_value = parsed.get("value")
-        ok = True
-        expectation = "response received"
-        if expected_kind is not None:
-            ok = ok and parsed.get("kind") == expected_kind
-            expectation = f"kind == {expected_kind}"
-        if expected_value is not None:
-            ok = ok and actual_value == expected_value
-            expectation = f"value == {expected_value!r}"
-        return {
-            "label": label or command,
-            "command": command,
-            "sent_hex": payload.hex(" "),
-            "response": parsed,
-            "expected_kind": expected_kind,
-            "expected_value": expected_value,
-            "actual_value": actual_value,
-            "ok": ok,
-            "expectation": expectation,
-        }
-    except Exception as exc:
-        return {
-            "label": label or command,
-            "command": command,
-            "ok": False,
-            "error": str(exc),
-            "expected_kind": expected_kind,
-            "expected_value": expected_value,
-        }
+    history: list[dict[str, Any]] = []
+    last: dict[str, Any] | None = None
+    for attempt in range(1, max(1, attempts) + 1):
+        try:
+            payload, response = SerialTransport(config).transact(command)
+            parsed = parse_response(response).to_dict()
+            actual_value = parsed.get("value")
+            ok = True
+            expectation = "response received"
+            if expected_kind is not None:
+                ok = ok and parsed.get("kind") == expected_kind
+                expectation = f"kind == {expected_kind}"
+            if expected_value is not None:
+                ok = ok and actual_value == expected_value
+                expectation = f"value == {expected_value!r}"
+            result = {
+                "label": label or command,
+                "command": command,
+                "sent_hex": payload.hex(" "),
+                "response": parsed,
+                "expected_kind": expected_kind,
+                "expected_value": expected_value,
+                "actual_value": actual_value,
+                "attempt": attempt,
+                "attempts": max(1, attempts),
+                "ok": ok,
+                "expectation": expectation,
+            }
+        except Exception as exc:
+            result = {
+                "label": label or command,
+                "command": command,
+                "attempt": attempt,
+                "attempts": max(1, attempts),
+                "ok": False,
+                "error": str(exc),
+                "expected_kind": expected_kind,
+                "expected_value": expected_value,
+            }
+        if result["ok"]:
+            if history:
+                result["retry_history"] = history
+            return result
+        history.append(result)
+        last = result
+        if attempt < max(1, attempts):
+            time.sleep(0.2)
+    assert last is not None
+    last["retry_history"] = history[:-1]
+    return last
 
 
 def _connect_check(config: SerialConfig, *, attempts: int = 3, delay_s: float = 0.5) -> dict[str, Any]:

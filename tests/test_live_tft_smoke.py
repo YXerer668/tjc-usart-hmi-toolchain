@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 from tools.live_tft_smoke import _capture_frame_ffmpeg_dshow
-from tools.live_tft_smoke import RuntimeStep, _run_serial_checks
+from tools.live_tft_smoke import RuntimeStep, _load_runtime_steps, _run_serial_checks, _transact_check
 
 
 class LiveTftSmokeTests(unittest.TestCase):
@@ -76,6 +76,48 @@ class LiveTftSmokeTests(unittest.TestCase):
             )
 
         self.assertEqual(calls, ["connect", "sendme", "wav0.en=1", "sleep:0.5", "get wav0.en"])
+
+    def test_runtime_step_attempts_are_loaded_from_expect_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            expect_path = Path(temp_dir) / "expect.json"
+            expect_path.write_text(
+                '{"steps":[{"command":"get wav0.en","expected_kind":"number","attempts":3}]}',
+                encoding="utf-8",
+            )
+
+            steps = _load_runtime_steps(str(expect_path))
+
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].command, "get wav0.en")
+        self.assertEqual(steps[0].attempts, 3)
+
+    def test_transact_check_retries_until_expected_value_matches(self) -> None:
+        responses = [
+            bytes.fromhex("71 00 00 00 00 ff ff ff"),
+            bytes.fromhex("71 01 00 00 00 ff ff ff"),
+        ]
+
+        class FakeTransport:
+            def __init__(self, _config):  # type: ignore[no-untyped-def]
+                pass
+
+            def transact(self, command):  # type: ignore[no-untyped-def]
+                return command.encode("ascii") + b"\xff\xff\xff", responses.pop(0)
+
+        with patch("tools.live_tft_smoke.SerialTransport", FakeTransport):
+            result = _transact_check(
+                object(),
+                "get wav0.en",
+                expected_kind="number",
+                expected_value=1,
+                attempts=3,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["attempt"], 2)
+        self.assertEqual(result["attempts"], 3)
+        self.assertEqual(result["actual_value"], 1)
+        self.assertEqual(len(result["retry_history"]), 1)
 
 
 if __name__ == "__main__":

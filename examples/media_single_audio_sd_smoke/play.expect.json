@@ -19,6 +19,7 @@
       "command": "get wav0.en",
       "expected_kind": "number",
       "expected_value": 1,
+      "attempts": 3,
       "delay_ms": 500
     },
     {
@@ -29,7 +30,8 @@
       "label": "verify wav0 stopped",
       "command": "get wav0.en",
       "expected_kind": "number",
-      "expected_value": 0
+      "expected_value": 0,
+      "attempts": 3
     }
   ]
 }
