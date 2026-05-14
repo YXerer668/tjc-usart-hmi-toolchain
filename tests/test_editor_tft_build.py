@@ -4,11 +4,11 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from usarthmi.editor import build_scene
+from usarthmi.editor import build_scene, _is_supported_experimental_page1_event_widget
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.object_hash import object_name_hash
 from usarthmi.page_format import load_page_file
-from usarthmi.scene import load_scene, validate_scene
+from usarthmi.scene import WidgetSpec, load_scene, validate_scene
 from usarthmi.tft_patch import TYPE_RECORD_LENGTHS, TYPE_USER_SLOT_COUNTS, _record_header_flag
 from usarthmi.tft_reverse import reverse_tft_tail
 from usarthmi.tft_toolchain import inspect_tft
@@ -936,7 +936,7 @@ class EditorTftBuildTests(unittest.TestCase):
                                 "w": 180,
                                 "h": 64,
                                 "text": "BACK",
-                                "events": {"up": ["page 1"]},
+                                "events": {"up": ["page 0"]},
                             },
                         ],
                     },
@@ -959,7 +959,18 @@ class EditorTftBuildTests(unittest.TestCase):
             page1 = load_page_file(manifest["target_pages"][1])
             back_button = next(block for block in page1.blocks if block.objname == "back0")
             self.assertIn("codesup-1", back_button.event_tokens)
-            self.assertIn("page 1", back_button.event_tokens)
+            self.assertIn("page 0", back_button.event_tokens)
+
+    def test_page1_experimental_button_event_aliases_match_tft_patcher(self) -> None:
+        for line in ("page 0", "page 1", "page page0", "page page1"):
+            with self.subTest(line=line):
+                widget = WidgetSpec("back0", "button", events={"up": [line]})
+                self.assertTrue(_is_supported_experimental_page1_event_widget(widget))
+
+        for line in ("page 2", "printh 23 02 54 45"):
+            with self.subTest(line=line):
+                widget = WidgetSpec("back0", "button", events={"up": [line]})
+                self.assertFalse(_is_supported_experimental_page1_event_widget(widget))
 
     def test_scene_build_rejects_page1_events_without_experimental_flag(self) -> None:
         bad_scene = validate_scene(

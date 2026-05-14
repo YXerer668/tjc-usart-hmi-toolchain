@@ -16,7 +16,14 @@ from .scene import SceneModel, save_scene_json, widget_to_dict
 from .tft_checksum import inspect_tft_checksum
 from .tft_images import compile_hmi_picture_resource, pack_picture_resources_into_tft
 from .tft_media import pack_gmov_resources_into_tft
-from .tft_patch import DEFAULT_CASE_ROOT, TYPE_RECORD_LENGTHS, patch_added_object_tft, patch_multi_page_tft, patch_rebuild_page_tft
+from .tft_patch import (
+    DEFAULT_CASE_ROOT,
+    SUPPORTED_PAGE1_BUTTON_EVENT_LINES,
+    TYPE_RECORD_LENGTHS,
+    patch_added_object_tft,
+    patch_multi_page_tft,
+    patch_rebuild_page_tft,
+)
 
 
 class EditorError(RuntimeError):
@@ -809,7 +816,7 @@ def _is_supported_experimental_page1_event_widget(widget) -> bool:
     if event_name not in {"down", "up"} or len(lines) != 1:
         return False
     line = lines[0].strip().lower()
-    return line in {"page 1", "page page0"}
+    return line in SUPPORTED_PAGE1_BUTTON_EVENT_LINES
 
 
 def _field3_template(entries, suffix: str) -> int:

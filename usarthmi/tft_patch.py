@@ -71,6 +71,7 @@ TYPE_USER_SLOT_COUNTS = {
     "j": 33,
     ":": 33,
 }
+SUPPORTED_PAGE1_BUTTON_EVENT_LINES = frozenset({"page 0", "page 1", "page page0", "page page1"})
 TEXT_POINTER_RECORD_OFFSETS = {
     "t": 0x48,
     "b": 0x4C,
@@ -354,12 +355,12 @@ class MultiPagePatchResult:
     def to_dict(self) -> dict[str, Any]:
         warnings = [
             "Experimental multi-page V1 supports the official case31 page-order layout.",
-            "Non-seed-page controls are limited to no-event text/button/number/progress/slider/gauge.",
-            "Do not use this yet for page events, timers, resources, waveform, or arbitrary multi-page layouts.",
+            "Non-seed-page controls are limited to text/button/number/progress/slider/gauge.",
+            "Do not use this yet for arbitrary page events, timers, resources, waveform, or arbitrary multi-page layouts.",
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 normal-button release events are opt-in and currently hardware-verified only for a single page 1 jump back to page0."
+                "Page1 normal-button jump-page events are opt-in and currently hardware-verified only for the minimal page1 back-to-page0 path."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
@@ -758,7 +759,7 @@ def _is_supported_page1_button_event_block(block: PageBlock) -> bool:
     prefix, lines = event_items[0]
     if prefix not in {"codesdown-", "codesup-"} or len(lines) != 1:
         return False
-    return lines[0].strip().lower() in {"page 0", "page 1", "page page0", "page page1"}
+    return lines[0].strip().lower() in SUPPORTED_PAGE1_BUTTON_EVENT_LINES
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:

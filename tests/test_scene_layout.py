@@ -7,7 +7,7 @@ import unittest
 from usarthmi.layout import resolve_page_layout
 from usarthmi.page_format import BlockField, PageBlock, PageFile
 from usarthmi.preview import render_page_preview, render_scene_preview
-from usarthmi.scene import WidgetSpec, load_scene, validate_scene
+from usarthmi.scene import SceneError, WidgetSpec, load_scene, validate_scene
 from PIL import Image
 
 
@@ -117,6 +117,52 @@ class SceneLayoutTests(unittest.TestCase):
 
         self.assertEqual(scene.pages[0].widgets[0].type, "timer")
         self.assertEqual(scene.pages[0].widgets[0].events["timer"], ["printh 23 02 54 4d"])
+
+    def test_scrolling_alias_maps_to_scrolling_text(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "scrolling-alias", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {"id": "slt0", "type": "scrolling", "x": 1, "y": 2, "w": 100, "h": 24, "text": "scroll"}
+                        ],
+                    }
+                ],
+            }
+        )
+
+        self.assertEqual(scene.pages[0].widgets[0].type, "scrolling-text")
+
+    def test_current_target_unsupported_advanced_widget_aliases_fail_clearly(self) -> None:
+        aliases = {
+            "textselect": "text-select",
+            "sltext": "sliding-text",
+            "datarecord": "data-record",
+            "filebrowser": "file-browser",
+            "filestream": "file-stream",
+        }
+        for alias, normalized in aliases.items():
+            with self.subTest(alias=alias):
+                with self.assertRaisesRegex(SceneError, f"unsupported type '{normalized}'.*current target"):
+                    validate_scene(
+                        {
+                            "project": {"name": "unsupported-current-target", "default_page": "page0"},
+                            "canvas": {"width": 800, "height": 480},
+                            "assets": {},
+                            "pages": [
+                                {
+                                    "id": "page0",
+                                    "layout": {"type": "absolute"},
+                                    "widgets": [{"id": "w0", "type": alias, "x": 0, "y": 0, "w": 10, "h": 10}],
+                                }
+                            ],
+                        }
+                    )
 
     def test_scene_preview_renders_png(self) -> None:
         base = Path(__file__).resolve().parents[1] / "examples" / "menu_demo"

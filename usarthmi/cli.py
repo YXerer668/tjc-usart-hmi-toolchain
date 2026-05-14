@@ -195,7 +195,7 @@ def _build_parser() -> argparse.ArgumentParser:
     hmi_add_widget.add_argument("--scene", required=True, help="Scene JSON file to modify")
     hmi_add_widget.add_argument("--page", default="page0", help="Target page id")
     hmi_add_widget.add_argument("--id", required=True, help="Widget id")
-    hmi_add_widget.add_argument("--type", required=True, help="Widget type or alias such as text, sltext, expicture, gmov")
+    hmi_add_widget.add_argument("--type", required=True, help="Widget type or alias such as text, scrolling-text, expicture, gmov")
     hmi_add_widget.add_argument("--x", type=int, help="Widget x")
     hmi_add_widget.add_argument("--y", type=int, help="Widget y")
     hmi_add_widget.add_argument("--w", type=int, help="Widget width")

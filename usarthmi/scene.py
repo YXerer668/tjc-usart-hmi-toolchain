@@ -75,6 +75,9 @@ SUPPORTED_WIDGET_TYPE_ALIASES = {
     "scrolling": "scrolling-text",
     "scrolling text": "scrolling-text",
     "scrolling-text": "scrolling-text",
+    "sliding-text": "sliding-text",
+    "sliding text": "sliding-text",
+    "sltext": "sliding-text",
     "statebutton": "state-button",
     "state-button": "state-button",
     "state_btn": "state-button",
@@ -99,6 +102,27 @@ SUPPORTED_WIDGET_TYPE_ALIASES = {
     "combo-box": "combobox",
     "wav": "audio",
     "wave-audio": "audio",
+    "select-text": "text-select",
+    "select text": "text-select",
+    "text-select": "text-select",
+    "text select": "text-select",
+    "textselect": "text-select",
+    "datarecord": "data-record",
+    "data-record": "data-record",
+    "data record": "data-record",
+    "filebrowser": "file-browser",
+    "file-browser": "file-browser",
+    "file browser": "file-browser",
+    "filestream": "file-stream",
+    "file-stream": "file-stream",
+    "file stream": "file-stream",
+}
+UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES = {
+    "text-select": "case_38_text_select was dropped by the official compiler for TJC8048X543_011C",
+    "sliding-text": "case_41_sltext was dropped by the official compiler for TJC8048X543_011C",
+    "data-record": "case_42_datarecord was dropped by the official compiler for TJC8048X543_011C",
+    "file-browser": "case_43_filebrowser was dropped by the official compiler for TJC8048X543_011C",
+    "file-stream": "case_44_filestream was dropped by the official compiler for TJC8048X543_011C",
 }
 
 
@@ -319,6 +343,9 @@ def _validate_widget(payload: dict[str, Any]) -> WidgetSpec:
     widget_type = normalize_widget_type(payload.get("type"))
     if not isinstance(widget_id, str) or not widget_id:
         raise SceneError("widget.id must be a non-empty string")
+    if widget_type in UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES:
+        reason = UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES[widget_type]
+        raise SceneError(f"widget '{widget_id}' has unsupported type '{widget_type}' for the current target: {reason}")
     if widget_type not in SUPPORTED_WIDGET_TYPES:
         raise SceneError(f"widget '{widget_id}' has unsupported type '{widget_type}'")
 
