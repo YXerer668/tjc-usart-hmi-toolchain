@@ -11,7 +11,7 @@ from tools.live_page_smoke import _load_hmi_pages, run_smoke
 
 
 class LivePageSmokeTests(unittest.TestCase):
-    def test_load_hmi_pages_uses_numeric_pa_names_not_container_order(self) -> None:
+    def test_load_hmi_pages_uses_container_order_for_runtime_page_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             hmi_path = Path(temp_dir) / "lcd_test.HMI"
             hmi_path.write_bytes(b"zero one two shadow")
@@ -37,8 +37,8 @@ class LivePageSmokeTests(unittest.TestCase):
                 pages = _load_hmi_pages(hmi_path)
 
         self.assertEqual([page.page_id for page in pages], [0, 1, 2])
-        self.assertEqual([page.entry_name for page in pages], ["0.pa", "1.pa", "2.pa"])
-        self.assertEqual([page.page_name for page in pages], ["page0", "page1", "page2"])
+        self.assertEqual([page.entry_name for page in pages], ["1.pa", "0.pa", "2.pa"])
+        self.assertEqual([page.page_name for page in pages], ["page1", "page0", "page2"])
 
     def test_run_smoke_blocks_upload_when_tft_checksum_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

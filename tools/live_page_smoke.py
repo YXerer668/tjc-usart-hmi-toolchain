@@ -212,18 +212,14 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
     inspection = inspect_hmi(hmi_path)
     raw = hmi_path.read_bytes()
     pages: list[HmiPage] = []
-    page_entries: list[tuple[int, Any]] = []
     for entry in inspection.entries:
-        page_id = _page_id_from_entry_name(entry.name)
-        if page_id is None or not entry.in_file:
+        if not _is_numeric_page_entry_name(entry.name) or not entry.in_file:
             continue
-        page_entries.append((page_id, entry))
-
-    for page_id, entry in sorted(page_entries, key=lambda item: (item[0], item[1].name)):
+        # Live `sendme` follows the HMI directory order, not the numeric .pa filename.
         page = parse_page_data(raw[entry.data_offset : entry.data_offset + entry.length])
         pages.append(
             HmiPage(
-                page_id=page_id,
+                page_id=len(pages),
                 entry_name=entry.name,
                 page_name=page.page_name,
                 page=page,
@@ -232,11 +228,9 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
     return pages
 
 
-def _page_id_from_entry_name(name: str) -> int | None:
+def _is_numeric_page_entry_name(name: str) -> bool:
     path = Path(name)
-    if path.suffix.lower() != ".pa" or not path.stem.isdecimal():
-        return None
-    return int(path.stem)
+    return path.suffix.lower() == ".pa" and path.stem.isdecimal()
 
 
 def _run_page_checks(
