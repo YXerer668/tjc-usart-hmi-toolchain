@@ -302,6 +302,8 @@ def _run_serial_checks(
             )
         )
     for item in runtime_steps:
+        if item.delay_ms > 0:
+            time.sleep(item.delay_ms / 1000.0)
         checks.append(
             _transact_check(
                 config,
@@ -311,8 +313,6 @@ def _run_serial_checks(
                 label=item.label,
             )
         )
-        if item.delay_ms > 0:
-            time.sleep(item.delay_ms / 1000.0)
     if restore_page is not None:
         checks.append(_transact_check(config, f"page {restore_page}", label=f"restore page {restore_page}"))
     return checks
