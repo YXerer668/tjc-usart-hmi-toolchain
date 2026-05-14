@@ -59,6 +59,11 @@ def main() -> int:
     parser.add_argument("--upload", action="store_true")
     parser.add_argument("--known-current", help="Trusted current TFT for exact-file upload skipping.")
     parser.add_argument("--skip-if-identical", action="store_true")
+    parser.add_argument(
+        "--require-model",
+        default="TJC8048X543_011C",
+        help="When uploading, require connect to report this model before whmi-wri. Empty string disables.",
+    )
     parser.add_argument("--progress", action="store_true")
     parser.add_argument("--capture", action="store_true")
     parser.add_argument(
@@ -99,24 +104,40 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     checksum = _inspect_tft_checksum_safe(tft_path)
     checksum_ok = bool(checksum.get("valid"))
     upload_result = None
+    required_model = str(getattr(args, "require_model", "") or "")
+    model_preflight = None
     known_current = Path(args.known_current).resolve() if args.known_current else None
     if args.upload:
         if checksum_ok:
-            upload_result = upload_tft(
-                tft_path,
-                port=args.port,
-                baud=args.baud,
-                download_baud=args.download_baud,
-                chunk_size=args.chunk_size,
-                timeout_ms=max(args.timeout_ms, 8000),
-                prepare_delay_ms=args.prepare_delay_ms,
-                prepare_wait_ms=args.prepare_wait_ms,
-                known_current=known_current,
-                skip_if_identical=args.skip_if_identical,
-                allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
-                progress=_make_progress() if args.progress else None,
-            ).to_dict()
-            time.sleep(max(0.0, args.post_upload_wait_s))
+            if required_model:
+                model_preflight = _model_preflight_check(
+                    port=args.port,
+                    baud=args.baud,
+                    timeout_ms=args.timeout_ms,
+                    required_model=required_model,
+                )
+            if model_preflight is not None and not model_preflight["ok"]:
+                upload_result = {
+                    "skipped": True,
+                    "blocked": True,
+                    "reason": "model_preflight_failed",
+                }
+            else:
+                upload_result = upload_tft(
+                    tft_path,
+                    port=args.port,
+                    baud=args.baud,
+                    download_baud=args.download_baud,
+                    chunk_size=args.chunk_size,
+                    timeout_ms=max(args.timeout_ms, 8000),
+                    prepare_delay_ms=args.prepare_delay_ms,
+                    prepare_wait_ms=args.prepare_wait_ms,
+                    known_current=known_current,
+                    skip_if_identical=args.skip_if_identical,
+                    allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
+                    progress=_make_progress() if args.progress else None,
+                ).to_dict()
+                time.sleep(max(0.0, args.post_upload_wait_s))
         else:
             upload_result = {
                 "skipped": True,
@@ -162,6 +183,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "chunk_size": args.chunk_size,
         "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
         "checksum": checksum,
+        "model_preflight": model_preflight,
         "upload": upload_result,
         "expectations": [
             {
@@ -200,6 +222,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
             and checks_ok
             and camera_ok,
             "checksum_valid": checksum_ok,
+            "model_preflight_ok": None if model_preflight is None else bool(model_preflight["ok"]),
             "uploaded": bool(upload_result and not upload_result.get("skipped")),
             "upload_blocked": bool(upload_result and upload_result.get("blocked")),
             "upload_skipped": bool(upload_result and upload_result.get("skipped")),
@@ -208,6 +231,25 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
             "camera_captured": bool(camera and camera.get("ok")),
             "camera_ok": camera_ok,
         },
+    }
+
+
+def _model_preflight_check(
+    *,
+    port: str,
+    baud: int,
+    timeout_ms: int,
+    required_model: str,
+) -> dict[str, Any]:
+    config = SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms)
+    check = _connect_check(config)
+    details = check.get("response", {}).get("details", {}) if isinstance(check.get("response"), dict) else {}
+    actual_model = details.get("model") if isinstance(details, dict) else None
+    return {
+        "required_model": required_model,
+        "actual_model": actual_model,
+        "connect": check,
+        "ok": bool(check.get("ok")) and actual_model == required_model,
     }
 
 

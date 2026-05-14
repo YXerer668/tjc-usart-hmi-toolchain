@@ -226,6 +226,60 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(result["serial_checks"], [])
         self.assertFalse(result["summary"]["ok"])
 
+    def test_run_smoke_blocks_upload_on_model_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_dir = Path(temp_dir) / "out"
+            tft_path = Path(temp_dir) / "candidate.tft"
+            tft_path.write_bytes(b"fake-tft")
+            args = Namespace(
+                file=str(tft_path),
+                out_dir=str(out_dir),
+                expect_json=None,
+                expect=[],
+                set_expect=[],
+                upload=True,
+                known_current=None,
+                skip_if_identical=False,
+                port="COM36",
+                baud=9600,
+                download_baud=921600,
+                chunk_size=4096,
+                timeout_ms=3000,
+                prepare_delay_ms=1000,
+                prepare_wait_ms=800,
+                allow_unsafe_chunk_size=False,
+                progress=False,
+                post_upload_wait_s=0,
+                select_page=None,
+                restore_page=None,
+                expected_page_id=0,
+                capture=False,
+                require_model="TJC8048X543_011C",
+            )
+
+            with (
+                patch("tools.live_tft_smoke.inspect_tft_checksum", return_value={"valid": True}),
+                patch(
+                    "tools.live_tft_smoke._connect_check",
+                    return_value={
+                        "ok": True,
+                        "response": {"details": {"model": "TJC8048X550_011"}},
+                    },
+                ),
+                patch("tools.live_tft_smoke.upload_tft") as upload_tft,
+                patch("tools.live_tft_smoke._run_serial_checks", return_value=[]),
+            ):
+                result = run_smoke(args)
+
+        upload_tft.assert_not_called()
+        self.assertEqual(result["upload"]["reason"], "model_preflight_failed")
+        self.assertEqual(result["model_preflight"]["required_model"], "TJC8048X543_011C")
+        self.assertEqual(result["model_preflight"]["actual_model"], "TJC8048X550_011")
+        self.assertFalse(result["summary"]["model_preflight_ok"])
+        self.assertTrue(result["summary"]["upload_blocked"])
+        self.assertTrue(result["summary"]["serial_checks_skipped"])
+        self.assertFalse(result["summary"]["ok"])
+
 
 if __name__ == "__main__":
     unittest.main()
