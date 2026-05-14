@@ -17,9 +17,19 @@
 这些 case 的共同现象是：
 
 - `.HMI` 里能看到被 graft 的对象。
-- 官方编译能完成，通常没有错误。
+- 官方 GUI 打开后底部状态栏确认是 `Model:TJC8048X543_011  inch:4.3(800X480)`，不是未改型号的 `TJC8048X550_011`。
+- 官方编译能完成，通常没有错误，输出仍显示 `页面:page0 占用内存:16+340=356`。
 - 生成 `.TFT` 的对象数仍等于原始 seed 对象数。
 - 在 `.TFT` object tail 中找不到对应对象名、type/id header 或关键 payload。
+
+2026-05-14 复查证据保存在本机 `C:\Users\SinYu\Desktop\case_for_codex\case_*/official_gui_model_recheck\`：
+
+- `01_opened_model_status.png`：官方 GUI 打开工程时的全窗口截图。
+- `01_opened_model_status_bottom_status.png`：底部型号状态栏裁剪图。
+- `02_after_compile.png`：官方编译后的全窗口截图。
+- `lcd_test.official_recheck.json`：编译输出、run.run 路径和大小记录。
+
+这次复查的意义是排除了“只是官方例程没改板子型号”的主要误判路径。
 
 ## 容易混淆的名字
 
