@@ -53,6 +53,9 @@ Known unstable / research-only:
   is the slower full serial upload, because it is much easier to reason about
   and has been more reliable on the test machine.
 
+For a clearer implemented / experimental / missing matrix, see
+[`FEATURE_STATUS.md`](FEATURE_STATUS.md).
+
 ## Safety Notes
 
 - Keep generated `.TFT`, `.HMI`, `.zi`, screenshots, official binaries, and
