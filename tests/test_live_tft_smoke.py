@@ -15,6 +15,7 @@ from tools.live_tft_smoke import (
     _load_runtime_steps,
     _run_serial_checks,
     _transact_check,
+    run_smoke,
 )
 
 
@@ -179,6 +180,51 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(result["attempts"], 3)
         self.assertEqual(result["actual_value"], 1)
         self.assertEqual(len(result["retry_history"]), 1)
+
+    def test_run_smoke_records_checksum_and_blocks_invalid_upload(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_dir = Path(temp_dir) / "out"
+            tft_path = Path(temp_dir) / "bad.tft"
+            tft_path.write_bytes(b"not-a-real-tft")
+            args = Namespace(
+                file=str(tft_path),
+                out_dir=str(out_dir),
+                expect_json=None,
+                expect=[],
+                set_expect=[],
+                upload=True,
+                known_current=None,
+                skip_if_identical=False,
+                port="COM36",
+                baud=9600,
+                download_baud=921600,
+                chunk_size=4096,
+                timeout_ms=3000,
+                prepare_delay_ms=1000,
+                prepare_wait_ms=800,
+                allow_unsafe_chunk_size=False,
+                progress=False,
+                post_upload_wait_s=0,
+                select_page=None,
+                restore_page=None,
+                expected_page_id=0,
+                capture=False,
+            )
+
+            with (
+                patch("tools.live_tft_smoke.inspect_tft_checksum", side_effect=RuntimeError("bad checksum")),
+                patch("tools.live_tft_smoke.upload_tft") as upload_tft,
+                patch("tools.live_tft_smoke._run_serial_checks", return_value=[]),
+            ):
+                result = run_smoke(args)
+
+        upload_tft.assert_not_called()
+        self.assertFalse(result["checksum"]["valid"])
+        self.assertEqual(result["checksum"]["error"], "bad checksum")
+        self.assertTrue(result["summary"]["upload_blocked"])
+        self.assertTrue(result["summary"]["serial_checks_skipped"])
+        self.assertEqual(result["serial_checks"], [])
+        self.assertFalse(result["summary"]["ok"])
 
 
 if __name__ == "__main__":

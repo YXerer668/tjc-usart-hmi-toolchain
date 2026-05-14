@@ -14,6 +14,7 @@ if str(WORKSPACE_ROOT) not in sys.path:
     sys.path.insert(0, str(WORKSPACE_ROOT))
 
 from usarthmi.protocol import build_get, parse_response
+from usarthmi.tft_checksum import inspect_tft_checksum
 from usarthmi.tft_download import DEFAULT_DOWNLOAD_BAUD, PUBLIC_WHMI_CHUNK_SIZE, upload_tft
 from usarthmi.transport import SerialConfig, SerialTransport
 
@@ -95,24 +96,33 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     expectations = _load_expectations(args.expect_json, args.expect)
     set_expectations = _load_set_expectations(args.expect_json, args.set_expect)
     runtime_steps = _load_runtime_steps(args.expect_json)
+    checksum = _inspect_tft_checksum_safe(tft_path)
+    checksum_ok = bool(checksum.get("valid"))
     upload_result = None
     known_current = Path(args.known_current).resolve() if args.known_current else None
     if args.upload:
-        upload_result = upload_tft(
-            tft_path,
-            port=args.port,
-            baud=args.baud,
-            download_baud=args.download_baud,
-            chunk_size=args.chunk_size,
-            timeout_ms=max(args.timeout_ms, 8000),
-            prepare_delay_ms=args.prepare_delay_ms,
-            prepare_wait_ms=args.prepare_wait_ms,
-            known_current=known_current,
-            skip_if_identical=args.skip_if_identical,
-            allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
-            progress=_make_progress() if args.progress else None,
-        ).to_dict()
-        time.sleep(max(0.0, args.post_upload_wait_s))
+        if checksum_ok:
+            upload_result = upload_tft(
+                tft_path,
+                port=args.port,
+                baud=args.baud,
+                download_baud=args.download_baud,
+                chunk_size=args.chunk_size,
+                timeout_ms=max(args.timeout_ms, 8000),
+                prepare_delay_ms=args.prepare_delay_ms,
+                prepare_wait_ms=args.prepare_wait_ms,
+                known_current=known_current,
+                skip_if_identical=args.skip_if_identical,
+                allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
+                progress=_make_progress() if args.progress else None,
+            ).to_dict()
+            time.sleep(max(0.0, args.post_upload_wait_s))
+        else:
+            upload_result = {
+                "skipped": True,
+                "blocked": True,
+                "reason": "invalid_tft_checksum",
+            }
 
     select_page = args.select_page
     if select_page is None and "select_page" in expectation_config:
@@ -124,17 +134,21 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
     if expected_page_id is None:
         expected_page_id = int(expectation_config.get("page_id", 0))
 
-    serial_checks = _run_serial_checks(
-        expectations,
-        port=args.port,
-        baud=args.baud,
-        timeout_ms=args.timeout_ms,
-        expected_page_id=expected_page_id,
-        select_page=select_page,
-        set_expectations=set_expectations,
-        runtime_steps=runtime_steps,
-        restore_page=restore_page,
-    )
+    serial_checks_skipped = bool(args.upload and upload_result and upload_result.get("blocked"))
+    if serial_checks_skipped:
+        serial_checks = []
+    else:
+        serial_checks = _run_serial_checks(
+            expectations,
+            port=args.port,
+            baud=args.baud,
+            timeout_ms=args.timeout_ms,
+            expected_page_id=expected_page_id,
+            select_page=select_page,
+            set_expectations=set_expectations,
+            runtime_steps=runtime_steps,
+            restore_page=restore_page,
+        )
     camera = _capture_frame(args, out_dir) if args.capture else None
     checks_ok = all(item["ok"] for item in serial_checks)
     camera_ok = camera is None or bool(camera.get("ok"))
@@ -147,6 +161,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "download_baud": args.download_baud,
         "chunk_size": args.chunk_size,
         "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
+        "checksum": checksum,
         "upload": upload_result,
         "expectations": [
             {
@@ -180,14 +195,32 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "serial_checks": serial_checks,
         "camera": camera,
         "summary": {
-            "ok": (not args.upload or upload_result is not None) and checks_ok and camera_ok,
+            "ok": checksum_ok
+            and (not args.upload or (upload_result is not None and not upload_result.get("blocked")))
+            and checks_ok
+            and camera_ok,
+            "checksum_valid": checksum_ok,
             "uploaded": bool(upload_result and not upload_result.get("skipped")),
+            "upload_blocked": bool(upload_result and upload_result.get("blocked")),
             "upload_skipped": bool(upload_result and upload_result.get("skipped")),
             "serial_checks_ok": checks_ok,
+            "serial_checks_skipped": serial_checks_skipped,
             "camera_captured": bool(camera and camera.get("ok")),
             "camera_ok": camera_ok,
         },
     }
+
+
+def _inspect_tft_checksum_safe(tft_path: Path) -> dict[str, Any]:
+    try:
+        return inspect_tft_checksum(tft_path)
+    except Exception as exc:
+        return {
+            "path": str(tft_path),
+            "file_size": tft_path.stat().st_size if tft_path.exists() else None,
+            "valid": False,
+            "error": str(exc),
+        }
 
 
 def _load_expectation_config(expect_json: str | None) -> dict[str, Any]:
