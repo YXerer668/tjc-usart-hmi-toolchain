@@ -1,5 +1,7 @@
 # usarthmi
 
+[中文说明](README.zh-CN.md) | [Feature Status](FEATURE_STATUS.md)
+
 `usarthmi` is an experimental, scriptable toolchain for TJC / USART HMI serial
 screens. It started from live reverse engineering of a `TJC8048X543_011C`
 800x480 panel and the official `USART HMI` editor, then grew into a Python CLI
