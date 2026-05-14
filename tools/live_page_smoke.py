@@ -51,13 +51,17 @@ class SerialCheck:
 class HmiPage:
     page_id: int
     entry_name: str
+    entry_page_number: int
     page_name: str
     page: PageFile
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "page_id": self.page_id,
+            "page_id_source": "hmi_directory_order",
             "entry_name": self.entry_name,
+            "entry_page_number": self.entry_page_number,
+            "entry_page_number_matches_runtime": self.entry_page_number == self.page_id,
             "page_name": self.page_name,
             "objects": [_block_summary(block) for block in self.page.blocks],
         }
@@ -168,6 +172,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
         "hmi": str(hmi_path),
         "tft": str(tft_path),
         "out_dir": str(out_dir),
+        "page_id_source": "hmi_directory_order",
         "pages": [page.to_dict() for page in pages],
         "checksum": checksum,
         "model_preflight": model_preflight,
@@ -213,7 +218,8 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
     raw = hmi_path.read_bytes()
     pages: list[HmiPage] = []
     for entry in inspection.entries:
-        if not _is_numeric_page_entry_name(entry.name) or not entry.in_file:
+        entry_page_number = _numeric_page_entry_number(entry.name)
+        if entry_page_number is None or not entry.in_file:
             continue
         # Live `sendme` follows the HMI directory order, not the numeric .pa filename.
         page = parse_page_data(raw[entry.data_offset : entry.data_offset + entry.length])
@@ -221,6 +227,7 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
             HmiPage(
                 page_id=len(pages),
                 entry_name=entry.name,
+                entry_page_number=entry_page_number,
                 page_name=page.page_name,
                 page=page,
             )
@@ -228,9 +235,11 @@ def _load_hmi_pages(hmi_path: Path) -> list[HmiPage]:
     return pages
 
 
-def _is_numeric_page_entry_name(name: str) -> bool:
+def _numeric_page_entry_number(name: str) -> int | None:
     path = Path(name)
-    return path.suffix.lower() == ".pa" and path.stem.isdecimal()
+    if path.suffix.lower() != ".pa" or not path.stem.isdecimal():
+        return None
+    return int(path.stem)
 
 
 def _run_page_checks(

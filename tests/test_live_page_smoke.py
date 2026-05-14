@@ -37,8 +37,13 @@ class LivePageSmokeTests(unittest.TestCase):
                 pages = _load_hmi_pages(hmi_path)
 
         self.assertEqual([page.page_id for page in pages], [0, 1, 2])
+        self.assertEqual([page.entry_page_number for page in pages], [1, 0, 2])
         self.assertEqual([page.entry_name for page in pages], ["1.pa", "0.pa", "2.pa"])
         self.assertEqual([page.page_name for page in pages], ["page1", "page0", "page2"])
+        self.assertEqual(
+            [page.to_dict()["entry_page_number_matches_runtime"] for page in pages],
+            [False, False, True],
+        )
 
     def test_run_smoke_blocks_upload_when_tft_checksum_is_invalid(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -122,6 +127,7 @@ class LivePageSmokeTests(unittest.TestCase):
         model_preflight.assert_called_once()
         upload_tft.assert_called_once()
         run_page_checks.assert_called_once()
+        self.assertEqual(result["page_id_source"], "hmi_directory_order")
         self.assertTrue(result["summary"]["ok"])
         self.assertFalse(result["summary"]["upload_blocked"])
         self.assertFalse(result["summary"]["serial_checks_skipped"])
@@ -156,7 +162,17 @@ def _args(temp_dir: Path) -> tuple[Namespace, Path, Path, Path]:
 
 
 def _patched_page_inputs(hmi_path: Path, tft_path: Path, out_dir: Path):
-    page = SimpleNamespace(to_dict=lambda: {"page_id": 0, "page_name": "page0", "objects": []})
+    page = SimpleNamespace(
+        to_dict=lambda: {
+            "page_id": 0,
+            "page_id_source": "hmi_directory_order",
+            "entry_name": "0.pa",
+            "entry_page_number": 0,
+            "entry_page_number_matches_runtime": True,
+            "page_name": "page0",
+            "objects": [],
+        }
+    )
     return _PatchGroup(
         [
             patch("tools.live_page_smoke._resolve_paths", return_value=(hmi_path, tft_path, out_dir)),
