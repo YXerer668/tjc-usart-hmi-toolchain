@@ -10,6 +10,13 @@ Scope:
 - `back0` has a single release event: `page 1`, which should jump back to page0.
 - This remains behind `experimental_multi_page_events`.
 
+Live evidence:
+
+- `hardware_verified_2026-05-14.json` records a full COM36 upload and serial
+  smoke test.
+- Runtime page ids are inverted in this recovered layout: `page 0` selects the
+  generated page1, and `page 1` selects the seed page0.
+
 Build:
 
 ```powershell
@@ -29,4 +36,3 @@ python tools\live_tft_smoke.py --upload --progress `
   --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 `
   --timeout-ms 3000 --prepare-delay-ms 1000 --prepare-wait-ms 800
 ```
-

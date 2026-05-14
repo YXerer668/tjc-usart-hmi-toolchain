@@ -360,7 +360,7 @@ class MultiPagePatchResult:
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 normal-button jump-page events are opt-in and currently hardware-verified only for the minimal page1 back-to-page0 path."
+                "Page1 normal-button jump-page events are opt-in; in the recovered case31 layout runtime page 1 maps back to seed page0."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
