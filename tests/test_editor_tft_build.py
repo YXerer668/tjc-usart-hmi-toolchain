@@ -843,6 +843,7 @@ class EditorTftBuildTests(unittest.TestCase):
             {"id": "p1t", "type": "text", "x": 40, "y": 30, "w": 160, "h": 40, "text": "P1"},
             {"id": "p1b", "type": "button", "x": 220, "y": 30, "w": 120, "h": 50, "text": "BTN"},
             {"id": "n1", "type": "number", "x": 40, "y": 100, "w": 120, "h": 40, "value": 123},
+            {"id": "img1", "type": "image", "x": 220, "y": 100, "w": 96, "h": 64, "resources": {"pic": 0}},
             {"id": "bar1", "type": "progress", "x": 40, "y": 160, "w": 220, "h": 28, "value": 68},
             {"id": "slider1", "type": "slider", "x": 40, "y": 220, "w": 220, "h": 40, "value": 42},
             {"id": "gauge1", "type": "gauge", "x": 360, "y": 80, "w": 160, "h": 160, "value": 75},
@@ -867,7 +868,7 @@ class EditorTftBuildTests(unittest.TestCase):
                 self.assertTrue(manifest["tft_checksum"]["valid"])
                 self.assertEqual(manifest["tft_patch"]["mode"], "experimental_multi_page_tft_patch")
                 self.assertEqual(manifest["tft_patch"]["page_count"], 2)
-                self.assertEqual(manifest["tft_patch"]["object_count"], 11)
+                self.assertEqual(manifest["tft_patch"]["object_count"], 12)
 
                 page1_path = Path(manifest["target_pages"][1])
                 page1 = load_page_file(page1_path)
@@ -878,6 +879,7 @@ class EditorTftBuildTests(unittest.TestCase):
                 )
                 checks = {
                     "n1": ("6", 0x44, 4, 123),
+                    "img1": ("p", 0x38, 2, 0),
                     "bar1": ("j", 0x3A, 1, 68),
                     "slider1": ("\x01", 0x42, 2, 42),
                     "gauge1": ("z", 0x3C, 2, 75),
@@ -1032,7 +1034,38 @@ class EditorTftBuildTests(unittest.TestCase):
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
-            with self.assertRaisesRegex(Exception, "page1 supports only text/button/number/progress/slider/gauge"):
+            with self.assertRaisesRegex(Exception, "page1 supports only text/button/number/image/progress/slider/gauge"):
+                build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+    def test_scene_build_rejects_page1_new_image_resources(self) -> None:
+        bad_scene = validate_scene(
+            {
+                "project": {"name": "bad-page1-image-resource", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "img1",
+                                "type": "image",
+                                "x": 10,
+                                "y": 10,
+                                "w": 100,
+                                "h": 60,
+                                "resources": {"asset": "newpic"},
+                            }
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(Exception, "page1 widget resources"):
                 build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
 
     def test_scene_build_can_minimize_seed_objects_in_bounds(self) -> None:

@@ -67,7 +67,8 @@ RESOURCE_FIELD_ALIASES = {
     "pressed": "pic2",
     "crop": "picc",
 }
-PAGE1_PLAIN_WIDGET_TYPES = {"text", "button", "number", "progress", "slider", "gauge"}
+PAGE1_PLAIN_WIDGET_TYPES = {"text", "button", "number", "image", "progress", "slider", "gauge"}
+PAGE1_PLAIN_WIDGET_TYPES_LABEL = "text/button/number/image/progress/slider/gauge"
 MEDIA_WIDGET_TYPE_CODES = {"\x02", "\x03", "\x04"}
 
 
@@ -317,6 +318,7 @@ def build_hmi(
         page,
         scene.pages[1:],
         button_proto=button_proto,
+        picture_proto=picture_proto,
         number_proto=number_proto,
         text_proto=text_proto,
         advanced_protos=advanced_protos,
@@ -338,6 +340,7 @@ def _build_extra_page_entries(
     extra_pages,
     *,
     button_proto,
+    picture_proto,
     number_proto,
     text_proto,
     advanced_protos,
@@ -366,7 +369,7 @@ def _build_extra_page_entries(
                 widget,
                 next_id,
                 button_proto=button_proto,
-                picture_proto=None,
+                picture_proto=picture_proto,
                 number_proto=number_proto,
                 timer_proto=None,
                 text_proto=text_proto,
@@ -376,7 +379,7 @@ def _build_extra_page_entries(
             if widget_block is None:
                 raise EditorError(
                     "Multi-page HMI/TFT build V1 extra pages currently support only "
-                    "text/button/number/progress/slider/gauge widgets"
+                    f"{PAGE1_PLAIN_WIDGET_TYPES_LABEL} widgets"
                 )
             generated_blocks.append(widget_block)
         page.blocks = [block, *generated_blocks]
@@ -787,7 +790,7 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
         if widget.type not in PAGE1_PLAIN_WIDGET_TYPES:
             raise EditorError(
                 "Multi-page build V1 page1 supports only "
-                "text/button/number/progress/slider/gauge widgets"
+                f"{PAGE1_PLAIN_WIDGET_TYPES_LABEL} widgets"
             )
         if widget.id in seen_ids:
             raise EditorError(f"Multi-page build V1 page1 object name conflicts with {widget.id!r}")
@@ -796,7 +799,9 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
             allow_events and _is_supported_experimental_page1_event_widget(widget)
         ):
             raise EditorError("Multi-page build V1 does not support page1 widget events yet")
-        if widget.resources:
+        if widget.resources and not (
+            widget.type == "image" and set(widget.resources).issubset({"pic"})
+        ):
             raise EditorError("Multi-page build V1 does not support page1 widget resources yet")
         if widget.children:
             raise EditorError("Multi-page build V1 does not support page1 child widgets yet")
