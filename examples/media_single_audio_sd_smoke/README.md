@@ -30,10 +30,22 @@ python tools\live_tft_smoke.py `
   --upload --progress
 ```
 
+Optional runtime start/stop smoke, after this TFT is already on the panel:
+
+```powershell
+python tools\live_tft_smoke.py `
+  --file reverse_usarthmi\media_single_audio_sd_smoke_build\output.tft `
+  --out-dir reverse_usarthmi\media_single_audio_sd_smoke_build\play_smoke `
+  --expect-json examples\media_single_audio_sd_smoke\play.expect.json
+```
+
 Notes:
 
 - The sample keeps `wav0.en=0` so flashing it does not immediately try to play
   audio.
+- `play.expect.json` deliberately toggles `wav0.en=1` and then restores
+  `wav0.en=0`. It proves runtime start/stop control and readback, but it still
+  does not prove the physical speaker path.
 - Runtime reads are limited to fields such as `wav0.en`, `wav0.vid`,
   `wav0.loop`, `wav0.fps`, `wav0.dis`, and `wav0.tim`.
 - `get wav0.path` returns `0x1A` on the current panel, so the smoke explicitly

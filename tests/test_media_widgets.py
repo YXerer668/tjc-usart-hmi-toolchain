@@ -34,6 +34,22 @@ SEED_HMI = Path(r"D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI")
 
 
 class MediaWidgetTests(unittest.TestCase):
+    def test_single_audio_play_expectation_toggles_and_restores_en(self) -> None:
+        expect_path = Path(__file__).resolve().parents[1] / "examples" / "media_single_audio_sd_smoke" / "play.expect.json"
+        data = json.loads(expect_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(data["expectations"]["wav0.en"], 0)
+        steps = data["steps"]
+        self.assertEqual([step["label"] for step in steps], ["start wav0", "verify wav0 started", "stop wav0", "verify wav0 stopped"])
+        self.assertEqual(steps[0]["command"], "wav0.en=1")
+        self.assertEqual(steps[1]["command"], "get wav0.en")
+        self.assertEqual(steps[1]["expected_kind"], "number")
+        self.assertEqual(steps[1]["expected_value"], 1)
+        self.assertEqual(steps[2]["command"], "wav0.en=0")
+        self.assertEqual(steps[3]["command"], "get wav0.en")
+        self.assertEqual(steps[3]["expected_kind"], "number")
+        self.assertEqual(steps[3]["expected_value"], 0)
+
     def test_media_widget_aliases_are_supported(self) -> None:
         scene = validate_scene(
             {

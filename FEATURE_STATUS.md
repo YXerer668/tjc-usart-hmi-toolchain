@@ -68,7 +68,7 @@ Legend:
 | Touch capture (`case_45`) | Implemented | Experimental | Current-editor fixture-backed record generation. |
 | GMOV animation | Implemented | Experimental | Single internal GMOV smoke path is the recommended media test. |
 | Video | Implemented | Experimental | Single SD-path video object tail is TFT-buildable and live serial-readback proven; broad playback/resource scheduling is not closed. |
-| Audio / WAV | Implemented | Experimental | Single SD-path audio object tail is TFT-buildable and live serial-readback proven; playback/speaker validation is still open. |
+| Audio / WAV | Implemented | Experimental | Single SD-path audio object tail is TFT-buildable; live readback and `wav0.en` start/stop control are proven, but speaker validation is still open. |
 | Text select (`case_38`) | Authoring probe only | Not implemented | Current target/editor compile dropped the grafted object. |
 | Sliding text / `sltext` (`case_41`) | Authoring probe only | Not implemented | Current target/editor compile dropped the grafted object. |
 | Data record | Authoring probe only | Not implemented | Current target/editor compile dropped the grafted object. |

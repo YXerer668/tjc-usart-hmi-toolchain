@@ -1,0 +1,35 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": {
+    "wav0.en": 0,
+    "wav0.vid": 0,
+    "wav0.loop": 0,
+    "wav0.fps": 1,
+    "wav0.dis": 100,
+    "wav0.tim": 0
+  },
+  "steps": [
+    {
+      "label": "start wav0",
+      "command": "wav0.en=1"
+    },
+    {
+      "label": "verify wav0 started",
+      "command": "get wav0.en",
+      "expected_kind": "number",
+      "expected_value": 1,
+      "delay_ms": 500
+    },
+    {
+      "label": "stop wav0",
+      "command": "wav0.en=0"
+    },
+    {
+      "label": "verify wav0 stopped",
+      "command": "get wav0.en",
+      "expected_kind": "number",
+      "expected_value": 0
+    }
+  ]
+}
