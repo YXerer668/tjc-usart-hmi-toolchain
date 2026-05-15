@@ -1,0 +1,70 @@
+{
+  "probe": "event_demo_post_primary_probe_20260515",
+  "date": "2026-05-15",
+  "purpose": "Test whether forcing page0 load bytecode into a post-primary page event chunk fixes non-media page-load scheduling.",
+  "build": {
+    "output_tft_size": 11409476,
+    "checksum_hex": "0x729633AE",
+    "checksum_valid": true,
+    "post_primary_page_event_found_by_probe": true
+  },
+  "device": {
+    "port": "COM36",
+    "command_baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload": {
+    "bytes_sent": 11409476,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 211.25,
+    "skipped": false
+  },
+  "serial_after_upload": [
+    {
+      "command": "connect",
+      "result": "comok 2,1089-0,TJC8048X543_011C,277,10501,FC8B3401B1A6086E,128974848-0"
+    },
+    {
+      "command": "sendme",
+      "hex": "",
+      "expected": "66 00 FF FF FF"
+    },
+    {
+      "command": "get evtbtn.txt",
+      "hex": ""
+    },
+    {
+      "command": "click evtbtn,0",
+      "hex": "",
+      "expected": "23 02 54 45"
+    },
+    {
+      "command": "page 0",
+      "hex": "",
+      "expected_page_load": "23 02 50 01"
+    },
+    {
+      "command": "bkcmd=3",
+      "hex": ""
+    },
+    {
+      "command": "get dim",
+      "hex": ""
+    },
+    {
+      "command": "rest",
+      "hex": ""
+    }
+  ],
+  "restore_attempt": {
+    "known_good_tft": "reverse_usarthmi/event_demo_live_probe_20260515/output.tft",
+    "known_good_checksum_hex": "0x038D048C",
+    "connect_before_restore": "TJC8048X543_011C",
+    "result": "failed",
+    "error": "Timed out waiting for initial whmi-wri ack",
+    "manual_connect_then_whmi_wri": "failed, no 0x05 ack"
+  },
+  "conclusion": "Forcing post-primary page-load on a non-media single-page build is unsafe and does not merely leave page-load untriggered; it leaves the runtime command parser unresponsive except for connect. Keep this as a negative fixture and recover with physical reset, official downloader, or SD-card TFT."
+}

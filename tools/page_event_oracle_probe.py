@@ -31,7 +31,12 @@ CALLBACK_SLOT_OFFSETS = {
 }
 
 
-def probe_hmi_tft(hmi_path: Path, tft_path: Path) -> dict[str, Any]:
+def probe_hmi_tft(
+    hmi_path: Path,
+    tft_path: Path,
+    *,
+    force_post_primary_page_load: bool = False,
+) -> dict[str, Any]:
     try:
         page = parse_page_data(_hmi_resource(hmi_path, "0.pa"))
     except ValueError as exc:
@@ -44,7 +49,11 @@ def probe_hmi_tft(hmi_path: Path, tft_path: Path) -> dict[str, Any]:
     if object_start is None:
         raise SystemExit("TFT Header2 does not expose unknown_objects_address")
     object_region = tft_raw[object_start:]
-    post_primary_page_event = _build_post_primary_page_event(page.blocks, context=context)
+    post_primary_page_event = _build_post_primary_page_event(
+        page.blocks,
+        context=context,
+        force=force_post_primary_page_load,
+    )
     post_primary_matches = _all_matches(object_region, post_primary_page_event)
 
     block_reports = []
@@ -95,6 +104,7 @@ def probe_hmi_tft(hmi_path: Path, tft_path: Path) -> dict[str, Any]:
         "page_name": page.page_name,
         "object_count": len(page.blocks),
         "post_primary_page_event": {
+            "force_post_primary_page_load": force_post_primary_page_load,
             "length": len(post_primary_page_event),
             "hex_prefix": post_primary_page_event[:64].hex(" "),
             "matches": [_offset_item(value) for value in post_primary_matches],
@@ -331,9 +341,18 @@ def main() -> int:
     parser.add_argument("--hmi", required=True, type=Path)
     parser.add_argument("--tft", required=True, type=Path)
     parser.add_argument("--out", type=Path)
+    parser.add_argument(
+        "--force-post-primary-page-load",
+        action="store_true",
+        help="Also search the experimental post-primary page-load chunk for non-media pages.",
+    )
     args = parser.parse_args()
 
-    report = probe_hmi_tft(args.hmi.resolve(), args.tft.resolve())
+    report = probe_hmi_tft(
+        args.hmi.resolve(),
+        args.tft.resolve(),
+        force_post_primary_page_load=args.force_post_primary_page_load,
+    )
     text = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

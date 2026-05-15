@@ -1855,12 +1855,15 @@ def _build_post_primary_page_event(
     target_blocks: list[PageBlock],
     *,
     context: _EventCompileContext,
+    force: bool = False,
 ) -> bytes:
-    if not _uses_post_primary_page_load(target_blocks):
+    if not (force or _uses_post_primary_page_load(target_blocks)):
         return b""
     events = _events_by_prefix(target_blocks[0])
     load_lines = events.get("codesload-", [])
     loadend_lines = events.get("codesloadend-", [])
+    if not load_lines and not loadend_lines:
+        return b""
     out = bytearray()
     out.extend(_code_block(bytes.fromhex("09 1f 04 35")))
     load_script = _compile_event_script(load_lines, context=context)

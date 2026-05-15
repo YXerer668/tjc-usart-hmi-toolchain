@@ -1,0 +1,790 @@
+{
+  "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\event_demo_post_primary_probe_20260515\\output.hmi",
+  "tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\event_demo_post_primary_probe_20260515\\output.tft",
+  "editor_version": "tjc-1.67.6",
+  "model": "TJC8048X543_011",
+  "object_start": 11403264,
+  "object_start_hex": "0xAE0000",
+  "object_region_length": 6212,
+  "object_region_length_hex": "0x1844",
+  "page_name": "page0",
+  "object_count": 5,
+  "post_primary_page_event": {
+    "force_post_primary_page_load": true,
+    "length": 37,
+    "hex_prefix": "04 00 00 00 09 1f 04 35 0e 00 00 00 09 0f 08 32 33 20 30 32 20 35 30 20 30 31 03 00 00 00 09 30 08 00 00 00 00",
+    "matches": [
+      {
+        "value": 965,
+        "hex": "0x3C5"
+      }
+    ],
+    "reference_targets": [
+      {
+        "name": "post_primary_page_event_start",
+        "value": 965,
+        "value_hex": "0x3C5",
+        "references": []
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "index": 0,
+      "objname": "page0",
+      "type_code": "y",
+      "id": 0,
+      "event_tokens": [
+        "codesload-1",
+        "printh 23 02 50 01",
+        "codesloadend-0",
+        "codesdown-0",
+        "codesup-0",
+        "codesunload-0"
+      ],
+      "event_table_length": 65,
+      "event_table_hex_prefix": "0e 00 00 00 09 0f 08 32 33 20 30 32 20 35 30 20 30 31 03 00 00 00 09 30 08 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00",
+      "event_table_matches": [],
+      "first_non_empty_item_offset_in_table": 0,
+      "first_non_empty_item_offset_in_table_hex": "0x0",
+      "reference_targets": [],
+      "record_candidates": [
+        {
+          "relative_offset": 545,
+          "relative_offset_hex": "0x221",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5518,
+          "relative_offset_hex": "0x158E",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 325,
+              "value_hex": "0x145",
+              "raw_hex": "45 01 00 00",
+              "points_to_event_target": false
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "objname": "t0",
+      "type_code": "t",
+      "id": 1,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 5570,
+              "hex": "0x15C2"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 5708,
+              "hex": "0x164C"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 5846,
+              "hex": "0x16D6"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 5984,
+              "hex": "0x1760"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 609,
+          "relative_offset_hex": "0x261",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5656,
+          "relative_offset_hex": "0x1618",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 365,
+              "value_hex": "0x16D",
+              "raw_hex": "6d 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "objname": "b0",
+      "type_code": "b",
+      "id": 2,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 5570,
+              "hex": "0x15C2"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 5708,
+              "hex": "0x164C"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 5846,
+              "hex": "0x16D6"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 5984,
+              "hex": "0x1760"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 693,
+          "relative_offset_hex": "0x2B5",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5794,
+          "relative_offset_hex": "0x16A2",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 391,
+              "value_hex": "0x187",
+              "raw_hex": "87 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "objname": "p0",
+      "type_code": "p",
+      "id": 3,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 5570,
+              "hex": "0x15C2"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 5708,
+              "hex": "0x164C"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 5846,
+              "hex": "0x16D6"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 5984,
+              "hex": "0x1760"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 777,
+          "relative_offset_hex": "0x309",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5932,
+          "relative_offset_hex": "0x172C",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 417,
+              "value_hex": "0x1A1",
+              "raw_hex": "a1 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "objname": "evtbtn",
+      "type_code": "b",
+      "id": 4,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-1",
+        "printh 23 02 54 45"
+      ],
+      "event_table_length": 44,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 0e 00 00 00 09 0f 08 32 33 20 30 32 20 35 34 20 34 35 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 443,
+          "hex": "0x1BB"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": 22,
+      "first_non_empty_item_offset_in_table_hex": "0x16",
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 443,
+          "value_hex": "0x1BB",
+          "references": [
+            {
+              "value": 6122,
+              "hex": "0x17EA"
+            }
+          ]
+        },
+        {
+          "name": "first_executable",
+          "value": 465,
+          "value_hex": "0x1D1",
+          "references": [
+            {
+              "value": 853,
+              "hex": "0x355"
+            },
+            {
+              "value": 6086,
+              "hex": "0x17C6"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 837,
+          "relative_offset_hex": "0x345",
+          "header_hex": "62 04 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 465,
+              "value_hex": "0x1D1",
+              "raw_hex": "d1 01 00 00",
+              "points_to_event_target": true
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 6070,
+          "relative_offset_hex": "0x17B6",
+          "header_hex": "62 04 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 465,
+              "value_hex": "0x1D1",
+              "raw_hex": "d1 01 00 00",
+              "points_to_event_target": true
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 443,
+              "value_hex": "0x1BB",
+              "raw_hex": "bb 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "diagnosis": {
+    "page_load_non_empty": true,
+    "page_event_table_found": false,
+    "post_primary_page_event_found": true,
+    "page_callback_like_slots": [],
+    "object_callback_like_slots": [
+      {
+        "record_offset_hex": "0x345",
+        "slots": [
+          "slot_0x10"
+        ],
+        "objname": "evtbtn"
+      },
+      {
+        "record_offset_hex": "0x17B6",
+        "slots": [
+          "slot_0x10"
+        ],
+        "objname": "evtbtn"
+      }
+    ],
+    "page_event_offset_0x34_refs": [],
+    "object_event_offset_0x34_refs": [
+      {
+        "record_offset_hex": "0x1618",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "t0"
+      },
+      {
+        "record_offset_hex": "0x16A2",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "b0"
+      },
+      {
+        "record_offset_hex": "0x172C",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "p0"
+      },
+      {
+        "record_offset_hex": "0x17B6",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "evtbtn"
+      }
+    ],
+    "interpretation": "Official-style media page-load bytecode is present after the primary records. Do not expect the normal page event table search alone to find codesload."
+  }
+}
