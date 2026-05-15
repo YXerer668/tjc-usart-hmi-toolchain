@@ -18,11 +18,11 @@ from .tft_images import compile_hmi_picture_resource, pack_picture_resources_int
 from .tft_media import pack_gmov_resources_into_tft
 from .tft_patch import (
     DEFAULT_CASE_ROOT,
-    SUPPORTED_PAGE1_BUTTON_EVENT_LINES,
     TYPE_RECORD_LENGTHS,
     patch_added_object_tft,
     patch_multi_page_tft,
     patch_rebuild_page_tft,
+    is_supported_page1_button_event_line,
 )
 
 
@@ -830,8 +830,7 @@ def _is_supported_experimental_page1_event_widget(widget) -> bool:
     event_name, lines = event_items[0]
     if event_name not in {"down", "up"} or len(lines) != 1:
         return False
-    line = lines[0].strip().lower()
-    return line in SUPPORTED_PAGE1_BUTTON_EVENT_LINES
+    return is_supported_page1_button_event_line(lines[0])
 
 
 def _field3_template(entries, suffix: str) -> int:

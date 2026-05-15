@@ -170,6 +170,14 @@ EVENT_FIELD_USER_SLOTS = {
 }
 EVENT_ASSIGN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
 EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)(\+\+|--)\s*$")
+
+
+def is_supported_page1_button_event_line(line: str) -> bool:
+    """Return whether a page1 button event is inside the conservative V1 allow-list."""
+    normalized = line.strip().lower()
+    if normalized in SUPPORTED_PAGE1_BUTTON_EVENT_LINES:
+        return True
+    return EVENT_ASSIGN_RE.match(normalized) is not None or EVENT_UNARY_RE.match(normalized) is not None
 IMAGE_BUTTON_MIRROR_RELATIVE_VALUES = (
     9,
     10,
@@ -759,7 +767,7 @@ def _is_supported_page1_button_event_block(block: PageBlock) -> bool:
     prefix, lines = event_items[0]
     if prefix not in {"codesdown-", "codesup-"} or len(lines) != 1:
         return False
-    return lines[0].strip().lower() in SUPPORTED_PAGE1_BUTTON_EVENT_LINES
+    return is_supported_page1_button_event_line(lines[0])
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:
@@ -1383,7 +1391,6 @@ def _build_multi_page_tail(
     mirror_value_count = len(mirror_descriptor_sequence)
 
     prefix_head = _multi_page_prefix_head(seed.prefix_head, extra_page_objects)
-    event_context = _build_event_compile_context([*page0_blocks, *extra_page_blocks])
     out = bytearray(prefix_head)
 
     extra_page_infos: list[dict[str, Any]] = []
@@ -1392,7 +1399,7 @@ def _build_multi_page_tail(
             out,
             seed,
             page_blocks,
-            event_context=event_context,
+            event_context=_build_event_compile_context(page_blocks),
         )
         extra_page_infos.append(info)
 
@@ -1400,7 +1407,7 @@ def _build_multi_page_tail(
         out,
         seed,
         page0_blocks,
-        event_context=event_context,
+        event_context=_build_event_compile_context(page0_blocks),
     )
 
     attr_offset = len(out)

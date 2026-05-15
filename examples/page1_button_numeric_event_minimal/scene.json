@@ -1,0 +1,58 @@
+{
+  "project": {
+    "name": "page1-button-numeric-event-minimal",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 72,
+          "y": 70,
+          "w": 220,
+          "h": 60,
+          "value": 3,
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "inc0",
+          "type": "button",
+          "x": 72,
+          "y": 154,
+          "w": 180,
+          "h": 64,
+          "text": "INC",
+          "events": {
+            "down": [
+              "numval.val++"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

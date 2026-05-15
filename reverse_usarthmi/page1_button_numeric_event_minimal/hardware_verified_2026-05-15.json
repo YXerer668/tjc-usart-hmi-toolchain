@@ -1,0 +1,43 @@
+{
+  "case": "page1_button_numeric_event_minimal",
+  "date": "2026-05-15",
+  "source_smoke_result": "reverse_usarthmi/page1_button_numeric_event_minimal/live_smoke/smoke_result.json",
+  "build": {
+    "scene": "examples/page1_button_numeric_event_minimal/scene.json",
+    "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+    "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+    "output_tft": "reverse_usarthmi/page1_button_numeric_event_minimal/local_build/output.tft",
+    "file_size": 11411776,
+    "stored_crc32": "0xEB9DE787",
+    "calculated_crc32": "0xEB9DE787",
+    "checksum_valid": true
+  },
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload": {
+    "method": "public_whmi_wri",
+    "chunk_size": 4096,
+    "bytes_sent": 11411776,
+    "chunks_sent": 2787,
+    "elapsed_s": 209.968,
+    "skipped": false
+  },
+  "runtime_evidence": {
+    "initial_runtime_page": 0,
+    "initial_numval_val": 3,
+    "inc0_txt": "INC",
+    "first_press_command": "click inc0,1",
+    "after_first_press_numval_val": 4,
+    "second_press_command": "click inc0,1",
+    "after_second_press_numval_val": 5,
+    "serial_checks_ok": true
+  },
+  "notes": [
+    "The first build used a cross-page event-field slot and live smoke failed with click inc0,1 returning 0x1C while numval stayed 3.",
+    "The fixed build compiles page1 event field references with the page-local user-slot context; live smoke verified numval.val++ twice."
+  ]
+}

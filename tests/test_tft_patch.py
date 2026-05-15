@@ -9,6 +9,7 @@ from usarthmi.tft_checksum import inspect_tft_checksum
 from usarthmi.tft_patch import (
     _augment_seed_templates,
     _build_event_layout,
+    _build_event_compile_context,
     _build_primary_block,
     _build_object_event_table,
     _build_page_event_table,
@@ -830,6 +831,68 @@ class TftPatchTests(unittest.TestCase):
             self.assertTrue(inspect_tft_checksum(out)["valid"])
             self.assertTrue(patch_result.experimental_events)
             self.assertEqual(patch_result.object_count, 6)
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists()
+        and (EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_16_number_basic" / "extract" / "0.pa").exists(),
+        "local multi-page numeric button-event fixtures are not available",
+    )
+    def test_multi_page_patch_allows_page1_button_numeric_event_when_opted_in(self) -> None:
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            page1_pa = temp / "page1_button_numeric_event.pa"
+            out = temp / "page1_button_numeric_event.tft"
+            page0_blocks = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").blocks
+            page1 = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa")
+            number = load_page_file(EXTRACT_ROOT / "case_16_number_basic" / "extract" / "0.pa").blocks[-1].clone()
+            button = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            _configure_added_block(number, object_id=1, name="numval", x=72, y=70, w=220, h=60)
+            number.set_int("val", 3, width=4)
+            _configure_added_block(button, object_id=2, name="inc0", x=72, y=154, w=180, h=64)
+            button.set_string("txt", "INC")
+            button.set_int("txt_maxl", 16, width=2)
+            button.set_event("codesdown-", ["numval.val++"])
+            page1.blocks.extend([number, button])
+            page1_pa.write_bytes(page1.serialize())
+
+            with self.assertRaisesRegex(Exception, "page1 control events"):
+                patch_multi_page_tft(
+                    baseline_tft,
+                    baseline_pa=baseline_pa,
+                    target_pages=[
+                        EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                        page1_pa,
+                    ],
+                    out_tft=out,
+                )
+
+            patch_result = patch_multi_page_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pages=[
+                    EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                    page1_pa,
+                ],
+                out_tft=out,
+                allow_experimental_events=True,
+            )
+
+            self.assertTrue(inspect_tft_checksum(out)["valid"])
+            self.assertTrue(patch_result.experimental_events)
+            self.assertEqual(patch_result.object_count, 7)
+            number_slot_start = sum(_user_slot_count(block) for block in page1.blocks[: page1.blocks.index(number)])
+            local_ref = (number_slot_start + 27).to_bytes(4, "little")
+            page0_global_ref = (
+                sum(_user_slot_count(block) for block in page0_blocks) + number_slot_start + 27
+            ).to_bytes(4, "little")
+            compiled = _build_object_event_table(button, context=_build_event_compile_context(page1.blocks))
+            self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", compiled)
+            self.assertNotIn(b"\x07\x00\x00\x00\x01" + page0_global_ref + b"++", compiled)
 
     def test_added_object_patch_keeps_qrcode_text_pointer_separate(self) -> None:
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
