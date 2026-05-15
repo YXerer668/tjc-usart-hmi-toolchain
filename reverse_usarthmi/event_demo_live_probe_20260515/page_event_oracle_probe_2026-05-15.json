@@ -1,0 +1,788 @@
+{
+  "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\event_demo_live_probe_20260515\\output.hmi",
+  "tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\event_demo_live_probe_20260515\\output.tft",
+  "editor_version": "tjc-1.67.6",
+  "model": "TJC8048X543_011",
+  "object_start": 11403264,
+  "object_start_hex": "0xAE0000",
+  "object_region_length": 6212,
+  "object_region_length_hex": "0x1844",
+  "page_name": "page0",
+  "object_count": 5,
+  "blocks": [
+    {
+      "index": 0,
+      "objname": "page0",
+      "type_code": "y",
+      "id": 0,
+      "event_tokens": [
+        "codesload-1",
+        "printh 23 02 50 01",
+        "codesloadend-0",
+        "codesdown-0",
+        "codesup-0",
+        "codesunload-0"
+      ],
+      "event_table_length": 65,
+      "event_table_hex_prefix": "0e 00 00 00 09 0f 08 32 33 20 30 32 20 35 30 20 30 31 03 00 00 00 09 30 08 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": 0,
+      "first_non_empty_item_offset_in_table_hex": "0x0",
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 5569,
+              "hex": "0x15C1"
+            }
+          ]
+        },
+        {
+          "name": "first_executable",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 5569,
+              "hex": "0x15C1"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 570,
+          "relative_offset_hex": "0x23A",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5517,
+          "relative_offset_hex": "0x158D",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 325,
+              "value_hex": "0x145",
+              "raw_hex": "45 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "objname": "t0",
+      "type_code": "t",
+      "id": 1,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 350,
+          "hex": "0x15E"
+        },
+        {
+          "value": 390,
+          "hex": "0x186"
+        },
+        {
+          "value": 416,
+          "hex": "0x1A0"
+        },
+        {
+          "value": 442,
+          "hex": "0x1BA"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 350,
+          "value_hex": "0x15E",
+          "references": []
+        },
+        {
+          "name": "event_table_start",
+          "value": 390,
+          "value_hex": "0x186",
+          "references": [
+            {
+              "value": 5025,
+              "hex": "0x13A1"
+            },
+            {
+              "value": 5707,
+              "hex": "0x164B"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 416,
+          "value_hex": "0x1A0",
+          "references": [
+            {
+              "value": 706,
+              "hex": "0x2C2"
+            },
+            {
+              "value": 2505,
+              "hex": "0x9C9"
+            },
+            {
+              "value": 5845,
+              "hex": "0x16D5"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 442,
+          "value_hex": "0x1BA",
+          "references": [
+            {
+              "value": 5983,
+              "hex": "0x175F"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 634,
+          "relative_offset_hex": "0x27A",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5655,
+          "relative_offset_hex": "0x1617",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 390,
+              "value_hex": "0x186",
+              "raw_hex": "86 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "objname": "b0",
+      "type_code": "b",
+      "id": 2,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 350,
+          "hex": "0x15E"
+        },
+        {
+          "value": 390,
+          "hex": "0x186"
+        },
+        {
+          "value": 416,
+          "hex": "0x1A0"
+        },
+        {
+          "value": 442,
+          "hex": "0x1BA"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 350,
+          "value_hex": "0x15E",
+          "references": []
+        },
+        {
+          "name": "event_table_start",
+          "value": 390,
+          "value_hex": "0x186",
+          "references": [
+            {
+              "value": 5025,
+              "hex": "0x13A1"
+            },
+            {
+              "value": 5707,
+              "hex": "0x164B"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 416,
+          "value_hex": "0x1A0",
+          "references": [
+            {
+              "value": 706,
+              "hex": "0x2C2"
+            },
+            {
+              "value": 2505,
+              "hex": "0x9C9"
+            },
+            {
+              "value": 5845,
+              "hex": "0x16D5"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 442,
+          "value_hex": "0x1BA",
+          "references": [
+            {
+              "value": 5983,
+              "hex": "0x175F"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 718,
+          "relative_offset_hex": "0x2CE",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5793,
+          "relative_offset_hex": "0x16A1",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 416,
+              "value_hex": "0x1A0",
+              "raw_hex": "a0 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "objname": "p0",
+      "type_code": "p",
+      "id": 3,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 350,
+          "hex": "0x15E"
+        },
+        {
+          "value": 390,
+          "hex": "0x186"
+        },
+        {
+          "value": 416,
+          "hex": "0x1A0"
+        },
+        {
+          "value": 442,
+          "hex": "0x1BA"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 350,
+          "value_hex": "0x15E",
+          "references": []
+        },
+        {
+          "name": "event_table_start",
+          "value": 390,
+          "value_hex": "0x186",
+          "references": [
+            {
+              "value": 5025,
+              "hex": "0x13A1"
+            },
+            {
+              "value": 5707,
+              "hex": "0x164B"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 416,
+          "value_hex": "0x1A0",
+          "references": [
+            {
+              "value": 706,
+              "hex": "0x2C2"
+            },
+            {
+              "value": 2505,
+              "hex": "0x9C9"
+            },
+            {
+              "value": 5845,
+              "hex": "0x16D5"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 442,
+          "value_hex": "0x1BA",
+          "references": [
+            {
+              "value": 5983,
+              "hex": "0x175F"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 802,
+          "relative_offset_hex": "0x322",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 5931,
+          "relative_offset_hex": "0x172B",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 442,
+              "value_hex": "0x1BA",
+              "raw_hex": "ba 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "objname": "evtbtn",
+      "type_code": "b",
+      "id": 4,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-1",
+        "printh 23 02 54 45"
+      ],
+      "event_table_length": 44,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 0e 00 00 00 09 0f 08 32 33 20 30 32 20 35 34 20 34 35 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 468,
+          "hex": "0x1D4"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": 22,
+      "first_non_empty_item_offset_in_table_hex": "0x16",
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 468,
+          "value_hex": "0x1D4",
+          "references": [
+            {
+              "value": 6121,
+              "hex": "0x17E9"
+            }
+          ]
+        },
+        {
+          "name": "first_executable",
+          "value": 490,
+          "value_hex": "0x1EA",
+          "references": [
+            {
+              "value": 878,
+              "hex": "0x36E"
+            },
+            {
+              "value": 6085,
+              "hex": "0x17C5"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 862,
+          "relative_offset_hex": "0x35E",
+          "header_hex": "62 04 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 490,
+              "value_hex": "0x1EA",
+              "raw_hex": "ea 01 00 00",
+              "points_to_event_target": true
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 6069,
+          "relative_offset_hex": "0x17B5",
+          "header_hex": "62 04 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 490,
+              "value_hex": "0x1EA",
+              "raw_hex": "ea 01 00 00",
+              "points_to_event_target": true
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 468,
+              "value_hex": "0x1D4",
+              "raw_hex": "d4 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "diagnosis": {
+    "page_load_non_empty": true,
+    "page_event_table_found": true,
+    "page_callback_like_slots": [],
+    "object_callback_like_slots": [
+      {
+        "objname": "evtbtn",
+        "record_offset_hex": "0x35E",
+        "slots": [
+          "slot_0x10"
+        ]
+      },
+      {
+        "objname": "evtbtn",
+        "record_offset_hex": "0x17B5",
+        "slots": [
+          "slot_0x10"
+        ]
+      }
+    ],
+    "interpretation": "Page-load bytecode is present and object callbacks are visible, but no page callback-like slot points to the page event table. Compare against an official page-load oracle."
+  }
+}

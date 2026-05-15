@@ -14,3 +14,14 @@
 ```powershell
 .\usarthmi.cmd scene build .\examples\event_demo\scene.json --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI --baseline-tft C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft --out build\event_demo
 ```
+
+事件调度差分探针：
+
+```powershell
+python tools\page_event_oracle_probe.py `
+  --hmi reverse_usarthmi\event_demo_live_probe_20260515\output.hmi `
+  --tft reverse_usarthmi\event_demo_live_probe_20260515\output.tft `
+  --out reverse_usarthmi\event_demo_live_probe_20260515\page_event_oracle_probe_2026-05-15.json
+```
+
+这个探针会列出 HMI 事件表在 TFT object region 中的位置、`slot_0x0c/0x10/0x14` 回调候选、以及 `event_offset_0x34`。当前失败样例的关键形态是：`page0` 的 `event_offset_0x34` 指向 page-load event table，但没有 callback slot；`evtbtn` 的 `slot_0x10` 指向按钮 up 事件 item，所以按钮事件能跑。
