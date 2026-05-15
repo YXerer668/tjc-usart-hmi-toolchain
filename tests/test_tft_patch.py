@@ -1034,6 +1034,75 @@ class TftPatchTests(unittest.TestCase):
         (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
         and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
         and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists()
+        and (EXTRACT_ROOT / "case_04_add_text" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").exists(),
+        "local multi-page ref/tsw button-event fixtures are not available",
+    )
+    def test_multi_page_patch_allows_page1_button_ref_and_tsw_events_when_opted_in(self) -> None:
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            page1_pa = temp / "page1_button_ref_tsw_event.pa"
+            out = temp / "page1_button_ref_tsw_event.tft"
+            page1 = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa")
+            label = load_page_file(EXTRACT_ROOT / "case_04_add_text" / "extract" / "0.pa").blocks[-1].clone()
+            ref_button = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            disable_touch = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            enable_all = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            _configure_added_block(label, object_id=1, name="label0", x=72, y=70, w=280, h=50)
+            label.set_string("txt", "REFRESH ME")
+            label.set_int("txt_maxl", 20, width=2)
+            _configure_added_block(ref_button, object_id=2, name="ref0", x=72, y=154, w=150, h=58)
+            ref_button.set_string("txt", "REF")
+            ref_button.set_int("txt_maxl", 16, width=2)
+            ref_button.set_event("codesdown-", ["ref label0"])
+            _configure_added_block(disable_touch, object_id=3, name="tsw0", x=242, y=154, w=150, h=58)
+            disable_touch.set_string("txt", "TSW0")
+            disable_touch.set_int("txt_maxl", 16, width=2)
+            disable_touch.set_event("codesdown-", ["tsw label0,0"])
+            _configure_added_block(enable_all, object_id=4, name="all0", x=412, y=154, w=150, h=58)
+            enable_all.set_string("txt", "ALL")
+            enable_all.set_int("txt_maxl", 16, width=2)
+            enable_all.set_event("codesdown-", ["tsw 255,1"])
+            page1.blocks.extend([label, ref_button, disable_touch, enable_all])
+            page1_pa.write_bytes(page1.serialize())
+
+            with self.assertRaisesRegex(Exception, "page1 control events"):
+                patch_multi_page_tft(
+                    baseline_tft,
+                    baseline_pa=baseline_pa,
+                    target_pages=[
+                        EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                        page1_pa,
+                    ],
+                    out_tft=out,
+                )
+
+            patch_result = patch_multi_page_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pages=[
+                    EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                    page1_pa,
+                ],
+                out_tft=out,
+                allow_experimental_events=True,
+            )
+
+            self.assertTrue(inspect_tft_checksum(out)["valid"])
+            self.assertTrue(patch_result.experimental_events)
+            compiled_ref = _build_object_event_table(ref_button, context=_build_event_compile_context(page1.blocks))
+            compiled_tsw0 = _build_object_event_table(disable_touch, context=_build_event_compile_context(page1.blocks))
+            compiled_tsw_all = _build_object_event_table(enable_all, context=_build_event_compile_context(page1.blocks))
+            self.assertIn(b"\x09\x00\x00\x00\x09\x03\x04label0", compiled_ref)
+            self.assertIn(b"\x0b\x00\x00\x00\x09\x09\x04label0,0", compiled_tsw0)
+            self.assertIn(b"\x08\x00\x00\x00\x09\x09\x04255,1", compiled_tsw_all)
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists()
         and (EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").exists(),
         "local multi-page button-event fixtures are not available",
     )

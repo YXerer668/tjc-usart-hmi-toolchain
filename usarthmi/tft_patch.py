@@ -848,6 +848,7 @@ def _is_supported_page1_button_event_block(
     return (
         _is_supported_page1_button_click_event_block(block, line=line, page1_blocks=page1_blocks)
         or _is_supported_page1_button_vis_event_block(block, line=line, page1_blocks=page1_blocks)
+        or _is_supported_page1_button_tsw_event_block(block, line=line, page1_blocks=page1_blocks)
         or _is_supported_page1_button_ref_event_block(block, line=line, page1_blocks=page1_blocks)
     )
 
@@ -900,6 +901,23 @@ def _is_supported_page1_button_vis_event_block(
     if parsed is None:
         return False
     target_name, _ = parsed
+    if target_name == block.objname:
+        return False
+    return any(candidate.objname == target_name for candidate in page1_blocks)
+
+
+def _is_supported_page1_button_tsw_event_block(
+    block: PageBlock,
+    *,
+    line: str,
+    page1_blocks: list[PageBlock],
+) -> bool:
+    parsed = parse_page1_button_tsw_event_line(line)
+    if parsed is None:
+        return False
+    target_name, _ = parsed
+    if target_name == "255":
+        return True
     if target_name == block.objname:
         return False
     return any(candidate.objname == target_name for candidate in page1_blocks)

@@ -1275,6 +1275,86 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertIn("codesup-1", sink_button.event_tokens)
             self.assertIn("printh 23 02 43 4B", sink_button.event_tokens)
 
+    def test_scene_build_emits_experimental_page1_button_ref_tsw_event_tft_when_enabled(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-page1-button-ref-tsw-event",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "label0",
+                                "type": "text",
+                                "x": 72,
+                                "y": 70,
+                                "w": 280,
+                                "h": 50,
+                                "text": "REFRESH ME",
+                            },
+                            {
+                                "id": "ref0",
+                                "type": "button",
+                                "x": 72,
+                                "y": 154,
+                                "w": 150,
+                                "h": 58,
+                                "text": "REF",
+                                "events": {"down": ["ref label0"]},
+                            },
+                            {
+                                "id": "tsw0",
+                                "type": "button",
+                                "x": 242,
+                                "y": 154,
+                                "w": 150,
+                                "h": 58,
+                                "text": "TSW0",
+                                "events": {"down": ["tsw label0,0"]},
+                            },
+                            {
+                                "id": "all0",
+                                "type": "button",
+                                "x": 412,
+                                "y": 154,
+                                "w": 150,
+                                "h": 58,
+                                "text": "ALL",
+                                "events": {"down": ["tsw 255,1"]},
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            page1 = load_page_file(manifest["target_pages"][1])
+            ref_button = next(block for block in page1.blocks if block.objname == "ref0")
+            tsw_button = next(block for block in page1.blocks if block.objname == "tsw0")
+            all_button = next(block for block in page1.blocks if block.objname == "all0")
+            self.assertIn("ref label0", ref_button.event_tokens)
+            self.assertIn("tsw label0,0", tsw_button.event_tokens)
+            self.assertIn("tsw 255,1", all_button.event_tokens)
+
     def test_scene_build_emits_experimental_page1_load_printh_event_tft_when_enabled(self) -> None:
         scene = validate_scene(
             {
