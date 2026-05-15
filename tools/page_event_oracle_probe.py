@@ -14,6 +14,7 @@ from usarthmi.hmi_inspect import _parse_entries
 from usarthmi.event_bytecode import decode_event_table
 from usarthmi.page_format import PageBlock, parse_page_data
 from usarthmi.tft_patch import (
+    TYPE_USER_SLOT_COUNTS,
     _build_event_compile_context,
     _build_object_event_table,
     _build_page_event_table,
@@ -21,7 +22,7 @@ from usarthmi.tft_patch import (
     _header,
     _header_int,
 )
-from usarthmi.tft_toolchain import inspect_tft
+from usarthmi.tft_toolchain import TftToolchainError, inspect_tft
 
 
 CALLBACK_SLOT_OFFSETS = {
@@ -42,7 +43,7 @@ def probe_hmi_tft(
         page = parse_page_data(_hmi_resource(hmi_path, "0.pa"))
     except ValueError as exc:
         raise SystemExit(f"Unable to parse 0.pa from {hmi_path}: {exc}") from exc
-    context = _build_event_compile_context(page.blocks)
+    context, context_error = _probe_compile_context(page.blocks)
     tft_raw = tft_path.read_bytes()
     tft = inspect_tft(tft_path)
     header2 = _header(tft, "Header2")
@@ -50,19 +51,23 @@ def probe_hmi_tft(
     if object_start is None:
         raise SystemExit("TFT Header2 does not expose unknown_objects_address")
     object_region = tft_raw[object_start:]
-    post_primary_page_event = _build_post_primary_page_event(
-        page.blocks,
-        context=context,
-        force=force_post_primary_page_load,
+    post_primary_page_event, post_primary_error = _try_build_event_table(
+        lambda: _build_post_primary_page_event(
+            page.blocks,
+            context=context,
+            force=force_post_primary_page_load,
+        )
     )
     post_primary_matches = _all_matches(object_region, post_primary_page_event)
 
     block_reports = []
     for index, block in enumerate(page.blocks):
-        event_table = (
-            _build_page_event_table(block, context=context)
-            if index == 0
-            else _build_object_event_table(block, context=context)
+        event_table, event_table_error = _try_build_event_table(
+            lambda block=block, index=index: (
+                _build_page_event_table(block, context=context)
+                if index == 0
+                else _build_object_event_table(block, context=context)
+            )
         )
         event_matches = _all_matches(object_region, event_table)
         first_executable = _first_executable_offset(event_table)
@@ -76,6 +81,7 @@ def probe_hmi_tft(
                 "id": _block_id(block),
                 "event_tokens": block.event_tokens,
                 "event_table_length": len(event_table),
+                "event_table_error": event_table_error,
                 "event_table_hex_prefix": event_table[:64].hex(" "),
                 "event_table_items": decode_event_table(event_table),
                 "event_table_matches": [_offset_item(value) for value in event_matches],
@@ -105,9 +111,15 @@ def probe_hmi_tft(
         "object_region_length_hex": f"0x{len(object_region):X}",
         "page_name": page.page_name,
         "object_count": len(page.blocks),
+        "compile_context": {
+            "available": context_error is None,
+            "error": context_error,
+            "unsupported_type_codes": _unsupported_type_codes(page.blocks),
+        },
         "post_primary_page_event": {
             "force_post_primary_page_load": force_post_primary_page_load,
             "length": len(post_primary_page_event),
+            "error": post_primary_error,
             "hex_prefix": post_primary_page_event[:64].hex(" "),
             "items": decode_event_table(post_primary_page_event),
             "matches": [_offset_item(value) for value in post_primary_matches],
@@ -137,6 +149,29 @@ def _hmi_resource(path: Path, name: str) -> bytes:
     raise SystemExit(f"HMI resource {name!r} not found in {path}")
 
 
+def _probe_compile_context(blocks: list[PageBlock]):
+    try:
+        return _build_event_compile_context(blocks), None
+    except (KeyError, TftToolchainError) as exc:
+        return None, str(exc)
+
+
+def _try_build_event_table(builder) -> tuple[bytes, str | None]:
+    try:
+        return builder(), None
+    except (KeyError, TftToolchainError) as exc:
+        return b"", str(exc)
+
+
+def _unsupported_type_codes(blocks: list[PageBlock]) -> list[str]:
+    values = {
+        _display_type_code(block.type_code)
+        for block in blocks
+        if block.type_code is not None and block.type_code not in TYPE_USER_SLOT_COUNTS
+    }
+    return sorted(value for value in values if value is not None)
+
+
 def _record_candidates(region: bytes, block: PageBlock, targets: list[dict[str, Any]]) -> list[dict[str, Any]]:
     block_id = _block_id(block)
     if block.type_code is None or block_id is None:
@@ -159,6 +194,7 @@ def _record_candidates(region: bytes, block: PageBlock, targets: list[dict[str, 
                 "value_hex": f"0x{value:X}",
                 "raw_hex": record[slot_offset : slot_offset + 4].hex(" "),
                 "points_to_event_target": value in target_values,
+                "event_target_matches": _slot_target_matches(value, targets),
             }
         candidates.append(
             {
@@ -178,9 +214,23 @@ def _reference_targets(
 ) -> list[dict[str, Any]]:
     targets = []
     for match in matches:
-        targets.append({"name": "event_table_start", "value": match})
+        targets.append(
+            {
+                "name": "event_table_start",
+                "value": match,
+                "table_start": match,
+                "table_end": match + event_table_length,
+            }
+        )
         if first_executable is not None and first_executable < event_table_length:
-            targets.append({"name": "first_executable", "value": match + first_executable})
+            targets.append(
+                {
+                    "name": "first_executable",
+                    "value": match + first_executable,
+                    "table_start": match,
+                    "table_end": match + event_table_length,
+                }
+            )
     deduped: list[dict[str, Any]] = []
     seen: set[tuple[str, int]] = set()
     for item in targets:
@@ -189,6 +239,27 @@ def _reference_targets(
             seen.add(key)
             deduped.append(item)
     return deduped
+
+
+def _slot_target_matches(value: int, targets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    matches = []
+    for target in targets:
+        table_start = int(target.get("table_start", target["value"]))
+        table_end = int(target.get("table_end", target["value"] + 1))
+        exact = value == target["value"]
+        inside_table = table_start <= value < table_end
+        if not exact and not inside_table:
+            continue
+        matches.append(
+            {
+                "name": target["name"],
+                "exact": exact,
+                "inside_event_table": inside_table,
+                "delta_from_table_start": value - table_start,
+                "delta_hex": f"0x{value - table_start:X}",
+            }
+        )
+    return matches
 
 
 def _first_executable_offset(event_table: bytes) -> int | None:
