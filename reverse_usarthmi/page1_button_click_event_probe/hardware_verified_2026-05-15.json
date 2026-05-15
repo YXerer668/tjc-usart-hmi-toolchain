@@ -1,0 +1,65 @@
+{
+  "name": "page1_button_click_event_probe",
+  "date": "2026-05-15",
+  "screen": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C",
+    "connect_preview": "comok 2,1089-0,TJC8048X543_011C,277,10501,FC8B3401B1A6086E,128974848-0"
+  },
+  "build": {
+    "scene": "examples/page1_button_click_event_probe/scene.json",
+    "output_tft": "reverse_usarthmi/page1_button_click_event_probe/local_build/output.tft",
+    "file_size": 11413096,
+    "crc_valid": true,
+    "stored_crc_hex": "0x1C7EA80B"
+  },
+  "upload": {
+    "method": "public_whmi_full_upload",
+    "bytes_sent": 11413096,
+    "chunks_sent": 2787,
+    "chunk_size": 4096,
+    "elapsed_s": 209.032,
+    "skipped": false
+  },
+  "serial_probe": [
+    {
+      "command": "page 0",
+      "response_hex": ""
+    },
+    {
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "click sink0,1",
+      "response_hex": ""
+    },
+    {
+      "command": "click sink0,0",
+      "response_hex": "23 02 43 4b",
+      "ascii_preview": "#\\u0002CK"
+    },
+    {
+      "command": "click fire0,1",
+      "response_hex": ""
+    },
+    {
+      "command": "click fire0,0",
+      "response_hex": "23 02 43 4b",
+      "ascii_preview": "#\\u0002CK"
+    }
+  ],
+  "verified_behavior": [
+    "runtime page 0 maps to generated 1.pa/page1",
+    "page 0 then sendme returns 0",
+    "sink0 release emits the direct printh probe 23 02 43 4b",
+    "fire0 release runs click sink0,0 and emits the same 23 02 43 4b probe",
+    "this proves a page1 normal-button event can dispatch a second page1 normal-button release event"
+  ],
+  "notes": [
+    "The page1 click allow-list is deliberately limited to same-page normal-button targets.",
+    "The target button must have exactly one explicit hex printh probe event, preventing recursive or arbitrary script cascades."
+  ]
+}

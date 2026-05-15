@@ -982,10 +982,39 @@ class EditorTftBuildTests(unittest.TestCase):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertTrue(_is_supported_experimental_page1_event_widget(widget))
 
-        for line in ("page 2", "printh", "printh GG", "vis back0,0", "rawhex 09 0c 04 31"):
+        for line in ("page 2", "printh", "printh GG", "click probe0,0", "vis back0,0", "rawhex 09 0c 04 31"):
             with self.subTest(line=line):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertFalse(_is_supported_experimental_page1_event_widget(widget))
+
+    def test_page1_experimental_click_event_requires_same_page_printh_target(self) -> None:
+        fire = WidgetSpec("fire0", "button", events={"up": ["click sink0,0"]})
+        sink = WidgetSpec("sink0", "button", events={"up": ["printh 23 02 43 4B"]})
+        number = WidgetSpec("numval", "number")
+        self.assertTrue(_is_supported_experimental_page1_event_widget(fire, page1_widgets=[fire, sink]))
+
+        with self.subTest("self click is rejected"):
+            self_click = WidgetSpec("fire0", "button", events={"up": ["click fire0,0"]})
+            self.assertFalse(
+                _is_supported_experimental_page1_event_widget(self_click, page1_widgets=[self_click, sink])
+            )
+
+        with self.subTest("missing target is rejected"):
+            self.assertFalse(_is_supported_experimental_page1_event_widget(fire, page1_widgets=[fire]))
+
+        with self.subTest("non-button target is rejected"):
+            bad_target = WidgetSpec("numval", "button", events={"up": ["click numval,0"]})
+            self.assertFalse(
+                _is_supported_experimental_page1_event_widget(bad_target, page1_widgets=[bad_target, number])
+            )
+
+        with self.subTest("target click cascade is rejected"):
+            loop_sink = WidgetSpec("sink0", "button", events={"up": ["click fire0,0"]})
+            self.assertFalse(_is_supported_experimental_page1_event_widget(fire, page1_widgets=[fire, loop_sink]))
+
+        with self.subTest("target non-printh event is rejected"):
+            page_sink = WidgetSpec("sink0", "button", events={"up": ["page 1"]})
+            self.assertFalse(_is_supported_experimental_page1_event_widget(fire, page1_widgets=[fire, page_sink]))
 
     def test_scene_build_emits_experimental_page1_button_printh_event_tft_when_enabled(self) -> None:
         scene = validate_scene(
@@ -1034,6 +1063,67 @@ class EditorTftBuildTests(unittest.TestCase):
             probe_button = next(block for block in page1.blocks if block.objname == "probe0")
             self.assertIn("codesup-1", probe_button.event_tokens)
             self.assertIn("printh 23 02 50 31", probe_button.event_tokens)
+
+    def test_scene_build_emits_experimental_page1_button_click_event_tft_when_enabled(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-page1-button-click-event",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "fire0",
+                                "type": "button",
+                                "x": 72,
+                                "y": 154,
+                                "w": 180,
+                                "h": 64,
+                                "text": "FIRE",
+                                "events": {"up": ["click sink0,0"]},
+                            },
+                            {
+                                "id": "sink0",
+                                "type": "button",
+                                "x": 292,
+                                "y": 154,
+                                "w": 180,
+                                "h": 64,
+                                "text": "SINK",
+                                "events": {"up": ["printh 23 02 43 4B"]},
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            page1 = load_page_file(manifest["target_pages"][1])
+            fire_button = next(block for block in page1.blocks if block.objname == "fire0")
+            sink_button = next(block for block in page1.blocks if block.objname == "sink0")
+            self.assertIn("codesup-1", fire_button.event_tokens)
+            self.assertIn("click sink0,0", fire_button.event_tokens)
+            self.assertIn("codesup-1", sink_button.event_tokens)
+            self.assertIn("printh 23 02 43 4B", sink_button.event_tokens)
 
     def test_scene_build_emits_experimental_page1_button_numeric_event_tft_when_enabled(self) -> None:
         scene = validate_scene(

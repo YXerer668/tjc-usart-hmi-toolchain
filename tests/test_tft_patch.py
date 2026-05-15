@@ -894,6 +894,64 @@ class TftPatchTests(unittest.TestCase):
             self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", compiled)
             self.assertNotIn(b"\x07\x00\x00\x00\x01" + page0_global_ref + b"++", compiled)
 
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists()
+        and (EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").exists(),
+        "local multi-page button-event fixtures are not available",
+    )
+    def test_multi_page_patch_allows_page1_button_click_to_printh_probe_when_opted_in(self) -> None:
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            page1_pa = temp / "page1_button_click_event.pa"
+            out = temp / "page1_button_click_event.tft"
+            page1 = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa")
+            fire = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            sink = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            _configure_added_block(fire, object_id=1, name="fire0", x=72, y=154, w=180, h=64)
+            fire.set_string("txt", "FIRE")
+            fire.set_int("txt_maxl", 16, width=2)
+            fire.set_event("codesup-", ["click sink0,0"])
+            _configure_added_block(sink, object_id=2, name="sink0", x=292, y=154, w=180, h=64)
+            sink.set_string("txt", "SINK")
+            sink.set_int("txt_maxl", 16, width=2)
+            sink.set_event("codesup-", ["printh 23 02 43 4B"])
+            page1.blocks.extend([fire, sink])
+            page1_pa.write_bytes(page1.serialize())
+
+            with self.assertRaisesRegex(Exception, "page1 control events"):
+                patch_multi_page_tft(
+                    baseline_tft,
+                    baseline_pa=baseline_pa,
+                    target_pages=[
+                        EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                        page1_pa,
+                    ],
+                    out_tft=out,
+                )
+
+            patch_result = patch_multi_page_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pages=[
+                    EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                    page1_pa,
+                ],
+                out_tft=out,
+                allow_experimental_events=True,
+            )
+
+            self.assertTrue(inspect_tft_checksum(out)["valid"])
+            self.assertTrue(patch_result.experimental_events)
+            self.assertEqual(patch_result.object_count, 7)
+            fire_compiled = _build_object_event_table(fire, context=_build_event_compile_context(page1.blocks))
+            sink_compiled = _build_object_event_table(sink, context=_build_event_compile_context(page1.blocks))
+            self.assertIn(b"\x09\x00\x08sink0,0", fire_compiled)
+            self.assertIn(b"\x09\x0f\x0823 02 43 4B", sink_compiled)
+
     def test_added_object_patch_keeps_qrcode_text_pointer_separate(self) -> None:
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
         baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"

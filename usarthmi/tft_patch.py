@@ -171,6 +171,7 @@ EVENT_FIELD_USER_SLOTS = {
 EVENT_ASSIGN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
 EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)(\+\+|--)\s*$")
 EVENT_PRINTH_HEX_RE = re.compile(r"^printh\s+[0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*\s*$")
+EVENT_CLICK_RE = re.compile(r"^click\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
 
 
 def is_supported_page1_button_event_line(line: str) -> bool:
@@ -182,6 +183,21 @@ def is_supported_page1_button_event_line(line: str) -> bool:
     if EVENT_PRINTH_HEX_RE.match(stripped) is not None:
         return True
     return EVENT_ASSIGN_RE.match(normalized) is not None or EVENT_UNARY_RE.match(normalized) is not None
+
+
+def is_page1_printh_probe_event_line(line: str) -> bool:
+    """Return whether an event line is an explicit hex-only printh probe."""
+    return EVENT_PRINTH_HEX_RE.match(line.strip()) is not None
+
+
+def parse_page1_button_click_event_line(line: str) -> tuple[str, int] | None:
+    """Parse the deliberately tiny page1 click allow-list shape."""
+    match = EVENT_CLICK_RE.match(line.strip())
+    if match is None:
+        return None
+    return match.group(1), int(match.group(2))
+
+
 IMAGE_BUTTON_MIRROR_RELATIVE_VALUES = (
     9,
     10,
@@ -372,7 +388,7 @@ class MultiPagePatchResult:
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 normal-button events are opt-in; V1 allows page jumps, numeric field edits, and explicit hex printh probes only."
+                "Page1 normal-button events are opt-in; V1 allows page jumps, numeric field edits, explicit hex printh probes, and one-level click-to-printh cascades only."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
@@ -751,27 +767,66 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
                     "Multi-page V1 page1 supports only text/button/number/image/progress/slider/gauge/checkbox/radio controls"
                 )
             if any(lines for lines in _events_by_prefix(block).values()) and not (
-                allow_experimental_events and _is_supported_page1_button_event_block(block)
+                allow_experimental_events
+                and _is_supported_page1_button_event_block(block, page1_blocks=page.blocks)
             ):
                 raise TftToolchainError("Multi-page V1 page1 control events are not supported yet")
             if block.type_code == "b" and _field_int(block, "sta") == 2:
                 raise TftToolchainError("Multi-page V1 page1 image buttons are not supported yet")
 
 
-def _is_supported_page1_button_event_block(block: PageBlock) -> bool:
-    if block.type_code != "b":
+def _is_supported_page1_button_event_block(
+    block: PageBlock,
+    *,
+    page1_blocks: list[PageBlock] | None = None,
+) -> bool:
+    event_item = _single_page1_button_event_block(block)
+    if event_item is None:
         return False
+    _, line = event_item
+    if is_supported_page1_button_event_line(line):
+        return True
+    if page1_blocks is None:
+        return False
+    return _is_supported_page1_button_click_event_block(block, line=line, page1_blocks=page1_blocks)
+
+
+def _single_page1_button_event_block(block: PageBlock) -> tuple[str, str] | None:
+    if block.type_code != "b":
+        return None
     event_items = [
         (prefix, lines)
         for prefix, lines in _events_by_prefix(block).items()
         if lines
     ]
     if len(event_items) != 1:
-        return False
+        return None
     prefix, lines = event_items[0]
     if prefix not in {"codesdown-", "codesup-"} or len(lines) != 1:
+        return None
+    return prefix, lines[0]
+
+
+def _is_supported_page1_button_click_event_block(
+    block: PageBlock,
+    *,
+    line: str,
+    page1_blocks: list[PageBlock],
+) -> bool:
+    parsed = parse_page1_button_click_event_line(line)
+    if parsed is None:
         return False
-    return is_supported_page1_button_event_line(lines[0])
+    target_name, _ = parsed
+    if target_name == block.objname:
+        return False
+    target_block = next((candidate for candidate in page1_blocks if candidate.objname == target_name), None)
+    if target_block is None or target_block.type_code != "b":
+        return False
+    target_event_item = _single_page1_button_event_block(target_block)
+    if target_event_item is None:
+        return False
+    _, target_line = target_event_item
+    return is_page1_printh_probe_event_line(target_line)
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:

@@ -22,7 +22,9 @@ from .tft_patch import (
     patch_added_object_tft,
     patch_multi_page_tft,
     patch_rebuild_page_tft,
+    is_page1_printh_probe_event_line,
     is_supported_page1_button_event_line,
+    parse_page1_button_click_event_line,
 )
 
 
@@ -806,7 +808,8 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
             raise EditorError(f"Multi-page build V1 page1 object name conflicts with {widget.id!r}")
         seen_ids.add(widget.id)
         if widget.events and not (
-            allow_events and _is_supported_experimental_page1_event_widget(widget)
+            allow_events
+            and _is_supported_experimental_page1_event_widget(widget, page1_widgets=scene.pages[1].widgets)
         ):
             raise EditorError("Multi-page build V1 does not support page1 widget events yet")
         if widget.resources and not (
@@ -821,16 +824,45 @@ def _experimental_multi_page_events_enabled(scene: SceneModel) -> bool:
     return bool(scene.project.get("experimental_multi_page_events"))
 
 
-def _is_supported_experimental_page1_event_widget(widget) -> bool:
-    if widget.type != "button":
+def _is_supported_experimental_page1_event_widget(widget, *, page1_widgets=None) -> bool:
+    event_item = _single_page1_button_event_widget(widget)
+    if event_item is None:
         return False
+    _, line = event_item
+    if is_supported_page1_button_event_line(line):
+        return True
+    if page1_widgets is None:
+        return False
+    return _is_supported_page1_button_click_event_widget(widget, line=line, page1_widgets=page1_widgets)
+
+
+def _single_page1_button_event_widget(widget) -> tuple[str, str] | None:
+    if widget.type != "button":
+        return None
     event_items = [(name, lines) for name, lines in widget.events.items() if lines]
     if len(event_items) != 1:
-        return False
+        return None
     event_name, lines = event_items[0]
     if event_name not in {"down", "up"} or len(lines) != 1:
+        return None
+    return event_name, lines[0]
+
+
+def _is_supported_page1_button_click_event_widget(widget, *, line: str, page1_widgets) -> bool:
+    parsed = parse_page1_button_click_event_line(line)
+    if parsed is None:
         return False
-    return is_supported_page1_button_event_line(lines[0])
+    target_name, _ = parsed
+    if target_name == widget.id:
+        return False
+    target_widget = next((candidate for candidate in page1_widgets if candidate.id == target_name), None)
+    if target_widget is None or target_widget.type != "button":
+        return False
+    target_event_item = _single_page1_button_event_widget(target_widget)
+    if target_event_item is None:
+        return False
+    _, target_line = target_event_item
+    return is_page1_printh_probe_event_line(target_line)
 
 
 def _field3_template(entries, suffix: str) -> int:
