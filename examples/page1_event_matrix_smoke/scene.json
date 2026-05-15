@@ -1,0 +1,190 @@
+{
+  "project": {
+    "name": "page1-event-matrix-smoke",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title0",
+          "type": "text",
+          "x": 48,
+          "y": 34,
+          "w": 704,
+          "h": 52,
+          "text": "PAGE1 EVENT MATRIX",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 68,
+          "y": 112,
+          "w": 168,
+          "h": 68,
+          "value": 0,
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "label0",
+          "type": "text",
+          "x": 270,
+          "y": 112,
+          "w": 360,
+          "h": 68,
+          "text": "VISIBLE LABEL",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "inc0",
+          "type": "button",
+          "x": 68,
+          "y": 220,
+          "w": 132,
+          "h": 58,
+          "text": "INC",
+          "events": {
+            "down": [
+              "numval.val++"
+            ]
+          }
+        },
+        {
+          "id": "set0",
+          "type": "button",
+          "x": 222,
+          "y": 220,
+          "w": 132,
+          "h": 58,
+          "text": "SET7",
+          "events": {
+            "down": [
+              "numval.val=7"
+            ]
+          }
+        },
+        {
+          "id": "dec0",
+          "type": "button",
+          "x": 376,
+          "y": 220,
+          "w": 132,
+          "h": 58,
+          "text": "DEC",
+          "events": {
+            "down": [
+              "numval.val--"
+            ]
+          }
+        },
+        {
+          "id": "hide0",
+          "type": "button",
+          "x": 530,
+          "y": 220,
+          "w": 132,
+          "h": 58,
+          "text": "HIDE",
+          "events": {
+            "down": [
+              "vis label0,0"
+            ]
+          }
+        },
+        {
+          "id": "show0",
+          "type": "button",
+          "x": 68,
+          "y": 308,
+          "w": 132,
+          "h": 58,
+          "text": "SHOW",
+          "events": {
+            "down": [
+              "vis label0,1"
+            ]
+          }
+        },
+        {
+          "id": "ref0",
+          "type": "button",
+          "x": 222,
+          "y": 308,
+          "w": 132,
+          "h": 58,
+          "text": "REF",
+          "events": {
+            "down": [
+              "ref label0"
+            ]
+          }
+        },
+        {
+          "id": "tsw0",
+          "type": "button",
+          "x": 376,
+          "y": 308,
+          "w": 132,
+          "h": 58,
+          "text": "TSW0",
+          "events": {
+            "down": [
+              "tsw label0,0"
+            ]
+          }
+        },
+        {
+          "id": "all0",
+          "type": "button",
+          "x": 530,
+          "y": 308,
+          "w": 132,
+          "h": 58,
+          "text": "ALL",
+          "events": {
+            "down": [
+              "tsw 255,1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

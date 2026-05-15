@@ -17,6 +17,7 @@
 - `page1_button_click_event_probe`: page1 普通按钮 `click` 级联探针样例，只放行同页按钮到 `printh` 目标的一层级联。
 - `page1_button_vis_event_probe`: page1 普通按钮 `vis obj,0/1` 显隐样例，已经在当前屏上烧录并用摄像头验证。
 - `page1_button_ref_tsw_event_probe`: page1 普通按钮 `ref obj` 与 `tsw obj,0/1` 样例；已烧录并完成串口读回/摄像头验证，`tsw` 的物理触摸锁定效果仍需要手指触摸闭环。
+- `page1_event_matrix_smoke`: page1 普通按钮事件矩阵样例，组合数字 `++/=7/--`、`vis`、`ref`、`tsw`；已活屏验证串口读回、摄像头显示和事件点击链，适合做当前 page1 事件链的综合 smoke。
 - `page1_load_printh_event_probe`: page1 页面加载 `printh` 探针事件样例，只放行固定 4 字节十六进制 payload；当前已能编译和烧录，但活屏切页未观察到 probe 输出。
 - `multi_page_two_way_jump_probe`: 双页双向跳转样例；允许以 `patch_seed_page0_widgets` 给 seed `page0.b0` 补事件，再由新增 `page1.back0` 跳回。
 - `event_demo`: 单页 `page0.load` 与按钮 `up` 的分离探针；2026-05-15 活屏确认按钮 `up printh` 有效，但 `page0.load` 在 `page 0` 和 `rest` 后均未触发。

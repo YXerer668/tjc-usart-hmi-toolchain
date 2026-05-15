@@ -1,0 +1,95 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": [
+    {
+      "target": "title0.txt",
+      "expected": "PAGE1 EVENT MATRIX",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "numval.val",
+      "expected": 0,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "label0.txt",
+      "expected": "VISIBLE LABEL",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "steps": [
+    {
+      "label": "click inc0",
+      "command": "click inc0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "numval after inc",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 1,
+      "delay_ms": 100
+    },
+    {
+      "label": "click set0",
+      "command": "click set0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "numval after set",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 7,
+      "delay_ms": 100
+    },
+    {
+      "label": "click dec0",
+      "command": "click dec0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "numval after dec",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 6,
+      "delay_ms": 100
+    },
+    {
+      "label": "click hide0",
+      "command": "click hide0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "click show0",
+      "command": "click show0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "click ref0",
+      "command": "click ref0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "click tsw0",
+      "command": "click tsw0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "click all0",
+      "command": "click all0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    }
+  ]
+}

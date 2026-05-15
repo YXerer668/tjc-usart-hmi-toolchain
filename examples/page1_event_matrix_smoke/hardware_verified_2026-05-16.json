@@ -1,0 +1,105 @@
+{
+  "source": "codex_live_page1_event_matrix_smoke",
+  "date": "2026-05-16",
+  "scene": "examples/page1_event_matrix_smoke/scene.json",
+  "built_tft": "reverse_usarthmi/page1_event_matrix_smoke/local_build/output.tft",
+  "smoke_result": "reverse_usarthmi/page1_event_matrix_smoke/smoke/smoke_result.json",
+  "camera_proof": "reverse_usarthmi/page1_event_matrix_smoke/smoke/camera_after_smoke.jpg",
+  "target": {
+    "port": "COM36",
+    "model": "TJC8048X543_011C",
+    "baud": 9600,
+    "download_baud": 921600
+  },
+  "checksum": {
+    "valid": true,
+    "stored_hex": "0xA1851E9E",
+    "calculated_hex": "0xA1851E9E",
+    "file_size": 11423332
+  },
+  "upload": {
+    "uploaded": true,
+    "bytes_sent": 11423332,
+    "chunks_sent": 2789,
+    "chunk_size": 4096,
+    "elapsed_s": 209.406
+  },
+  "serial_readback": {
+    "sendme": 0,
+    "title0.txt": "PAGE1 EVENT MATRIX",
+    "numval.val.initial": 0,
+    "label0.txt": "VISIBLE LABEL",
+    "numval.val.after_inc0": 1,
+    "numval.val.after_set0": 7,
+    "numval.val.after_dec0": 6
+  },
+  "runtime_steps": [
+    {
+      "command": "click inc0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 1,
+      "ok": true
+    },
+    {
+      "command": "click set0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 7,
+      "ok": true
+    },
+    {
+      "command": "click dec0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 6,
+      "ok": true
+    },
+    {
+      "command": "click hide0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click show0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click ref0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click tsw0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click all0,1",
+      "expected_kind": "none",
+      "ok": true
+    }
+  ],
+  "conclusion": {
+    "page1_event_matrix_upload": "live-proven",
+    "numeric_inc_set_dec": "live-proven",
+    "object_readback": "live-proven",
+    "serial_click_dispatch": "live-proven",
+    "vis_ref_tsw_command_dispatch": "live-proven",
+    "camera_visible_layout": "live-proven",
+    "physical_tsw_touch_lockout": "not_proven_by_serial_only"
+  }
+}
