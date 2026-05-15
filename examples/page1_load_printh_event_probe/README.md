@@ -11,6 +11,10 @@ Minimal page1 page-load event probe for the experimental multi-page event path.
 - Current builds expose this explicitly in `manifest.json`:
   `tft_patch.experimental_event_summary.page1_page_events[].runtime_status`
   is `compile_only_scheduler_unrecovered`.
+- The already-tested callback-slot candidates can be summarized with
+  `python tools\page_event_callback_slot_status.py`. Slots `0x0C`, `0x10`, and
+  `0x14` were all live-tested and failed cleanly, so do not repeat those blind
+  burns as new evidence.
 
 Build from the repo root:
 
