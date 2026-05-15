@@ -1,0 +1,56 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": [
+    {
+      "target": "title0.txt",
+      "expected": "PAGE1 REF / TSW PROBE",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "label0.txt",
+      "expected": "TOUCH TARGET",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "ref0.txt",
+      "expected": "REF",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "disable0.txt",
+      "expected": "TSW OFF",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "enable0.txt",
+      "expected": "TSW ALL",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "steps": [
+    {
+      "label": "trigger ref label0 event",
+      "command": "click ref0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "trigger tsw label0 off event",
+      "command": "click disable0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "trigger tsw all on event",
+      "command": "click enable0,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    }
+  ]
+}

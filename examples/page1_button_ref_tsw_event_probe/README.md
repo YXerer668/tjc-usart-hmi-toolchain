@@ -31,3 +31,35 @@ Expected compile-time evidence:
 - `tft_patch.experimental_events` is `true`.
 - The generated page1 object event tables contain `ref label0`,
   `tsw label0,0`, and `tsw 255,1`.
+
+Optional live smoke after building or uploading:
+
+```powershell
+python tools\live_tft_smoke.py `
+  --file reverse_usarthmi\page1_button_ref_tsw_event_probe\local_build\output.tft `
+  --out-dir reverse_usarthmi\page1_button_ref_tsw_event_probe\smoke `
+  --expect-json examples\page1_button_ref_tsw_event_probe\smoke.expect.json
+```
+
+Add `--upload --progress --capture` when the screen should be reflashed first.
+The smoke checks object readback and serial `click` dispatch. It does not claim
+to prove the physical touch-lockout behavior of `tsw label0,0`; that still needs
+a manual or camera-assisted touch check.
+
+Live validation on 2026-05-16:
+
+- Built against `case_00_baseline/lcd_test.tft`.
+- Checksum valid: `0xAA7BA568`.
+- Uploaded to `COM36` / `TJC8048X543_011C`: `11,415,644` bytes, `2788` chunks,
+  about `208.625 s`.
+- Runtime `sendme` returned page `0`.
+- `get title0.txt`, `get label0.txt`, `get ref0.txt`, `get disable0.txt`, and
+  `get enable0.txt` all matched the expected strings.
+- Serial `click ref0,1`, `click disable0,1`, and `click enable0,1` all returned
+  the expected silent success shape.
+- Camera proof captured the page layout with the title, yellow target label, and
+  three buttons visible.
+
+This proves the generated page, object readback, serial click dispatch, and
+visible layout. It still does not prove physical touch lockout because serial
+`click` is not the same input path as a finger touching the panel.

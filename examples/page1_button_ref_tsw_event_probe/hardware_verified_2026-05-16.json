@@ -1,0 +1,59 @@
+{
+  "source": "codex_live_page1_ref_tsw_event_probe",
+  "date": "2026-05-16",
+  "scene": "examples/page1_button_ref_tsw_event_probe/scene.json",
+  "built_tft": "reverse_usarthmi/page1_button_ref_tsw_event_probe/local_build/output.tft",
+  "smoke_result": "reverse_usarthmi/page1_button_ref_tsw_event_probe/smoke/smoke_result.json",
+  "camera_proof": "reverse_usarthmi/page1_button_ref_tsw_event_probe/smoke/camera_after_upload.jpg",
+  "target": {
+    "port": "COM36",
+    "model": "TJC8048X543_011C",
+    "baud": 9600,
+    "download_baud": 921600
+  },
+  "checksum": {
+    "valid": true,
+    "stored_hex": "0xAA7BA568",
+    "calculated_hex": "0xAA7BA568",
+    "file_size": 11415644
+  },
+  "upload": {
+    "uploaded": true,
+    "bytes_sent": 11415644,
+    "chunks_sent": 2788,
+    "chunk_size": 4096,
+    "elapsed_s": 208.625
+  },
+  "serial_readback": {
+    "sendme": 0,
+    "title0.txt": "PAGE1 REF / TSW PROBE",
+    "label0.txt": "TOUCH TARGET",
+    "ref0.txt": "REF",
+    "disable0.txt": "TSW OFF",
+    "enable0.txt": "TSW ALL"
+  },
+  "runtime_steps": [
+    {
+      "command": "click ref0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click disable0,1",
+      "expected_kind": "none",
+      "ok": true
+    },
+    {
+      "command": "click enable0,1",
+      "expected_kind": "none",
+      "ok": true
+    }
+  ],
+  "conclusion": {
+    "page1_ref_tsw_scene_upload": "live-proven",
+    "object_readback": "live-proven",
+    "serial_click_dispatch": "live-proven",
+    "camera_visible_layout": "live-proven",
+    "physical_tsw_touch_lockout": "not_proven_by_serial_only"
+  }
+}
