@@ -400,4 +400,11 @@ def _wait_for_ack(ser: serial.Serial, timeout_s: float, label: str) -> None:
             return
         seen.extend(data)
     suffix = f"; saw {seen.hex(' ')}" if seen else ""
-    raise SerialTransportError(f"Timed out waiting for {label}{suffix}")
+    hint = ""
+    if "initial whmi-wri ack" in label:
+        hint = (
+            ". If connect still returns comok but runtime commands such as sendme/get dim do not respond, "
+            "the panel is probably in a wedged runtime state and public whmi-wri may not be accepted; "
+            "power-cycle the panel, use the official downloader recovery path, or restore from SD-card TFT."
+        )
+    raise SerialTransportError(f"Timed out waiting for {label}{suffix}{hint}")

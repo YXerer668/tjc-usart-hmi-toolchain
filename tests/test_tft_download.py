@@ -5,7 +5,13 @@ import tempfile
 import unittest
 
 from usarthmi.transport import TERMINATOR
-from usarthmi.tft_download import PUBLIC_WHMI_CHUNK_SIZE, _write_command, plan_upload, upload_tft
+from usarthmi.tft_download import (
+    PUBLIC_WHMI_CHUNK_SIZE,
+    _wait_for_ack,
+    _write_command,
+    plan_upload,
+    upload_tft,
+)
 
 
 class FakeSerial:
@@ -16,6 +22,11 @@ class FakeSerial:
         if isinstance(payload, str):
             payload = payload.encode("ascii")
         self.data.extend(payload)
+
+
+class EmptyReadSerial:
+    def read(self, size: int = 1) -> bytes:
+        return b""
 
 
 class TftDownloadTests(unittest.TestCase):
@@ -96,6 +107,10 @@ class TftDownloadTests(unittest.TestCase):
                     port="COM_SHOULD_NOT_BE_OPENED",
                     chunk_size=2048,
                 )
+
+    def test_initial_whmi_ack_timeout_explains_runtime_wedge(self) -> None:
+        with self.assertRaisesRegex(Exception, "runtime commands such as sendme/get dim do not respond"):
+            _wait_for_ack(EmptyReadSerial(), 0.001, "initial whmi-wri ack")  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":

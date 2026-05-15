@@ -44,3 +44,23 @@ Next recovery should use one of:
 
 Do not expose this forced post-primary generation path as a normal scene option
 until a safe scheduler descriptor is recovered.
+
+## Added guardrail
+
+`tools/tjc_serial_health.py` was added after this failure. It sends only safe
+runtime commands:
+
+```powershell
+python tools\tjc_serial_health.py --port COM36 --baud 9600 --timeout-ms 3000 --expected-model TJC8048X543_011C --out reverse_usarthmi\event_demo_post_primary_probe_20260515\serial_health_after_failure_2026-05-15.json
+```
+
+Current bad-state result:
+
+- `connect_ok=true`
+- `model=TJC8048X543_011C`
+- `runtime_ok=false`
+- `public_upload_ready=false`
+
+Use this before future automated uploads. If it reports `connect_ok=true` but
+`runtime_ok=false`, do not keep retrying public `whmi-wri`; recover the panel
+first.
