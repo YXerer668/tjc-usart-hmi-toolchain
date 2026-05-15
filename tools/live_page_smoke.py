@@ -22,6 +22,7 @@ from tools.live_case_smoke import (
     _default_probe_attr,
     _inspect_tft_checksum_safe,
     _model_preflight_check,
+    _preflight_failure_reason,
 )
 
 
@@ -125,7 +126,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 upload_result = {
                     "skipped": True,
                     "blocked": True,
-                    "reason": "model_preflight_failed",
+                    "reason": _preflight_failure_reason(model_preflight),
                 }
             else:
                 upload_result = upload_tft(

@@ -14,6 +14,7 @@ if str(WORKSPACE_ROOT) not in sys.path:
     sys.path.insert(0, str(WORKSPACE_ROOT))
 
 from usarthmi.protocol import build_get, parse_response
+from usarthmi.serial_health import probe_serial_health
 from usarthmi.tft_checksum import inspect_tft_checksum
 from usarthmi.tft_download import DEFAULT_DOWNLOAD_BAUD, PUBLIC_WHMI_CHUNK_SIZE, upload_tft
 from usarthmi.transport import SerialConfig, SerialTransport
@@ -120,7 +121,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 upload_result = {
                     "skipped": True,
                     "blocked": True,
-                    "reason": "model_preflight_failed",
+                    "reason": _preflight_failure_reason(model_preflight),
                 }
             else:
                 upload_result = upload_tft(
@@ -241,16 +242,28 @@ def _model_preflight_check(
     timeout_ms: int,
     required_model: str,
 ) -> dict[str, Any]:
-    config = SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms)
-    check = _connect_check(config)
-    details = check.get("response", {}).get("details", {}) if isinstance(check.get("response"), dict) else {}
-    actual_model = details.get("model") if isinstance(details, dict) else None
+    health = probe_serial_health(
+        port=port,
+        baud=baud,
+        timeout_ms=timeout_ms,
+        expected_model=required_model,
+    )
+    summary = health["summary"]
     return {
         "required_model": required_model,
-        "actual_model": actual_model,
-        "connect": check,
-        "ok": bool(check.get("ok")) and actual_model == required_model,
+        "actual_model": summary.get("model"),
+        "connect": next((item for item in health["commands"] if item["name"] == "connect"), None),
+        "serial_health": health,
+        "serial_upload_ready": bool(summary.get("public_upload_ready")),
+        "diagnosis": summary.get("diagnosis"),
+        "ok": bool(summary.get("public_upload_ready")),
     }
+
+
+def _preflight_failure_reason(preflight: dict[str, Any]) -> str:
+    if preflight.get("actual_model") != preflight.get("required_model"):
+        return "model_preflight_failed"
+    return "serial_runtime_preflight_failed"
 
 
 def _inspect_tft_checksum_safe(tft_path: Path) -> dict[str, Any]:

@@ -65,6 +65,9 @@ For a clearer implemented / experimental / missing matrix, see
 - Prefer full `tft upload` over trying to reuse the official editor's
   "skip unchanged blocks" downloader. The latter was observed to leave Windows
   USB/PnP in a ghost-COM state on the development machine.
+- Live smoke upload helpers use the same serial-health preflight as the CLI:
+  a matching `connect` model is not enough; `sendme` and `get dim` must also
+  respond before public `whmi-wri` upload is attempted.
 - Do not copy official `work\a-*\output\*.tft` while the official serial
   download is actively transferring. Copy it before starting transfer or after
   the transfer has fully finished.

@@ -15,6 +15,7 @@ if str(WORKSPACE_ROOT) not in sys.path:
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.page_format import PageBlock, PageFile, load_page_file, parse_page_data
 from usarthmi.protocol import ParsedResponse, build_click, build_get, build_set, parse_response
+from usarthmi.serial_health import probe_serial_health
 from usarthmi.tft_checksum import inspect_tft_checksum
 from usarthmi.tft_download import upload_tft
 from usarthmi.tft_patch import patch_rebuild_page_tft
@@ -136,7 +137,7 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 upload_result = {
                     "skipped": True,
                     "blocked": True,
-                    "reason": "model_preflight_failed",
+                    "reason": _preflight_failure_reason(model_preflight),
                 }
             else:
                 progress = _make_progress() if args.progress else None
@@ -513,22 +514,28 @@ def _model_preflight_check(
     timeout_ms: int,
     required_model: str,
 ) -> dict[str, Any]:
-    transport = SerialTransport(SerialConfig(port=port, baud=baud, timeout_ms=timeout_ms))
-    check = _transact_check(
-        transport,
-        "connect",
-        lambda response: response.kind == "connect",
-        "connect preflight",
-        attempts=3,
+    health = probe_serial_health(
+        port=port,
+        baud=baud,
+        timeout_ms=timeout_ms,
+        expected_model=required_model,
     )
-    details = check.response.get("details", {}) if isinstance(check.response, dict) else {}
-    actual_model = details.get("model") if isinstance(details, dict) else None
+    summary = health["summary"]
     return {
         "required_model": required_model,
-        "actual_model": actual_model,
-        "connect": check.to_dict(),
-        "ok": check.ok and actual_model == required_model,
+        "actual_model": summary.get("model"),
+        "connect": next((item for item in health["commands"] if item["name"] == "connect"), None),
+        "serial_health": health,
+        "serial_upload_ready": bool(summary.get("public_upload_ready")),
+        "diagnosis": summary.get("diagnosis"),
+        "ok": bool(summary.get("public_upload_ready")),
     }
+
+
+def _preflight_failure_reason(preflight: dict[str, Any]) -> str:
+    if preflight.get("actual_model") != preflight.get("required_model"):
+        return "model_preflight_failed"
+    return "serial_runtime_preflight_failed"
 
 
 def _inspect_tft_checksum_safe(tft_path: Path) -> dict[str, Any]:

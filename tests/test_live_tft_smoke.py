@@ -260,10 +260,20 @@ class LiveTftSmokeTests(unittest.TestCase):
             with (
                 patch("tools.live_tft_smoke.inspect_tft_checksum", return_value={"valid": True}),
                 patch(
-                    "tools.live_tft_smoke._connect_check",
+                    "tools.live_tft_smoke.probe_serial_health",
                     return_value={
-                        "ok": True,
-                        "response": {"details": {"model": "TJC8048X550_011"}},
+                        "summary": {
+                            "model": "TJC8048X550_011",
+                            "public_upload_ready": False,
+                            "diagnosis": "connect returned model 'TJC8048X550_011', expected 'TJC8048X543_011C'",
+                        },
+                        "commands": [
+                            {
+                                "name": "connect",
+                                "passed": True,
+                                "response": {"details": {"model": "TJC8048X550_011"}},
+                            }
+                        ],
                     },
                 ),
                 patch("tools.live_tft_smoke.upload_tft") as upload_tft,

@@ -7,7 +7,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from tools.live_case_smoke import run_smoke
+from tools.live_case_smoke import _model_preflight_check, _preflight_failure_reason, run_smoke
 
 
 class LiveCaseSmokeTests(unittest.TestCase):
@@ -98,6 +98,37 @@ class LiveCaseSmokeTests(unittest.TestCase):
         self.assertTrue(result["summary"]["ok"])
         self.assertFalse(result["summary"]["upload_blocked"])
         self.assertFalse(result["summary"]["serial_checks_skipped"])
+
+    def test_model_preflight_requires_runtime_health_not_only_connect(self) -> None:
+        with patch(
+            "tools.live_case_smoke.probe_serial_health",
+            return_value={
+                "summary": {
+                    "model": "TJC8048X543_011C",
+                    "public_upload_ready": False,
+                    "diagnosis": "runtime commands do not respond",
+                },
+                "commands": [
+                    {
+                        "name": "connect",
+                        "passed": True,
+                        "response": {"details": {"model": "TJC8048X543_011C"}},
+                    }
+                ],
+            },
+        ):
+            result = _model_preflight_check(
+                port="COM36",
+                baud=9600,
+                timeout_ms=3000,
+                required_model="TJC8048X543_011C",
+            )
+
+        self.assertEqual(result["actual_model"], "TJC8048X543_011C")
+        self.assertFalse(result["serial_upload_ready"])
+        self.assertFalse(result["ok"])
+        self.assertIn("runtime commands", result["diagnosis"])
+        self.assertEqual(_preflight_failure_reason(result), "serial_runtime_preflight_failed")
 
 
 def _args(temp_dir: Path) -> Namespace:
