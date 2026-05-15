@@ -44,9 +44,10 @@ python tools\page_event_oracle_batch.py C:\Users\SinYu\Desktop\case_for_codex `
 2026-05-16 的 `Program.s` 探针：
 
 - 新增 `tools/program_s_oracle_probe.py`，专门把官方编辑器顶部“上电全局初始化”代码和页面/控件事件分开分析。
-- baseline `Program.s` 中当前编译器已支持的连续两行 `printh ...` + `page 0`，在官方 `case_00_baseline/lcd_test.tft` 的 `unknown_objects_address` 区域找到唯一连续块匹配：`0xAE010D`，置信度 `high`。
-- `case_49_audio` 的官方 `source_raw.run` 也出现同型匹配：`0x160135`，说明至少这两条启动命令复用了现有 length-prefixed bytecode 内核。
-- `baud=9600 / dim=100 / recmod=0 / int ...` 仍明确标记为 `unsupported`，不要把“不支持编译”误判成“官方 TFT 不存在”。
+- baseline `Program.s` 中已观测的连续启动块 `baud=9600 / dim=100 / recmod=0 / printh ... / page 0`，在官方 `case_00_baseline/lcd_test.tft` 的 `unknown_objects_address` 区域找到唯一连续块匹配：`0xAE00E6`，长度 `83` 字节，置信度 `high`。
+- `case_49_audio` 的官方 `source_raw.run` 也出现同型匹配：`0x16010E`，说明这组启动命令复用了现有 length-prefixed bytecode item 形态。
+- `baud=9600 / dim=100 / recmod=0` 已作为 fixture-proven global assignment 子集接入最小编译器；`baud` 目前只启用官方已证实的 `9600`，不要声称已支持任意波特率。
+- `int sys0=...` 仍明确标记为 `unsupported`，不要把“不支持编译”误判成“官方 TFT 不存在”。
 
 `Program.s` 探针示例：
 

@@ -2104,10 +2104,9 @@ def _strip_event_comment(line: str) -> str:
 
 
 def _compile_property_event(line: str, *, context: _EventCompileContext | None) -> bytes | None:
-    global_assign = re.match(r"^volume\s*=\s*(-?\d+)\s*$", line, flags=re.IGNORECASE)
+    global_assign = _compile_global_assignment_event(line)
     if global_assign is not None:
-        value = global_assign.group(1)
-        return b"\x04\x08\x12\x00\x00=" + value.encode("ascii")
+        return global_assign
 
     assign = EVENT_ASSIGN_RE.match(line)
     if assign is not None:
@@ -2120,6 +2119,42 @@ def _compile_property_event(line: str, *, context: _EventCompileContext | None) 
         object_name, field_name, operator = unary.groups()
         slot = _event_field_slot(object_name, field_name, context=context, source=line)
         return b"\x01" + slot.to_bytes(4, "little") + operator.encode("ascii")
+
+    return None
+
+
+def _compile_global_assignment_event(line: str) -> bytes | None:
+    """Compile the small fixture-proven global assignment subset.
+
+    These opcodes are observed in Program.s startup code. Keep this as a
+    whitelist rather than a generic name=value compiler; arbitrary Program.s
+    variables still need separate official oracles.
+    """
+
+    global_assign = re.match(r"^volume\s*=\s*(-?\d+)\s*$", line, flags=re.IGNORECASE)
+    if global_assign is not None:
+        value = global_assign.group(1)
+        return b"\x04\x08\x12\x00\x00=" + value.encode("ascii")
+
+    dim_assign = re.match(r"^dim\s*=\s*(-?\d+)\s*$", line, flags=re.IGNORECASE)
+    if dim_assign is not None:
+        value = dim_assign.group(1)
+        return b"\x04\x04\x10\x00\x00=" + value.encode("ascii")
+
+    recmod_assign = re.match(r"^recmod\s*=\s*(-?\d+)\s*$", line, flags=re.IGNORECASE)
+    if recmod_assign is not None:
+        value = recmod_assign.group(1)
+        return b"\x04\x08\x0f\x00\x00=" + value.encode("ascii")
+
+    baud_assign = re.match(r"^baud\s*=\s*(\d+)\s*$", line, flags=re.IGNORECASE)
+    if baud_assign is not None:
+        value = int(baud_assign.group(1))
+        if value != 9600:
+            raise TftToolchainError(
+                "Unsupported Program.s baud assignment for the current minimal compiler: "
+                f"baud={value}. Only official fixture-proven baud=9600 is enabled."
+            )
+        return b"\x04\x04\x30\x00\x00=\x03" + value.to_bytes(4, "little")
 
     return None
 

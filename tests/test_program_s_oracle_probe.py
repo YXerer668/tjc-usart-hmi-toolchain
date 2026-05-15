@@ -6,6 +6,7 @@ import unittest
 
 from tools.program_s_oracle_probe import probe_program_s
 from usarthmi.tft_patch import _compile_event_line, _event_item
+from usarthmi.tft_toolchain import TftToolchainError
 
 
 def _sample_hmi(program_s: bytes) -> bytes:
@@ -50,7 +51,7 @@ class ProgramSOracleProbeTests(unittest.TestCase):
         self.assertEqual(report["block_matches"][0]["line_range"], "1-2")
         self.assertEqual(report["block_matches"][0]["matches"][0]["region"], "whole_file_unknown")
 
-    def test_unsupported_startup_lines_are_not_flattened_into_false_failures(self) -> None:
+    def test_global_startup_lines_compile_but_do_not_fake_missing_matches(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp = Path(tmp_dir)
             hmi = tmp / "sample.HMI"
@@ -61,9 +62,24 @@ class ProgramSOracleProbeTests(unittest.TestCase):
             report = probe_program_s(hmi, tft)
 
         statuses = [item["compile_status"] for item in report["program_s_lines"]]
-        self.assertEqual(statuses, ["unsupported", "unsupported", "compiled"])
-        self.assertEqual(report["summary"]["unsupported_line_count"], 2)
+        self.assertEqual(statuses, ["compiled", "compiled", "compiled"])
+        self.assertEqual(report["summary"]["compiled_line_count"], 3)
+        self.assertEqual(report["summary"]["unsupported_line_count"], 0)
         self.assertEqual(report["summary"]["line_match_count"], 1)
+
+    def test_fixture_proven_global_startup_assignment_bytes(self) -> None:
+        expected = {
+            "baud=9600": "0b 00 00 00 04 04 30 00 00 3d 03 80 25 00 00",
+            "dim=100": "09 00 00 00 04 04 10 00 00 3d 31 30 30",
+            "recmod=0": "07 00 00 00 04 08 0f 00 00 3d 30",
+        }
+        for line, expected_hex in expected.items():
+            with self.subTest(line=line):
+                self.assertEqual(_compiled_item(line).hex(" "), expected_hex)
+
+    def test_unproven_baud_values_remain_unsupported(self) -> None:
+        with self.assertRaisesRegex(TftToolchainError, "Only official fixture-proven baud=9600"):
+            _compile_event_line("baud=115200", context=None)
 
 
 CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
@@ -80,12 +96,14 @@ class ProgramSOracleOfficialFixtureTests(unittest.TestCase):
         report = probe_program_s(BASELINE_HMI, BASELINE_TFT)
 
         self.assertEqual(report["tft_meta"]["model"], "TJC8048X543_011")
-        self.assertEqual(report["summary"]["compiled_line_count"], 2)
-        self.assertGreaterEqual(report["summary"]["line_match_count"], 2)
+        self.assertEqual(report["summary"]["compiled_line_count"], 5)
+        self.assertEqual(report["summary"]["unsupported_line_count"], 1)
+        self.assertGreaterEqual(report["summary"]["line_match_count"], 5)
         self.assertEqual(report["summary"]["block_match_count"], 1)
         match = report["block_matches"][0]["matches"][0]
         self.assertIn("unknown_objects_address", match["region"])
         self.assertEqual(match["confidence"], "high")
+        self.assertEqual(match["offset_hex"], "0xAE00E6")
 
 
 if __name__ == "__main__":
