@@ -105,7 +105,7 @@ def main(argv: list[str] | None = None) -> int:
     exit_code = 0
     if (
         getattr(args, "command", None) == "tft"
-        and getattr(args, "tft_command", None) == "health"
+        and getattr(args, "tft_command", None) in {"health", "preflight"}
         and not result.get("summary", {}).get("healthy", False)
     ):
         exit_code = 1
@@ -325,6 +325,12 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_health.add_argument("--baud", type=int, default=9600, help="Current device baud")
     tft_health.add_argument("--timeout-ms", type=int, default=3000, help="Per-command timeout in milliseconds")
     tft_health.add_argument("--expected-model", help="Expected model, for example TJC8048X543_011C")
+    tft_preflight = tft_sub.add_parser("preflight", help="Check TFT checksum and serial upload readiness")
+    tft_preflight.add_argument("--file", required=True, help="TFT file path")
+    tft_preflight.add_argument("--port", required=True, help="Serial port, for example COM36")
+    tft_preflight.add_argument("--baud", type=int, default=9600, help="Current device baud")
+    tft_preflight.add_argument("--timeout-ms", type=int, default=3000, help="Per-command serial timeout")
+    tft_preflight.add_argument("--expected-model", help="Expected model, for example TJC8048X543_011C")
     tft_upload = tft_sub.add_parser("upload", help="Upload a .tft file to a screen over serial")
     tft_upload.add_argument("--file", required=True, help="TFT file path")
     tft_upload.add_argument("--port", required=True, help="Serial port")
@@ -342,6 +348,11 @@ def _build_parser() -> argparse.ArgumentParser:
         "--require-runtime-healthy",
         action="store_true",
         help="Probe connect/sendme/get dim before upload and abort if normal runtime commands do not respond",
+    )
+    tft_upload.add_argument(
+        "--require-valid-checksum",
+        action="store_true",
+        help="Verify the final 4-byte TFT checksum before upload and abort if invalid",
     )
     tft_upload.add_argument("--expected-model", help="Expected model for --require-runtime-healthy")
     tft_upload.add_argument(
@@ -704,8 +715,52 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             expected_model=args.expected_model,
             verbose=args.verbose,
         )
+    if args.tft_command == "preflight":
+        checksum = inspect_tft_checksum(args.file)
+        health = probe_serial_health(
+            port=args.port,
+            baud=args.baud,
+            timeout_ms=args.timeout_ms,
+            expected_model=args.expected_model,
+            verbose=args.verbose,
+        )
+        checksum_ok = bool(checksum.get("valid"))
+        serial_ready = bool(health["summary"].get("public_upload_ready"))
+        ready = checksum_ok and serial_ready
+        if ready:
+            diagnosis = "TFT checksum is valid and serial runtime is ready for public upload."
+        elif not checksum_ok and not serial_ready:
+            diagnosis = "TFT checksum is invalid and serial runtime is not ready for public upload."
+        elif not checksum_ok:
+            diagnosis = "TFT checksum is invalid; do not upload until it is repaired."
+        else:
+            diagnosis = health["summary"]["diagnosis"]
+        return {
+            "file": str(Path(args.file).resolve()),
+            "port": args.port,
+            "baud": args.baud,
+            "expected_model": args.expected_model,
+            "summary": {
+                "healthy": ready,
+                "ready": ready,
+                "tft_checksum_valid": checksum_ok,
+                "serial_upload_ready": serial_ready,
+                "diagnosis": diagnosis,
+            },
+            "checksum": checksum,
+            "serial_health": health,
+        }
     if args.tft_command == "upload":
+        preflight_checksum = None
         preflight_health = None
+        if args.require_valid_checksum:
+            preflight_checksum = inspect_tft_checksum(args.file)
+            if not preflight_checksum["valid"]:
+                raise TftToolchainError(
+                    "TFT upload preflight failed: checksum invalid "
+                    f"(stored={preflight_checksum['stored_hex']}, "
+                    f"calculated={preflight_checksum['calculated_hex']})"
+                )
         if args.require_runtime_healthy:
             preflight_health = probe_serial_health(
                 port=args.port,
@@ -738,6 +793,8 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
             progress=progress,
         ).to_dict()
+        if preflight_checksum is not None:
+            result["preflight_checksum"] = preflight_checksum
         if preflight_health is not None:
             result["preflight_health"] = preflight_health
         return result

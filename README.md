@@ -228,11 +228,18 @@ python -m usarthmi --json tft health `
   --timeout-ms 3000 `
   --expected-model TJC8048X543_011C
 
+python -m usarthmi --json tft preflight `
+  --file added_object.tft `
+  --port COM36 `
+  --baud 9600 `
+  --expected-model TJC8048X543_011C
+
 python -m usarthmi --json tft upload `
   --file added_object.tft `
   --port COM36 `
   --baud 9600 `
   --download-baud 921600 `
+  --require-valid-checksum `
   --require-runtime-healthy `
   --expected-model TJC8048X543_011C `
   --progress

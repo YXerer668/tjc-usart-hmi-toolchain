@@ -69,5 +69,6 @@ first.
 Formal CLI uploads should use the same guardrail:
 
 ```powershell
-python -m usarthmi --json tft upload --file known_good.tft --port COM36 --baud 9600 --download-baud 921600 --require-runtime-healthy --expected-model TJC8048X543_011C
+python -m usarthmi --json tft preflight --file known_good.tft --port COM36 --baud 9600 --expected-model TJC8048X543_011C
+python -m usarthmi --json tft upload --file known_good.tft --port COM36 --baud 9600 --download-baud 921600 --require-valid-checksum --require-runtime-healthy --expected-model TJC8048X543_011C
 ```
