@@ -35,6 +35,7 @@ from .protocol import (
 )
 from .runtime_preview import build_scene_runtime_commands, push_scene_runtime_preview
 from .scene import SceneError, WidgetSpec, load_scene, save_scene_json, validate_scene
+from .serial_health import probe_serial_health
 from .tft_download import DEFAULT_DOWNLOAD_BAUD, PUBLIC_WHMI_CHUNK_SIZE, plan_upload, upload_tft
 from .tft_case_diff import compare_case_folder
 from .tft_checksum import inspect_tft_checksum
@@ -101,11 +102,19 @@ def main(argv: list[str] | None = None) -> int:
             print(f"ERROR: {exc}")
         return 2
 
+    exit_code = 0
+    if (
+        getattr(args, "command", None) == "tft"
+        and getattr(args, "tft_command", None) == "health"
+        and not result.get("summary", {}).get("healthy", False)
+    ):
+        exit_code = 1
+
     if getattr(args, "json", False):
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         _print_human_result(args.command, result)
-    return 0
+    return exit_code
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -311,6 +320,11 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_patch_font.add_argument("--baseline-tft", required=True, help="Input TFT used as binary seed")
     tft_patch_font.add_argument("--font", required=True, help="Replacement .zi font file")
     tft_patch_font.add_argument("--out", required=True, help="Output TFT path")
+    tft_health = tft_sub.add_parser("health", help="Probe whether a serial screen is safe for public TFT upload")
+    tft_health.add_argument("--port", required=True, help="Serial port, for example COM36")
+    tft_health.add_argument("--baud", type=int, default=9600, help="Current device baud")
+    tft_health.add_argument("--timeout-ms", type=int, default=3000, help="Per-command timeout in milliseconds")
+    tft_health.add_argument("--expected-model", help="Expected model, for example TJC8048X543_011C")
     tft_upload = tft_sub.add_parser("upload", help="Upload a .tft file to a screen over serial")
     tft_upload.add_argument("--file", required=True, help="TFT file path")
     tft_upload.add_argument("--port", required=True, help="Serial port")
@@ -324,6 +338,18 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     tft_upload.add_argument("--timeout-ms", type=int, default=3000, help="Ack timeout in milliseconds")
     tft_upload.add_argument("--address", type=int, default=0, help="Optional HMI address prefix, 0 disables")
+    tft_upload.add_argument(
+        "--require-runtime-healthy",
+        action="store_true",
+        help="Probe connect/sendme/get dim before upload and abort if normal runtime commands do not respond",
+    )
+    tft_upload.add_argument("--expected-model", help="Expected model for --require-runtime-healthy")
+    tft_upload.add_argument(
+        "--health-timeout-ms",
+        type=int,
+        default=3000,
+        help="Per-command timeout for --require-runtime-healthy",
+    )
     tft_upload.add_argument(
         "--known-current",
         help="Trusted currently-flashed TFT file; used only for safe identical-file skipping",
@@ -670,9 +696,34 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             font_path=args.font,
             out_tft=args.out,
         ).to_dict()
+    if args.tft_command == "health":
+        return probe_serial_health(
+            port=args.port,
+            baud=args.baud,
+            timeout_ms=args.timeout_ms,
+            expected_model=args.expected_model,
+            verbose=args.verbose,
+        )
     if args.tft_command == "upload":
+        preflight_health = None
+        if args.require_runtime_healthy:
+            preflight_health = probe_serial_health(
+                port=args.port,
+                baud=args.baud,
+                timeout_ms=args.health_timeout_ms,
+                expected_model=args.expected_model,
+                verbose=args.verbose,
+            )
+            summary = preflight_health["summary"]
+            if not summary["public_upload_ready"]:
+                raise SerialTransportError(
+                    "TFT upload preflight failed: "
+                    f"{summary['diagnosis']} "
+                    f"(connect_ok={summary['connect_ok']}, runtime_ok={summary['runtime_ok']}, "
+                    f"model={summary.get('model')!r})"
+                )
         progress = _make_upload_progress() if args.progress else None
-        return upload_tft(
+        result = upload_tft(
             args.file,
             port=args.port,
             baud=args.baud,
@@ -687,6 +738,9 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
             progress=progress,
         ).to_dict()
+        if preflight_health is not None:
+            result["preflight_health"] = preflight_health
+        return result
     if args.tft_command == "plan-upload":
         return plan_upload(
             args.file,

@@ -222,11 +222,19 @@ python -m usarthmi --json tft patch-add-object `
 Upload:
 
 ```powershell
+python -m usarthmi --json tft health `
+  --port COM36 `
+  --baud 9600 `
+  --timeout-ms 3000 `
+  --expected-model TJC8048X543_011C
+
 python -m usarthmi --json tft upload `
   --file added_object.tft `
   --port COM36 `
   --baud 9600 `
   --download-baud 921600 `
+  --require-runtime-healthy `
+  --expected-model TJC8048X543_011C `
   --progress
 ```
 

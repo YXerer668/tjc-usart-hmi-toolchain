@@ -52,6 +52,7 @@ runtime commands:
 
 ```powershell
 python tools\tjc_serial_health.py --port COM36 --baud 9600 --timeout-ms 3000 --expected-model TJC8048X543_011C --out reverse_usarthmi\event_demo_post_primary_probe_20260515\serial_health_after_failure_2026-05-15.json
+python -m usarthmi --json tft health --port COM36 --baud 9600 --timeout-ms 3000 --expected-model TJC8048X543_011C
 ```
 
 Current bad-state result:
@@ -64,3 +65,9 @@ Current bad-state result:
 Use this before future automated uploads. If it reports `connect_ok=true` but
 `runtime_ok=false`, do not keep retrying public `whmi-wri`; recover the panel
 first.
+
+Formal CLI uploads should use the same guardrail:
+
+```powershell
+python -m usarthmi --json tft upload --file known_good.tft --port COM36 --baud 9600 --download-baud 921600 --require-runtime-healthy --expected-model TJC8048X543_011C
+```

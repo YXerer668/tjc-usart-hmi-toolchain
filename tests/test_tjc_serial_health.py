@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import io
 import unittest
+from unittest.mock import patch
 
-from tools.tjc_serial_health import _classify_health
+from usarthmi.cli import main
+from usarthmi.serial_health import _classify_health
 
 
 def command_result(name: str, kind: str, *, passed: bool = True, model: str | None = None) -> dict:
@@ -54,6 +57,60 @@ class TJCSerialHealthTests(unittest.TestCase):
         self.assertFalse(summary["connect_ok"])
         self.assertFalse(summary["public_upload_ready"])
         self.assertIn("expected", summary["diagnosis"])
+
+    def test_cli_health_returns_nonzero_when_unhealthy(self) -> None:
+        report = {
+            "summary": {"healthy": False},
+            "commands": [],
+        }
+        with patch("usarthmi.cli.probe_serial_health", return_value=report), patch(
+            "sys.stdout", new_callable=io.StringIO
+        ):
+            code = main(
+                [
+                    "--json",
+                    "tft",
+                    "health",
+                    "--port",
+                    "COM36",
+                    "--expected-model",
+                    "TJC8048X543_011C",
+                ]
+            )
+
+        self.assertEqual(code, 1)
+
+    def test_cli_upload_preflight_blocks_unhealthy_runtime(self) -> None:
+        report = {
+            "summary": {
+                "public_upload_ready": False,
+                "connect_ok": True,
+                "runtime_ok": False,
+                "model": "TJC8048X543_011C",
+                "diagnosis": "runtime commands do not respond",
+            },
+            "commands": [],
+        }
+        with patch("usarthmi.cli.probe_serial_health", return_value=report), patch(
+            "usarthmi.cli.upload_tft"
+        ) as upload_mock, patch("sys.stdout", new_callable=io.StringIO):
+            code = main(
+                [
+                    "--json",
+                    "tft",
+                    "upload",
+                    "--file",
+                    "candidate.tft",
+                    "--port",
+                    "COM36",
+                    "--require-runtime-healthy",
+                    "--expected-model",
+                    "TJC8048X543_011C",
+                ]
+            )
+
+        self.assertEqual(code, 2)
+        upload_mock.assert_not_called()
 
 
 if __name__ == "__main__":
