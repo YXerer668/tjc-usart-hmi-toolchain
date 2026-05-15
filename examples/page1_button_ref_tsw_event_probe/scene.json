@@ -1,0 +1,118 @@
+{
+  "project": {
+    "name": "page1-button-ref-tsw-event-probe",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title0",
+          "type": "text",
+          "x": 72,
+          "y": 52,
+          "w": 560,
+          "h": 54,
+          "text": "PAGE1 REF / TSW PROBE",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "label0",
+          "type": "text",
+          "x": 72,
+          "y": 128,
+          "w": 400,
+          "h": 58,
+          "text": "TOUCH TARGET",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "ref0",
+          "type": "button",
+          "x": 72,
+          "y": 236,
+          "w": 150,
+          "h": 62,
+          "text": "REF",
+          "events": {
+            "down": [
+              "ref label0"
+            ]
+          }
+        },
+        {
+          "id": "disable0",
+          "type": "button",
+          "x": 246,
+          "y": 236,
+          "w": 170,
+          "h": 62,
+          "text": "TSW OFF",
+          "style": {
+            "font_id": 0,
+            "background_color": 63488,
+            "foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          },
+          "events": {
+            "down": [
+              "tsw label0,0"
+            ]
+          }
+        },
+        {
+          "id": "enable0",
+          "type": "button",
+          "x": 440,
+          "y": 236,
+          "w": 170,
+          "h": 62,
+          "text": "TSW ALL",
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          },
+          "events": {
+            "down": [
+              "tsw 255,1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
