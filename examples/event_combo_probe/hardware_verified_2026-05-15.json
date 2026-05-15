@@ -1,0 +1,61 @@
+{
+  "date": "2026-05-15",
+  "target": {
+    "port": "COM36",
+    "model": "TJC8048X543_011C",
+    "baud": 9600,
+    "download_baud": 921600
+  },
+  "scene": "examples/event_combo_probe/scene.json",
+  "built_tft": "reverse_usarthmi/event_combo_probe/local_build/output.tft",
+  "checksum": {
+    "valid": true,
+    "stored_hex": "0xD4DD1200",
+    "calculated_hex": "0xD4DD1200",
+    "file_size": 11414588
+  },
+  "upload": {
+    "success": true,
+    "bytes_sent": 11414588,
+    "chunks_sent": 2787,
+    "chunk_size": 4096,
+    "elapsed_s": 210.359
+  },
+  "serial_proof": [
+    {
+      "command": "sendme",
+      "response_kind": "page_id",
+      "value": 0
+    },
+    {
+      "command": "get numval.val",
+      "phase": "before_combo_click",
+      "response_kind": "number",
+      "value": 0
+    },
+    {
+      "command": "click combo0 down",
+      "mapped_command": "click combo0,1",
+      "response_kind": "none"
+    },
+    {
+      "command": "get numval.val",
+      "phase": "after_combo_click",
+      "response_kind": "number",
+      "value": 11
+    },
+    {
+      "command": "click reset0 down",
+      "mapped_command": "click reset0,1",
+      "response_kind": "none"
+    },
+    {
+      "command": "get numval.val",
+      "phase": "after_reset_click",
+      "response_kind": "number",
+      "value": 0
+    }
+  ],
+  "camera_proof": "reverse_usarthmi/event_combo_probe/live_event_combo_after_click_2026-05-15.jpg",
+  "conclusion": "page0 button events preserve and execute multi-line numeric scripts in order"
+}

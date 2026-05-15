@@ -372,7 +372,9 @@ Multi-page generation, broad widget coverage, event-code authoring, and broader
 font fixture coverage are still outside the proven V1 path. Event bytecode
 assembly has partial support (`printh`/`page`/`click`/`ref`/`vis`/`tsw`/`rawhex`):
 object button events are live-proven, including `printh`, `click`, `ref`, `tsw`,
-and numeric updates.
+and numeric updates. The `examples/event_combo_probe` smoke test proves a
+single page0 button can execute multiple numeric event lines in order
+(`val=10`, `++`, `++`, `--`) and be verified by serial readback.
 Media event bytecode is now decoded in oracle reports, with official audio
 fixtures proving `wav0.vid=0`, `wav0.en=1`, and `play 0,0,0` byte-for-byte.
 Page-load events are not recovered yet. A 2026-05-15 single-page `page0.load`

@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from usarthmi.event_bytecode import decode_event_table
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.tft_checksum import inspect_tft_checksum
 from usarthmi.tft_patch import (
@@ -241,6 +242,29 @@ class TftPatchTests(unittest.TestCase):
         numval_ref = (number_slot_start + 27).to_bytes(4, "little")
         self.assertIn(b"\x07\x00\x00\x00\x01" + numval_ref + b"++", event_layout.data)
         self.assertEqual(event_layout.callbacks[2]["codesdown-"], event_layout.offsets[2] + 12)
+
+    def test_event_table_builder_keeps_multi_line_numeric_event_order(self) -> None:
+        source_pa = EXTRACT_ROOT / "case_16_number_basic" / "extract" / "0.pa"
+        page = load_page_file(source_pa)
+        button = next(block for block in page.blocks if block.objname == "b0")
+        button.set_event(
+            "codesdown-",
+            [
+                "numval.val=10",
+                "numval.val++",
+                "numval.val++",
+                "numval.val--",
+            ],
+        )
+
+        event_data = _build_object_event_table(button, context=_build_event_compile_context(page.blocks))
+        items = [
+            (item.get("operator"), item.get("value"))
+            for item in decode_event_table(event_data)
+            if item["kind"] == "property_event"
+        ]
+
+        self.assertEqual(items, [("=", "10"), ("++", None), ("++", None), ("--", None)])
 
     def test_event_table_builder_compiles_vis_event(self) -> None:
         source_pa = EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa"

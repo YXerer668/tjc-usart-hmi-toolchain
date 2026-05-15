@@ -1,0 +1,121 @@
+{
+  "project": {
+    "name": "event-combo-probe",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 63390
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title0",
+          "type": "text",
+          "x": 56,
+          "y": 32,
+          "w": 688,
+          "h": 54,
+          "text": "EVENT COMBO PROBE",
+          "style": {
+            "font_id": 0,
+            "background_color": 63390,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "hint0",
+          "type": "text",
+          "x": 80,
+          "y": 96,
+          "w": 640,
+          "h": 42,
+          "text": "combo0: val=10, ++, ++, --  =>  11",
+          "style": {
+            "font_id": 0,
+            "background_color": 63390,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 276,
+          "y": 162,
+          "w": 248,
+          "h": 86,
+          "value": 0,
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "border_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "combo0",
+          "type": "button",
+          "x": 178,
+          "y": 294,
+          "w": 210,
+          "h": 76,
+          "text": "COMBO",
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "pressed_background_color": 1024,
+            "pressed_foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          },
+          "events": {
+            "down": [
+              "numval.val=10",
+              "numval.val++",
+              "numval.val++",
+              "numval.val--"
+            ]
+          }
+        },
+        {
+          "id": "reset0",
+          "type": "button",
+          "x": 412,
+          "y": 294,
+          "w": 210,
+          "h": 76,
+          "text": "RESET",
+          "style": {
+            "font_id": 0,
+            "background_color": 63488,
+            "foreground_color": 65535,
+            "pressed_background_color": 32768,
+            "pressed_foreground_color": 65535,
+            "xcen": 1,
+            "ycen": 1
+          },
+          "events": {
+            "down": [
+              "numval.val=0"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
