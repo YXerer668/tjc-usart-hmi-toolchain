@@ -1,0 +1,86 @@
+{
+  "project": {
+    "name": "page1-button-numeric-event-matrix",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 72,
+          "y": 60,
+          "w": 220,
+          "h": 60,
+          "value": 3,
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "inc0",
+          "type": "button",
+          "x": 72,
+          "y": 145,
+          "w": 160,
+          "h": 58,
+          "text": "INC",
+          "events": {
+            "down": [
+              "numval.val++"
+            ]
+          }
+        },
+        {
+          "id": "set7",
+          "type": "button",
+          "x": 250,
+          "y": 145,
+          "w": 160,
+          "h": 58,
+          "text": "SET7",
+          "events": {
+            "down": [
+              "numval.val=7"
+            ]
+          }
+        },
+        {
+          "id": "dec0",
+          "type": "button",
+          "x": 428,
+          "y": 145,
+          "w": 160,
+          "h": 58,
+          "text": "DEC",
+          "events": {
+            "down": [
+              "numval.val--"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

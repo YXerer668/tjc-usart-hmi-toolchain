@@ -1,0 +1,85 @@
+{
+  "name": "page1_button_numeric_event_matrix_live_expectations",
+  "select_page": 0,
+  "page_id": 0,
+  "restore_page": 1,
+  "expectations": [
+    {
+      "target": "numval.val",
+      "expected": 3,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "inc0.txt",
+      "expected": "INC",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "set7.txt",
+      "expected": "SET7",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "dec0.txt",
+      "expected": "DEC",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "steps": [
+    {
+      "label": "press inc0",
+      "command": "click inc0,1",
+      "delay_ms": 120
+    },
+    {
+      "label": "release inc0",
+      "command": "click inc0,0",
+      "delay_ms": 120
+    },
+    {
+      "label": "numval incremented",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected": 4,
+      "attempts": 3
+    },
+    {
+      "label": "press set7",
+      "command": "click set7,1",
+      "delay_ms": 120
+    },
+    {
+      "label": "release set7",
+      "command": "click set7,0",
+      "delay_ms": 120
+    },
+    {
+      "label": "numval assigned",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected": 7,
+      "attempts": 3
+    },
+    {
+      "label": "press dec0",
+      "command": "click dec0,1",
+      "delay_ms": 120
+    },
+    {
+      "label": "release dec0",
+      "command": "click dec0,0",
+      "delay_ms": 120
+    },
+    {
+      "label": "numval decremented",
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected": 6,
+      "attempts": 3
+    }
+  ]
+}

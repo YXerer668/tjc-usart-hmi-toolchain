@@ -1,0 +1,44 @@
+{
+  "case": "page1_button_numeric_event_matrix",
+  "date": "2026-05-15",
+  "source_smoke_result": "reverse_usarthmi/page1_button_numeric_event_matrix/live_smoke/smoke_result.json",
+  "build": {
+    "scene": "examples/page1_button_numeric_event_matrix/scene.json",
+    "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+    "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+    "output_tft": "reverse_usarthmi/page1_button_numeric_event_matrix/local_build/output.tft",
+    "file_size": 11414352,
+    "stored_crc32": "0xC3C34A33",
+    "calculated_crc32": "0xC3C34A33",
+    "checksum_valid": true
+  },
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload": {
+    "method": "public_whmi_wri",
+    "chunk_size": 4096,
+    "bytes_sent": 11414352,
+    "chunks_sent": 2787,
+    "elapsed_s": 206.984,
+    "skipped": false
+  },
+  "runtime_evidence": {
+    "initial_runtime_page": 0,
+    "initial_numval_val": 3,
+    "inc0_txt": "INC",
+    "set7_txt": "SET7",
+    "dec0_txt": "DEC",
+    "after_inc0_press": 4,
+    "after_set7_press": 7,
+    "after_dec0_press": 6,
+    "serial_checks_ok": true
+  },
+  "notes": [
+    "This verifies multiple page1 button callbacks on the same page.",
+    "The event matrix covers numeric field increment, assignment, and decrement in one live smoke."
+  ]
+}
