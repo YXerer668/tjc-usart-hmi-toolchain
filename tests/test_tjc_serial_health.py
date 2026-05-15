@@ -92,9 +92,10 @@ class TJCSerialHealthTests(unittest.TestCase):
             },
             "commands": [],
         }
-        with patch("usarthmi.cli.probe_serial_health", return_value=report), patch(
-            "usarthmi.cli.upload_tft"
-        ) as upload_mock, patch("sys.stdout", new_callable=io.StringIO):
+        checksum = {"valid": True, "stored_hex": "0x11111111", "calculated_hex": "0x11111111"}
+        with patch("usarthmi.cli.inspect_tft_checksum", return_value=checksum), patch(
+            "usarthmi.cli.probe_serial_health", return_value=report
+        ), patch("usarthmi.cli.upload_tft") as upload_mock, patch("sys.stdout", new_callable=io.StringIO):
             code = main(
                 [
                     "--json",
@@ -104,9 +105,6 @@ class TJCSerialHealthTests(unittest.TestCase):
                     "candidate.tft",
                     "--port",
                     "COM36",
-                    "--require-runtime-healthy",
-                    "--expected-model",
-                    "TJC8048X543_011C",
                 ]
             )
 
@@ -155,12 +153,35 @@ class TJCSerialHealthTests(unittest.TestCase):
                     "candidate.tft",
                     "--port",
                     "COM36",
-                    "--require-valid-checksum",
                 ]
             )
 
         self.assertEqual(code, 2)
         upload_mock.assert_not_called()
+
+    def test_cli_upload_can_explicitly_skip_default_preflight(self) -> None:
+        with patch("usarthmi.cli.inspect_tft_checksum") as checksum_mock, patch(
+            "usarthmi.cli.probe_serial_health"
+        ) as health_mock, patch(
+            "usarthmi.cli.upload_tft", return_value=SimpleNamespace(to_dict=lambda: {"uploaded": True})
+        ) as upload_mock, patch("sys.stdout", new_callable=io.StringIO):
+            code = main(
+                [
+                    "--json",
+                    "tft",
+                    "upload",
+                    "--file",
+                    "candidate.tft",
+                    "--port",
+                    "COM36",
+                    "--no-preflight",
+                ]
+            )
+
+        self.assertEqual(code, 0)
+        checksum_mock.assert_not_called()
+        health_mock.assert_not_called()
+        upload_mock.assert_called_once()
 
 
 if __name__ == "__main__":

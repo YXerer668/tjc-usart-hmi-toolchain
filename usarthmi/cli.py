@@ -330,7 +330,11 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_preflight.add_argument("--port", required=True, help="Serial port, for example COM36")
     tft_preflight.add_argument("--baud", type=int, default=9600, help="Current device baud")
     tft_preflight.add_argument("--timeout-ms", type=int, default=3000, help="Per-command serial timeout")
-    tft_preflight.add_argument("--expected-model", help="Expected model, for example TJC8048X543_011C")
+    tft_preflight.add_argument(
+        "--expected-model",
+        default="TJC8048X543_011C",
+        help="Expected model, for example TJC8048X543_011C; pass an empty string to skip model matching",
+    )
     tft_upload = tft_sub.add_parser("upload", help="Upload a .tft file to a screen over serial")
     tft_upload.add_argument("--file", required=True, help="TFT file path")
     tft_upload.add_argument("--port", required=True, help="Serial port")
@@ -347,14 +351,23 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_upload.add_argument(
         "--require-runtime-healthy",
         action="store_true",
-        help="Probe connect/sendme/get dim before upload and abort if normal runtime commands do not respond",
+        help="Deprecated compatibility flag; runtime-health preflight is enabled by default",
     )
     tft_upload.add_argument(
         "--require-valid-checksum",
         action="store_true",
-        help="Verify the final 4-byte TFT checksum before upload and abort if invalid",
+        help="Deprecated compatibility flag; checksum preflight is enabled by default",
     )
-    tft_upload.add_argument("--expected-model", help="Expected model for --require-runtime-healthy")
+    tft_upload.add_argument(
+        "--no-preflight",
+        action="store_true",
+        help="Skip default checksum and serial-health preflight; only use for deliberate recovery/reverse probes",
+    )
+    tft_upload.add_argument(
+        "--expected-model",
+        default="TJC8048X543_011C",
+        help="Expected model for upload preflight; pass an empty string to skip model matching",
+    )
     tft_upload.add_argument(
         "--health-timeout-ms",
         type=int,
@@ -716,12 +729,13 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             verbose=args.verbose,
         )
     if args.tft_command == "preflight":
+        expected_model = str(args.expected_model or "") or None
         checksum = inspect_tft_checksum(args.file)
         health = probe_serial_health(
             port=args.port,
             baud=args.baud,
             timeout_ms=args.timeout_ms,
-            expected_model=args.expected_model,
+            expected_model=expected_model,
             verbose=args.verbose,
         )
         checksum_ok = bool(checksum.get("valid"))
@@ -739,7 +753,7 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             "file": str(Path(args.file).resolve()),
             "port": args.port,
             "baud": args.baud,
-            "expected_model": args.expected_model,
+            "expected_model": expected_model,
             "summary": {
                 "healthy": ready,
                 "ready": ready,
@@ -753,7 +767,9 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
     if args.tft_command == "upload":
         preflight_checksum = None
         preflight_health = None
-        if args.require_valid_checksum:
+        run_checksum_preflight = args.require_valid_checksum or not args.no_preflight
+        run_runtime_preflight = args.require_runtime_healthy or not args.no_preflight
+        if run_checksum_preflight:
             preflight_checksum = inspect_tft_checksum(args.file)
             if not preflight_checksum["valid"]:
                 raise TftToolchainError(
@@ -761,12 +777,13 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
                     f"(stored={preflight_checksum['stored_hex']}, "
                     f"calculated={preflight_checksum['calculated_hex']})"
                 )
-        if args.require_runtime_healthy:
+        if run_runtime_preflight:
+            expected_model = str(args.expected_model or "") or None
             preflight_health = probe_serial_health(
                 port=args.port,
                 baud=args.baud,
                 timeout_ms=args.health_timeout_ms,
-                expected_model=args.expected_model,
+                expected_model=expected_model,
                 verbose=args.verbose,
             )
             summary = preflight_health["summary"]

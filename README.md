@@ -242,11 +242,12 @@ python -m usarthmi --json tft upload `
   --port COM36 `
   --baud 9600 `
   --download-baud 921600 `
-  --require-valid-checksum `
-  --require-runtime-healthy `
   --expected-model TJC8048X543_011C `
   --progress
 ```
+
+`tft upload` runs checksum and serial-health preflight by default. Use
+`--no-preflight` only for deliberate recovery or reverse-engineering probes.
 
 Replace the embedded TFT font with a generated `.zi`:
 
