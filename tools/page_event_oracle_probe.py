@@ -255,6 +255,14 @@ def _diagnose(block_reports: list[dict[str, Any]], *, post_primary_matches: list
     object_callbacks = _slot_refs(block_reports[1:], callback_slots_only=True)
     page_event_offsets = _slot_refs(block_reports[:1], names={"event_offset_0x34"})
     object_event_offsets = _slot_refs(block_reports[1:], names={"event_offset_0x34"})
+    scheduler_path = _scheduler_path(
+        page_load_non_empty=page_load_non_empty,
+        page_event_table_found=bool(page and page["event_table_matches"]),
+        post_primary_page_event_found=bool(post_primary_matches),
+        page_callbacks=page_callbacks,
+        object_callbacks=object_callbacks,
+        page_event_offsets=page_event_offsets,
+    )
     return {
         "page_load_non_empty": page_load_non_empty,
         "page_event_table_found": bool(page and page["event_table_matches"]),
@@ -263,6 +271,9 @@ def _diagnose(block_reports: list[dict[str, Any]], *, post_primary_matches: list
         "object_callback_like_slots": object_callbacks,
         "page_event_offset_0x34_refs": page_event_offsets,
         "object_event_offset_0x34_refs": object_event_offsets,
+        "scheduler_path": scheduler_path,
+        "upload_risk": _upload_risk(scheduler_path),
+        "recommended_writer_action": _recommended_writer_action(scheduler_path),
         "interpretation": _interpretation(
             page_load_non_empty=page_load_non_empty,
             page_event_table_found=bool(page and page["event_table_matches"]),
@@ -299,6 +310,55 @@ def _slot_refs(
                     item["objname"] = block["objname"]
                 refs.append(item)
     return refs
+
+
+def _scheduler_path(
+    *,
+    page_load_non_empty: bool,
+    page_event_table_found: bool,
+    post_primary_page_event_found: bool,
+    page_callbacks: list[dict[str, Any]],
+    object_callbacks: list[dict[str, Any]],
+    page_event_offsets: list[dict[str, Any]],
+) -> str:
+    if page_load_non_empty and post_primary_page_event_found:
+        return "post_primary_page_event"
+    if page_load_non_empty and page_event_table_found and page_event_offsets and not page_callbacks:
+        return "normal_page_table_without_page_callback"
+    if page_load_non_empty and page_callbacks:
+        return "normal_page_table_with_page_callback"
+    if object_callbacks:
+        return "object_callbacks_only"
+    return "unbound_or_empty"
+
+
+def _upload_risk(scheduler_path: str) -> str:
+    return {
+        "post_primary_page_event": "research_only",
+        "normal_page_table_without_page_callback": "high",
+        "normal_page_table_with_page_callback": "medium",
+        "object_callbacks_only": "low_for_object_events_only",
+        "unbound_or_empty": "unknown",
+    }.get(scheduler_path, "unknown")
+
+
+def _recommended_writer_action(scheduler_path: str) -> str:
+    if scheduler_path == "post_primary_page_event":
+        return (
+            "Keep page-load generation fixture-gated: official media-style TFTs relocate page-load bytecode "
+            "into a post-primary chunk, so do not burn an ad-hoc page-load build until this chunk is reproduced "
+            "byte-for-byte for the target layout."
+        )
+    if scheduler_path == "normal_page_table_without_page_callback":
+        return (
+            "Do not burn callback-slot guesses. The normal page event table exists, but no recovered page-level "
+            "callback cache points at executable code; compare against an official page-load oracle first."
+        )
+    if scheduler_path == "normal_page_table_with_page_callback":
+        return "Inspect the referenced descriptor and then validate on hardware with a minimal recovery TFT ready."
+    if scheduler_path == "object_callbacks_only":
+        return "Continue object-event bytecode work; this fixture does not prove page-load scheduling."
+    return "Collect a smaller official oracle before adding writer behavior."
 
 
 def _interpretation(

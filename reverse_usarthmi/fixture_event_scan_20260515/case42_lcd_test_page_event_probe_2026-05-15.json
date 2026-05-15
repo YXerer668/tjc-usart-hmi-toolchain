@@ -10,6 +10,7 @@
   "page_name": "page0",
   "object_count": 4,
   "post_primary_page_event": {
+    "force_post_primary_page_load": false,
     "length": 0,
     "hex_prefix": "",
     "matches": [],
@@ -645,6 +646,9 @@
         "objname": "p0"
       }
     ],
+    "scheduler_path": "unbound_or_empty",
+    "upload_risk": "unknown",
+    "recommended_writer_action": "Collect a smaller official oracle before adding writer behavior.",
     "interpretation": "No callback-like references were found by this narrow probe."
   }
 }

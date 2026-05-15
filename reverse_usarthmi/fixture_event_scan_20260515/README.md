@@ -50,6 +50,9 @@ records instead of continuing to guess callback slots.
 
 - The normal per-record event table referenced by mirror `event_offset_0x34`.
 - The post-primary page event chunk used by media projects.
+- It also classifies each report with `scheduler_path`, `upload_risk`, and
+  `recommended_writer_action` so generated page-load candidates are not treated
+  as safe just because their bytecode exists somewhere in the TFT.
 
 Evidence:
 
@@ -60,6 +63,11 @@ Evidence:
   - Official audio sample has non-empty `codesload-1`.
   - The normal page event table does not contain the page-load payload.
   - A 32-byte post-primary page event chunk matches the official TFT at relative object-region offset `0x8DA`.
+  - Classified as `scheduler_path=post_primary_page_event`, `upload_risk=research_only`.
+- `event_demo_live_probe_20260515\page_event_oracle_probe_2026-05-15.json`
+  - Generated page-load bytecode is present in the normal page table.
+  - No recovered page-level callback cache points at executable code.
+  - Classified as `scheduler_path=normal_page_table_without_page_callback`, `upload_risk=high`.
 
 This is important because the failed generated `event_demo` already had a page event table
 and `event_offset_0x34`, but page-load still did not run live. For media-style official

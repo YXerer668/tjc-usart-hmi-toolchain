@@ -9,6 +9,13 @@
   "object_region_length_hex": "0x1844",
   "page_name": "page0",
   "object_count": 5,
+  "post_primary_page_event": {
+    "force_post_primary_page_load": false,
+    "length": 0,
+    "hex_prefix": "",
+    "matches": [],
+    "reference_targets": []
+  },
   "blocks": [
     {
       "index": 0,
@@ -766,23 +773,66 @@
   "diagnosis": {
     "page_load_non_empty": true,
     "page_event_table_found": true,
+    "post_primary_page_event_found": false,
     "page_callback_like_slots": [],
     "object_callback_like_slots": [
       {
-        "objname": "evtbtn",
         "record_offset_hex": "0x35E",
         "slots": [
           "slot_0x10"
-        ]
+        ],
+        "objname": "evtbtn"
       },
       {
-        "objname": "evtbtn",
         "record_offset_hex": "0x17B5",
         "slots": [
           "slot_0x10"
-        ]
+        ],
+        "objname": "evtbtn"
       }
     ],
-    "interpretation": "Page-load bytecode is present and object callbacks are visible, but no page callback-like slot points to the page event table. Compare against an official page-load oracle."
+    "page_event_offset_0x34_refs": [
+      {
+        "record_offset_hex": "0x158D",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "page0"
+      }
+    ],
+    "object_event_offset_0x34_refs": [
+      {
+        "record_offset_hex": "0x1617",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "t0"
+      },
+      {
+        "record_offset_hex": "0x16A1",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "b0"
+      },
+      {
+        "record_offset_hex": "0x172B",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "p0"
+      },
+      {
+        "record_offset_hex": "0x17B5",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "evtbtn"
+      }
+    ],
+    "scheduler_path": "normal_page_table_without_page_callback",
+    "upload_risk": "high",
+    "recommended_writer_action": "Do not burn callback-slot guesses. The normal page event table exists, but no recovered page-level callback cache points at executable code; compare against an official page-load oracle first.",
+    "interpretation": "Page-load bytecode is present and the mirror event_offset_0x34 points to the page event table, but no recovered callback-cache slot points to the executable item. The page-load scheduler path is still separate from object click/timer callback caches."
   }
 }

@@ -32,7 +32,7 @@ Legend:
 | Picture-resource packing | Experimental | Packs local PNG/JPG assets into TFT picture resources; live-proven for image widgets and two-state image buttons. |
 | Custom `.zi` font generation/patching | Experimental | Full GB2312 Chinese/English baseline is live-proven; sparse Chinese subsets are not reliable yet. |
 | Multi-page TFT build | Experimental | Limited to the recovered two-page layout and plain page1 controls, including image widgets that reference an existing picture ID plus checkbox/radio values. |
-| Event bytecode compiler | Research only | Can emit some `page`/`printh`/`click`/`vis`/`play`/assignment bytecode. Narrow `page1` normal-button events are live-proven behind `experimental_multi_page_events`; page1 page-load probes compile and upload but did not fire on live page transitions yet. |
+| Event bytecode compiler | Research only | Can emit some `page`/`printh`/`click`/`vis`/`play`/assignment bytecode. Narrow `page1` normal-button events are live-proven behind `experimental_multi_page_events`; page-load probes are now classified by `scheduler_path`/`upload_risk` and must stay fixture-gated because normal-table page-load builds did not fire live. |
 | Official smart/sparse download | Research only | Captured and partially understood, but not recommended after USB/PnP instability on the test machine. |
 | Full `.HMI` decompiler/editor replacement | Not implemented | The tool edits through a recovered scene model and seed project; it does not reconstruct every official editor feature. |
 | Generic all-model TFT compiler | Not implemented | Current writer targets the recovered 800x480 `TJC8048X543_011C` seed layout. |

@@ -365,6 +365,8 @@ assembly has partial support (`printh`/`page`/`click`/`vis`/`rawhex`): object
 button events are live-proven, including `printh`, `click`, and numeric updates.
 Page-load events are not recovered yet. A 2026-05-15 single-page `page0.load`
 probe and separate page1 callback-slot probes on `COM36` both showed that the
-panel does not yet schedule compiled page-load blocks; the missing piece is
-likely an additional TJC page-event entry/index/flag outside the obvious
-object-tail byte stream.
+panel does not yet schedule compiled page-load blocks. Event oracle reports now
+include `scheduler_path`, `upload_risk`, and `recommended_writer_action` fields:
+generated normal-table page-load probes are marked high risk, while official
+media-style samples show a separate post-primary page-event chunk that remains
+research-only until reproduced byte-for-byte for the target layout.

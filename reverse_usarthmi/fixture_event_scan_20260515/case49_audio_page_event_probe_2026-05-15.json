@@ -10,6 +10,7 @@
   "page_name": "page0",
   "object_count": 9,
   "post_primary_page_event": {
+    "force_post_primary_page_load": false,
     "length": 32,
     "hex_prefix": "04 00 00 00 09 1f 04 35 09 00 00 00 04 08 12 00 00 3d 31 30 30 03 00 00 00 09 30 08 00 00 00 00",
     "matches": [
@@ -1226,6 +1227,9 @@
         "objname": "b5"
       }
     ],
+    "scheduler_path": "post_primary_page_event",
+    "upload_risk": "research_only",
+    "recommended_writer_action": "Keep page-load generation fixture-gated: official media-style TFTs relocate page-load bytecode into a post-primary chunk, so do not burn an ad-hoc page-load build until this chunk is reproduced byte-for-byte for the target layout.",
     "interpretation": "Official-style media page-load bytecode is present after the primary records. Do not expect the normal page event table search alone to find codesload."
   }
 }
