@@ -16,6 +16,7 @@ from usarthmi.tft_patch import (
     _build_event_compile_context,
     _build_object_event_table,
     _build_page_event_table,
+    _build_post_primary_page_event,
     _header,
     _header_int,
 )
@@ -43,6 +44,8 @@ def probe_hmi_tft(hmi_path: Path, tft_path: Path) -> dict[str, Any]:
     if object_start is None:
         raise SystemExit("TFT Header2 does not expose unknown_objects_address")
     object_region = tft_raw[object_start:]
+    post_primary_page_event = _build_post_primary_page_event(page.blocks, context=context)
+    post_primary_matches = _all_matches(object_region, post_primary_page_event)
 
     block_reports = []
     for index, block in enumerate(page.blocks):
@@ -91,8 +94,22 @@ def probe_hmi_tft(hmi_path: Path, tft_path: Path) -> dict[str, Any]:
         "object_region_length_hex": f"0x{len(object_region):X}",
         "page_name": page.page_name,
         "object_count": len(page.blocks),
+        "post_primary_page_event": {
+            "length": len(post_primary_page_event),
+            "hex_prefix": post_primary_page_event[:64].hex(" "),
+            "matches": [_offset_item(value) for value in post_primary_matches],
+            "reference_targets": [
+                {
+                    "name": "post_primary_page_event_start",
+                    "value": value,
+                    "value_hex": f"0x{value:X}",
+                    "references": [_offset_item(ref) for ref in _all_u32_references(object_region, value)],
+                }
+                for value in post_primary_matches
+            ],
+        },
         "blocks": block_reports,
-        "diagnosis": _diagnose(block_reports),
+        "diagnosis": _diagnose(block_reports, post_primary_matches=post_primary_matches),
     }
 
 
@@ -216,7 +233,7 @@ def _is_callback_slot(name: str) -> bool:
     return name.startswith("slot_")
 
 
-def _diagnose(block_reports: list[dict[str, Any]]) -> dict[str, Any]:
+def _diagnose(block_reports: list[dict[str, Any]], *, post_primary_matches: list[int]) -> dict[str, Any]:
     page = block_reports[0] if block_reports else None
     page_load_non_empty = False
     if page:
@@ -224,51 +241,76 @@ def _diagnose(block_reports: list[dict[str, Any]]) -> dict[str, Any]:
             token.startswith("codesload-") and not token.endswith("-0")
             for token in page["event_tokens"]
         )
-    object_callbacks = []
-    for block in block_reports[1:]:
+    page_callbacks = _slot_refs(block_reports[:1], callback_slots_only=True)
+    object_callbacks = _slot_refs(block_reports[1:], callback_slots_only=True)
+    page_event_offsets = _slot_refs(block_reports[:1], names={"event_offset_0x34"})
+    object_event_offsets = _slot_refs(block_reports[1:], names={"event_offset_0x34"})
+    return {
+        "page_load_non_empty": page_load_non_empty,
+        "page_event_table_found": bool(page and page["event_table_matches"]),
+        "post_primary_page_event_found": bool(post_primary_matches),
+        "page_callback_like_slots": page_callbacks,
+        "object_callback_like_slots": object_callbacks,
+        "page_event_offset_0x34_refs": page_event_offsets,
+        "object_event_offset_0x34_refs": object_event_offsets,
+        "interpretation": _interpretation(
+            page_load_non_empty=page_load_non_empty,
+            page_event_table_found=bool(page and page["event_table_matches"]),
+            post_primary_page_event_found=bool(post_primary_matches),
+            page_callbacks=page_callbacks,
+            object_callbacks=object_callbacks,
+            page_event_offsets=page_event_offsets,
+        ),
+    }
+
+
+def _slot_refs(
+    block_reports: list[dict[str, Any]],
+    *,
+    names: set[str] | None = None,
+    callback_slots_only: bool = False,
+) -> list[dict[str, Any]]:
+    refs = []
+    for block in block_reports:
         for candidate in block["record_candidates"]:
             slots = [
                 name
                 for name, slot in candidate["slots"].items()
-                if _is_callback_slot(name) and slot.get("points_to_event_target")
+                if slot.get("points_to_event_target")
+                and (names is None or name in names)
+                and (not callback_slots_only or _is_callback_slot(name))
             ]
             if slots:
-                object_callbacks.append(
-                    {
-                        "objname": block["objname"],
-                        "record_offset_hex": candidate["relative_offset_hex"],
-                        "slots": slots,
-                    }
-                )
-    page_callbacks = []
-    if page:
-        for candidate in page["record_candidates"]:
-            slots = [
-                name
-                for name, slot in candidate["slots"].items()
-                if _is_callback_slot(name) and slot.get("points_to_event_target")
-            ]
-            if slots:
-                page_callbacks.append(
-                    {
-                        "record_offset_hex": candidate["relative_offset_hex"],
-                        "slots": slots,
-                    }
-                )
-    return {
-        "page_load_non_empty": page_load_non_empty,
-        "page_event_table_found": bool(page and page["event_table_matches"]),
-        "page_callback_like_slots": page_callbacks,
-        "object_callback_like_slots": object_callbacks,
-        "interpretation": _interpretation(page_load_non_empty, page_callbacks, object_callbacks),
-    }
+                item = {
+                    "record_offset_hex": candidate["relative_offset_hex"],
+                    "slots": slots,
+                }
+                if block.get("objname") is not None:
+                    item["objname"] = block["objname"]
+                refs.append(item)
+    return refs
 
 
 def _interpretation(
+    *,
     page_load_non_empty: bool,
+    page_event_table_found: bool,
+    post_primary_page_event_found: bool,
     page_callbacks: list[dict[str, Any]],
     object_callbacks: list[dict[str, Any]],
+    page_event_offsets: list[dict[str, Any]],
 ) -> str:
+    if page_load_non_empty and post_primary_page_event_found:
+        return (
+            "Official-style media page-load bytecode is present after the primary records. "
+            "Do not expect the normal page event table search alone to find codesload."
+        )
+    if page_load_non_empty and page_event_table_found and page_event_offsets and not page_callbacks:
+        return (
+            "Page-load bytecode is present and the mirror event_offset_0x34 points to the page event table, "
+            "but no recovered callback-cache slot points to the executable item. The page-load scheduler path "
+            "is still separate from object click/timer callback caches."
+        )
     if page_load_non_empty and not page_callbacks and object_callbacks:
         return (
             "Page-load bytecode is present and object callbacks are visible, "

@@ -43,3 +43,25 @@ which one has the cleanest official compiled TFT pair. The previous generated
 `event_demo` proved object up-event scheduling works, while page-load remains missing.
 These official samples should let us compare HMI event scripts against official object
 records instead of continuing to guess callback slots.
+
+## Follow-up oracle probe
+
+`tools/page_event_oracle_probe.py` now reports two separate page-event locations:
+
+- The normal per-record event table referenced by mirror `event_offset_0x34`.
+- The post-primary page event chunk used by media projects.
+
+Evidence:
+
+- `case42_lcd_test_page_event_probe_2026-05-15.json`
+  - Current-model compiled seed has empty page events.
+  - Page mirror `event_offset_0x34` still points to the normal page event table.
+- `case49_audio_page_event_probe_2026-05-15.json`
+  - Official audio sample has non-empty `codesload-1`.
+  - The normal page event table does not contain the page-load payload.
+  - A 32-byte post-primary page event chunk matches the official TFT at relative object-region offset `0x8DA`.
+
+This is important because the failed generated `event_demo` already had a page event table
+and `event_offset_0x34`, but page-load still did not run live. For media-style official
+projects, page-load can be relocated into the post-primary chunk, so the next fix should
+separate "event bytes exist" from "runtime scheduler has a launch path."

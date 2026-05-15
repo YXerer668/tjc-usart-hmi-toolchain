@@ -1,0 +1,650 @@
+{
+  "hmi": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_42_datarecord\\lcd_test.HMI",
+  "tft": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_42_datarecord\\lcd_test.tft",
+  "editor_version": "tjc-1.67.6",
+  "model": "TJC8048X543_011",
+  "object_start": 11010048,
+  "object_start_hex": "0xA80000",
+  "object_region_length": 4892,
+  "object_region_length_hex": "0x131C",
+  "page_name": "page0",
+  "object_count": 4,
+  "post_primary_page_event": {
+    "length": 0,
+    "hex_prefix": "",
+    "matches": [],
+    "reference_targets": []
+  },
+  "blocks": [
+    {
+      "index": 0,
+      "objname": "page0",
+      "type_code": "y",
+      "id": 0,
+      "event_tokens": [
+        "codesload-0",
+        "codesloadend-0",
+        "codesdown-0",
+        "codesup-0",
+        "codesunload-0"
+      ],
+      "event_table_length": 40,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 4386,
+              "hex": "0x1122"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 491,
+          "relative_offset_hex": "0x1EB",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 4334,
+          "relative_offset_hex": "0x10EE",
+          "header_hex": "79 00 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 325,
+              "value_hex": "0x145",
+              "raw_hex": "45 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "objname": "t0",
+      "type_code": "t",
+      "id": 1,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 4386,
+              "hex": "0x1122"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 4524,
+              "hex": "0x11AC"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 4662,
+              "hex": "0x1236"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 4800,
+              "hex": "0x12C0"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 555,
+          "relative_offset_hex": "0x22B",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 4472,
+          "relative_offset_hex": "0x1178",
+          "header_hex": "74 01 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 365,
+              "value_hex": "0x16D",
+              "raw_hex": "6d 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "objname": "b0",
+      "type_code": "b",
+      "id": 2,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 4386,
+              "hex": "0x1122"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 4524,
+              "hex": "0x11AC"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 4662,
+              "hex": "0x1236"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 4800,
+              "hex": "0x12C0"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 639,
+          "relative_offset_hex": "0x27F",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 4610,
+          "relative_offset_hex": "0x1202",
+          "header_hex": "62 02 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 391,
+              "value_hex": "0x187",
+              "raw_hex": "87 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "objname": "p0",
+      "type_code": "p",
+      "id": 3,
+      "event_tokens": [
+        "codesdown-0",
+        "codesup-0"
+      ],
+      "event_table_length": 26,
+      "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_matches": [
+        {
+          "value": 325,
+          "hex": "0x145"
+        },
+        {
+          "value": 365,
+          "hex": "0x16D"
+        },
+        {
+          "value": 391,
+          "hex": "0x187"
+        },
+        {
+          "value": 417,
+          "hex": "0x1A1"
+        }
+      ],
+      "first_non_empty_item_offset_in_table": null,
+      "first_non_empty_item_offset_in_table_hex": null,
+      "reference_targets": [
+        {
+          "name": "event_table_start",
+          "value": 325,
+          "value_hex": "0x145",
+          "references": [
+            {
+              "value": 4386,
+              "hex": "0x1122"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 365,
+          "value_hex": "0x16D",
+          "references": [
+            {
+              "value": 4524,
+              "hex": "0x11AC"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 391,
+          "value_hex": "0x187",
+          "references": [
+            {
+              "value": 4662,
+              "hex": "0x1236"
+            }
+          ]
+        },
+        {
+          "name": "event_table_start",
+          "value": 417,
+          "value_hex": "0x1A1",
+          "references": [
+            {
+              "value": 4800,
+              "hex": "0x12C0"
+            }
+          ]
+        }
+      ],
+      "record_candidates": [
+        {
+          "relative_offset": 723,
+          "relative_offset_hex": "0x2D3",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 0,
+              "value_hex": "0x0",
+              "raw_hex": "00 00 00 00",
+              "points_to_event_target": false
+            }
+          }
+        },
+        {
+          "relative_offset": 4748,
+          "relative_offset_hex": "0x128C",
+          "header_hex": "70 03 00 37",
+          "slots": {
+            "slot_0x0c": {
+              "offset": 12,
+              "offset_hex": "0xC",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x10": {
+              "offset": 16,
+              "offset_hex": "0x10",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "slot_0x14": {
+              "offset": 20,
+              "offset_hex": "0x14",
+              "value": 4294967295,
+              "value_hex": "0xFFFFFFFF",
+              "raw_hex": "ff ff ff ff",
+              "points_to_event_target": false
+            },
+            "event_offset_0x34": {
+              "offset": 52,
+              "offset_hex": "0x34",
+              "value": 417,
+              "value_hex": "0x1A1",
+              "raw_hex": "a1 01 00 00",
+              "points_to_event_target": true
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "diagnosis": {
+    "page_load_non_empty": false,
+    "page_event_table_found": true,
+    "post_primary_page_event_found": false,
+    "page_callback_like_slots": [],
+    "object_callback_like_slots": [],
+    "page_event_offset_0x34_refs": [
+      {
+        "record_offset_hex": "0x10EE",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "page0"
+      }
+    ],
+    "object_event_offset_0x34_refs": [
+      {
+        "record_offset_hex": "0x1178",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "t0"
+      },
+      {
+        "record_offset_hex": "0x1202",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "b0"
+      },
+      {
+        "record_offset_hex": "0x128C",
+        "slots": [
+          "event_offset_0x34"
+        ],
+        "objname": "p0"
+      }
+    ],
+    "interpretation": "No callback-like references were found by this narrow probe."
+  }
+}

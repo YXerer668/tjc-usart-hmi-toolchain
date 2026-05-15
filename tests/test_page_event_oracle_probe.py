@@ -23,7 +23,9 @@ class PageEventOracleProbeTests(unittest.TestCase):
         self.assertTrue(diagnosis["page_load_non_empty"])
         self.assertTrue(diagnosis["page_event_table_found"])
         self.assertFalse(diagnosis["page_callback_like_slots"])
+        self.assertTrue(diagnosis["page_event_offset_0x34_refs"])
         self.assertTrue(diagnosis["object_callback_like_slots"])
+        self.assertTrue(diagnosis["object_event_offset_0x34_refs"])
 
 
 if __name__ == "__main__":
