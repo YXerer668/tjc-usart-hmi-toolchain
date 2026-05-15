@@ -173,6 +173,7 @@ EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*
 EVENT_PRINTH_HEX_RE = re.compile(r"^printh\s+[0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*\s*$")
 EVENT_CLICK_RE = re.compile(r"^click\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
 EVENT_VIS_RE = re.compile(r"^vis\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
+EVENT_REF_RE = re.compile(r"^ref\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", flags=re.IGNORECASE)
 
 
 def is_supported_page1_button_event_line(line: str) -> bool:
@@ -213,6 +214,14 @@ def parse_page1_button_vis_event_line(line: str) -> tuple[str, int] | None:
     if match is None:
         return None
     return match.group(1), int(match.group(2))
+
+
+def parse_page1_button_ref_event_line(line: str) -> str | None:
+    """Parse the deliberately tiny page1 ref allow-list shape."""
+    match = EVENT_REF_RE.match(line.strip())
+    if match is None:
+        return None
+    return match.group(1)
 
 
 IMAGE_BUTTON_MIRROR_RELATIVE_VALUES = (
@@ -830,6 +839,7 @@ def _is_supported_page1_button_event_block(
     return (
         _is_supported_page1_button_click_event_block(block, line=line, page1_blocks=page1_blocks)
         or _is_supported_page1_button_vis_event_block(block, line=line, page1_blocks=page1_blocks)
+        or _is_supported_page1_button_ref_event_block(block, line=line, page1_blocks=page1_blocks)
     )
 
 
@@ -881,6 +891,20 @@ def _is_supported_page1_button_vis_event_block(
     if parsed is None:
         return False
     target_name, _ = parsed
+    if target_name == block.objname:
+        return False
+    return any(candidate.objname == target_name for candidate in page1_blocks)
+
+
+def _is_supported_page1_button_ref_event_block(
+    block: PageBlock,
+    *,
+    line: str,
+    page1_blocks: list[PageBlock],
+) -> bool:
+    target_name = parse_page1_button_ref_event_line(line)
+    if target_name is None:
+        return False
     if target_name == block.objname:
         return False
     return any(candidate.objname == target_name for candidate in page1_blocks)
@@ -2026,6 +2050,12 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
             raise TftToolchainError(f"Unsupported empty click event line: {line!r}")
         return b"\x09\x00\x08" + payload.encode("ascii")
 
+    if lower.startswith("ref "):
+        payload = stripped[4:].strip()
+        if not payload:
+            raise TftToolchainError(f"Unsupported empty ref event line: {line!r}")
+        return b"\x09\x03\x04" + payload.encode("ascii")
+
     if lower.startswith("vis "):
         payload = stripped[4:].strip()
         if not payload:
@@ -2049,7 +2079,7 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
 
     raise TftToolchainError(
         "Unsupported event line for the current minimal logic compiler: "
-        f"{line!r}. Supported V1 event commands are page/printh/click/vis/play/rawhex "
+        f"{line!r}. Supported V1 event commands are page/printh/click/ref/vis/play/rawhex "
         "and numeric object-field assignment/inc/dec such as tm0.en=1."
     )
 

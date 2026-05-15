@@ -993,15 +993,21 @@ class EditorTftBuildTests(unittest.TestCase):
 
         hide = WidgetSpec("hide0", "button", events={"down": ["vis label0,0"]})
         show = WidgetSpec("show0", "button", events={"down": ["vis label0,1"]})
+        refresh = WidgetSpec("ref0", "button", events={"down": ["ref label0"]})
         label = WidgetSpec("label0", "text")
         self.assertTrue(_is_supported_experimental_page1_event_widget(hide, page1_widgets=[hide, show, label]))
         self.assertTrue(_is_supported_experimental_page1_event_widget(show, page1_widgets=[hide, show, label]))
+        self.assertTrue(_is_supported_experimental_page1_event_widget(refresh, page1_widgets=[refresh, label]))
 
         self_hide = WidgetSpec("hide0", "button", events={"down": ["vis hide0,0"]})
+        self_ref = WidgetSpec("ref0", "button", events={"down": ["ref ref0"]})
         missing = WidgetSpec("bad0", "button", events={"down": ["vis missing0,0"]})
+        missing_ref = WidgetSpec("bad2", "button", events={"down": ["ref missing0"]})
         bad_state = WidgetSpec("bad1", "button", events={"down": ["vis label0,2"]})
         self.assertFalse(_is_supported_experimental_page1_event_widget(self_hide, page1_widgets=[self_hide, label]))
+        self.assertFalse(_is_supported_experimental_page1_event_widget(self_ref, page1_widgets=[self_ref, label]))
         self.assertFalse(_is_supported_experimental_page1_event_widget(missing, page1_widgets=[missing, label]))
+        self.assertFalse(_is_supported_experimental_page1_event_widget(missing_ref, page1_widgets=[missing_ref, label]))
         self.assertFalse(_is_supported_experimental_page1_event_widget(bad_state, page1_widgets=[bad_state, label]))
 
     def test_page1_experimental_page_load_event_allow_list_is_narrow(self) -> None:

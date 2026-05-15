@@ -69,6 +69,18 @@ class EventBytecodeTests(unittest.TestCase):
         self.assertEqual(items[2]["kind"], "separator")
         self.assertEqual(items[2]["command"], "loadend")
 
+    def test_decodes_ref_command(self) -> None:
+        table = bytes.fromhex(
+            "09 00 00 00 09 03 04 6c 61 62 65 6c 30"
+            "00 00 00 00"
+        )
+
+        items = decode_event_table(table)
+
+        self.assertEqual(items[0]["kind"], "command")
+        self.assertEqual(items[0]["command"], "ref")
+        self.assertEqual(items[0]["args"], "label0")
+
 
 @unittest.skipUnless(
     CASE49_PA.exists() and CASE49_TFT.exists(),

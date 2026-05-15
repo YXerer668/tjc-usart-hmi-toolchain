@@ -5,6 +5,7 @@ from typing import Any
 
 COMMAND_PREFIXES: dict[bytes, tuple[str, str]] = {
     b"\x09\x00\x08": ("command", "click"),
+    b"\x09\x03\x04": ("command", "ref"),
     b"\x09\x05\x04": ("command", "vis"),
     b"\x09\x0c\x04": ("command", "page"),
     b"\x09\x0f\x08": ("command", "printh"),

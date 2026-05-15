@@ -252,6 +252,16 @@ class TftPatchTests(unittest.TestCase):
 
         self.assertIn(b"\x0b\x00\x00\x00\x09\x05\x04label0,0", event_data)
 
+    def test_event_table_builder_compiles_ref_event(self) -> None:
+        source_pa = EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa"
+        page = load_page_file(source_pa)
+        button = page.blocks[-1].clone()
+        button.set_event("codesdown-", ["ref label0"])
+
+        event_data = _build_object_event_table(button)
+
+        self.assertIn(b"\x09\x00\x00\x00\x09\x03\x04label0", event_data)
+
     def test_checksum_matches_official_cases(self) -> None:
         for case_name in (
             "case_00_baseline",

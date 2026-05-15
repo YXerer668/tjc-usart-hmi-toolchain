@@ -44,7 +44,9 @@ Stable enough for local use:
 Experimental but useful:
 
 - Multi-page page0/page1 generation with limited plain controls.
-- Event bytecode assembly/inspection for a small set of commands. Page1
+- Event bytecode assembly/inspection for a small set of commands. Page0
+  button `ref obj` is live-proven from scene DSL through TFT upload and
+  camera-verified redraw after a red `fill` overlay. Page1
   normal-button events are live-proven for `page 1`, explicit-hex `printh`,
   one-level same-page `click` cascades, and numeric field `++` / `=` / `--`
   operations, plus same-page `vis obj,0/1` show/hide operations;
