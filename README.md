@@ -44,8 +44,9 @@ Stable enough for local use:
 Experimental but useful:
 
 - Multi-page page0/page1 generation with limited plain controls.
-- Event bytecode assembly for a small set of commands; live scheduling is not
-  fully solved.
+- Event bytecode assembly/inspection for a small set of commands; media/audio
+  assignments and `play` events are fixture-backed, while live page-load
+  scheduling is not fully solved.
 - Single internal GMOV/animation smoke builds for the current resource layout.
 
 Known unstable / research-only:
@@ -363,6 +364,8 @@ Multi-page generation, broad widget coverage, event-code authoring, and broader
 font fixture coverage are still outside the proven V1 path. Event bytecode
 assembly has partial support (`printh`/`page`/`click`/`vis`/`rawhex`): object
 button events are live-proven, including `printh`, `click`, and numeric updates.
+Media event bytecode is now decoded in oracle reports, with official audio
+fixtures proving `wav0.vid=0`, `wav0.en=1`, and `play 0,0,0` byte-for-byte.
 Page-load events are not recovered yet. A 2026-05-15 single-page `page0.load`
 probe and separate page1 callback-slot probes on `COM36` both showed that the
 panel does not yet schedule compiled page-load blocks. Event oracle reports now

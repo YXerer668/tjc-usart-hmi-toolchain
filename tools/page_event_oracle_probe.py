@@ -11,6 +11,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from usarthmi.hmi_inspect import _parse_entries
+from usarthmi.event_bytecode import decode_event_table
 from usarthmi.page_format import PageBlock, parse_page_data
 from usarthmi.tft_patch import (
     _build_event_compile_context,
@@ -76,9 +77,10 @@ def probe_hmi_tft(
                 "event_tokens": block.event_tokens,
                 "event_table_length": len(event_table),
                 "event_table_hex_prefix": event_table[:64].hex(" "),
+                "event_table_items": decode_event_table(event_table),
                 "event_table_matches": [_offset_item(value) for value in event_matches],
-        "first_non_empty_item_offset_in_table": first_executable,
-        "first_non_empty_item_offset_in_table_hex": f"0x{first_executable:X}" if first_executable is not None else None,
+                "first_non_empty_item_offset_in_table": first_executable,
+                "first_non_empty_item_offset_in_table_hex": f"0x{first_executable:X}" if first_executable is not None else None,
                 "reference_targets": [
                     {
                         "name": item["name"],
@@ -107,6 +109,7 @@ def probe_hmi_tft(
             "force_post_primary_page_load": force_post_primary_page_load,
             "length": len(post_primary_page_event),
             "hex_prefix": post_primary_page_event[:64].hex(" "),
+            "items": decode_event_table(post_primary_page_event),
             "matches": [_offset_item(value) for value in post_primary_matches],
             "reference_targets": [
                 {

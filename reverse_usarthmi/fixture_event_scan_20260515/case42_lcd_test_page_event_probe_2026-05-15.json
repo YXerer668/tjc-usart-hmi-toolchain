@@ -13,6 +13,7 @@
     "force_post_primary_page_load": false,
     "length": 0,
     "hex_prefix": "",
+    "items": [],
     "matches": [],
     "reference_targets": []
   },
@@ -31,6 +32,67 @@
       ],
       "event_table_length": 40,
       "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00",
+      "event_table_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 1,
+          "offset": 4,
+          "offset_hex": "0x4",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 2,
+          "offset": 12,
+          "offset_hex": "0xC",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 16,
+          "offset_hex": "0x10",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 4,
+          "offset": 22,
+          "offset_hex": "0x16",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 5,
+          "offset": 26,
+          "offset_hex": "0x1A",
+          "length": 6,
+          "payload_hex": "75 6e 6c 6f 61 64",
+          "kind": "marker",
+          "name": "unload"
+        },
+        {
+          "index": 6,
+          "offset": 36,
+          "offset_hex": "0x24",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
       "event_table_matches": [
         {
           "value": 325,
@@ -144,6 +206,50 @@
       ],
       "event_table_length": 26,
       "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 1,
+          "offset": 4,
+          "offset_hex": "0x4",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 2,
+          "offset": 12,
+          "offset_hex": "0xC",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 16,
+          "offset_hex": "0x10",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 4,
+          "offset": 22,
+          "offset_hex": "0x16",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
       "event_table_matches": [
         {
           "value": 325,
@@ -302,6 +408,50 @@
       ],
       "event_table_length": 26,
       "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 1,
+          "offset": 4,
+          "offset_hex": "0x4",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 2,
+          "offset": 12,
+          "offset_hex": "0xC",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 16,
+          "offset_hex": "0x10",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 4,
+          "offset": 22,
+          "offset_hex": "0x16",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
       "event_table_matches": [
         {
           "value": 325,
@@ -460,6 +610,50 @@
       ],
       "event_table_length": 26,
       "event_table_hex_prefix": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "event_table_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 1,
+          "offset": 4,
+          "offset_hex": "0x4",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 2,
+          "offset": 12,
+          "offset_hex": "0xC",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 16,
+          "offset_hex": "0x10",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 4,
+          "offset": 22,
+          "offset_hex": "0x16",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
       "event_table_matches": [
         {
           "value": 325,
