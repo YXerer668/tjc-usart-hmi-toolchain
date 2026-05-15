@@ -1,0 +1,85 @@
+{
+  "probe": "page1_load_callback_slot_probe",
+  "date": "2026-05-15",
+  "purpose": "Test whether the missing page1 load-event trigger is caused by one unset page mirror callback slot.",
+  "basis": {
+    "source_probe": "reverse_usarthmi/page1_load_printh_event_probe",
+    "event_payload": "printh 23 02 50 4C",
+    "page1_runtime_page": 0,
+    "seed_page0_runtime_page": 1,
+    "page_event_table_relative_offset_hex": "0x14B",
+    "page_mirror_record_relative_offset_hex": "0x1DA7",
+    "target_value_written_hex": "4b 01 00 00",
+    "target_value_written_meaning": "little-endian pointer to page event table start 0x14B"
+  },
+  "device": {
+    "port": "COM36",
+    "command_baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload_settings": {
+    "chunk_size": 4096,
+    "file_size": 11411828,
+    "skipped": false
+  },
+  "candidates": [
+    {
+      "name": "slot_0c_table_start",
+      "slot_hex": "0x0C",
+      "write_absolute_offset_hex": "0xAE1DB3",
+      "checksum_hex": "0x3C713200",
+      "diff_summary": "4 callback bytes plus 4 trailing checksum bytes changed",
+      "upload_elapsed_s": 209.344,
+      "serial_result": {
+        "connect_model": "TJC8048X543_011C",
+        "initial_sendme_hex": "66 00 ff ff ff",
+        "after_page_1_sendme_hex": "66 01 ff ff ff",
+        "after_page_0_sendme_hex": "66 00 ff ff ff",
+        "expected_printh_hex": "23 02 50 4c",
+        "expected_printh_seen": false
+      },
+      "conclusion": "Failed cleanly; page switching stayed healthy but page load did not emit the probe bytes."
+    },
+    {
+      "name": "slot_10_table_start",
+      "slot_hex": "0x10",
+      "write_absolute_offset_hex": "0xAE1DB7",
+      "checksum_hex": "0x565D6E6A",
+      "diff_summary": "4 callback bytes plus 4 trailing checksum bytes changed",
+      "upload_elapsed_s": 208.265,
+      "serial_result": {
+        "connect_model": "TJC8048X543_011C",
+        "initial_sendme_hex": "66 00 ff ff ff",
+        "after_page_1_sendme_hex": "66 01 ff ff ff",
+        "after_page_0_sendme_hex": "66 00 ff ff ff",
+        "expected_printh_hex": "23 02 50 4c",
+        "expected_printh_seen": false
+      },
+      "conclusion": "Failed cleanly; page switching stayed healthy but page load did not emit the probe bytes."
+    },
+    {
+      "name": "slot_14_table_start",
+      "slot_hex": "0x14",
+      "write_absolute_offset_hex": "0xAE1DBB",
+      "checksum_hex": "0xDFF9CF37",
+      "diff_summary": "4 callback bytes plus 4 trailing checksum bytes changed",
+      "upload_elapsed_s": 209.657,
+      "serial_result": {
+        "connect_model": "TJC8048X543_011C",
+        "initial_sendme_hex": "66 00 ff ff ff",
+        "after_page_1_sendme_hex": "66 01 ff ff ff",
+        "after_page_0_sendme_hex": "66 00 ff ff ff",
+        "expected_printh_hex": "23 02 50 4c",
+        "expected_printh_seen": false
+      },
+      "conclusion": "Failed cleanly; page switching stayed healthy but page load did not emit the probe bytes."
+    }
+  ],
+  "overall_conclusion": "The page1 load-event gap is not solved by writing the page event table start into page mirror callback slots 0x0C, 0x10, or 0x14. The next useful path is an official two-page/page-load oracle or a deeper scheduler descriptor comparison, not more blind slot writes.",
+  "safety_notes": [
+    "All three variants had valid TFT checksums before upload.",
+    "All three variants were uploaded to the confirmed TJC8048X543_011C target on COM36.",
+    "All three variants preserved page switching and sendme behavior."
+  ]
+}

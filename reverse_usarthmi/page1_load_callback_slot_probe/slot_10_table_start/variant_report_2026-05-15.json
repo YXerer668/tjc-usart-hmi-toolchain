@@ -1,0 +1,112 @@
+{
+  "source_binding_report": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_event_probe\\scheduler_binding_probe_2026-05-15.json",
+  "source_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_event_probe\\local_build\\output.tft",
+  "out_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_callback_slot_probe\\slot_10_table_start\\output.tft",
+  "candidate": {
+    "slot": 16,
+    "slot_hex": "0x10",
+    "target_mode": "table-start",
+    "target_relative_offset": 331,
+    "target_relative_offset_hex": "0x14B",
+    "event_table_range": {
+      "start": 331,
+      "start_hex": "0x14B",
+      "end": 396,
+      "end_hex": "0x18C",
+      "length": 65
+    },
+    "page_mirror_record_relative_offset": 7591,
+    "page_mirror_record_relative_offset_hex": "0x1DA7",
+    "write_relative_offset": 7607,
+    "write_relative_offset_hex": "0x1DB7",
+    "write_absolute_offset": 11410871,
+    "write_absolute_offset_hex": "0xAE1DB7",
+    "old_bytes_hex": "ff ff ff ff",
+    "new_bytes_hex": "4b 01 00 00"
+  },
+  "checksum": {
+    "path": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_callback_slot_probe\\slot_10_table_start\\output.tft",
+    "file_size": 11411828,
+    "model_series": 3,
+    "stored": 1448963690,
+    "stored_hex": "0x565D6E6A",
+    "calculated": 1448963690,
+    "calculated_hex": "0x565D6E6A",
+    "valid": true,
+    "algorithm": "word-based Nextion/TJC CRC variant for series 2/3, byte-based for series 0/1/100, final XOR with bytes 0x03/0x2E/0x3C"
+  },
+  "diff": {
+    "changed_offset_count": 8,
+    "changed_offsets": [
+      {
+        "offset": 11410871,
+        "offset_hex": "0xAE1DB7",
+        "old": 255,
+        "new": 75,
+        "old_hex": "0xFF",
+        "new_hex": "0x4B"
+      },
+      {
+        "offset": 11410872,
+        "offset_hex": "0xAE1DB8",
+        "old": 255,
+        "new": 1,
+        "old_hex": "0xFF",
+        "new_hex": "0x01"
+      },
+      {
+        "offset": 11410873,
+        "offset_hex": "0xAE1DB9",
+        "old": 255,
+        "new": 0,
+        "old_hex": "0xFF",
+        "new_hex": "0x00"
+      },
+      {
+        "offset": 11410874,
+        "offset_hex": "0xAE1DBA",
+        "old": 255,
+        "new": 0,
+        "old_hex": "0xFF",
+        "new_hex": "0x00"
+      },
+      {
+        "offset": 11411824,
+        "offset_hex": "0xAE2170",
+        "old": 236,
+        "new": 106,
+        "old_hex": "0xEC",
+        "new_hex": "0x6A"
+      },
+      {
+        "offset": 11411825,
+        "offset_hex": "0xAE2171",
+        "old": 209,
+        "new": 110,
+        "old_hex": "0xD1",
+        "new_hex": "0x6E"
+      },
+      {
+        "offset": 11411826,
+        "offset_hex": "0xAE2172",
+        "old": 86,
+        "new": 93,
+        "old_hex": "0x56",
+        "new_hex": "0x5D"
+      },
+      {
+        "offset": 11411827,
+        "offset_hex": "0xAE2173",
+        "old": 104,
+        "new": 86,
+        "old_hex": "0x68",
+        "new_hex": "0x56"
+      }
+    ],
+    "expected": "one 4-byte callback write plus the trailing 4-byte checksum"
+  },
+  "safety_notes": [
+    "This variant changes only one page mirror callback slot and then recomputes the final TFT checksum.",
+    "It is intended as a narrow scheduler-binding probe, not a supported writer feature."
+  ]
+}
