@@ -44,9 +44,11 @@ Stable enough for local use:
 Experimental but useful:
 
 - Multi-page page0/page1 generation with limited plain controls.
-- Event bytecode assembly/inspection for a small set of commands; media/audio
-  assignments and `play` events are fixture-backed, while live page-load
-  scheduling is not fully solved.
+- Event bytecode assembly/inspection for a small set of commands. Page1
+  normal-button `up` events are live-proven for `page 1`, explicit-hex
+  `printh`, and one-level same-page `click` cascades; media/audio assignments
+  and `play` events are fixture-backed, while live page-load scheduling is not
+  fully solved.
 - Single internal GMOV/animation smoke builds for the current resource layout.
 
 Known unstable / research-only:
