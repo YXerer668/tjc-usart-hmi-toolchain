@@ -1,0 +1,254 @@
+{
+  "manifest": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_event_probe\\local_build\\manifest.json",
+  "output_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_event_probe\\local_build\\output.tft",
+  "object_start": 11403264,
+  "object_start_hex": "0xAE0000",
+  "mirror_value_count": 41,
+  "mirror_record_len": 138,
+  "mirror_record_len_hex": "0x8A",
+  "section_offsets": {
+    "hash": {
+      "value": 924,
+      "hex": "0x39C"
+    },
+    "primary": {
+      "value": 952,
+      "hex": "0x3B8"
+    },
+    "attr": {
+      "value": 1307,
+      "hex": "0x51B"
+    },
+    "user": {
+      "value": 1343,
+      "hex": "0x53F"
+    },
+    "pic": {
+      "value": 7559,
+      "hex": "0x1D87"
+    },
+    "padding": {
+      "value": 8557,
+      "hex": "0x216D"
+    },
+    "prefix_delta": {
+      "value": 6,
+      "hex": "0x6"
+    },
+    "tail": {
+      "value": 8564,
+      "hex": "0x2174"
+    }
+  },
+  "page1": {
+    "pa": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_event_probe\\local_build\\target_1.pa",
+    "object_count": 3,
+    "mirror_records_start": {
+      "value": 7591,
+      "hex": "0x1DA7"
+    },
+    "blocks": [
+      {
+        "index": 0,
+        "objname": "page1",
+        "type_code": "y",
+        "event_tokens": [
+          "codesload-1",
+          "printh 23 02 50 4C",
+          "codesloadend-0",
+          "codesdown-0",
+          "codesup-0",
+          "codesunload-0"
+        ],
+        "event_table_length": 65,
+        "event_table_matches": [
+          {
+            "value": 331,
+            "hex": "0x14B"
+          }
+        ],
+        "mirror_record_relative_offset": 7591,
+        "mirror_record_relative_offset_hex": "0x1DA7",
+        "mirror_record_header_hex": "79 00 00 37",
+        "mirror_event_offset_field": {
+          "value": 331,
+          "hex": "0x14B"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": []
+      },
+      {
+        "index": 1,
+        "objname": "title",
+        "type_code": "t",
+        "event_tokens": [
+          "codesdown-0",
+          "codesup-0"
+        ],
+        "event_table_length": 26,
+        "event_table_matches": [
+          {
+            "value": 356,
+            "hex": "0x164"
+          },
+          {
+            "value": 396,
+            "hex": "0x18C"
+          },
+          {
+            "value": 422,
+            "hex": "0x1A6"
+          },
+          {
+            "value": 806,
+            "hex": "0x326"
+          },
+          {
+            "value": 846,
+            "hex": "0x34E"
+          },
+          {
+            "value": 872,
+            "hex": "0x368"
+          },
+          {
+            "value": 898,
+            "hex": "0x382"
+          }
+        ],
+        "mirror_record_relative_offset": 7729,
+        "mirror_record_relative_offset_hex": "0x1E31",
+        "mirror_record_header_hex": "74 01 00 37",
+        "mirror_event_offset_field": {
+          "value": 396,
+          "hex": "0x18C"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": []
+      },
+      {
+        "index": 2,
+        "objname": "hint",
+        "type_code": "t",
+        "event_tokens": [
+          "codesdown-0",
+          "codesup-0"
+        ],
+        "event_table_length": 26,
+        "event_table_matches": [
+          {
+            "value": 356,
+            "hex": "0x164"
+          },
+          {
+            "value": 396,
+            "hex": "0x18C"
+          },
+          {
+            "value": 422,
+            "hex": "0x1A6"
+          },
+          {
+            "value": 806,
+            "hex": "0x326"
+          },
+          {
+            "value": 846,
+            "hex": "0x34E"
+          },
+          {
+            "value": 872,
+            "hex": "0x368"
+          },
+          {
+            "value": 898,
+            "hex": "0x382"
+          }
+        ],
+        "mirror_record_relative_offset": 7867,
+        "mirror_record_relative_offset_hex": "0x1EBB",
+        "mirror_record_header_hex": "74 02 00 37",
+        "mirror_event_offset_field": {
+          "value": 422,
+          "hex": "0x1A6"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": []
+      }
+    ]
+  },
+  "diagnosis": {
+    "non_empty_page_load_event": true,
+    "page_event_table_found": true,
+    "page_mirror_event_offset_points_to_table": true,
+    "page_load_callback_slot_points_to_table": false,
+    "object_event_callbacks_found": [],
+    "interpretation": "Page-load bytecode exists, but no callback slots point at it. Compare against an official page-load TFT before guessing a field offset."
+  }
+}

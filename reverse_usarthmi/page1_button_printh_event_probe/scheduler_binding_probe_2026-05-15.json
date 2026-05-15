@@ -1,0 +1,239 @@
+{
+  "manifest": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_button_printh_event_probe\\local_build\\manifest.json",
+  "output_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_button_printh_event_probe\\local_build\\output.tft",
+  "object_start": 11403264,
+  "object_start_hex": "0xAE0000",
+  "mirror_value_count": 41,
+  "mirror_record_len": 138,
+  "mirror_record_len_hex": "0x8A",
+  "section_offsets": {
+    "hash": {
+      "value": 880,
+      "hex": "0x370"
+    },
+    "primary": {
+      "value": 908,
+      "hex": "0x38C"
+    },
+    "attr": {
+      "value": 1263,
+      "hex": "0x4EF"
+    },
+    "user": {
+      "value": 1299,
+      "hex": "0x513"
+    },
+    "pic": {
+      "value": 7539,
+      "hex": "0x1D73"
+    },
+    "padding": {
+      "value": 8537,
+      "hex": "0x2159"
+    },
+    "prefix_delta": {
+      "value": 6,
+      "hex": "0x6"
+    },
+    "tail": {
+      "value": 8544,
+      "hex": "0x2160"
+    }
+  },
+  "page1": {
+    "pa": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_button_printh_event_probe\\local_build\\target_1.pa",
+    "object_count": 3,
+    "mirror_records_start": {
+      "value": 7571,
+      "hex": "0x1D93"
+    },
+    "blocks": [
+      {
+        "index": 0,
+        "objname": "page1",
+        "type_code": "y",
+        "event_tokens": [
+          "codesload-0",
+          "codesloadend-0",
+          "codesdown-0",
+          "codesup-0",
+          "codesunload-0"
+        ],
+        "event_table_length": 40,
+        "event_table_matches": [
+          {
+            "value": 331,
+            "hex": "0x14B"
+          },
+          {
+            "value": 762,
+            "hex": "0x2FA"
+          }
+        ],
+        "mirror_record_relative_offset": 7571,
+        "mirror_record_relative_offset_hex": "0x1D93",
+        "mirror_record_header_hex": "79 00 00 37",
+        "mirror_event_offset_field": {
+          "value": 331,
+          "hex": "0x14B"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": []
+      },
+      {
+        "index": 1,
+        "objname": "title",
+        "type_code": "t",
+        "event_tokens": [
+          "codesdown-0",
+          "codesup-0"
+        ],
+        "event_table_length": 26,
+        "event_table_matches": [
+          {
+            "value": 331,
+            "hex": "0x14B"
+          },
+          {
+            "value": 371,
+            "hex": "0x173"
+          },
+          {
+            "value": 762,
+            "hex": "0x2FA"
+          },
+          {
+            "value": 802,
+            "hex": "0x322"
+          },
+          {
+            "value": 828,
+            "hex": "0x33C"
+          },
+          {
+            "value": 854,
+            "hex": "0x356"
+          }
+        ],
+        "mirror_record_relative_offset": 7709,
+        "mirror_record_relative_offset_hex": "0x1E1D",
+        "mirror_record_header_hex": "74 01 00 37",
+        "mirror_event_offset_field": {
+          "value": 371,
+          "hex": "0x173"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": []
+      },
+      {
+        "index": 2,
+        "objname": "ping0",
+        "type_code": "b",
+        "event_tokens": [
+          "codesdown-0",
+          "codesup-1",
+          "printh 23 02 50 31"
+        ],
+        "event_table_length": 44,
+        "event_table_matches": [
+          {
+            "value": 397,
+            "hex": "0x18D"
+          }
+        ],
+        "mirror_record_relative_offset": 7847,
+        "mirror_record_relative_offset_hex": "0x1EA7",
+        "mirror_record_header_hex": "62 02 00 37",
+        "mirror_event_offset_field": {
+          "value": 397,
+          "hex": "0x18D"
+        },
+        "callback_slots": {
+          "maybe_load_or_down_0x0c": {
+            "offset": 12,
+            "offset_hex": "0xC",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          },
+          "maybe_load_or_up_0x10": {
+            "offset": 16,
+            "offset_hex": "0x10",
+            "value": 419,
+            "value_hex": "0x1A3",
+            "raw_hex": "a3 01 00 00"
+          },
+          "maybe_timer_0x14": {
+            "offset": 20,
+            "offset_hex": "0x14",
+            "value": 4294967295,
+            "value_hex": "0xFFFFFFFF",
+            "raw_hex": "ff ff ff ff"
+          }
+        },
+        "callback_slots_pointing_at_event_table": [
+          "maybe_load_or_up_0x10"
+        ]
+      }
+    ]
+  },
+  "diagnosis": {
+    "non_empty_page_load_event": false,
+    "page_event_table_found": true,
+    "page_mirror_event_offset_points_to_table": true,
+    "page_load_callback_slot_points_to_table": false,
+    "object_event_callbacks_found": [
+      {
+        "objname": "ping0",
+        "slots": [
+          "maybe_load_or_up_0x10"
+        ]
+      }
+    ],
+    "interpretation": "No non-empty page load script is present in this page."
+  }
+}
