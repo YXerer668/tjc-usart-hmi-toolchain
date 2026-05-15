@@ -13,6 +13,7 @@
 - `page1_button_event_minimal`: page1 普通按钮跳回 page0 的最小事件样例，需要显式打开 `experimental_multi_page_events`。
 - `page1_button_numeric_event_minimal`: page1 普通按钮执行 `numval.val++` 的最小数字事件样例，已经活屏验证。
 - `page1_button_numeric_event_matrix`: page1 多按钮数字事件矩阵，覆盖 `++`、`=7`、`--`，已经活屏验证。
+- `page1_button_printh_event_probe`: page1 普通按钮 `printh` 探针事件样例，只放行显式十六进制字节列表。
 - `event_demo`: `printh` 事件字节码探针，用于继续逆向事件调度，不要直接当稳定交互 demo。
 - `all_controls_demo`: 已恢复控件的集合展示页，适合做大范围冒烟测试。
 

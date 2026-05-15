@@ -968,15 +968,72 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertIn("page 1", back_button.event_tokens)
 
     def test_page1_experimental_button_event_aliases_match_tft_patcher(self) -> None:
-        for line in ("page 0", "page 1", "page page0", "page page1", "numval.val++", "numval.val=7"):
+        for line in (
+            "page 0",
+            "page 1",
+            "page page0",
+            "page page1",
+            "numval.val++",
+            "numval.val=7",
+            "printh 23 02 54 45",
+            "printh AA bb 00",
+        ):
             with self.subTest(line=line):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertTrue(_is_supported_experimental_page1_event_widget(widget))
 
-        for line in ("page 2", "printh 23 02 54 45", "vis back0,0", "rawhex 09 0c 04 31"):
+        for line in ("page 2", "printh", "printh GG", "vis back0,0", "rawhex 09 0c 04 31"):
             with self.subTest(line=line):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertFalse(_is_supported_experimental_page1_event_widget(widget))
+
+    def test_scene_build_emits_experimental_page1_button_printh_event_tft_when_enabled(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-page1-button-printh-event",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "probe0",
+                                "type": "button",
+                                "x": 72,
+                                "y": 154,
+                                "w": 180,
+                                "h": 64,
+                                "text": "PING",
+                                "events": {"up": ["printh 23 02 50 31"]},
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            page1 = load_page_file(manifest["target_pages"][1])
+            probe_button = next(block for block in page1.blocks if block.objname == "probe0")
+            self.assertIn("codesup-1", probe_button.event_tokens)
+            self.assertIn("printh 23 02 50 31", probe_button.event_tokens)
 
     def test_scene_build_emits_experimental_page1_button_numeric_event_tft_when_enabled(self) -> None:
         scene = validate_scene(

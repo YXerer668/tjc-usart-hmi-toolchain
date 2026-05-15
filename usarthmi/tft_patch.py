@@ -170,12 +170,16 @@ EVENT_FIELD_USER_SLOTS = {
 }
 EVENT_ASSIGN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(-?\d+)\s*$")
 EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)(\+\+|--)\s*$")
+EVENT_PRINTH_HEX_RE = re.compile(r"^printh\s+[0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*\s*$")
 
 
 def is_supported_page1_button_event_line(line: str) -> bool:
     """Return whether a page1 button event is inside the conservative V1 allow-list."""
-    normalized = line.strip().lower()
+    stripped = line.strip()
+    normalized = stripped.lower()
     if normalized in SUPPORTED_PAGE1_BUTTON_EVENT_LINES:
+        return True
+    if EVENT_PRINTH_HEX_RE.match(stripped) is not None:
         return True
     return EVENT_ASSIGN_RE.match(normalized) is not None or EVENT_UNARY_RE.match(normalized) is not None
 IMAGE_BUTTON_MIRROR_RELATIVE_VALUES = (
@@ -368,7 +372,7 @@ class MultiPagePatchResult:
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 normal-button jump-page events are opt-in; in the recovered case31 layout runtime page 1 maps back to seed page0."
+                "Page1 normal-button events are opt-in; V1 allows page jumps, numeric field edits, and explicit hex printh probes only."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
