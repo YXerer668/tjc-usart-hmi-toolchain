@@ -27,6 +27,7 @@ from .tft_patch import (
     is_supported_page1_button_event_line,
     parse_page1_button_click_event_line,
     parse_page1_button_ref_event_line,
+    parse_page1_button_tsw_event_line,
     parse_page1_button_vis_event_line,
 )
 
@@ -850,6 +851,7 @@ def _is_supported_experimental_page1_event_widget(widget, *, page1_widgets=None)
     return (
         _is_supported_page1_button_click_event_widget(widget, line=line, page1_widgets=page1_widgets)
         or _is_supported_page1_button_vis_event_widget(widget, line=line, page1_widgets=page1_widgets)
+        or _is_supported_page1_button_tsw_event_widget(widget, line=line, page1_widgets=page1_widgets)
         or _is_supported_page1_button_ref_event_widget(widget, line=line, page1_widgets=page1_widgets)
     )
 
@@ -890,6 +892,16 @@ def _is_supported_page1_button_vis_event_widget(widget, *, line: str, page1_widg
     target_name, _ = parsed
     if target_name == widget.id:
         return False
+    return any(candidate.id == target_name for candidate in page1_widgets)
+
+
+def _is_supported_page1_button_tsw_event_widget(widget, *, line: str, page1_widgets) -> bool:
+    parsed = parse_page1_button_tsw_event_line(line)
+    if parsed is None:
+        return False
+    target_name, _ = parsed
+    if target_name == "255":
+        return True
     return any(candidate.id == target_name for candidate in page1_widgets)
 
 

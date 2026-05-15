@@ -7,6 +7,7 @@ COMMAND_PREFIXES: dict[bytes, tuple[str, str]] = {
     b"\x09\x00\x08": ("command", "click"),
     b"\x09\x03\x04": ("command", "ref"),
     b"\x09\x05\x04": ("command", "vis"),
+    b"\x09\x09\x04": ("command", "tsw"),
     b"\x09\x0c\x04": ("command", "page"),
     b"\x09\x0f\x08": ("command", "printh"),
     b"\x09\x1f\x04": ("separator", "post_primary_page_load"),

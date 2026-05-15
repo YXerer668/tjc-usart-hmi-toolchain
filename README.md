@@ -46,7 +46,10 @@ Experimental but useful:
 - Multi-page page0/page1 generation with limited plain controls.
 - Event bytecode assembly/inspection for a small set of commands. Page0
   button `ref obj` is live-proven from scene DSL through TFT upload and
-  camera-verified redraw after a red `fill` overlay. Page1
+  camera-verified redraw after a red `fill` overlay. Page0 `tsw obj,0`
+  is live-proven with a raw opcode matrix: only opcode `09` accepted the
+  `target0,0` payload, and a physical tap on the disabled target left
+  `numval.val` at `0`. Page1
   normal-button events are live-proven for `page 1`, explicit-hex `printh`,
   one-level same-page `click` cascades, and numeric field `++` / `=` / `--`
   operations, plus same-page `vis obj,0/1` show/hide operations;
@@ -367,8 +370,9 @@ payloads. Additional local tests cover JPG source entries, transparent PNG
 flattening, non-16-aligned dimensions, and large-image shrink-to-budget behavior.
 Multi-page generation, broad widget coverage, event-code authoring, and broader
 font fixture coverage are still outside the proven V1 path. Event bytecode
-assembly has partial support (`printh`/`page`/`click`/`vis`/`rawhex`): object
-button events are live-proven, including `printh`, `click`, and numeric updates.
+assembly has partial support (`printh`/`page`/`click`/`ref`/`vis`/`tsw`/`rawhex`):
+object button events are live-proven, including `printh`, `click`, `ref`, `tsw`,
+and numeric updates.
 Media event bytecode is now decoded in oracle reports, with official audio
 fixtures proving `wav0.vid=0`, `wav0.en=1`, and `play 0,0,0` byte-for-byte.
 Page-load events are not recovered yet. A 2026-05-15 single-page `page0.load`

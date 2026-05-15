@@ -7,6 +7,7 @@ from usarthmi.event_bytecode import decode_event_table
 from usarthmi.page_format import load_page_file
 from usarthmi.tft_patch import (
     _build_event_compile_context,
+    _compile_event_line,
     _build_object_event_table,
     _header,
     _header_int,
@@ -80,6 +81,24 @@ class EventBytecodeTests(unittest.TestCase):
         self.assertEqual(items[0]["kind"], "command")
         self.assertEqual(items[0]["command"], "ref")
         self.assertEqual(items[0]["args"], "label0")
+
+    def test_decodes_tsw_command(self) -> None:
+        table = bytes.fromhex(
+            "0c 00 00 00 09 09 04 74 61 72 67 65 74 30 2c 30"
+            "00 00 00 00"
+        )
+
+        items = decode_event_table(table)
+
+        self.assertEqual(items[0]["kind"], "command")
+        self.assertEqual(items[0]["command"], "tsw")
+        self.assertEqual(items[0]["args"], "target0,0")
+
+    def test_compiles_tsw_command(self) -> None:
+        self.assertEqual(
+            _compile_event_line("tsw target0,0"),
+            bytes.fromhex("09 09 04 74 61 72 67 65 74 30 2c 30"),
+        )
 
 
 @unittest.skipUnless(

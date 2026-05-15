@@ -173,6 +173,7 @@ EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*
 EVENT_PRINTH_HEX_RE = re.compile(r"^printh\s+[0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*\s*$")
 EVENT_CLICK_RE = re.compile(r"^click\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
 EVENT_VIS_RE = re.compile(r"^vis\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
+EVENT_TSW_RE = re.compile(r"^tsw\s+([A-Za-z_][A-Za-z0-9_]*|255),([01])\s*$", flags=re.IGNORECASE)
 EVENT_REF_RE = re.compile(r"^ref\s+([A-Za-z_][A-Za-z0-9_]*)\s*$", flags=re.IGNORECASE)
 
 
@@ -211,6 +212,14 @@ def parse_page1_button_click_event_line(line: str) -> tuple[str, int] | None:
 def parse_page1_button_vis_event_line(line: str) -> tuple[str, int] | None:
     """Parse the deliberately tiny page1 vis allow-list shape."""
     match = EVENT_VIS_RE.match(line.strip())
+    if match is None:
+        return None
+    return match.group(1), int(match.group(2))
+
+
+def parse_page1_button_tsw_event_line(line: str) -> tuple[str, int] | None:
+    """Parse the deliberately tiny page1 tsw allow-list shape."""
+    match = EVENT_TSW_RE.match(line.strip())
     if match is None:
         return None
     return match.group(1), int(match.group(2))
@@ -2062,6 +2071,12 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
             raise TftToolchainError(f"Unsupported empty vis event line: {line!r}")
         return b"\x09\x05\x04" + payload.encode("ascii")
 
+    if lower.startswith("tsw "):
+        payload = stripped[4:].strip()
+        if not payload:
+            raise TftToolchainError(f"Unsupported empty tsw event line: {line!r}")
+        return b"\x09\x09\x04" + payload.encode("ascii")
+
     if lower.startswith("play "):
         payload = stripped[5:].strip()
         if not payload:
@@ -2079,7 +2094,7 @@ def _compile_event_line(line: str, *, context: _EventCompileContext | None = Non
 
     raise TftToolchainError(
         "Unsupported event line for the current minimal logic compiler: "
-        f"{line!r}. Supported V1 event commands are page/printh/click/ref/vis/play/rawhex "
+        f"{line!r}. Supported V1 event commands are page/printh/click/ref/vis/tsw/play/rawhex "
         "and numeric object-field assignment/inc/dec such as tm0.en=1."
     )
 
