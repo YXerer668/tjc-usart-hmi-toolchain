@@ -52,7 +52,9 @@ Experimental but useful:
   `numval.val` at `0`. Page1
   normal-button events are live-proven for `page 1`, explicit-hex `printh`,
   one-level same-page `click` cascades, and numeric field `++` / `=` / `--`
-  operations, plus same-page `vis obj,0/1` show/hide operations;
+  operations, plus same-page `vis obj,0/1` show/hide operations. Page0 timer
+  `codestimer-` callbacks are live-proven for `numval.val++` after runtime
+  `tm0.en=1`; boot/page-load autorun is still open.
   media/audio assignments and `play` events are fixture-backed, while live
   page-load scheduling is not fully solved.
 - Single internal GMOV/animation smoke builds for the current resource layout.

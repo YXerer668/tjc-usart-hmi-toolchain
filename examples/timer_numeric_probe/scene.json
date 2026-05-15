@@ -1,0 +1,85 @@
+{
+  "project": {
+    "name": "timer-numeric-probe",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 63390
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title0",
+          "type": "text",
+          "x": 56,
+          "y": 36,
+          "w": 688,
+          "h": 56,
+          "text": "TIMER NUMERIC PROBE",
+          "style": {
+            "font_id": 0,
+            "background_color": 63390,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "hint0",
+          "type": "text",
+          "x": 80,
+          "y": 102,
+          "w": 640,
+          "h": 42,
+          "text": "tm0.timer -> numval.val++ every 500ms",
+          "style": {
+            "font_id": 0,
+            "background_color": 63390,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 276,
+          "y": 178,
+          "w": 248,
+          "h": 90,
+          "value": 0,
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "border_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "tm0",
+          "type": "timer",
+          "value": 500,
+          "style": {
+            "enabled": true
+          },
+          "events": {
+            "timer": [
+              "numval.val++"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

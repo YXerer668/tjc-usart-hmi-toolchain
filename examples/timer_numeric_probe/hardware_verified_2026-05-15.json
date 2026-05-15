@@ -1,0 +1,93 @@
+{
+  "source": "codex_live_timer_numeric_probe",
+  "timestamp": "2026-05-15T22:01:33.6076754+08:00",
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "model": "TJC8048X543_011C"
+  },
+  "artifact": {
+    "scene": "examples/timer_numeric_probe/scene.json",
+    "output_tft": "reverse_usarthmi/timer_numeric_probe/local_build/output.tft",
+    "file_size": 11412496,
+    "sha256": "85AA8D30305DB68F4BC959D2AFC5728C7762AE232DD28086C51798437D739947",
+    "tft_checksum_hex": "0x36FCD131",
+    "tft_checksum_valid": true
+  },
+  "upload": {
+    "method": "public whmi-wri full serial upload",
+    "download_baud": 921600,
+    "chunk_size": 4096,
+    "status": "success",
+    "bytes_sent": 11412496,
+    "chunks_sent": 2787,
+    "elapsed_s": 210.016
+  },
+  "serial_evidence": [
+    {
+      "step": "stop timer",
+      "command": "tm0.en=0",
+      "response_kind": "none"
+    },
+    {
+      "step": "clear number",
+      "command": "numval.val=0",
+      "response_kind": "none"
+    },
+    {
+      "step": "stopped check after 1400ms",
+      "command": "get numval.val",
+      "response_hex": "71 00 00 00 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "start timer",
+      "command": "tm0.en=1",
+      "response_kind": "none"
+    },
+    {
+      "step": "running check after 1800ms",
+      "command": "get numval.val",
+      "response_hex": "71 04 00 00 00 ff ff ff",
+      "value": 4
+    },
+    {
+      "step": "stop timer again",
+      "command": "tm0.en=0",
+      "response_kind": "none"
+    },
+    {
+      "step": "stopped check after 1200ms",
+      "command": "get numval.val",
+      "response_hex": "71 04 00 00 00 ff ff ff",
+      "value": 4
+    },
+    {
+      "step": "page reload after disabling and clearing",
+      "command": "page 0",
+      "response_kind": "none"
+    },
+    {
+      "step": "timer enabled attribute after page reload",
+      "command": "get tm0.en",
+      "response_hex": "71 01 00 00 00 ff ff ff",
+      "value": 1
+    },
+    {
+      "step": "number after 1800ms following page reload",
+      "command": "get numval.val",
+      "response_hex": "71 00 00 00 00 ff ff ff",
+      "value": 0
+    }
+  ],
+  "camera_evidence": {
+    "path": "reverse_usarthmi/timer_numeric_probe/live_timer_after_enable_2026-05-15.jpg",
+    "size": [2560, 1440],
+    "mean_luma": 121.16,
+    "std_luma": 80.38
+  },
+  "conclusion": {
+    "timer_event_callback": "live-proven after runtime tm0.en 0->1 transition",
+    "boot_autorun": "not proven; page reload restored tm0.en to 1 but did not schedule numval.val++ within 1800ms"
+  }
+}

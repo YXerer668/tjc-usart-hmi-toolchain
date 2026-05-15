@@ -243,6 +243,36 @@ class TftPatchTests(unittest.TestCase):
         self.assertIn(b"\x07\x00\x00\x00\x01" + numval_ref + b"++", event_layout.data)
         self.assertEqual(event_layout.callbacks[2]["codesdown-"], event_layout.offsets[2] + 12)
 
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_16_number_basic" / "lcd_test.HMI").exists()
+        and (CASE_ROOT / "case_19_timer" / "lcd_test.HMI").exists(),
+        "local number/timer fixtures are not available",
+    )
+    def test_event_table_builder_compiles_timer_to_number_increment_event(self) -> None:
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        page = load_page_file(baseline_pa)
+        number = _load_case_last_block("case_16_number_basic")
+        timer = _load_case_last_block("case_19_timer")
+        _configure_added_block(number, object_id=4, name="numval", x=276, y=162, w=248, h=86)
+        timer.set_int("id", 5, width=1)
+        timer.set_string("objname", "tm0")
+        timer.set_int("tim", 500, width=2)
+        timer.set_int("en", 1, width=1)
+        timer.set_event("codestimer-", ["numval.val++"])
+        page.blocks.extend([number, timer])
+
+        event_layout = _build_event_layout(page.blocks, 0x149, image_button_layout=False)
+
+        number_slot_start = 0
+        for block in page.blocks:
+            if block is number:
+                break
+            number_slot_start += _user_slot_count(block)
+        timer_index = page.blocks.index(timer)
+        numval_ref = (number_slot_start + 27).to_bytes(4, "little")
+        self.assertIn(b"\x07\x00\x00\x00\x01" + numval_ref + b"++", event_layout.data)
+        self.assertEqual(event_layout.callbacks[timer_index]["codestimer-"], event_layout.offsets[timer_index] + 13)
+
     def test_event_table_builder_keeps_multi_line_numeric_event_order(self) -> None:
         source_pa = EXTRACT_ROOT / "case_16_number_basic" / "extract" / "0.pa"
         page = load_page_file(source_pa)

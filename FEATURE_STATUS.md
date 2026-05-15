@@ -32,7 +32,7 @@ Legend:
 | Picture-resource packing | Experimental | Packs local PNG/JPG assets into TFT picture resources; live-proven for image widgets and two-state image buttons. |
 | Custom `.zi` font generation/patching | Experimental | Full GB2312 Chinese/English baseline is live-proven; sparse Chinese subsets are not reliable yet. |
 | Multi-page TFT build | Experimental | Limited to the recovered two-page layout and plain page1 controls, including image widgets that reference an existing picture ID plus checkbox/radio values. |
-| Event bytecode compiler | Experimental | Can emit/decode some `page`/`printh`/`click`/`ref`/`vis`/`tsw`/`play`/assignment bytecode. Page0 button `ref obj`, `tsw obj,0/1`, and ordered multi-line numeric scripts are live-proven from scene DSL through TFT upload. Page1 normal-button events are live-proven for `page 1`, explicit-hex `printh`, one-level same-page `click` cascade, numeric field `++` / `=` / `--`, and same-page `vis obj,0/1` visibility operations. Media/audio events such as `wav0.vid=0`, `wav0.en=1`, and `play 0,0,0` are byte-aligned against official fixtures; page-load probes are classified by `scheduler_path`/`upload_risk` and must stay fixture-gated because normal-table page-load builds did not fire live. |
+| Event bytecode compiler | Experimental | Can emit/decode some `page`/`printh`/`click`/`ref`/`vis`/`tsw`/`play`/assignment bytecode. Page0 button `ref obj`, `tsw obj,0/1`, ordered multi-line numeric scripts, and timer `codestimer-` numeric increment after runtime `tm0.en=1` are live-proven from scene DSL through TFT upload. Page1 normal-button events are live-proven for `page 1`, explicit-hex `printh`, one-level same-page `click` cascade, numeric field `++` / `=` / `--`, and same-page `vis obj,0/1` visibility operations. Media/audio events such as `wav0.vid=0`, `wav0.en=1`, and `play 0,0,0` are byte-aligned against official fixtures; page-load probes are classified by `scheduler_path`/`upload_risk` and must stay fixture-gated because normal-table page-load builds did not fire live. |
 | Official smart/sparse download | Research only | Captured and partially understood, but not recommended after USB/PnP instability on the test machine. |
 | Full `.HMI` decompiler/editor replacement | Not implemented | The tool edits through a recovered scene model and seed project; it does not reconstruct every official editor feature. |
 | Generic all-model TFT compiler | Not implemented | Current writer targets the recovered 800x480 `TJC8048X543_011C` seed layout. |
@@ -55,7 +55,7 @@ Legend:
 | Gauge | Implemented | Experimental | Fixture-backed record generation; allowed in page1 plain controls. |
 | Progress bar | Implemented | Experimental | Fixture-backed record generation; allowed in page1 plain controls. |
 | QR code | Implemented | Experimental | Fixture-backed record generation. |
-| Timer | Implemented | Experimental | Fixture-backed; event/runtime scheduling still limited. |
+| Timer | Implemented | Experimental | Fixture-backed; 2026-05-15 live-proven for `tm0.codestimer- -> numval.val++` after runtime enable toggle. `page 0` reload restores `tm0.en=1` but does not start scheduling, so boot/page-load autorun remains open. |
 | Variable | Implemented | Experimental | Fixture-backed record generation. |
 | Dual-state button | Implemented | Experimental | Fixture-backed record generation. |
 | State button / switch | Implemented | Experimental | Fixture-backed record generation. |
