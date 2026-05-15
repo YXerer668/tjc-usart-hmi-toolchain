@@ -6,11 +6,15 @@
   "expectations": [
     {
       "target": "p1title.txt",
-      "expected": "PAGE1"
+      "expected": "PAGE1",
+      "expected_kind": "string",
+      "attempts": 3
     },
     {
       "target": "back0.txt",
-      "expected": "BACK"
+      "expected": "BACK",
+      "expected_kind": "string",
+      "attempts": 3
     }
   ],
   "steps": [
@@ -28,18 +32,21 @@
       "label": "sendme after back0 release",
       "command": "sendme",
       "expected_kind": "page_id",
-      "expected": 1
+      "expected": 1,
+      "attempts": 3
     },
     {
       "label": "back0 hidden after jump",
       "command": "get back0.txt",
-      "expected_kind": "invalid_reference"
+      "expected_kind": "invalid_reference",
+      "attempts": 3
     },
     {
       "label": "page0 visible after jump",
       "command": "get page0.bco",
       "expected_kind": "number",
-      "expected": 65535
+      "expected": 65535,
+      "attempts": 3
     }
   ]
 }

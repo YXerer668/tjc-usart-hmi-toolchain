@@ -1,0 +1,43 @@
+{
+  "case": "page1_button_event_minimal",
+  "date": "2026-05-15",
+  "source_smoke_result": "reverse_usarthmi/page1_button_event_minimal/live_smoke_current/smoke_result.json",
+  "build": {
+    "scene": "examples/page1_button_event_minimal/scene.json",
+    "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+    "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+    "output_tft": "reverse_usarthmi/page1_button_event_minimal/local_build_current/output.tft",
+    "file_size": 11411788,
+    "stored_crc32": "0xC04DDA9F",
+    "calculated_crc32": "0xC04DDA9F",
+    "checksum_valid": true
+  },
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload": {
+    "method": "public_whmi_wri",
+    "chunk_size": 4096,
+    "bytes_sent": 11411788,
+    "chunks_sent": 2787,
+    "elapsed_s": 211.125,
+    "skipped": false
+  },
+  "runtime_evidence": {
+    "initial_runtime_page": 0,
+    "p1title_txt": "PAGE1",
+    "back0_txt": "BACK",
+    "release_event": "click back0,0",
+    "post_release_page": 1,
+    "back0_after_jump": "invalid_reference",
+    "page0_bco_after_jump": 65535,
+    "serial_checks_ok": true
+  },
+  "notes": [
+    "This verifies the current local build after tightening expected_runtime.json with string kind and retry metadata.",
+    "The runtime page id mapping remains recovered case31 order: runtime page 0 is generated page1, runtime page 1 is seed page0."
+  ]
+}

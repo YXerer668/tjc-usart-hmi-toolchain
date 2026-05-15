@@ -12,6 +12,8 @@ Scope:
 
 Live evidence:
 
+- `hardware_verified_2026-05-15.json` records the current `local_build_current`
+  output after a full COM36 upload and stricter string/retry runtime checks.
 - `hardware_verified_2026-05-14.json` records a full COM36 upload and serial
   smoke test.
 - Runtime page ids are inverted in this recovered layout: `page 0` selects the
