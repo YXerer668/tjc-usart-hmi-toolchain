@@ -12,6 +12,8 @@ if str(REPO_ROOT) not in sys.path:
 
 from usarthmi.tft_checksum import inspect_tft_checksum, update_tft_checksum
 
+from tools.page_event_callback_slot_status import DEFAULT_HARDWARE_PROBE, summarize_callback_slot_probe
+
 
 SLOT_ALIASES = {
     "0x0c": 0x0C,
@@ -34,6 +36,7 @@ def build_variant(
     out_report: Path,
     slot: int,
     target: str,
+    allow_known_failed: bool = False,
 ) -> dict[str, Any]:
     binding = json.loads(binding_report_path.read_text(encoding="utf-8"))
     source_tft = Path(binding["output_tft"])
@@ -49,6 +52,18 @@ def build_variant(
         target_offset = table_start
     else:
         raise SystemExit(f"Unsupported target mode: {target}")
+    known_failure = _known_clean_failed_candidate(
+        binding_report_path=binding_report_path,
+        slot=slot,
+        target_offset=target_offset,
+        target=target,
+    )
+    if known_failure is not None and not allow_known_failed:
+        raise SystemExit(
+            "Refusing to regenerate known clean-failed page1 load callback slot "
+            f"{known_failure['slot_hex']} -> {known_failure['target_relative_offset_hex']}; "
+            "use --force-repeat-known-failed only when deliberately reproducing old evidence."
+        )
 
     record_start = int(page_block["mirror_record_relative_offset"])
     write_relative = record_start + slot
@@ -142,6 +157,11 @@ def main() -> int:
     parser.add_argument("--out-report", required=True, type=Path)
     parser.add_argument("--slot", required=True, type=_parse_slot)
     parser.add_argument("--target", choices=["table-start"], default="table-start")
+    parser.add_argument(
+        "--force-repeat-known-failed",
+        action="store_true",
+        help="Regenerate a slot candidate already recorded as live-tested and clean-failed.",
+    )
     args = parser.parse_args()
 
     report = build_variant(
@@ -150,9 +170,48 @@ def main() -> int:
         out_report=args.out_report.resolve(),
         slot=args.slot,
         target=args.target,
+        allow_known_failed=args.force_repeat_known_failed,
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
+
+
+def _known_clean_failed_candidate(
+    *,
+    binding_report_path: Path,
+    slot: int,
+    target_offset: int,
+    target: str,
+) -> dict[str, Any] | None:
+    if target != "table-start" or not DEFAULT_HARDWARE_PROBE.exists():
+        return None
+    try:
+        summary = summarize_callback_slot_probe(DEFAULT_HARDWARE_PROBE)
+    except (OSError, KeyError, json.JSONDecodeError):
+        return None
+    for candidate in summary["candidates"]:
+        if not (
+            candidate["checksum_valid"]
+            and candidate["page_switching_preserved"]
+            and not candidate["expected_printh_seen"]
+        ):
+            continue
+        if candidate["slot_hex"].lower() != f"0x{slot:x}":
+            continue
+        if candidate["target_relative_offset_hex"].lower() != f"0x{target_offset:x}":
+            continue
+        variant_path = REPO_ROOT / candidate["variant_report"]
+        try:
+            variant = json.loads(variant_path.read_text(encoding="utf-8"))
+        except (OSError, KeyError, json.JSONDecodeError):
+            continue
+        try:
+            source_binding = Path(variant["source_binding_report"]).resolve()
+        except (OSError, KeyError):
+            continue
+        if source_binding == binding_report_path.resolve():
+            return candidate
+    return None
 
 
 if __name__ == "__main__":

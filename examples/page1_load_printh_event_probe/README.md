@@ -15,6 +15,9 @@ Minimal page1 page-load event probe for the experimental multi-page event path.
   `python tools\page_event_callback_slot_status.py`. Slots `0x0C`, `0x10`, and
   `0x14` were all live-tested and failed cleanly, so do not repeat those blind
   burns as new evidence.
+- `tools\page_event_callback_variant.py` now refuses to regenerate those known
+  clean-failed candidates by default. Use `--force-repeat-known-failed` only for
+  deliberate reproduction of old evidence, not for new live probes.
 
 Build from the repo root:
 

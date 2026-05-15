@@ -29,6 +29,18 @@ def _source_tft_exists() -> bool:
     "local page1 load probe TFT is not available",
 )
 class PageEventCallbackVariantTests(unittest.TestCase):
+    def test_known_clean_failed_slot_is_refused_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            with self.assertRaisesRegex(SystemExit, "known clean-failed"):
+                build_variant(
+                    BINDING_REPORT,
+                    out_tft=tmp_path / "slot_10_table_start.tft",
+                    out_report=tmp_path / "slot_10_table_start.json",
+                    slot=0x10,
+                    target="table-start",
+                )
+
     def test_callback_variant_changes_only_one_slot_and_checksum(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -38,6 +50,7 @@ class PageEventCallbackVariantTests(unittest.TestCase):
                 out_report=tmp_path / "slot_10_table_start.json",
                 slot=0x10,
                 target="table-start",
+                allow_known_failed=True,
             )
 
         self.assertEqual(report["candidate"]["slot"], 0x10)
