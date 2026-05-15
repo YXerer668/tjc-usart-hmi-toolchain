@@ -15,6 +15,7 @@
 - `page1_button_numeric_event_matrix`: page1 多按钮数字事件矩阵，覆盖 `++`、`=7`、`--`，已经活屏验证。
 - `page1_button_printh_event_probe`: page1 普通按钮 `printh` 探针事件样例，只放行显式十六进制字节列表。
 - `page1_button_click_event_probe`: page1 普通按钮 `click` 级联探针样例，只放行同页按钮到 `printh` 目标的一层级联。
+- `page1_button_vis_event_probe`: page1 普通按钮 `vis obj,0/1` 显隐样例，已经在当前屏上烧录并用摄像头验证。
 - `page1_load_printh_event_probe`: page1 页面加载 `printh` 探针事件样例，只放行固定 4 字节十六进制 payload；当前已能编译和烧录，但活屏切页未观察到 probe 输出。
 - `event_demo`: 单页 `page0.load` 与按钮 `up` 的分离探针；2026-05-15 活屏确认按钮 `up printh` 有效，但 `page0.load` 在 `page 0` 和 `rest` 后均未触发。
 - `all_controls_demo`: 已恢复控件的集合展示页，适合做大范围冒烟测试。

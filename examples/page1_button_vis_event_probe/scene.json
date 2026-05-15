@@ -1,0 +1,74 @@
+{
+  "project": {
+    "name": "page1-button-vis-event-probe",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "label0",
+          "type": "text",
+          "x": 72,
+          "y": 70,
+          "w": 340,
+          "h": 58,
+          "text": "VISIBLE LABEL",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "hide0",
+          "type": "button",
+          "x": 72,
+          "y": 154,
+          "w": 160,
+          "h": 58,
+          "text": "HIDE",
+          "events": {
+            "down": [
+              "vis label0,0"
+            ]
+          }
+        },
+        {
+          "id": "show0",
+          "type": "button",
+          "x": 250,
+          "y": 154,
+          "w": 160,
+          "h": 58,
+          "text": "SHOW",
+          "events": {
+            "down": [
+              "vis label0,1"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

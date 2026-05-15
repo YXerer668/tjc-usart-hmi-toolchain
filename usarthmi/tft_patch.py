@@ -172,6 +172,7 @@ EVENT_ASSIGN_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]
 EVENT_UNARY_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\.([A-Za-z_][A-Za-z0-9_]*)(\+\+|--)\s*$")
 EVENT_PRINTH_HEX_RE = re.compile(r"^printh\s+[0-9A-Fa-f]{2}(?:\s+[0-9A-Fa-f]{2})*\s*$")
 EVENT_CLICK_RE = re.compile(r"^click\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
+EVENT_VIS_RE = re.compile(r"^vis\s+([A-Za-z_][A-Za-z0-9_]*),([01])\s*$", flags=re.IGNORECASE)
 
 
 def is_supported_page1_button_event_line(line: str) -> bool:
@@ -201,6 +202,14 @@ def is_page1_fixed_printh_probe_event_line(line: str, *, byte_count: int = 4) ->
 def parse_page1_button_click_event_line(line: str) -> tuple[str, int] | None:
     """Parse the deliberately tiny page1 click allow-list shape."""
     match = EVENT_CLICK_RE.match(line.strip())
+    if match is None:
+        return None
+    return match.group(1), int(match.group(2))
+
+
+def parse_page1_button_vis_event_line(line: str) -> tuple[str, int] | None:
+    """Parse the deliberately tiny page1 vis allow-list shape."""
+    match = EVENT_VIS_RE.match(line.strip())
     if match is None:
         return None
     return match.group(1), int(match.group(2))
@@ -818,7 +827,10 @@ def _is_supported_page1_button_event_block(
         return True
     if page1_blocks is None:
         return False
-    return _is_supported_page1_button_click_event_block(block, line=line, page1_blocks=page1_blocks)
+    return (
+        _is_supported_page1_button_click_event_block(block, line=line, page1_blocks=page1_blocks)
+        or _is_supported_page1_button_vis_event_block(block, line=line, page1_blocks=page1_blocks)
+    )
 
 
 def _single_page1_button_event_block(block: PageBlock) -> tuple[str, str] | None:
@@ -857,6 +869,21 @@ def _is_supported_page1_button_click_event_block(
         return False
     _, target_line = target_event_item
     return is_page1_printh_probe_event_line(target_line)
+
+
+def _is_supported_page1_button_vis_event_block(
+    block: PageBlock,
+    *,
+    line: str,
+    page1_blocks: list[PageBlock],
+) -> bool:
+    parsed = parse_page1_button_vis_event_line(line)
+    if parsed is None:
+        return False
+    target_name, _ = parsed
+    if target_name == block.objname:
+        return False
+    return any(candidate.objname == target_name for candidate in page1_blocks)
 
 
 def _validate_same_layout(base_blocks: list[PageBlock], target_blocks: list[PageBlock]) -> None:

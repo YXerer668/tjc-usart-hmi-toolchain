@@ -242,6 +242,16 @@ class TftPatchTests(unittest.TestCase):
         self.assertIn(b"\x07\x00\x00\x00\x01" + numval_ref + b"++", event_layout.data)
         self.assertEqual(event_layout.callbacks[2]["codesdown-"], event_layout.offsets[2] + 12)
 
+    def test_event_table_builder_compiles_vis_event(self) -> None:
+        source_pa = EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa"
+        page = load_page_file(source_pa)
+        button = page.blocks[-1].clone()
+        button.set_event("codesdown-", ["vis label0,0"])
+
+        event_data = _build_object_event_table(button)
+
+        self.assertIn(b"\x0b\x00\x00\x00\x09\x05\x04label0,0", event_data)
+
     def test_checksum_matches_official_cases(self) -> None:
         for case_name in (
             "case_00_baseline",
@@ -893,6 +903,68 @@ class TftPatchTests(unittest.TestCase):
             compiled = _build_object_event_table(button, context=_build_event_compile_context(page1.blocks))
             self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", compiled)
             self.assertNotIn(b"\x07\x00\x00\x00\x01" + page0_global_ref + b"++", compiled)
+
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists()
+        and (EXTRACT_ROOT / "case_04_add_text" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").exists(),
+        "local multi-page vis button-event fixtures are not available",
+    )
+    def test_multi_page_patch_allows_page1_button_vis_event_when_opted_in(self) -> None:
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            page1_pa = temp / "page1_button_vis_event.pa"
+            out = temp / "page1_button_vis_event.tft"
+            page1 = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa")
+            label = load_page_file(EXTRACT_ROOT / "case_04_add_text" / "extract" / "0.pa").blocks[-1].clone()
+            hide = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            show = load_page_file(EXTRACT_ROOT / "case_05_add_button" / "extract" / "0.pa").blocks[-1].clone()
+            _configure_added_block(label, object_id=1, name="label0", x=72, y=70, w=280, h=50)
+            label.set_string("txt", "VISIBLE")
+            label.set_int("txt_maxl", 16, width=2)
+            _configure_added_block(hide, object_id=2, name="hide0", x=72, y=154, w=160, h=58)
+            hide.set_string("txt", "HIDE")
+            hide.set_int("txt_maxl", 16, width=2)
+            hide.set_event("codesdown-", ["vis label0,0"])
+            _configure_added_block(show, object_id=3, name="show0", x=250, y=154, w=160, h=58)
+            show.set_string("txt", "SHOW")
+            show.set_int("txt_maxl", 16, width=2)
+            show.set_event("codesdown-", ["vis label0,1"])
+            page1.blocks.extend([label, hide, show])
+            page1_pa.write_bytes(page1.serialize())
+
+            with self.assertRaisesRegex(Exception, "page1 control events"):
+                patch_multi_page_tft(
+                    baseline_tft,
+                    baseline_pa=baseline_pa,
+                    target_pages=[
+                        EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                        page1_pa,
+                    ],
+                    out_tft=out,
+                )
+
+            patch_result = patch_multi_page_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pages=[
+                    EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                    page1_pa,
+                ],
+                out_tft=out,
+                allow_experimental_events=True,
+            )
+
+            self.assertTrue(inspect_tft_checksum(out)["valid"])
+            self.assertTrue(patch_result.experimental_events)
+            compiled_hide = _build_object_event_table(hide, context=_build_event_compile_context(page1.blocks))
+            compiled_show = _build_object_event_table(show, context=_build_event_compile_context(page1.blocks))
+            self.assertIn(b"\x0b\x00\x00\x00\x09\x05\x04label0,0", compiled_hide)
+            self.assertIn(b"\x0b\x00\x00\x00\x09\x05\x04label0,1", compiled_show)
 
     @unittest.skipUnless(
         (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()

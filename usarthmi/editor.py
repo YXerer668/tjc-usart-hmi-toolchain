@@ -26,6 +26,7 @@ from .tft_patch import (
     is_page1_printh_probe_event_line,
     is_supported_page1_button_event_line,
     parse_page1_button_click_event_line,
+    parse_page1_button_vis_event_line,
 )
 
 
@@ -845,7 +846,10 @@ def _is_supported_experimental_page1_event_widget(widget, *, page1_widgets=None)
         return True
     if page1_widgets is None:
         return False
-    return _is_supported_page1_button_click_event_widget(widget, line=line, page1_widgets=page1_widgets)
+    return (
+        _is_supported_page1_button_click_event_widget(widget, line=line, page1_widgets=page1_widgets)
+        or _is_supported_page1_button_vis_event_widget(widget, line=line, page1_widgets=page1_widgets)
+    )
 
 
 def _single_page1_button_event_widget(widget) -> tuple[str, str] | None:
@@ -875,6 +879,16 @@ def _is_supported_page1_button_click_event_widget(widget, *, line: str, page1_wi
         return False
     _, target_line = target_event_item
     return is_page1_printh_probe_event_line(target_line)
+
+
+def _is_supported_page1_button_vis_event_widget(widget, *, line: str, page1_widgets) -> bool:
+    parsed = parse_page1_button_vis_event_line(line)
+    if parsed is None:
+        return False
+    target_name, _ = parsed
+    if target_name == widget.id:
+        return False
+    return any(candidate.id == target_name for candidate in page1_widgets)
 
 
 def _field3_template(entries, suffix: str) -> int:

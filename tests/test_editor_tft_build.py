@@ -986,10 +986,23 @@ class EditorTftBuildTests(unittest.TestCase):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertTrue(_is_supported_experimental_page1_event_widget(widget))
 
-        for line in ("page 2", "printh", "printh GG", "click probe0,0", "vis back0,0", "rawhex 09 0c 04 31"):
+        for line in ("page 2", "printh", "printh GG", "click probe0,0", "vis label0,0", "rawhex 09 0c 04 31"):
             with self.subTest(line=line):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertFalse(_is_supported_experimental_page1_event_widget(widget))
+
+        hide = WidgetSpec("hide0", "button", events={"down": ["vis label0,0"]})
+        show = WidgetSpec("show0", "button", events={"down": ["vis label0,1"]})
+        label = WidgetSpec("label0", "text")
+        self.assertTrue(_is_supported_experimental_page1_event_widget(hide, page1_widgets=[hide, show, label]))
+        self.assertTrue(_is_supported_experimental_page1_event_widget(show, page1_widgets=[hide, show, label]))
+
+        self_hide = WidgetSpec("hide0", "button", events={"down": ["vis hide0,0"]})
+        missing = WidgetSpec("bad0", "button", events={"down": ["vis missing0,0"]})
+        bad_state = WidgetSpec("bad1", "button", events={"down": ["vis label0,2"]})
+        self.assertFalse(_is_supported_experimental_page1_event_widget(self_hide, page1_widgets=[self_hide, label]))
+        self.assertFalse(_is_supported_experimental_page1_event_widget(missing, page1_widgets=[missing, label]))
+        self.assertFalse(_is_supported_experimental_page1_event_widget(bad_state, page1_widgets=[bad_state, label]))
 
     def test_page1_experimental_page_load_event_allow_list_is_narrow(self) -> None:
         self.assertTrue(
