@@ -30,4 +30,13 @@ python tools\page_event_oracle_probe.py `
 
 - 官方 audio wiki 编译产物 `case_49_audio/official_compile/source_raw.run` 被识别为 `post_primary_page_event` 路径：page-load `volume=100` 不在普通 page event table，而是位于 primary records 后面的 `09 1f 04 35 ... 09 30 08` chunk。
 - datarecord wiki 样本现在会 fail-soft：遇到未知控件 type `B` 或暂不支持的 `repo primaryKey.val,0` 行时，报告会保留 `compile_context.error` / `event_table_error`，而不是整份 oracle 失败。
+- `tools/page_event_oracle_batch.py` 可以批量扫描 `case_for_codex` 并自动配对邻近 `TFT/run`：当前扫到 4 个 page-event HMI，其中只有 `case_49_audio` 是完整 `post_primary_page_event` oracle，datarecord/filebrowser/filestream 都还属于 incomplete oracle。
 - 因此当前策略仍然是：普通 page-load callback 猜测不烧录；先用官方 oracle 证明单字段绑定，再生成单变量候选。
+
+批量扫描示例：
+
+```powershell
+python tools\page_event_oracle_batch.py C:\Users\SinYu\Desktop\case_for_codex `
+  --out reverse_usarthmi\page_lifecycle_oracle_scan_20260515\batch_page_event_oracles.json `
+  --compact
+```
