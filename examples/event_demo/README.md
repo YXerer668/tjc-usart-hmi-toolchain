@@ -40,3 +40,19 @@ python tools\page_event_oracle_batch.py C:\Users\SinYu\Desktop\case_for_codex `
   --out reverse_usarthmi\page_lifecycle_oracle_scan_20260515\batch_page_event_oracles.json `
   --compact
 ```
+
+2026-05-16 的 `Program.s` 探针：
+
+- 新增 `tools/program_s_oracle_probe.py`，专门把官方编辑器顶部“上电全局初始化”代码和页面/控件事件分开分析。
+- baseline `Program.s` 中当前编译器已支持的连续两行 `printh ...` + `page 0`，在官方 `case_00_baseline/lcd_test.tft` 的 `unknown_objects_address` 区域找到唯一连续块匹配：`0xAE010D`，置信度 `high`。
+- `case_49_audio` 的官方 `source_raw.run` 也出现同型匹配：`0x160135`，说明至少这两条启动命令复用了现有 length-prefixed bytecode 内核。
+- `baud=9600 / dim=100 / recmod=0 / int ...` 仍明确标记为 `unsupported`，不要把“不支持编译”误判成“官方 TFT 不存在”。
+
+`Program.s` 探针示例：
+
+```powershell
+python tools\program_s_oracle_probe.py `
+  C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.HMI `
+  C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft `
+  --out reverse_usarthmi\program_s_oracle_probe_20260516\baseline_program_s_oracle.json
+```
