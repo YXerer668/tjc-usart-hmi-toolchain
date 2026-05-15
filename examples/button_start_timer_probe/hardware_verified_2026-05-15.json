@@ -1,0 +1,98 @@
+{
+  "source": "codex_live_button_start_timer_probe",
+  "timestamp": "2026-05-15T22:22:50.9852985+08:00",
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "model": "TJC8048X543_011C"
+  },
+  "artifact": {
+    "scene": "examples/button_start_timer_probe/scene.json",
+    "output_tft": "reverse_usarthmi/button_start_timer_probe/local_build/output.tft",
+    "file_size": 11413824,
+    "sha256": "305C2D3E7D3191496BF02F857D64A129F8F71676034399BEFE17934FBF7440DB",
+    "tft_checksum_hex": "0xE6349E42",
+    "tft_checksum_valid": true
+  },
+  "upload": {
+    "method": "public whmi-wri full serial upload",
+    "download_baud": 921600,
+    "chunk_size": 4096,
+    "status": "success",
+    "bytes_sent": 11413824,
+    "chunks_sent": 2787,
+    "elapsed_s": 210.36
+  },
+  "serial_evidence": [
+    {
+      "step": "page after upload",
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "start button exists",
+      "command": "get start0.txt",
+      "response_hex": "70 53 54 41 52 54 ff ff ff",
+      "value": "START"
+    },
+    {
+      "step": "stop button exists",
+      "command": "get stop0.txt",
+      "response_hex": "70 53 54 4f 50 ff ff ff",
+      "value": "STOP"
+    },
+    {
+      "step": "timer initially disabled",
+      "command": "get tm0.en",
+      "response_hex": "71 00 00 00 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "number initially zero",
+      "command": "get numval.val",
+      "response_hex": "71 00 00 00 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "button starts timer",
+      "command": "click start0,0",
+      "response_kind": "none"
+    },
+    {
+      "step": "number after 1800ms following start click",
+      "command": "get numval.val",
+      "response_hex": "71 04 00 00 00 ff ff ff",
+      "value": 4
+    },
+    {
+      "step": "button stops timer",
+      "command": "click stop0,0",
+      "response_kind": "none"
+    },
+    {
+      "step": "number immediately after stop click",
+      "command": "get numval.val",
+      "response_hex": "71 04 00 00 00 ff ff ff",
+      "value": 4
+    },
+    {
+      "step": "number after 1200ms following stop click",
+      "command": "get numval.val",
+      "response_hex": "71 04 00 00 00 ff ff ff",
+      "value": 4
+    }
+  ],
+  "camera_evidence": {
+    "path": "reverse_usarthmi/button_start_timer_probe/live_after_button_start_2026-05-15.jpg",
+    "size": [2560, 1440],
+    "mean_luma": 124.17,
+    "std_luma": 82.12
+  },
+  "conclusion": {
+    "button_assignment_starts_timer": "live-proven",
+    "timer_event_callback": "live-proven",
+    "page_load_scheduler": "still open; failure is not explained by assignment bytecode"
+  }
+}
+

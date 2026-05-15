@@ -1,0 +1,118 @@
+{
+  "source": "codex_live_multi_page_two_way_jump_probe",
+  "timestamp": "2026-05-15T22:29:26.9599200+08:00",
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "model": "TJC8048X543_011C"
+  },
+  "artifact": {
+    "scene": "examples/multi_page_two_way_jump_probe/scene.json",
+    "output_tft": "reverse_usarthmi/multi_page_two_way_jump_probe/local_build/output.tft",
+    "file_size": 11411800,
+    "sha256": "6A382D7C1AAE6B3374446E52768A4B3178DF5736703B6003B012E8777CC81B5A",
+    "tft_checksum_hex": "0xFAF23FD8",
+    "tft_checksum_valid": true
+  },
+  "upload": {
+    "method": "public whmi-wri full serial upload",
+    "download_baud": 921600,
+    "chunk_size": 4096,
+    "status": "success",
+    "bytes_sent": 11411800,
+    "chunks_sent": 2787,
+    "elapsed_s": 209.578
+  },
+  "serial_evidence": [
+    {
+      "step": "initial page after upload",
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "generated page1 visible at runtime page 0",
+      "command": "get p1title.txt",
+      "response_hex": "70 50 41 47 45 31 20 47 45 4e 45 52 41 54 45 44 ff ff ff",
+      "value": "PAGE1 GENERATED"
+    },
+    {
+      "step": "switch to seed page0 runtime index",
+      "command": "page 1",
+      "response_kind": "none"
+    },
+    {
+      "step": "runtime index after page 1",
+      "command": "sendme",
+      "response_hex": "66 01 ff ff ff",
+      "value": 1
+    },
+    {
+      "step": "seed b0 text readback caveat",
+      "command": "get b0.txt",
+      "response_hex": "1a ff ff ff",
+      "value": "invalid_reference"
+    },
+    {
+      "step": "seed b0 jumps to generated page1",
+      "command": "click b0,0",
+      "response_kind": "none"
+    },
+    {
+      "step": "runtime index after b0 click",
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff",
+      "value": 0
+    },
+    {
+      "step": "generated page1 readback after b0 click",
+      "command": "get p1title.txt",
+      "response_hex": "70 50 41 47 45 31 20 47 45 4e 45 52 41 54 45 44 ff ff ff",
+      "value": "PAGE1 GENERATED"
+    },
+    {
+      "step": "generated back0 jumps to seed page0",
+      "command": "click back0,0",
+      "response_kind": "none"
+    },
+    {
+      "step": "runtime index after back0 click",
+      "command": "sendme",
+      "response_hex": "66 01 ff ff ff",
+      "value": 1
+    },
+    {
+      "step": "negative click control before b0 retry",
+      "command": "click missing0,0",
+      "response_hex": "02 ff ff ff",
+      "value": "unknown object, page stayed at runtime 1"
+    },
+    {
+      "step": "b0 retry after negative click",
+      "command": "click b0,0",
+      "response_kind": "none"
+    },
+    {
+      "step": "runtime index after b0 retry",
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff",
+      "value": 0
+    }
+  ],
+  "camera_evidence": {
+    "path": "reverse_usarthmi/multi_page_two_way_jump_probe/live_generated_page1_2026-05-15.jpg",
+    "size": [2560, 1440],
+    "mean_luma": 129.11,
+    "std_luma": 79.48
+  },
+  "conclusion": {
+    "runtime_page_mapping": {
+      "page 0": "generated 1.pa / scene page1",
+      "page 1": "seed 0.pa / scene page0"
+    },
+    "seed_page0_button_patch": "live-proven for b0.up -> page 0",
+    "generated_page1_button_event": "live-proven for back0.up -> page 1",
+    "seed_object_readback_caveat": "get b0.txt returned 0x1A on runtime page 1 even though click b0,0 triggered the patched event"
+  }
+}
+

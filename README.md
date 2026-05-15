@@ -44,6 +44,9 @@ Stable enough for local use:
 Experimental but useful:
 
 - Multi-page page0/page1 generation with limited plain controls.
+- Multi-page seed-page button patching for narrow two-way navigation probes:
+  `patch_seed_page0_widgets` can edit an existing page0 button event while
+  keeping the seed object layout intact.
 - Event bytecode assembly/inspection for a small set of commands. Page0
   button `ref obj` is live-proven from scene DSL through TFT upload and
   camera-verified redraw after a red `fill` overlay. Page0 `tsw obj,0`

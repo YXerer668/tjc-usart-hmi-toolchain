@@ -86,6 +86,7 @@ PAGE1_PLAIN_WIDGET_TYPES = {
 }
 PAGE1_PLAIN_WIDGET_TYPES_LABEL = "text/button/number/image/progress/slider/gauge/checkbox/radio"
 MEDIA_WIDGET_TYPE_CODES = {"\x02", "\x03", "\x04"}
+SEED_PAGE0_PATCH_WIDGET_TYPES = {"button"}
 
 
 def import_asset(source: str | Path, out_dir: str | Path) -> dict[str, Any]:
@@ -311,22 +312,25 @@ def build_hmi(
 
     next_id = 1 if scene.project.get("drop_seed_objects") else max((_block_int(block, "id") or 0) for block in page.blocks) + 1
     generated_blocks = []
-    for widget in page0.widgets:
-        block = _build_widget_block(
-            widget,
-            next_id,
-            button_proto=button_proto,
-            picture_proto=picture_proto,
-            number_proto=number_proto,
-            timer_proto=timer_proto,
-            text_proto=text_proto,
-            advanced_protos=advanced_protos,
-            manifest_assets=manifest_assets,
-        )
-        if block is None:
-            raise EditorError(f"Scene widget type {widget.type!r} cannot be emitted by the HMI builder yet")
-        generated_blocks.append(block)
-        next_id += 1
+    if len(scene.pages) > 1 and _patch_seed_page0_widgets_enabled(scene):
+        _apply_seed_page0_widget_patches(unknown_blocks, page0.widgets, manifest_assets=manifest_assets)
+    else:
+        for widget in page0.widgets:
+            block = _build_widget_block(
+                widget,
+                next_id,
+                button_proto=button_proto,
+                picture_proto=picture_proto,
+                number_proto=number_proto,
+                timer_proto=timer_proto,
+                text_proto=text_proto,
+                advanced_protos=advanced_protos,
+                manifest_assets=manifest_assets,
+            )
+            if block is None:
+                raise EditorError(f"Scene widget type {widget.type!r} cannot be emitted by the HMI builder yet")
+            generated_blocks.append(block)
+            next_id += 1
 
     page.blocks = [seed_page_block] + unknown_blocks + generated_blocks
     rebuilt_page = page.serialize()
@@ -462,6 +466,33 @@ def _build_widget_block(
     _clear_existing_events(block)
     _apply_event_fields(block, widget.events, owner=widget.id)
     return block
+
+
+def _apply_seed_page0_widget_patches(
+    seed_blocks,
+    widgets,
+    *,
+    manifest_assets: dict[str, Any],
+) -> None:
+    blocks_by_name = {block.objname: block for block in seed_blocks if block.objname}
+    for widget in widgets:
+        block = blocks_by_name.get(widget.id)
+        if block is None:
+            raise EditorError(f"Seed page0 patch target {widget.id!r} does not exist")
+        if widget.type == "button" and block.type_code != "b":
+            raise EditorError(f"Seed page0 patch target {widget.id!r} is not a button")
+
+        if any(value is not None for value in (widget.x, widget.y, widget.w, widget.h)):
+            if None in (widget.x, widget.y, widget.w, widget.h):
+                raise EditorError(f"Seed page0 patch target {widget.id!r} geometry requires x/y/w/h together")
+            _apply_geometry_fields(block, widget)
+        _apply_textual_fields(block, widget)
+        _apply_color_fields(block, widget)
+        _apply_style_fields(block, widget)
+        _apply_resource_fields(block, widget, manifest_assets)
+        if widget.events:
+            _clear_existing_events(block)
+            _apply_event_fields(block, widget.events, owner=widget.id)
 
 
 def _apply_common_widget_fields(block, widget, next_id: int) -> None:
@@ -788,14 +819,22 @@ def _collect_hmi_picture_sources(manifest_assets: dict[str, Any]) -> list[tuple[
 
 def _validate_multi_page_scene_support(scene: SceneModel) -> None:
     allow_events = _experimental_multi_page_events_enabled(scene)
+    patch_seed_page0_widgets = _patch_seed_page0_widgets_enabled(scene)
     if len(scene.pages) != 2:
         raise EditorError("Multi-page build V1 supports exactly two pages: page0 and page1")
     expected_ids = ["page0", "page1"]
     page_ids = [page.id for page in scene.pages]
     if page_ids != expected_ids:
         raise EditorError(f"Multi-page build V1 requires pages {expected_ids}, got {page_ids}")
-    if scene.pages[0].widgets or scene.pages[0].events:
+    if scene.pages[0].events:
         raise EditorError("Multi-page build V1 requires page0 to keep the seed object layout unchanged")
+    if scene.pages[0].widgets and not patch_seed_page0_widgets:
+        raise EditorError("Multi-page build V1 requires page0 to keep the seed object layout unchanged")
+    _validate_seed_page0_widget_patches(
+        scene.pages[0].widgets,
+        allow_experimental_events=allow_events,
+        enabled=patch_seed_page0_widgets,
+    )
     if scene.pages[1].events and not (
         allow_events and _is_supported_experimental_page1_page_events(scene.pages[1].events)
     ):
@@ -825,6 +864,45 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
 
 def _experimental_multi_page_events_enabled(scene: SceneModel) -> bool:
     return bool(scene.project.get("experimental_multi_page_events"))
+
+
+def _patch_seed_page0_widgets_enabled(scene: SceneModel) -> bool:
+    return bool(scene.project.get("patch_seed_page0_widgets"))
+
+
+def _validate_seed_page0_widget_patches(
+    widgets,
+    *,
+    allow_experimental_events: bool,
+    enabled: bool,
+) -> None:
+    if not widgets:
+        return
+    if not enabled:
+        raise EditorError("Multi-page build V1 seed page0 widget patches are not enabled")
+    seen_ids: set[str] = set()
+    for widget in widgets:
+        if widget.id in seen_ids:
+            raise EditorError(f"Multi-page build V1 duplicate seed page0 patch target {widget.id!r}")
+        seen_ids.add(widget.id)
+        if widget.type not in SEED_PAGE0_PATCH_WIDGET_TYPES:
+            raise EditorError("Multi-page build V1 seed page0 patch currently supports only button widgets")
+        if widget.resources:
+            raise EditorError("Multi-page build V1 seed page0 patch does not support widget resources yet")
+        if widget.children:
+            raise EditorError("Multi-page build V1 seed page0 patch does not support child widgets yet")
+        if widget.events and not (
+            allow_experimental_events and _is_supported_experimental_seed_page0_event_widget(widget)
+        ):
+            raise EditorError("Multi-page build V1 seed page0 widget events are not supported yet")
+
+
+def _is_supported_experimental_seed_page0_event_widget(widget) -> bool:
+    event_item = _single_page1_button_event_widget(widget)
+    if event_item is None:
+        return False
+    _, line = event_item
+    return is_supported_page1_button_event_line(line) or is_page1_printh_probe_event_line(line)
 
 
 def _is_supported_experimental_page1_page_events(events: dict[str, list[str]]) -> bool:

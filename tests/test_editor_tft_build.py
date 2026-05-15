@@ -971,6 +971,110 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertIn("codesup-1", back_button.event_tokens)
             self.assertIn("page 1", back_button.event_tokens)
 
+    def test_scene_build_emits_two_way_seed_page0_and_page1_button_events(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-two-way-button-event",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                    "patch_seed_page0_widgets": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "b0",
+                                "type": "button",
+                                "x": 192,
+                                "y": 239,
+                                "w": 100,
+                                "h": 50,
+                                "text": "TO P1",
+                                "events": {"up": ["page 0"]},
+                            }
+                        ],
+                    },
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "back0",
+                                "type": "button",
+                                "x": 72,
+                                "y": 154,
+                                "w": 180,
+                                "h": 64,
+                                "text": "BACK",
+                                "events": {"up": ["page 1"]},
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            page0 = load_page_file(manifest["target_pages"][0])
+            page1 = load_page_file(manifest["target_pages"][1])
+            seed_button = next(block for block in page0.blocks if block.objname == "b0")
+            back_button = next(block for block in page1.blocks if block.objname == "back0")
+            self.assertIn("codesup-1", seed_button.event_tokens)
+            self.assertIn("page 0", seed_button.event_tokens)
+            self.assertEqual(seed_button.get_field("txt").value.decode("gbk"), "TO P1")
+            self.assertIn("codesup-1", back_button.event_tokens)
+            self.assertIn("page 1", back_button.event_tokens)
+
+    def test_scene_build_rejects_seed_page0_patch_without_opt_in(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-bad-page0-patch",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "b0",
+                                "type": "button",
+                                "x": 192,
+                                "y": 239,
+                                "w": 100,
+                                "h": 50,
+                                "events": {"up": ["page 0"]},
+                            }
+                        ],
+                    },
+                    {"id": "page1", "layout": {"type": "absolute"}, "widgets": []},
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(Exception, "seed object layout unchanged"):
+                build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
     def test_page1_experimental_button_event_aliases_match_tft_patcher(self) -> None:
         for line in (
             "page 0",

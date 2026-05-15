@@ -1,0 +1,89 @@
+{
+  "project": {
+    "name": "multi-page-two-way-jump-probe",
+    "default_page": "page0",
+    "experimental_multi_page_events": true,
+    "patch_seed_page0_widgets": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "b0",
+          "type": "button",
+          "x": 192,
+          "y": 239,
+          "w": 100,
+          "h": 50,
+          "text": "TO P1",
+          "events": {
+            "up": [
+              "page 0"
+            ]
+          },
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "p1title",
+          "type": "text",
+          "x": 86,
+          "y": 74,
+          "w": 628,
+          "h": 64,
+          "text": "PAGE1 GENERATED",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "back0",
+          "type": "button",
+          "x": 292,
+          "y": 220,
+          "w": 216,
+          "h": 78,
+          "text": "BACK P0",
+          "events": {
+            "up": [
+              "page 1"
+            ]
+          },
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "xcen": 1,
+            "ycen": 1
+          }
+        }
+      ]
+    }
+  ]
+}
+
