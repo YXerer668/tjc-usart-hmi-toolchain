@@ -1,0 +1,67 @@
+{
+  "project": {
+    "name": "page1-load-printh-event-probe",
+    "default_page": "page0",
+    "experimental_multi_page_events": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "events": {
+        "load": [
+          "printh 23 02 50 4C"
+        ]
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 72,
+          "y": 62,
+          "w": 420,
+          "h": 52,
+          "text": "PAGE1 LOAD PROBE",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "xcen": 0,
+            "ycen": 1
+          }
+        },
+        {
+          "id": "hint",
+          "type": "text",
+          "x": 72,
+          "y": 134,
+          "w": 560,
+          "h": 38,
+          "text": "Entering runtime page 0 should print 23 02 50 4C.",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 33808,
+            "xcen": 0,
+            "ycen": 1
+          }
+        }
+      ]
+    }
+  ]
+}

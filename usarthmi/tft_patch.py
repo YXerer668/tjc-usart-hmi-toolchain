@@ -190,6 +190,14 @@ def is_page1_printh_probe_event_line(line: str) -> bool:
     return EVENT_PRINTH_HEX_RE.match(line.strip()) is not None
 
 
+def is_page1_fixed_printh_probe_event_line(line: str, *, byte_count: int = 4) -> bool:
+    """Return whether an event line is a fixed-size explicit hex printh probe."""
+    stripped = line.strip()
+    if EVENT_PRINTH_HEX_RE.match(stripped) is None:
+        return False
+    return len(stripped.split()) == byte_count + 1
+
+
 def parse_page1_button_click_event_line(line: str) -> tuple[str, int] | None:
     """Parse the deliberately tiny page1 click allow-list shape."""
     match = EVENT_CLICK_RE.match(line.strip())
@@ -388,7 +396,7 @@ class MultiPagePatchResult:
         ]
         if self.experimental_events:
             warnings.append(
-                "Page1 normal-button events are opt-in; V1 allows page jumps, numeric field edits, explicit hex printh probes, and one-level click-to-printh cascades only."
+                "Page1 experimental events are opt-in; page1 button events are live-proven, while page1 load printh probes are compile/probe-only until the extra-page load scheduler is recovered."
             )
         return {
             "mode": "experimental_multi_page_tft_patch",
@@ -761,6 +769,10 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
             continue
         for block_index, block in enumerate(page.blocks):
             if block_index == 0:
+                if any(lines for lines in _events_by_prefix(block).values()) and not (
+                    allow_experimental_events and _is_supported_page1_page_event_block(block)
+                ):
+                    raise TftToolchainError("Multi-page V1 page1 page events are not supported yet")
                 continue
             if block.type_code not in {"t", "b", "6", "p", "j", "\x01", "z", "8", "9"}:
                 raise TftToolchainError(
@@ -773,6 +785,24 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
                 raise TftToolchainError("Multi-page V1 page1 control events are not supported yet")
             if block.type_code == "b" and _field_int(block, "sta") == 2:
                 raise TftToolchainError("Multi-page V1 page1 image buttons are not supported yet")
+
+
+def _is_supported_page1_page_event_block(block: PageBlock) -> bool:
+    if block.type_code != "y":
+        return False
+    event_items = [
+        (prefix, lines)
+        for prefix, lines in _events_by_prefix(block).items()
+        if lines
+    ]
+    if len(event_items) != 1:
+        return False
+    prefix, lines = event_items[0]
+    return (
+        prefix == "codesload-"
+        and len(lines) == 1
+        and is_page1_fixed_printh_probe_event_line(lines[0], byte_count=4)
+    )
 
 
 def _is_supported_page1_button_event_block(

@@ -22,6 +22,7 @@ from .tft_patch import (
     patch_added_object_tft,
     patch_multi_page_tft,
     patch_rebuild_page_tft,
+    is_page1_fixed_printh_probe_event_line,
     is_page1_printh_probe_event_line,
     is_supported_page1_button_event_line,
     parse_page1_button_click_event_line,
@@ -361,20 +362,17 @@ def _build_extra_page_entries(
     entries: list[dict[str, Any]] = []
     seed_page_block = next(block.clone() for block in seed_page.blocks if block.type_code == "y")
     for index, page_spec in enumerate(extra_pages, start=1):
-        if page_spec.events:
-            raise EditorError(
-                "Multi-page HMI/TFT build V1 does not support extra-page events yet; "
-                f"page {page_spec.id!r} has events"
-            )
         if page_spec.id != f"page{index}":
             raise EditorError(
                 "Multi-page HMI/TFT build V1 requires consecutive page ids page0, page1"
             )
+
         page = parse_page_data(seed_page.serialize())
         page.page_name = page_spec.id
         block = seed_page_block.clone()
         block.set_string("objname", page_spec.id, encoding="ascii")
         block.set_int("id", 0, width=1)
+        _apply_event_fields(block, page_spec.events, owner=page_spec.id)
         generated_blocks = []
         for next_id, widget in enumerate(page_spec.widgets, start=1):
             widget_block = _build_widget_block(
@@ -795,7 +793,9 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
         raise EditorError(f"Multi-page build V1 requires pages {expected_ids}, got {page_ids}")
     if scene.pages[0].widgets or scene.pages[0].events:
         raise EditorError("Multi-page build V1 requires page0 to keep the seed object layout unchanged")
-    if scene.pages[1].events:
+    if scene.pages[1].events and not (
+        allow_events and _is_supported_experimental_page1_page_events(scene.pages[1].events)
+    ):
         raise EditorError("Multi-page build V1 does not support page1 events yet")
     seen_ids = {"page0", "page1"}
     for widget in scene.pages[1].widgets:
@@ -822,6 +822,18 @@ def _validate_multi_page_scene_support(scene: SceneModel) -> None:
 
 def _experimental_multi_page_events_enabled(scene: SceneModel) -> bool:
     return bool(scene.project.get("experimental_multi_page_events"))
+
+
+def _is_supported_experimental_page1_page_events(events: dict[str, list[str]]) -> bool:
+    event_items = [(name, lines) for name, lines in events.items() if lines]
+    if len(event_items) != 1:
+        return False
+    event_name, lines = event_items[0]
+    return (
+        event_name == "load"
+        and len(lines) == 1
+        and is_page1_fixed_printh_probe_event_line(lines[0], byte_count=4)
+    )
 
 
 def _is_supported_experimental_page1_event_widget(widget, *, page1_widgets=None) -> bool:

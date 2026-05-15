@@ -4,7 +4,11 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from usarthmi.editor import build_scene, _is_supported_experimental_page1_event_widget
+from usarthmi.editor import (
+    build_scene,
+    _is_supported_experimental_page1_event_widget,
+    _is_supported_experimental_page1_page_events,
+)
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.object_hash import object_name_hash
 from usarthmi.page_format import load_page_file
@@ -987,6 +991,23 @@ class EditorTftBuildTests(unittest.TestCase):
                 widget = WidgetSpec("back0", "button", events={"up": [line]})
                 self.assertFalse(_is_supported_experimental_page1_event_widget(widget))
 
+    def test_page1_experimental_page_load_event_allow_list_is_narrow(self) -> None:
+        self.assertTrue(
+            _is_supported_experimental_page1_page_events({"load": ["printh 23 02 50 4C"]})
+        )
+
+        for events in (
+            {"load": ["printh 23 02 50"]},
+            {"load": ["printh 23 02 50 4C 00"]},
+            {"loadend": ["printh 23 02 50 4C"]},
+            {"load": ["printh 23 02 50 4C", "printh 23 02 50 4D"]},
+            {"load": ["page 1"]},
+            {"load": ["click sink0,0"]},
+            {"load": ["rawhex 09 0c 04 31"]},
+        ):
+            with self.subTest(events=events):
+                self.assertFalse(_is_supported_experimental_page1_page_events(events))
+
     def test_page1_experimental_click_event_requires_same_page_printh_target(self) -> None:
         fire = WidgetSpec("fire0", "button", events={"up": ["click sink0,0"]})
         sink = WidgetSpec("sink0", "button", events={"up": ["printh 23 02 43 4B"]})
@@ -1125,6 +1146,53 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertIn("codesup-1", sink_button.event_tokens)
             self.assertIn("printh 23 02 43 4B", sink_button.event_tokens)
 
+    def test_scene_build_emits_experimental_page1_load_printh_event_tft_when_enabled(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {
+                    "name": "multi-page-page1-load-printh-event",
+                    "default_page": "page0",
+                    "experimental_multi_page_events": True,
+                },
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "events": {"load": ["printh 23 02 50 4C"]},
+                        "widgets": [
+                            {
+                                "id": "p1title",
+                                "type": "text",
+                                "x": 72,
+                                "y": 64,
+                                "w": 320,
+                                "h": 58,
+                                "text": "LOAD",
+                            },
+                        ],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            page1 = load_page_file(manifest["target_pages"][1])
+            self.assertIn("codesload-1", page1.blocks[0].event_tokens)
+            self.assertIn("printh 23 02 50 4C", page1.blocks[0].event_tokens)
+
     def test_scene_build_emits_experimental_page1_button_numeric_event_tft_when_enabled(self) -> None:
         scene = validate_scene(
             {
@@ -1214,6 +1282,27 @@ class EditorTftBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             with self.assertRaisesRegex(Exception, "page1 widget events"):
                 build_scene(bad_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+        bad_page_event_scene = validate_scene(
+            {
+                "project": {"name": "bad-page1-load-event", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480},
+                "assets": {},
+                "pages": [
+                    {"id": "page0", "layout": {"type": "absolute"}, "widgets": []},
+                    {
+                        "id": "page1",
+                        "layout": {"type": "absolute"},
+                        "events": {"load": ["printh 23 02 50 4C"]},
+                        "widgets": [],
+                    },
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(Exception, "page1 events"):
+                build_scene(bad_page_event_scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
 
     def test_scene_build_rejects_unsupported_multi_page_shapes(self) -> None:
         bad_scene = validate_scene(

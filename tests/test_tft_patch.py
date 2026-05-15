@@ -952,6 +952,51 @@ class TftPatchTests(unittest.TestCase):
             self.assertIn(b"\x09\x00\x08sink0,0", fire_compiled)
             self.assertIn(b"\x09\x0f\x0823 02 43 4B", sink_compiled)
 
+    @unittest.skipUnless(
+        (CASE_ROOT / "case_31_multi_page_navigation" / "lcd_test.tft").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa").exists()
+        and (EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa").exists(),
+        "local multi-page page-event fixtures are not available",
+    )
+    def test_multi_page_patch_allows_page1_load_printh_probe_when_opted_in(self) -> None:
+        baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
+        baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp = Path(temp_dir)
+            page1_pa = temp / "page1_load_event.pa"
+            out = temp / "page1_load_event.tft"
+            page1 = load_page_file(EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "1.pa")
+            page1.blocks[0].set_event("codesload-", ["printh 23 02 50 4C"])
+            page1_pa.write_bytes(page1.serialize())
+
+            with self.assertRaisesRegex(Exception, "page1 page events"):
+                patch_multi_page_tft(
+                    baseline_tft,
+                    baseline_pa=baseline_pa,
+                    target_pages=[
+                        EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                        page1_pa,
+                    ],
+                    out_tft=out,
+                )
+
+            patch_result = patch_multi_page_tft(
+                baseline_tft,
+                baseline_pa=baseline_pa,
+                target_pages=[
+                    EXTRACT_ROOT / "case_31_multi_page_navigation" / "extract" / "0.pa",
+                    page1_pa,
+                ],
+                out_tft=out,
+                allow_experimental_events=True,
+            )
+
+            self.assertTrue(inspect_tft_checksum(out)["valid"])
+            self.assertTrue(patch_result.experimental_events)
+            page_compiled = _build_page_event_table(page1.blocks[0])
+            self.assertIn(b"\x09\x0f\x0823 02 50 4C", page_compiled)
+            self.assertIn(b"\x09\x30\x08", page_compiled)
+
     def test_added_object_patch_keeps_qrcode_text_pointer_separate(self) -> None:
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
         baseline_pa = EXTRACT_ROOT / "case_00_baseline" / "extract" / "0.pa"

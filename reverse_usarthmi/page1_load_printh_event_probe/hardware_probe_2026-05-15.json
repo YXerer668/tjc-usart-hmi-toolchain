@@ -1,0 +1,81 @@
+{
+  "name": "page1_load_printh_event_probe",
+  "date": "2026-05-15",
+  "status": "compiled_uploaded_but_runtime_load_printh_not_observed",
+  "screen": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C",
+    "connect_preview": "comok 2,1089-0,TJC8048X543_011C,277,10501,FC8B3401B1A6086E,128974848-0"
+  },
+  "build": {
+    "scene": "examples/page1_load_printh_event_probe/scene.json",
+    "output_tft": "reverse_usarthmi/page1_load_printh_event_probe/local_build/output.tft",
+    "file_size": 11411828,
+    "crc_valid": true,
+    "stored_crc_hex": "0x6856D1EC",
+    "experimental_events": true,
+    "tft_contains_probe_payload_count": 2,
+    "target_1_pa_contains_probe_payload_count": 2
+  },
+  "upload": {
+    "method": "public_whmi_full_upload",
+    "bytes_sent": 11411828,
+    "chunks_sent": 2787,
+    "chunk_size": 4096,
+    "elapsed_s": 207.985,
+    "skipped": false
+  },
+  "serial_probe": [
+    {
+      "command": "connect",
+      "response_hex": "63 6f 6d 6f 6b 20 32 2c 31 30 38 39 2d 30 2c 54 4a 43 38 30 34 38 58 35 34 33 5f 30 31 31 43 2c 32 37 37 2c 31 30 35 30 31 2c 46 43 38 42 33 34 30 31 42 31 41 36 30 38 36 45 2c 31 32 38 39 37 34 38 34 38 2d 30 ff ff ff"
+    },
+    {
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "page 1",
+      "response_hex": ""
+    },
+    {
+      "command": "sendme",
+      "response_hex": "66 01 ff ff ff"
+    },
+    {
+      "command": "page 0",
+      "response_hex": "",
+      "expected_probe_hex": "23 02 50 4c"
+    },
+    {
+      "command": "sendme",
+      "response_hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "page 1",
+      "response_hex": ""
+    },
+    {
+      "command": "page 0",
+      "response_hex": "",
+      "expected_probe_hex": "23 02 50 4c"
+    }
+  ],
+  "camera": {
+    "status": "not_available_this_run",
+    "note": "The USB Cam capture script timed out after 124 seconds, so this probe relies on checksum plus serial evidence."
+  },
+  "conclusion": [
+    "The scene builder can now emit page1 page-load event metadata and the TFT patcher accepts it only behind experimental_multi_page_events.",
+    "The generated TFT checksum is valid and uploaded successfully to COM36.",
+    "Runtime page switching remains healthy: page 1 returns sendme 1 and page 0 returns sendme 0.",
+    "The page1 load printh payload was not observed during page 1 -> page 0 transitions, so page-level load scheduling for extra pages is not yet solved."
+  ],
+  "next_hypotheses": [
+    "The page event bytes are present but the multi-page mirror/primary records may not point the page-load scheduler at them.",
+    "Page-level load for inserted pages may use a post-primary callback layout different from object release events.",
+    "An official two-page project with a page1 load printh probe is needed as the next bit-to-bit oracle."
+  ]
+}
