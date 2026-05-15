@@ -414,6 +414,7 @@ class MultiPagePatchResult:
     object_count: int
     section_offsets: dict[str, int]
     experimental_events: bool = False
+    experimental_event_summary: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         warnings = [
@@ -425,6 +426,14 @@ class MultiPagePatchResult:
             warnings.append(
                 "Page1 experimental events are opt-in; page1 button events are live-proven, while page1 load printh probes are compile/probe-only until the extra-page load scheduler is recovered."
             )
+        event_summary = self.experimental_event_summary or {
+            "page1_page_events": [],
+            "page1_object_events": [],
+        }
+        if event_summary.get("page1_page_events"):
+            warnings.append(
+                "Page1 page-level events are compile-only: bytecode is emitted, but the extra-page load scheduler callback is not recovered."
+            )
         return {
             "mode": "experimental_multi_page_tft_patch",
             "baseline_tft": self.baseline_tft,
@@ -435,6 +444,7 @@ class MultiPagePatchResult:
             "page_count": self.page_count,
             "object_count": self.object_count,
             "experimental_events": self.experimental_events,
+            "experimental_event_summary": event_summary,
             "section_offsets": {
                 key: {"value": value, "hex": f"0x{value:X}"}
                 for key, value in self.section_offsets.items()
@@ -773,6 +783,7 @@ def patch_multi_page_tft(
         object_count=sum(len(page.blocks) for page in pages),
         section_offsets=sections,
         experimental_events=allow_experimental_events,
+        experimental_event_summary=_summarize_multi_page_experimental_events(pages),
     )
 
 
@@ -830,6 +841,77 @@ def _is_supported_page1_page_event_block(block: PageBlock) -> bool:
         and len(lines) == 1
         and is_page1_fixed_printh_probe_event_line(lines[0], byte_count=4)
     )
+
+
+def _summarize_multi_page_experimental_events(pages: list[Any]) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "page1_page_events": [],
+        "page1_object_events": [],
+    }
+    if len(pages) < 2:
+        return summary
+    for block_index, block in enumerate(pages[1].blocks):
+        for prefix, lines in _events_by_prefix(block).items():
+            if not lines:
+                continue
+            item = {
+                "page_index": 1,
+                "block_index": block_index,
+                "objname": block.objname,
+                "type_code": _display_type_code(block.type_code),
+                "event_prefix": prefix,
+                "lines": lines,
+            }
+            if block_index == 0:
+                item.update(
+                    {
+                        "event_family": "page_level",
+                        "runtime_status": "compile_only_scheduler_unrecovered",
+                        "note": (
+                            "The page-load bytecode is present in the TFT, but the extra-page "
+                            "scheduler callback binding has not been recovered; the 2026-05-15 "
+                            "page1_load_printh live probe did not observe the printh payload."
+                        ),
+                    }
+                )
+                summary["page1_page_events"].append(item)
+            else:
+                item.update(
+                    {
+                        "event_family": _classify_page1_object_event_line(lines[0]),
+                        "runtime_status": "live_proven_event_family",
+                        "note": (
+                            "This object event shape is within the page1 button event families "
+                            "that have been live-smoked on the TJC8048X543_011C; each new scene "
+                            "should still be validated with serial readback or camera evidence."
+                        ),
+                    }
+                )
+                summary["page1_object_events"].append(item)
+    return summary
+
+
+def _classify_page1_object_event_line(line: str) -> str:
+    if is_page1_printh_probe_event_line(line):
+        return "printh_probe"
+    if parse_page1_button_click_event_line(line) is not None:
+        return "button_click"
+    if parse_page1_button_vis_event_line(line) is not None:
+        return "vis"
+    if parse_page1_button_tsw_event_line(line) is not None:
+        return "tsw"
+    if parse_page1_button_ref_event_line(line) is not None:
+        return "ref"
+    normalized = line.strip().lower()
+    if EVENT_ASSIGN_RE.match(normalized) is not None:
+        return "numeric_assignment"
+    if EVENT_UNARY_RE.match(normalized) is not None:
+        return "numeric_unary"
+    return "unknown"
+
+
+def _display_type_code(type_code: str) -> str:
+    return type_code if type_code.isprintable() else f"0x{ord(type_code):02X}"
 
 
 def _is_supported_page1_button_event_block(

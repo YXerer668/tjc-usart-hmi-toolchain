@@ -1398,6 +1398,13 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertTrue(Path(manifest["output_tft"]).exists())
             self.assertTrue(manifest["tft_checksum"]["valid"])
             self.assertTrue(manifest["tft_patch"]["experimental_events"])
+            summary = manifest["tft_patch"]["experimental_event_summary"]
+            self.assertEqual(len(summary["page1_page_events"]), 1)
+            self.assertEqual(
+                summary["page1_page_events"][0]["runtime_status"],
+                "compile_only_scheduler_unrecovered",
+            )
+            self.assertEqual(summary["page1_object_events"], [])
             page1 = load_page_file(manifest["target_pages"][1])
             self.assertIn("codesload-1", page1.blocks[0].event_tokens)
             self.assertIn("printh 23 02 50 4C", page1.blocks[0].event_tokens)

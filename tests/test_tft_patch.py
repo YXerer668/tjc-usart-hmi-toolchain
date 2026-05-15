@@ -1092,6 +1092,15 @@ class TftPatchTests(unittest.TestCase):
 
             self.assertTrue(inspect_tft_checksum(out)["valid"])
             self.assertTrue(patch_result.experimental_events)
+            summary = patch_result.to_dict()["experimental_event_summary"]
+            self.assertEqual(summary["page1_page_events"], [])
+            self.assertEqual(
+                [item["event_family"] for item in summary["page1_object_events"]],
+                ["ref", "tsw", "tsw"],
+            )
+            self.assertTrue(
+                all(item["runtime_status"] == "live_proven_event_family" for item in summary["page1_object_events"])
+            )
             compiled_ref = _build_object_event_table(ref_button, context=_build_event_compile_context(page1.blocks))
             compiled_tsw0 = _build_object_event_table(disable_touch, context=_build_event_compile_context(page1.blocks))
             compiled_tsw_all = _build_object_event_table(enable_all, context=_build_event_compile_context(page1.blocks))
@@ -1198,6 +1207,17 @@ class TftPatchTests(unittest.TestCase):
 
             self.assertTrue(inspect_tft_checksum(out)["valid"])
             self.assertTrue(patch_result.experimental_events)
+            summary = patch_result.to_dict()["experimental_event_summary"]
+            self.assertEqual(len(summary["page1_page_events"]), 1)
+            self.assertEqual(summary["page1_page_events"][0]["event_family"], "page_level")
+            self.assertEqual(
+                summary["page1_page_events"][0]["runtime_status"],
+                "compile_only_scheduler_unrecovered",
+            )
+            self.assertEqual(summary["page1_object_events"], [])
+            self.assertTrue(
+                any("compile-only" in warning for warning in patch_result.to_dict()["warnings"])
+            )
             page_compiled = _build_page_event_table(page1.blocks[0])
             self.assertIn(b"\x09\x0f\x0823 02 50 4C", page_compiled)
             self.assertIn(b"\x09\x30\x08", page_compiled)
