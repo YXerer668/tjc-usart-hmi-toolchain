@@ -342,7 +342,10 @@ payloads. Additional local tests cover JPG source entries, transparent PNG
 flattening, non-16-aligned dimensions, and large-image shrink-to-budget behavior.
 Multi-page generation, broad widget coverage, event-code authoring, and broader
 font fixture coverage are still outside the proven V1 path. Event bytecode
-assembly has partial support (`printh`/`page`/`click`/`vis`/`rawhex`), but a live
-page-load probe on `COM36` showed that the panel does not yet schedule the
-compiled event blocks; the missing piece is likely an additional TJC event
-entry/index/flag outside the obvious object-tail byte stream.
+assembly has partial support (`printh`/`page`/`click`/`vis`/`rawhex`): object
+button events are live-proven, including `printh`, `click`, and numeric updates.
+Page-load events are not recovered yet. A 2026-05-15 single-page `page0.load`
+probe and separate page1 callback-slot probes on `COM36` both showed that the
+panel does not yet schedule compiled page-load blocks; the missing piece is
+likely an additional TJC page-event entry/index/flag outside the obvious
+object-tail byte stream.

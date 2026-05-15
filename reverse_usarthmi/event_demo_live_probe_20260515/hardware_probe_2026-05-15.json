@@ -1,0 +1,97 @@
+{
+  "probe": "event_demo_live_probe_20260515",
+  "date": "2026-05-15",
+  "purpose": "Split page-load scheduling from object/button event scheduling using the existing examples/event_demo scene.",
+  "scene": "examples/event_demo/scene.json",
+  "build": {
+    "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+    "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+    "out_dir": "reverse_usarthmi/event_demo_live_probe_20260515",
+    "output_tft_size": 11409476,
+    "checksum_hex": "0x038D048C",
+    "checksum_valid": true,
+    "object_count": 5,
+    "added_objects": ["evtbtn"]
+  },
+  "device": {
+    "port": "COM36",
+    "command_baud": 9600,
+    "download_baud": 921600,
+    "model": "TJC8048X543_011C"
+  },
+  "upload": {
+    "bytes_sent": 11409476,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 211.719,
+    "skipped": false
+  },
+  "serial_probe_after_upload": [
+    {
+      "command": "connect",
+      "hex": "63 6f 6d 6f 6b 20 32 2c 31 30 38 39 2d 30 2c 54 4a 43 38 30 34 38 58 35 34 33 5f 30 31 31 43 2c 32 37 37 2c 31 30 35 30 31 2c 46 43 38 42 33 34 30 31 42 31 41 36 30 38 36 45 2c 31 32 38 39 37 34 38 34 38 2d 30 ff ff ff",
+      "ascii_preview": "comok 2,1089-0,TJC8048X543_011C,277,10501,FC8B3401B1A6086E,128974848-0..."
+    },
+    {
+      "command": "sendme",
+      "hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "get evtbtn.txt",
+      "hex": "70 45 56 45 4e 54 20 54 45 53 54 ff ff ff",
+      "ascii_preview": "pEVENT TEST..."
+    },
+    {
+      "command": "page 0",
+      "hex": "",
+      "expected_page_load_hex": "23 02 50 01",
+      "expected_page_load_seen": false
+    },
+    {
+      "command": "click evtbtn,0",
+      "hex": "23 02 54 45",
+      "expected_button_up_hex": "23 02 54 45",
+      "expected_button_up_seen": true
+    },
+    {
+      "command": "click evtbtn,1",
+      "hex": ""
+    },
+    {
+      "command": "click evtbtn,0",
+      "hex": "23 02 54 45",
+      "expected_button_up_hex": "23 02 54 45",
+      "expected_button_up_seen": true
+    }
+  ],
+  "serial_probe_after_rest": [
+    {
+      "command": "rest",
+      "hex": "00 00 00 ff ff ff 88 ff ff ff",
+      "ascii_preview": "..........",
+      "expected_page_load_hex": "23 02 50 01",
+      "expected_page_load_seen": false
+    },
+    {
+      "command": "connect",
+      "model": "TJC8048X543_011C"
+    },
+    {
+      "command": "sendme",
+      "hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "get evtbtn.txt",
+      "hex": "70 45 56 45 4e 54 20 54 45 53 54 ff ff ff",
+      "ascii_preview": "pEVENT TEST..."
+    },
+    {
+      "command": "click evtbtn,0",
+      "hex": "23 02 54 45",
+      "expected_button_up_hex": "23 02 54 45",
+      "expected_button_up_seen": true
+    }
+  ],
+  "conclusion": "Object/button up event scheduling is live-proven for this single-page build, but page0 load did not fire on explicit page 0 or after rest. The missing page-load scheduler binding is a general page-event gap, not only a page1/multi-page gap.",
+  "next_step": "Use an official GUI page-load oracle or recover the page-event scheduler descriptor; do not keep probing only page1 callback slots."
+}
