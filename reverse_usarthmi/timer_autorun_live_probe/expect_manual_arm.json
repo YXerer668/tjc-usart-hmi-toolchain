@@ -1,0 +1,27 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "steps": [
+    {
+      "label": "stop timer before arm",
+      "command": "tm0.en=0"
+    },
+    {
+      "label": "reset counter",
+      "command": "n0.val=0"
+    },
+    {
+      "label": "arm timer from serial",
+      "command": "tm0.en=1"
+    },
+    {
+      "label": "timer callback increments n0 after arm",
+      "command": "get n0.val",
+      "delay_ms": 1800,
+      "expected_kind": "number",
+      "expected_min": 1,
+      "attempts": 3
+    }
+  ],
+  "restore_page": 0
+}

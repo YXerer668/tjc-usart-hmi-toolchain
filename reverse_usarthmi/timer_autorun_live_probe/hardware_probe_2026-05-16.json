@@ -1,0 +1,54 @@
+{
+  "target": {
+    "port": "COM36",
+    "model": "TJC8048X543_011C",
+    "baud": 9600
+  },
+  "tft": {
+    "path": "reverse_usarthmi/timer_autorun_live_probe/build/output.tft",
+    "file_size": 11412500,
+    "checksum_hex": "0x33896CEE",
+    "checksum_valid": true
+  },
+  "generated_scene": {
+    "page": "page0",
+    "objects": ["title0", "n0", "hint0", "tm0"],
+    "timer": {
+      "object": "tm0",
+      "tim": 400,
+      "en": 1,
+      "event_lines": ["n0.val++"]
+    },
+    "page_load_lines": ["tm0.en=0", "tm0.en=1"]
+  },
+  "live_results": [
+    {
+      "name": "initial timer upload",
+      "out_dir": "reverse_usarthmi/timer_autorun_live_probe/live_20260516_1108_timer_upload",
+      "uploaded": true,
+      "result": "fail",
+      "finding": "Timer did not auto-increment n0 after first upload/page load; n0.val stayed 0."
+    },
+    {
+      "name": "page-load restart timer upload",
+      "out_dir": "reverse_usarthmi/timer_autorun_live_probe/live_20260516_1116_timer_load_restart",
+      "uploaded": true,
+      "result": "fail",
+      "finding": "Adding page0 load commands tm0.en=0 then tm0.en=1 still did not auto-increment n0 after upload/page load."
+    },
+    {
+      "name": "manual serial arm",
+      "out_dir": "reverse_usarthmi/timer_autorun_live_probe/live_20260516_1125_timer_manual_arm",
+      "uploaded": false,
+      "result": "pass",
+      "steps": ["tm0.en=0", "n0.val=0", "tm0.en=1", "delay 1800ms", "get n0.val"],
+      "readback": {
+        "kind": "number",
+        "value": 24,
+        "hex": "71 18 00 00 00 ff ff ff"
+      },
+      "camera": "reverse_usarthmi/timer_autorun_live_probe/live_20260516_1125_timer_manual_arm/camera_after_smoke.jpg"
+    }
+  ],
+  "conclusion": "Timer callback bytecode generation is live-proven after runtime serial arming, but the compiled initial timer scheduler/autorun path is still unresolved."
+}

@@ -34,6 +34,8 @@ class RuntimeStep:
     label: str | None = None
     expected_kind: str | None = None
     expected_value: Any | None = None
+    expected_min: float | int | None = None
+    expected_max: float | int | None = None
     expected_hex: str | None = None
     expected_ascii_preview: str | None = None
     delay_ms: int = 0
@@ -222,6 +224,8 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 "label": item.label,
                 "expected_kind": item.expected_kind,
                 "expected_value": item.expected_value,
+                "expected_min": item.expected_min,
+                "expected_max": item.expected_max,
                 "expected_hex": item.expected_hex,
                 "expected_ascii_preview": item.expected_ascii_preview,
                 "delay_ms": item.delay_ms,
@@ -373,6 +377,8 @@ def _load_runtime_steps(expect_json: str | None) -> list[RuntimeStep]:
                 label=str(entry["label"]) if entry.get("label") is not None else None,
                 expected_kind=str(entry["expected_kind"]) if entry.get("expected_kind") is not None else None,
                 expected_value=expected_value,
+                expected_min=_optional_number(entry.get("expected_min")),
+                expected_max=_optional_number(entry.get("expected_max")),
                 expected_hex=str(entry["expected_hex"]) if entry.get("expected_hex") is not None else None,
                 expected_ascii_preview=(
                     str(entry["expected_ascii_preview"])
@@ -467,6 +473,8 @@ def _run_serial_checks(
                 item.command,
                 expected_kind=item.expected_kind,
                 expected_value=item.expected_value,
+                expected_min=item.expected_min,
+                expected_max=item.expected_max,
                 expected_hex=item.expected_hex,
                 expected_ascii_preview=item.expected_ascii_preview,
                 label=item.label,
@@ -484,6 +492,8 @@ def _transact_check(
     *,
     expected_kind: str | None = None,
     expected_value: Any | None = None,
+    expected_min: float | int | None = None,
+    expected_max: float | int | None = None,
     expected_hex: str | None = None,
     expected_ascii_preview: str | None = None,
     label: str | None = None,
@@ -504,6 +514,14 @@ def _transact_check(
             if expected_value is not None:
                 ok = ok and actual_value == expected_value
                 expectation = f"value == {expected_value!r}"
+            if expected_min is not None:
+                actual_number = _as_number(actual_value)
+                ok = ok and actual_number is not None and actual_number >= expected_min
+                expectation = f"value >= {expected_min!r}"
+            if expected_max is not None:
+                actual_number = _as_number(actual_value)
+                ok = ok and actual_number is not None and actual_number <= expected_max
+                expectation = f"value <= {expected_max!r}"
             if expected_hex is not None:
                 ok = ok and _normalize_hex_text(parsed.get("hex")) == _normalize_hex_text(expected_hex)
                 expectation = f"hex == {expected_hex!r}"
@@ -517,6 +535,8 @@ def _transact_check(
                 "response": parsed,
                 "expected_kind": expected_kind,
                 "expected_value": expected_value,
+                "expected_min": expected_min,
+                "expected_max": expected_max,
                 "expected_hex": expected_hex,
                 "expected_ascii_preview": expected_ascii_preview,
                 "actual_value": actual_value,
@@ -535,6 +555,8 @@ def _transact_check(
                 "error": str(exc),
                 "expected_kind": expected_kind,
                 "expected_value": expected_value,
+                "expected_min": expected_min,
+                "expected_max": expected_max,
                 "expected_hex": expected_hex,
                 "expected_ascii_preview": expected_ascii_preview,
             }
@@ -555,6 +577,38 @@ def _normalize_hex_text(text: Any) -> str | None:
     if text is None:
         return None
     return "".join(str(text).split()).lower()
+
+
+def _optional_number(value: Any) -> float | int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError(f"Expected numeric comparison value, got {value!r}")
+    if isinstance(value, (int, float)):
+        return value
+    text = str(value).strip()
+    if not text:
+        raise ValueError("Expected numeric comparison value, got an empty string")
+    try:
+        return int(text, 0)
+    except ValueError:
+        return float(text)
+
+
+def _as_number(value: Any) -> float | int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return value
+    if value is None:
+        return None
+    try:
+        return int(str(value), 0)
+    except (TypeError, ValueError):
+        try:
+            return float(str(value))
+        except (TypeError, ValueError):
+            return None
 
 
 def _connect_check(config: SerialConfig, *, attempts: int = 3, delay_s: float = 0.5) -> dict[str, Any]:

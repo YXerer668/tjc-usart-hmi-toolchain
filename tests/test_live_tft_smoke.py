@@ -104,6 +104,22 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(steps[0].expected_ascii_preview, "#\u0002P1")
         self.assertEqual(steps[0].attempts, 3)
 
+    def test_load_runtime_steps_parses_numeric_range(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            expect_path = Path(temp_dir) / "expect.json"
+            expect_path.write_text(
+                '{"steps":[{"command":"get n0.val","expected_kind":"number",'
+                '"expected_min":1,"expected_max":"5","attempts":3}]}',
+                encoding="utf-8",
+            )
+            steps = _load_runtime_steps(str(expect_path))
+
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].command, "get n0.val")
+        self.assertEqual(steps[0].expected_min, 1)
+        self.assertEqual(steps[0].expected_max, 5)
+        self.assertEqual(steps[0].attempts, 3)
+
     def test_runtime_expectation_attempts_are_loaded_from_expect_json(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             expect_path = Path(temp_dir) / "expect.json"
@@ -258,6 +274,45 @@ class LiveTftSmokeTests(unittest.TestCase):
 
         self.assertFalse(result["ok"])
         self.assertEqual(result["expected_hex"], "23 02 50 32")
+
+    def test_transact_check_can_match_numeric_range(self) -> None:
+        class FakeTransport:
+            def __init__(self, _config):  # type: ignore[no-untyped-def]
+                pass
+
+            def transact(self, command):  # type: ignore[no-untyped-def]
+                return command.encode("ascii") + b"\xff\xff\xff", bytes.fromhex("71 03 00 00 00 ff ff ff")
+
+        with patch("tools.live_tft_smoke.SerialTransport", FakeTransport):
+            result = _transact_check(
+                object(),
+                "get n0.val",
+                expected_kind="number",
+                expected_min=1,
+                expected_max=10,
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["actual_value"], 3)
+
+    def test_transact_check_fails_on_numeric_range_miss(self) -> None:
+        class FakeTransport:
+            def __init__(self, _config):  # type: ignore[no-untyped-def]
+                pass
+
+            def transact(self, command):  # type: ignore[no-untyped-def]
+                return command.encode("ascii") + b"\xff\xff\xff", bytes.fromhex("71 00 00 00 00 ff ff ff")
+
+        with patch("tools.live_tft_smoke.SerialTransport", FakeTransport):
+            result = _transact_check(
+                object(),
+                "get n0.val",
+                expected_kind="number",
+                expected_min=1,
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["expected_min"], 1)
 
     def test_run_smoke_records_checksum_and_blocks_invalid_upload(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

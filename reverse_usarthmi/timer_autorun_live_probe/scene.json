@@ -1,0 +1,84 @@
+{
+  "project": {
+    "name": "timer-autorun-live-probe",
+    "default_page": "page0",
+    "clean_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "events": {
+        "load": [
+          "tm0.en=0",
+          "tm0.en=1"
+        ]
+      },
+      "widgets": [
+        {
+          "id": "title0",
+          "type": "text",
+          "x": 180,
+          "y": 88,
+          "w": 440,
+          "h": 54,
+          "text": "TIMER EVENT",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 31
+          }
+        },
+        {
+          "id": "n0",
+          "type": "number",
+          "x": 300,
+          "y": 178,
+          "w": 200,
+          "h": 72,
+          "value": 0,
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 63488
+          }
+        },
+        {
+          "id": "hint0",
+          "type": "text",
+          "x": 190,
+          "y": 286,
+          "w": 420,
+          "h": 42,
+          "text": "n0.val++ every 400ms",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0
+          }
+        },
+        {
+          "id": "tm0",
+          "type": "timer",
+          "value": 400,
+          "style": {
+            "enabled": true
+          },
+          "events": {
+            "timer": [
+              "n0.val++"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

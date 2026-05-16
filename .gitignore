@@ -72,6 +72,13 @@ reverse_usarthmi/event_demo_post_primary_probe_20260515/*
 !reverse_usarthmi/event_demo_post_primary_probe_20260515/page_event_oracle_probe_2026-05-15.json
 !reverse_usarthmi/event_demo_post_primary_probe_20260515/live_failure_2026-05-15.json
 !reverse_usarthmi/event_demo_post_primary_probe_20260515/serial_health_after_failure_2026-05-15.json
+!reverse_usarthmi/timer_autorun_live_probe/
+reverse_usarthmi/timer_autorun_live_probe/*
+!reverse_usarthmi/timer_autorun_live_probe/README.md
+!reverse_usarthmi/timer_autorun_live_probe/scene.json
+!reverse_usarthmi/timer_autorun_live_probe/expect.json
+!reverse_usarthmi/timer_autorun_live_probe/expect_manual_arm.json
+!reverse_usarthmi/timer_autorun_live_probe/hardware_probe_2026-05-16.json
 github_refs/
 github_tjc_screen_for_codex/
 
