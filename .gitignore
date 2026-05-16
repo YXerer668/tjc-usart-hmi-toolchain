@@ -79,6 +79,7 @@ reverse_usarthmi/timer_autorun_live_probe/*
 !reverse_usarthmi/timer_autorun_live_probe/expect.json
 !reverse_usarthmi/timer_autorun_live_probe/expect_manual_arm.json
 !reverse_usarthmi/timer_autorun_live_probe/hardware_probe_2026-05-16.json
+!reverse_usarthmi/timer_autorun_live_probe/timer_oracle_matrix_2026-05-16.json
 github_refs/
 github_tjc_screen_for_codex/
 

@@ -27,6 +27,25 @@ This probe captures the current state of timer event compilation on the
   `live_20260516_1125_timer_manual_arm/smoke_result.json`
 - Compact hardware summary:
   `hardware_probe_2026-05-16.json`
+- Timer oracle scan:
+  `timer_oracle_matrix_2026-05-16.json`
+
+## Timer Oracle Matrix
+
+`tools/timer_oracle_matrix.py` scanned `C:\Users\SinYu\Desktop\case_for_codex`
+on 2026-05-16 and found:
+
+- `case_19_timer`: timer object exists, but only `codestimer-0`.
+- `case_32_timer_autorun_witness`: timer object exists, but only
+  `codestimer-0`; despite the folder README, it is not a non-empty timer event
+  oracle.
+- `case_41_sltext\official_wiki\source_raw.HMI`: one real `codestimer-2`
+  timer event, but no sibling compiled TFT oracle is currently present.
+
+So the current blocking evidence gap is a compiled official TFT containing a
+non-empty `codestimer` object event. Without that, the safest live-proven
+workaround remains runtime arming (`tm0.en=1`) from serial or a button/object
+event.
 
 Treat this as: timer event callback generation is live-proven, but the initial
 timer scheduler/autorun path still needs reverse engineering.
