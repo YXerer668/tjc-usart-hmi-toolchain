@@ -73,3 +73,22 @@ This is important because the failed generated `event_demo` already had a page e
 and `event_offset_0x34`, but page-load still did not run live. For media-style official
 projects, page-load can be relocated into the post-primary chunk, so the next fix should
 separate "event bytes exist" from "runtime scheduler has a launch path."
+
+## Scheduler decision matrix
+
+Before burning more page-load candidates, run:
+
+```powershell
+python tools\page_event_scheduler_matrix.py
+```
+
+The matrix combines the batch official-oracle scan with the live page1 callback-slot
+negative probe. It records the complete `case_49_audio` `post_primary_page_event`
+oracle, the partial/unsupported `case_42`/`case_43`/`case_44` oracles, and the
+live-failed page1 slots `0x0C`, `0x10`, and `0x14`.
+
+Treat its `decision.forbidden_actions` as guardrails for automation: do not repeat
+blind page mirror slot writes, do not extrapolate object callback slots to page
+lifecycle scheduling, and do not treat partial oracles as scheduler truth. The next
+useful path is either a complete official two-page/page-load oracle or a byte-for-byte
+post-primary scheduler descriptor diff.
