@@ -111,6 +111,12 @@ Current high-signal diff:
   `4f9ca1251f6da411b4b0d93e00f2dd86613ae0a4fc260bb2b391b8e317cc55fc`.
 - Both sides have zero direct u32 references to table start / first executable,
   so the scheduler is not a simple recovered pointer slot.
+- Both descriptors currently share the same 32-byte descriptor-adjacent tail after
+  the payload. Decoded as little-endian u32 words:
+  `0xD073BAFB, 0x00000008, 0x00000009, 0xD9F18195,
+  0x00000000, 0x00000009, 0xDD309C22, 0x00000004`.
+  Treat this as a scheduler-record candidate until another official oracle proves
+  whether these are hashes, IDs, counts, or flags.
 - The generated force-post-primary probe has live negative evidence: valid
   checksum and upload, but the runtime command parser became unresponsive
   except for `connect`.

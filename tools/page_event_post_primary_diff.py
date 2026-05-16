@@ -149,6 +149,17 @@ def _compare_evidence(left: PostPrimaryEvidence, right: PostPrimaryEvidence) -> 
     right_items = right.post_primary.get("items") or []
     left_payload_hash = _payload_hash(left_descriptor)
     right_payload_hash = _payload_hash(right_descriptor)
+    context_before_common_suffix = _common_suffix_report(
+        (left_descriptor or {}).get("context_before_hex"),
+        (right_descriptor or {}).get("context_before_hex"),
+    )
+    context_after_common_prefix = _common_prefix_report(
+        (left_descriptor or {}).get("context_after_hex"),
+        (right_descriptor or {}).get("context_after_hex"),
+    )
+    context_after_common_prefix_words = _u32_word_entries(
+        context_after_common_prefix.get("hex")
+    )
     return {
         "both_have_descriptor": left_descriptor is not None and right_descriptor is not None,
         "same_payload_sha256": (
@@ -175,14 +186,14 @@ def _compare_evidence(left: PostPrimaryEvidence, right: PostPrimaryEvidence) -> 
             "left": _direct_reference_counts(left_descriptor),
             "right": _direct_reference_counts(right_descriptor),
         },
-        "context_before_common_suffix": _common_suffix_report(
-            (left_descriptor or {}).get("context_before_hex"),
-            (right_descriptor or {}).get("context_before_hex"),
+        "context_before_common_suffix": context_before_common_suffix,
+        "context_before_common_suffix_words": _u32_word_entries(
+            context_before_common_suffix.get("hex")
         ),
-        "context_after_common_prefix": _common_prefix_report(
-            (left_descriptor or {}).get("context_after_hex"),
-            (right_descriptor or {}).get("context_after_hex"),
-        ),
+        "context_after_common_prefix": context_after_common_prefix,
+        "context_after_common_prefix_words": context_after_common_prefix_words,
+        "context_after_common_prefix_word_count": len(context_after_common_prefix_words),
+        "shared_adjacent_context_candidate": context_after_common_prefix["length"] >= 16,
         "diagnosis_paths": {
             "left": left.diagnosis.get("scheduler_path"),
             "right": right.diagnosis.get("scheduler_path"),
@@ -228,6 +239,10 @@ def _decision(
         notes.append("The generated force-post-primary probe has live negative evidence.")
     if right.diagnosis.get("scheduler_path") == "post_primary_page_event":
         notes.append("Matching the post-primary payload location is not enough to prove safe scheduling.")
+    if comparison.get("shared_adjacent_context_candidate"):
+        notes.append(
+            "Both descriptors share a descriptor-adjacent word tail; treat it as a scheduler-record candidate."
+        )
 
     return {
         "safe_to_burn_more_force_post_primary": False,
@@ -307,6 +322,24 @@ def _common_suffix_report(left_hex: str | None, right_hex: str | None) -> dict[s
         length += 1
     suffix = left[len(left) - length :] if length else b""
     return {"length": length, "hex": suffix.hex(" ")}
+
+
+def _u32_word_entries(hex_text: str | None) -> list[dict[str, Any]]:
+    data = _hex_to_bytes(hex_text)
+    entries = []
+    for offset in range(0, len(data) - (len(data) % 4), 4):
+        raw = data[offset : offset + 4]
+        value = int.from_bytes(raw, byteorder="little")
+        entries.append(
+            {
+                "offset": offset,
+                "offset_hex": f"0x{offset:X}",
+                "u32": value,
+                "u32_hex": f"0x{value:08X}",
+                "raw_hex": raw.hex(" "),
+            }
+        )
+    return entries
 
 
 def _hex_to_bytes(text: str | None) -> bytes:

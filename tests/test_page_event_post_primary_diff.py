@@ -76,6 +76,12 @@ class PageEventPostPrimaryDiffUnitTests(unittest.TestCase):
                 diff["right"]["live_outcome"]["conclusion"],
                 "runtime command parser unresponsive except for connect",
             )
+            self.assertEqual(diff["comparison"]["context_after_common_prefix"]["length"], 9)
+            self.assertEqual(diff["comparison"]["context_after_common_prefix_word_count"], 2)
+            self.assertEqual(
+                [word["u32_hex"] for word in diff["comparison"]["context_after_common_prefix_words"]],
+                ["0x00000001", "0x00000002"],
+            )
 
 
 @unittest.skipUnless(
@@ -100,8 +106,20 @@ class PageEventPostPrimaryDiffFixtureTests(unittest.TestCase):
         )
         self.assertEqual(diff["comparison"]["length_delta_right_minus_left"], 5)
         self.assertFalse(diff["comparison"]["same_payload_sha256"])
+        self.assertEqual(diff["comparison"]["context_after_common_prefix"]["length"], 32)
+        self.assertTrue(diff["comparison"]["shared_adjacent_context_candidate"])
+        self.assertEqual(diff["comparison"]["context_after_common_prefix_word_count"], 8)
+        self.assertEqual(
+            diff["comparison"]["context_after_common_prefix_words"][0]["u32_hex"],
+            "0xD073BAFB",
+        )
+        self.assertEqual(
+            diff["comparison"]["context_after_common_prefix_words"][-1]["u32_hex"],
+            "0x00000004",
+        )
         self.assertFalse(diff["decision"]["safe_to_burn_more_force_post_primary"])
         self.assertIn("live negative evidence", " ".join(diff["decision"]["notes"]))
+        self.assertIn("scheduler-record candidate", " ".join(diff["decision"]["notes"]))
 
 
 def _report(
@@ -141,7 +159,7 @@ def _report(
                         "first_executable": [],
                     },
                     "context_before_hex": "00 11 22",
-                    "context_after_hex": "aa bb cc",
+                    "context_after_hex": "01 00 00 00 02 00 00 00 ff",
                 }
             ],
         },
