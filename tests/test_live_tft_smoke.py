@@ -115,6 +115,39 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(expectations[0].expected_kind, "number")
         self.assertEqual(expectations[0].attempts, 4)
 
+    def test_expect_json_config_keys_do_not_become_get_expectations(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            expect_path = Path(temp_dir) / "expect.json"
+            expect_path.write_text(
+                """
+                {
+                  "page_id": 0,
+                  "select_page": 0,
+                  "steps": [{"command": "click ping0,0", "expected_kind": "unknown"}],
+                  "restore_page": 0
+                }
+                """,
+                encoding="utf-8",
+            )
+
+            expectations = _load_expectations(str(expect_path), [])
+            steps = _load_runtime_steps(str(expect_path))
+
+        self.assertEqual(expectations, [])
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0].command, "click ping0,0")
+
+    def test_bare_expect_json_map_still_loads_legacy_expectations(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            expect_path = Path(temp_dir) / "expect.json"
+            expect_path.write_text('{"wav0.en": 1}', encoding="utf-8")
+
+            expectations = _load_expectations(str(expect_path), [])
+
+        self.assertEqual(len(expectations), 1)
+        self.assertEqual(expectations[0].target, "wav0.en")
+        self.assertEqual(expectations[0].expected, 1)
+
     def test_runtime_expectation_attempts_are_passed_to_transact_checks(self) -> None:
         calls: list[tuple[str, str | None, int]] = []
 

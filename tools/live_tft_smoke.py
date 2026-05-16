@@ -38,6 +38,16 @@ class RuntimeStep:
     attempts: int = 1
 
 
+EXPECT_JSON_CONFIG_KEYS = {
+    "expectations",
+    "set_expectations",
+    "steps",
+    "page_id",
+    "select_page",
+    "restore_page",
+}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Upload and/or runtime-smoke a TFT on a live USART HMI screen.")
     parser.add_argument("--file", required=True, help="TFT file to upload when --upload is set.")
@@ -290,7 +300,12 @@ def _load_expectations(expect_json: str | None, inline: list[str]) -> list[Runti
     if expect_json:
         raw = json.loads(Path(expect_json).read_text(encoding="utf-8"))
         if isinstance(raw, dict):
-            items = raw.get("expectations", raw)
+            if "expectations" in raw:
+                items = raw["expectations"]
+            elif EXPECT_JSON_CONFIG_KEYS.intersection(raw):
+                items = []
+            else:
+                items = raw
             if isinstance(items, dict):
                 expectations.extend(RuntimeExpectation(str(key), value) for key, value in items.items())
             elif isinstance(items, list):
