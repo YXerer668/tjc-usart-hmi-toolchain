@@ -18,12 +18,13 @@ class PageEventSchedulerMatrixUnitTests(unittest.TestCase):
             root = Path(temp_dir)
             batch_report = root / "batch.json"
             slot_probe = _write_slot_probe(root / "slot_probe")
+            object_probe = _write_object_event_probe(root / "timer_object_probe.json")
             batch_report.write_text(
                 json.dumps(_batch_report(), ensure_ascii=False),
                 encoding="utf-8",
             )
 
-            matrix = build_scheduler_matrix(batch_report, slot_probe)
+            matrix = build_scheduler_matrix(batch_report, slot_probe, [object_probe])
 
             self.assertEqual(
                 matrix["oracle_summary"]["complete_scheduler_path_counts"],
@@ -78,6 +79,26 @@ class PageEventSchedulerMatrixUnitTests(unittest.TestCase):
                 "post-primary",
                 matrix["decision"]["recommended_next_step"],
             )
+            self.assertTrue(
+                matrix["decision"]["object_event_boundary"]["object_callbacks_proven"]
+            )
+            self.assertEqual(
+                matrix["decision"]["object_event_boundary"]["proven_event_prefixes"],
+                ["codestimer"],
+            )
+            self.assertTrue(
+                matrix["decision"]["object_event_boundary"]["does_not_prove_page_lifecycle"]
+            )
+            self.assertEqual(
+                matrix["object_event_oracles"][0]["event_blocks"][0]["objname"],
+                "tm0",
+            )
+            self.assertEqual(
+                matrix["object_event_oracles"][0]["event_blocks"][0]["event_table_items"][2][
+                    "slot_hex"
+                ],
+                "0x3C",
+            )
 
 
 @unittest.skipUnless(
@@ -107,6 +128,8 @@ class PageEventSchedulerMatrixFixtureTests(unittest.TestCase):
             matrix["decision"]["confidence"],
             "high_for_guardrail_medium_for_scheduler_recovery",
         )
+        self.assertTrue(matrix["decision"]["object_event_boundary"]["object_callbacks_proven"])
+        self.assertIn("codestimer", matrix["decision"]["object_event_boundary"]["proven_event_prefixes"])
         descriptor = matrix["scheduler_paths"]["post_primary_page_event"]["oracles"][0][
             "post_primary_page_event"
         ]["descriptors"][0]
@@ -263,6 +286,67 @@ def _write_slot_probe(root: Path) -> Path:
         encoding="utf-8",
     )
     return hardware_probe
+
+
+def _write_object_event_probe(path: Path) -> Path:
+    path.write_text(
+        json.dumps(
+            {
+                "hmi": r"C:\cases\timer_control.HMI",
+                "tft": r"C:\cases\timer_control.run",
+                "model": "TJC8048X550_011",
+                "editor_version": "tjc-1.67.6",
+                "object_count": 5,
+                "diagnosis": {
+                    "scheduler_path": "object_callbacks_only",
+                    "upload_risk": "low_for_object_events_only",
+                    "recommended_writer_action": "Continue object-event bytecode work.",
+                },
+                "blocks": [
+                    {
+                        "index": 0,
+                        "objname": "page0",
+                        "event_tokens": ["codesload-0"],
+                    },
+                    {
+                        "index": 2,
+                        "objname": "tm0",
+                        "type_code": "3",
+                        "id": 2,
+                        "event_tokens": ["codestimer-1", "n0.val++"],
+                        "event_table_matches": [{"hex": "0x18F"}],
+                        "first_non_empty_item_offset_in_table_hex": "0xD",
+                        "reference_targets": [
+                            {
+                                "name": "first_executable",
+                                "value_hex": "0x19C",
+                                "references": [{"hex": "0x2D3"}, {"hex": "0x14F6"}],
+                            }
+                        ],
+                        "event_table_items": [
+                            {"kind": "empty", "offset_hex": "0x0", "payload_hex": ""},
+                            {
+                                "kind": "marker",
+                                "offset_hex": "0x4",
+                                "payload_hex": "74 69 6d 65 72",
+                                "name": "timer",
+                            },
+                            {
+                                "kind": "property_event",
+                                "offset_hex": "0xD",
+                                "payload_hex": "01 3c 00 00 00 2b 2b",
+                                "slot_hex": "0x3C",
+                                "operation": "++",
+                            },
+                        ],
+                    },
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return path
 
 
 if __name__ == "__main__":

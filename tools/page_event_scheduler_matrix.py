@@ -28,6 +28,13 @@ DEFAULT_BATCH_REPORT = (
     / "batch_page_event_oracles_v2.json"
 )
 
+DEFAULT_OBJECT_EVENT_PROBES = [
+    REPO_ROOT
+    / "reverse_usarthmi"
+    / "timer_autorun_live_probe"
+    / "official_timer_control_oracle_probe_2026-05-16.json",
+]
+
 
 FORBIDDEN_ACTIONS = [
     "blind_write_page_mirror_slots",
@@ -47,6 +54,7 @@ ALLOWED_NEXT_ACTIONS = [
 def build_scheduler_matrix(
     batch_report_path: Path = DEFAULT_BATCH_REPORT,
     slot_probe_path: Path = DEFAULT_HARDWARE_PROBE,
+    object_probe_paths: list[Path] | None = None,
 ) -> dict[str, Any]:
     """Combine page-event oracle evidence and live negative slot probes.
 
@@ -57,6 +65,10 @@ def build_scheduler_matrix(
 
     batch_report = _load_json(batch_report_path)
     slot_probe = summarize_callback_slot_probe(slot_probe_path)
+    resolved_object_probe_paths = (
+        object_probe_paths if object_probe_paths is not None else DEFAULT_OBJECT_EVENT_PROBES
+    )
+    object_event_oracles = _object_event_oracles(resolved_object_probe_paths)
     oracle_items = [_oracle_item(item) for item in batch_report.get("items", [])]
     scheduler_paths = _scheduler_path_matrix(oracle_items)
     blocked_slots = slot_probe["summary"].get("avoid_repeating_blind_slots", [])
@@ -67,9 +79,11 @@ def build_scheduler_matrix(
         "inputs": {
             "batch_report": _relative_path(batch_report_path),
             "slot_probe": _relative_path(slot_probe_path),
+            "object_event_probes": [_relative_path(path) for path in resolved_object_probe_paths],
         },
         "oracle_summary": _oracle_summary(batch_report, oracle_items),
         "scheduler_paths": scheduler_paths,
+        "object_event_oracles": object_event_oracles,
         "page1_load_negative_slot_probe": {
             "source": slot_probe["source"],
             "device": slot_probe.get("device", {}),
@@ -113,6 +127,7 @@ def build_scheduler_matrix(
                 "Recover a complete official minimal page-load oracle or diff the "
                 "case49 post-primary page-event descriptor before another page-load burn."
             ),
+            "object_event_boundary": _object_event_boundary(object_event_oracles),
             "confidence": _decision_confidence(scheduler_paths, blocked_slots),
         },
     }
@@ -164,6 +179,117 @@ def _scheduler_path_matrix(oracle_items: list[dict[str, Any]]) -> dict[str, Any]
             "oracles": items,
         }
     return matrix
+
+
+def _object_event_oracles(paths: list[Path]) -> list[dict[str, Any]]:
+    oracles: list[dict[str, Any]] = []
+    for path in paths:
+        if not path.exists():
+            continue
+        report = _load_json(path)
+        diagnosis = report.get("diagnosis") or {}
+        event_blocks = []
+        for block in report.get("blocks", []):
+            if block.get("index") == 0:
+                continue
+            tokens = [
+                token
+                for token in block.get("event_tokens", [])
+                if _is_non_empty_event_token(token)
+            ]
+            if not tokens:
+                continue
+            event_blocks.append(
+                {
+                    "index": block.get("index"),
+                    "objname": block.get("objname"),
+                    "type_code": block.get("type_code"),
+                    "id": block.get("id"),
+                    "event_tokens": tokens,
+                    "event_table_matches": block.get("event_table_matches", []),
+                    "first_non_empty_item_offset_in_table_hex": block.get(
+                        "first_non_empty_item_offset_in_table_hex"
+                    ),
+                    "reference_targets": _compact_reference_targets(block.get("reference_targets", [])),
+                    "event_table_items": _compact_event_table_items(block.get("event_table_items", [])),
+                }
+            )
+        if not event_blocks:
+            continue
+        oracles.append(
+            {
+                "path": _relative_path(path),
+                "hmi": report.get("hmi"),
+                "tft": report.get("tft"),
+                "model": report.get("model"),
+                "editor_version": report.get("editor_version"),
+                "object_count": report.get("object_count"),
+                "scheduler_path": diagnosis.get("scheduler_path"),
+                "upload_risk": diagnosis.get("upload_risk"),
+                "recommended_writer_action": diagnosis.get("recommended_writer_action"),
+                "event_blocks": event_blocks,
+            }
+        )
+    return oracles
+
+
+def _compact_reference_targets(targets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "name": item.get("name"),
+            "value_hex": item.get("value_hex"),
+            "references": [
+                ref.get("hex")
+                for ref in item.get("references", [])
+                if ref.get("hex") is not None
+            ],
+        }
+        for item in targets
+    ]
+
+
+def _compact_event_table_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    compact = []
+    for item in items:
+        compact_item = {
+            "kind": item.get("kind"),
+            "offset_hex": item.get("offset_hex"),
+            "payload_hex": item.get("payload_hex"),
+        }
+        if "slot_hex" in item:
+            compact_item["slot_hex"] = item.get("slot_hex")
+        if "operation" in item:
+            compact_item["operation"] = item.get("operation")
+        if "name" in item:
+            compact_item["name"] = item.get("name")
+        compact.append(compact_item)
+    return compact
+
+
+def _is_non_empty_event_token(token: str) -> bool:
+    return bool(re.match(r"^codes(?:load|loadend|down|up|unload)-[1-9]\d*", token)) or bool(
+        re.match(r"^codestimer-[1-9]\d*", token)
+    )
+
+
+def _object_event_boundary(object_event_oracles: list[dict[str, Any]]) -> dict[str, Any]:
+    proven_tokens = sorted(
+        {
+            token.split("-", 1)[0]
+            for oracle in object_event_oracles
+            for block in oracle.get("event_blocks", [])
+            for token in block.get("event_tokens", [])
+        }
+    )
+    return {
+        "object_callbacks_proven": bool(object_event_oracles),
+        "proven_event_prefixes": proven_tokens,
+        "does_not_prove_page_lifecycle": True,
+        "reason": (
+            "Official object-event probes can prove click/timer callback binding, "
+            "but page load/unload uses a separate scheduler path until a page-lifecycle oracle matches."
+        ),
+    }
 
 
 def _oracle_item(item: dict[str, Any]) -> dict[str, Any]:

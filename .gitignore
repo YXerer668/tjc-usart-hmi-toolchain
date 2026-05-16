@@ -66,6 +66,7 @@ reverse_usarthmi/fixture_event_scan_20260515/*
 !reverse_usarthmi/fixture_event_scan_20260515/case_for_codex_event_scan_2026-05-15.json
 !reverse_usarthmi/fixture_event_scan_20260515/case42_lcd_test_page_event_probe_2026-05-15.json
 !reverse_usarthmi/fixture_event_scan_20260515/case49_audio_page_event_probe_2026-05-15.json
+!reverse_usarthmi/fixture_event_scan_20260515/page_event_scheduler_matrix_2026-05-16.json
 !reverse_usarthmi/event_demo_post_primary_probe_20260515/
 reverse_usarthmi/event_demo_post_primary_probe_20260515/*
 !reverse_usarthmi/event_demo_post_primary_probe_20260515/README.md
