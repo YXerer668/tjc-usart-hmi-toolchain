@@ -124,6 +124,9 @@ Current high-signal diff:
   0x00000000, 0x00000009, 0xDD309C22, 0x00000004`.
   Treat this as a scheduler-record candidate until another official oracle proves
   whether these are hashes, IDs, counts, or flags.
+- `post_primary_diff_2026-05-16.json` now records this as
+  `comparison.scheduler_record_candidate`, including raw bytes, 8 decoded u32
+  words, coarse role guesses, and the explicit status `candidate_not_decoded`.
 - The generated force-post-primary probe has live negative evidence: valid
   checksum and upload, but the runtime command parser became unresponsive
   except for `connect`.

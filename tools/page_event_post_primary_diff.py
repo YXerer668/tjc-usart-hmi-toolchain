@@ -160,6 +160,12 @@ def _compare_evidence(left: PostPrimaryEvidence, right: PostPrimaryEvidence) -> 
     context_after_common_prefix_words = _u32_word_entries(
         context_after_common_prefix.get("hex")
     )
+    scheduler_record_candidate = _scheduler_record_candidate(
+        left=left,
+        right=right,
+        common_prefix=context_after_common_prefix,
+        words=context_after_common_prefix_words,
+    )
     return {
         "both_have_descriptor": left_descriptor is not None and right_descriptor is not None,
         "same_payload_sha256": (
@@ -194,6 +200,7 @@ def _compare_evidence(left: PostPrimaryEvidence, right: PostPrimaryEvidence) -> 
         "context_after_common_prefix_words": context_after_common_prefix_words,
         "context_after_common_prefix_word_count": len(context_after_common_prefix_words),
         "shared_adjacent_context_candidate": context_after_common_prefix["length"] >= 16,
+        "scheduler_record_candidate": scheduler_record_candidate,
         "diagnosis_paths": {
             "left": left.diagnosis.get("scheduler_path"),
             "right": right.diagnosis.get("scheduler_path"),
@@ -332,14 +339,54 @@ def _u32_word_entries(hex_text: str | None) -> list[dict[str, Any]]:
         value = int.from_bytes(raw, byteorder="little")
         entries.append(
             {
+                "index": offset // 4,
                 "offset": offset,
                 "offset_hex": f"0x{offset:X}",
                 "u32": value,
                 "u32_hex": f"0x{value:08X}",
                 "raw_hex": raw.hex(" "),
+                "role_guess": _u32_role_guess(value),
             }
         )
     return entries
+
+
+def _u32_role_guess(value: int) -> str:
+    if value == 0:
+        return "zero_or_null"
+    if value <= 0xFFFF:
+        return "small_count_id_or_flag"
+    return "hash_magic_or_pointer_candidate"
+
+
+def _scheduler_record_candidate(
+    *,
+    left: PostPrimaryEvidence,
+    right: PostPrimaryEvidence,
+    common_prefix: dict[str, Any],
+    words: list[dict[str, Any]],
+) -> dict[str, Any]:
+    byte_length = int(common_prefix.get("length") or 0)
+    present = byte_length >= 16 and bool(words)
+    return {
+        "present": present,
+        "source": "descriptor_context_after_common_prefix",
+        "anchor": "immediately_after_post_primary_payload",
+        "left_label": left.label,
+        "right_label": right.label,
+        "byte_length": byte_length,
+        "word_count": len(words),
+        "raw_hex": common_prefix.get("hex") or "",
+        "words": words,
+        "status": "candidate_not_decoded" if present else "insufficient_shared_tail",
+        "interpretation": (
+            "The official and generated descriptors share these bytes immediately after the "
+            "post-primary payload. Treat them as a scheduler-record/trailer candidate, not "
+            "as decoded fields, until more official oracles prove the roles."
+            if present
+            else "No long enough shared descriptor-adjacent tail was found."
+        ),
+    }
 
 
 def _hex_to_bytes(text: str | None) -> bytes:

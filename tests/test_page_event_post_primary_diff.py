@@ -82,6 +82,11 @@ class PageEventPostPrimaryDiffUnitTests(unittest.TestCase):
                 [word["u32_hex"] for word in diff["comparison"]["context_after_common_prefix_words"]],
                 ["0x00000001", "0x00000002"],
             )
+            self.assertFalse(diff["comparison"]["scheduler_record_candidate"]["present"])
+            self.assertEqual(
+                diff["comparison"]["scheduler_record_candidate"]["status"],
+                "insufficient_shared_tail",
+            )
 
 
 @unittest.skipUnless(
@@ -117,6 +122,15 @@ class PageEventPostPrimaryDiffFixtureTests(unittest.TestCase):
             diff["comparison"]["context_after_common_prefix_words"][-1]["u32_hex"],
             "0x00000004",
         )
+        candidate = diff["comparison"]["scheduler_record_candidate"]
+        self.assertTrue(candidate["present"])
+        self.assertEqual(candidate["byte_length"], 32)
+        self.assertEqual(candidate["word_count"], 8)
+        self.assertEqual(candidate["status"], "candidate_not_decoded")
+        self.assertEqual(candidate["anchor"], "immediately_after_post_primary_payload")
+        self.assertEqual(candidate["words"][0]["role_guess"], "hash_magic_or_pointer_candidate")
+        self.assertEqual(candidate["words"][4]["role_guess"], "zero_or_null")
+        self.assertEqual(candidate["words"][-1]["role_guess"], "small_count_id_or_flag")
         self.assertFalse(diff["decision"]["safe_to_burn_more_force_post_primary"])
         self.assertIn("live negative evidence", " ".join(diff["decision"]["notes"]))
         self.assertIn("scheduler-record candidate", " ".join(diff["decision"]["notes"]))
