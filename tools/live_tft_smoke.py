@@ -34,6 +34,8 @@ class RuntimeStep:
     label: str | None = None
     expected_kind: str | None = None
     expected_value: Any | None = None
+    expected_hex: str | None = None
+    expected_ascii_preview: str | None = None
     delay_ms: int = 0
     attempts: int = 1
 
@@ -220,6 +222,8 @@ def run_smoke(args: argparse.Namespace) -> dict[str, Any]:
                 "label": item.label,
                 "expected_kind": item.expected_kind,
                 "expected_value": item.expected_value,
+                "expected_hex": item.expected_hex,
+                "expected_ascii_preview": item.expected_ascii_preview,
                 "delay_ms": item.delay_ms,
                 "attempts": item.attempts,
             }
@@ -369,6 +373,12 @@ def _load_runtime_steps(expect_json: str | None) -> list[RuntimeStep]:
                 label=str(entry["label"]) if entry.get("label") is not None else None,
                 expected_kind=str(entry["expected_kind"]) if entry.get("expected_kind") is not None else None,
                 expected_value=expected_value,
+                expected_hex=str(entry["expected_hex"]) if entry.get("expected_hex") is not None else None,
+                expected_ascii_preview=(
+                    str(entry["expected_ascii_preview"])
+                    if entry.get("expected_ascii_preview") is not None
+                    else None
+                ),
                 delay_ms=int(entry.get("delay_ms", 0)),
                 attempts=attempts,
             )
@@ -457,6 +467,8 @@ def _run_serial_checks(
                 item.command,
                 expected_kind=item.expected_kind,
                 expected_value=item.expected_value,
+                expected_hex=item.expected_hex,
+                expected_ascii_preview=item.expected_ascii_preview,
                 label=item.label,
                 attempts=item.attempts,
             )
@@ -472,6 +484,8 @@ def _transact_check(
     *,
     expected_kind: str | None = None,
     expected_value: Any | None = None,
+    expected_hex: str | None = None,
+    expected_ascii_preview: str | None = None,
     label: str | None = None,
     attempts: int = 1,
 ) -> dict[str, Any]:
@@ -490,6 +504,12 @@ def _transact_check(
             if expected_value is not None:
                 ok = ok and actual_value == expected_value
                 expectation = f"value == {expected_value!r}"
+            if expected_hex is not None:
+                ok = ok and _normalize_hex_text(parsed.get("hex")) == _normalize_hex_text(expected_hex)
+                expectation = f"hex == {expected_hex!r}"
+            if expected_ascii_preview is not None:
+                ok = ok and parsed.get("ascii_preview") == expected_ascii_preview
+                expectation = f"ascii_preview == {expected_ascii_preview!r}"
             result = {
                 "label": label or command,
                 "command": command,
@@ -497,6 +517,8 @@ def _transact_check(
                 "response": parsed,
                 "expected_kind": expected_kind,
                 "expected_value": expected_value,
+                "expected_hex": expected_hex,
+                "expected_ascii_preview": expected_ascii_preview,
                 "actual_value": actual_value,
                 "attempt": attempt,
                 "attempts": max(1, attempts),
@@ -513,6 +535,8 @@ def _transact_check(
                 "error": str(exc),
                 "expected_kind": expected_kind,
                 "expected_value": expected_value,
+                "expected_hex": expected_hex,
+                "expected_ascii_preview": expected_ascii_preview,
             }
         if result["ok"]:
             if history:
@@ -525,6 +549,12 @@ def _transact_check(
     assert last is not None
     last["retry_history"] = history[:-1]
     return last
+
+
+def _normalize_hex_text(text: Any) -> str | None:
+    if text is None:
+        return None
+    return "".join(str(text).split()).lower()
 
 
 def _connect_check(config: SerialConfig, *, attempts: int = 3, delay_s: float = 0.5) -> dict[str, Any]:

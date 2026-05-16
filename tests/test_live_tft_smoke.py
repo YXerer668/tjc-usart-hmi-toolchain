@@ -89,14 +89,19 @@ class LiveTftSmokeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             expect_path = Path(temp_dir) / "expect.json"
             expect_path.write_text(
-                '{"steps":[{"command":"get wav0.en","expected_kind":"number","attempts":3}]}',
+                (
+                    '{"steps":[{"command":"click ping0,0","expected_kind":"unknown",'
+                    '"expected_hex":"23 02 50 31","expected_ascii_preview":"#\\u0002P1","attempts":3}]}'
+                ),
                 encoding="utf-8",
             )
 
             steps = _load_runtime_steps(str(expect_path))
 
         self.assertEqual(len(steps), 1)
-        self.assertEqual(steps[0].command, "get wav0.en")
+        self.assertEqual(steps[0].command, "click ping0,0")
+        self.assertEqual(steps[0].expected_hex, "23 02 50 31")
+        self.assertEqual(steps[0].expected_ascii_preview, "#\u0002P1")
         self.assertEqual(steps[0].attempts, 3)
 
     def test_runtime_expectation_attempts_are_loaded_from_expect_json(self) -> None:
@@ -213,6 +218,46 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertEqual(result["attempts"], 3)
         self.assertEqual(result["actual_value"], 1)
         self.assertEqual(len(result["retry_history"]), 1)
+
+    def test_transact_check_can_match_raw_hex_and_ascii_preview(self) -> None:
+        class FakeTransport:
+            def __init__(self, _config):  # type: ignore[no-untyped-def]
+                pass
+
+            def transact(self, command):  # type: ignore[no-untyped-def]
+                return command.encode("ascii") + b"\xff\xff\xff", bytes.fromhex("23 02 50 31")
+
+        with patch("tools.live_tft_smoke.SerialTransport", FakeTransport):
+            result = _transact_check(
+                object(),
+                "click ping0,0",
+                expected_kind="unknown",
+                expected_hex="23 02 50 31",
+                expected_ascii_preview="#\u0002P1",
+            )
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["response"]["hex"], "23 02 50 31")
+        self.assertEqual(result["response"]["ascii_preview"], "#\u0002P1")
+
+    def test_transact_check_fails_on_unexpected_raw_hex(self) -> None:
+        class FakeTransport:
+            def __init__(self, _config):  # type: ignore[no-untyped-def]
+                pass
+
+            def transact(self, command):  # type: ignore[no-untyped-def]
+                return command.encode("ascii") + b"\xff\xff\xff", bytes.fromhex("23 02 50 31")
+
+        with patch("tools.live_tft_smoke.SerialTransport", FakeTransport):
+            result = _transact_check(
+                object(),
+                "click ping0,0",
+                expected_kind="unknown",
+                expected_hex="23 02 50 32",
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["expected_hex"], "23 02 50 32")
 
     def test_run_smoke_records_checksum_and_blocks_invalid_upload(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
