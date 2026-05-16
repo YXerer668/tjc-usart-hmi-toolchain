@@ -107,6 +107,14 @@ class PageEventSchedulerMatrixFixtureTests(unittest.TestCase):
             matrix["decision"]["confidence"],
             "high_for_guardrail_medium_for_scheduler_recovery",
         )
+        descriptor = matrix["scheduler_paths"]["post_primary_page_event"]["oracles"][0][
+            "post_primary_page_event"
+        ]["descriptors"][0]
+        self.assertEqual(descriptor["offset_hex"], "0x8DA")
+        self.assertEqual(
+            descriptor["payload_sha256"],
+            "351515b69f4905ccc4f36d371113f8a7093031530c7ed0a25e485bbcdbb45cbc",
+        )
 
 
 def _batch_report() -> dict[str, object]:

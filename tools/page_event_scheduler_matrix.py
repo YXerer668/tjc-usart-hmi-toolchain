@@ -18,6 +18,7 @@ from tools.page_event_callback_slot_status import (  # noqa: E402
     DEFAULT_HARDWARE_PROBE,
     summarize_callback_slot_probe,
 )
+from tools.page_event_oracle_probe import probe_hmi_tft  # noqa: E402
 
 
 DEFAULT_BATCH_REPORT = (
@@ -171,7 +172,7 @@ def _oracle_item(item: dict[str, Any]) -> dict[str, Any]:
     candidate = best_probe.get("candidate") or {}
     compile_context = best_probe.get("compile_context") or {}
     page_event_error = best_probe.get("page_event_table_error")
-    post_primary = best_probe.get("post_primary_page_event") or {}
+    post_primary = _post_primary_summary(item, best_probe, candidate)
     return {
         "case_id": _case_id(item.get("hmi", "")),
         "hmi": item.get("hmi"),
@@ -220,6 +221,34 @@ def _oracle_quality(best_probe: dict[str, Any], page_event_error: str | None) ->
     if best_probe.get("ok"):
         return "partial"
     return "failed_probe"
+
+
+def _post_primary_summary(
+    item: dict[str, Any],
+    best_probe: dict[str, Any],
+    candidate: dict[str, Any],
+) -> dict[str, Any]:
+    summary = best_probe.get("post_primary_page_event") or {}
+    if summary.get("descriptors"):
+        return summary
+    if (best_probe.get("diagnosis") or {}).get("scheduler_path") != "post_primary_page_event":
+        return summary
+
+    hmi_path = Path(str(item.get("hmi", "")))
+    tft_path = Path(str(candidate.get("path", "")))
+    if not hmi_path.exists() or not tft_path.exists():
+        return {
+            **summary,
+            "descriptor_reprobe_error": "oracle files are not available",
+        }
+    try:
+        reprobe = probe_hmi_tft(hmi_path, tft_path)
+    except Exception as exc:  # pragma: no cover - only for stale local fixture failure reports.
+        return {
+            **summary,
+            "descriptor_reprobe_error": str(exc),
+        }
+    return reprobe.get("post_primary_page_event", summary)
 
 
 def _source_type(reason: str) -> str:
