@@ -29,6 +29,10 @@ This probe captures the current state of timer event compilation on the
   `hardware_probe_2026-05-16.json`
 - Timer oracle scan:
   `timer_oracle_matrix_2026-05-16.json`
+- Official timer sample scan:
+  `official_timer_samples_matrix_2026-05-16.json`
+- Official timer object-event probe:
+  `official_timer_control_oracle_probe_2026-05-16.json`
 
 ## Timer Oracle Matrix
 
@@ -42,10 +46,35 @@ on 2026-05-16 and found:
 - `case_41_sltext\official_wiki\source_raw.HMI`: one real `codestimer-2`
   timer event, but no sibling compiled TFT oracle is currently present.
 
-So the current blocking evidence gap is a compiled official TFT containing a
-non-empty `codestimer` object event. Without that, the safest live-proven
-workaround remains runtime arming (`tm0.en=1`) from serial or a button/object
-event.
+The scan deliberately does not treat unrelated `lcd_test.run` files as compiled
+oracles for `official_wiki/source_raw.HMI`; that would create false-positive
+object-event evidence.
+
+## Official Timer Control Oracle
+
+`reverse_usarthmi/official_timer_samples/timer_control.HMI` is the current
+compiled official non-empty timer oracle:
+
+- HMI: `reverse_usarthmi/official_timer_samples/timer_control.HMI`
+- TFT/run: `reverse_usarthmi/official_timer_samples/official_compile_output/timer_control.run`
+- Model: `TJC8048X550_011`
+- Size: `1,185,424` bytes
+- Checksum: `0xDBD4FC41`
+- Timer: `tm0`, `codestimer-1`, line `n0.val++`
+
+`official_timer_control_oracle_probe_2026-05-16.json` shows:
+
+- `tm0` event table relative offset: `0x18F`
+- First executable timer payload offset: `0x19C`
+- Event table start referenced at `0x1516`
+- First executable referenced at `0x2D3` and `0x14F6`
+- Property event payload: `01 3c 00 00 00 2b 2b`
+- Property slot: `0x3C`
+- Operation: `++`
+
+This fixture proves official object timer callback binding for a non-empty
+`codestimer` event. It still does not prove page-load or timer autorun scheduler
+binding.
 
 Treat this as: timer event callback generation is live-proven, but the initial
 timer scheduler/autorun path still needs reverse engineering.

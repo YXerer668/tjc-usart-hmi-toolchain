@@ -104,15 +104,71 @@ def _timer_block_summary(block: PABlockSummary) -> dict[str, Any] | None:
 
 
 def _sibling_tft(path: Path) -> str | None:
-    for suffix in (".tft", ".TFT"):
-        candidate = path.with_suffix(suffix)
-        if candidate.exists():
-            return str(candidate)
-    for name in ("lcd_test.tft", "lcd_test.TFT", "source_raw.tft", "source_raw.TFT"):
-        candidate = path.parent / name
+    stem = path.stem
+    candidates = [
+        path.with_suffix(".tft"),
+        path.with_suffix(".TFT"),
+        path.with_suffix(".run"),
+    ]
+    if stem.lower() in {"lcd_test", "source_raw"}:
+        candidates.extend(
+            [
+                path.parent / f"{stem}.tft",
+                path.parent / f"{stem}.TFT",
+                path.parent / f"{stem}.run",
+            ]
+        )
+    for root in _candidate_case_roots(path):
+        candidates.extend(_official_output_candidates(root, stem, _allow_generic_lcd_test(path)))
+    seen: set[Path] = set()
+    for candidate in candidates:
+        if candidate in seen:
+            continue
+        seen.add(candidate)
         if candidate.exists():
             return str(candidate)
     return None
+
+
+def _candidate_case_roots(path: Path) -> list[Path]:
+    roots = [path.parent]
+    if path.parent.name.lower() in {"official_wiki", "extract"}:
+        roots.append(path.parent.parent)
+    return roots
+
+
+def _official_output_candidates(root: Path, stem: str, allow_generic_lcd_test: bool) -> list[Path]:
+    candidates: list[Path] = []
+    names = [stem]
+    if stem.lower() == "source_raw":
+        names.append("source_raw")
+    if allow_generic_lcd_test and stem.lower() != "lcd_test":
+        names.append("lcd_test")
+    for folder in (
+        "official_compile_output",
+        "official_compile_capture",
+        "official_compile",
+        "official_gui_probe",
+        "official_gui_model_recheck",
+    ):
+        for name in dict.fromkeys(names):
+            candidates.extend(
+                [
+                    root / folder / f"{name}.run",
+                    root / folder / f"{name}.tft",
+                    root / folder / f"{name}.TFT",
+                ]
+            )
+    return candidates
+
+
+def _allow_generic_lcd_test(path: Path) -> bool:
+    # official_wiki/*.HMI and extract/main.HMI can coexist with a separate
+    # lcd_test.HMI probe in the case root; matching that generic output would
+    # create a false oracle for the source fixture.
+    if path.parent.name.lower() in {"official_wiki", "extract"} and path.stem.lower() != "lcd_test":
+        return False
+    return True
 
 
 def _summary(reports: list[dict[str, Any]]) -> dict[str, Any]:

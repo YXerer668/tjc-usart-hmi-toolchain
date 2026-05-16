@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tools.timer_oracle_matrix import _sibling_tft, _summary
+from tools.timer_oracle_matrix import _candidate_case_roots, _sibling_tft, _summary
 
 
 class TimerOracleMatrixTests(unittest.TestCase):
@@ -55,6 +55,64 @@ class TimerOracleMatrixTests(unittest.TestCase):
             tft.write_bytes(b"dummy")
 
             self.assertEqual(_sibling_tft(hmi), str(tft))
+
+    def test_sibling_tft_finds_official_compile_output_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            hmi = root / "timer_control.HMI"
+            run = root / "official_compile_output" / "timer_control.run"
+            hmi.write_bytes(b"dummy")
+            run.parent.mkdir()
+            run.write_bytes(b"dummy")
+
+            self.assertEqual(_sibling_tft(hmi), str(run))
+
+    def test_official_wiki_path_uses_parent_case_root(self) -> None:
+        path = Path(r"C:\cases\case_41_sltext\official_wiki\source_raw.HMI")
+
+        self.assertEqual(
+            _candidate_case_roots(path),
+            [
+                Path(r"C:\cases\case_41_sltext\official_wiki"),
+                Path(r"C:\cases\case_41_sltext"),
+            ],
+        )
+
+    def test_official_wiki_source_raw_does_not_match_unrelated_lcd_test_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_41_sltext"
+            hmi = root / "official_wiki" / "source_raw.HMI"
+            run = root / "official_gui_probe" / "lcd_test.run"
+            hmi.parent.mkdir(parents=True)
+            run.parent.mkdir(parents=True)
+            hmi.write_bytes(b"dummy")
+            run.write_bytes(b"dummy")
+
+            self.assertIsNone(_sibling_tft(hmi))
+
+    def test_official_wiki_named_fixture_does_not_match_unrelated_lcd_test_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_37_combobox"
+            hmi = root / "official_wiki" / "combobox_demo.HMI"
+            run = root / "official_gui_probe" / "lcd_test.run"
+            hmi.parent.mkdir(parents=True)
+            run.parent.mkdir(parents=True)
+            hmi.write_bytes(b"dummy")
+            run.write_bytes(b"dummy")
+
+            self.assertIsNone(_sibling_tft(hmi))
+
+    def test_official_wiki_source_raw_matches_same_stem_official_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_41_sltext"
+            hmi = root / "official_wiki" / "source_raw.HMI"
+            run = root / "official_compile" / "source_raw.run"
+            hmi.parent.mkdir(parents=True)
+            run.parent.mkdir(parents=True)
+            hmi.write_bytes(b"dummy")
+            run.write_bytes(b"dummy")
+
+            self.assertEqual(_sibling_tft(hmi), str(run))
 
 
 if __name__ == "__main__":
