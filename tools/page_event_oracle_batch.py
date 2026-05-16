@@ -77,23 +77,35 @@ def build_batch_report(
 def _tft_candidates_for_hmi(hmi_path: Path) -> list[dict[str, Any]]:
     case_root = _case_root_for_path(hmi_path)
     stem = hmi_path.stem
+    stem_lower = stem.lower()
     raw_candidates: list[tuple[str, Path]] = [
         ("same_dir_same_stem_tft", hmi_path.with_suffix(".tft")),
         ("same_dir_same_stem_TFT", hmi_path.with_suffix(".TFT")),
         ("same_dir_same_stem_run", hmi_path.with_suffix(".run")),
-        ("same_dir_source_raw_tft", hmi_path.parent / "source_raw.tft"),
-        ("same_dir_source_raw_run", hmi_path.parent / "source_raw.run"),
     ]
+    if stem_lower == "source_raw":
+        raw_candidates.extend(
+            [
+                ("same_dir_source_raw_tft", hmi_path.parent / "source_raw.tft"),
+                ("same_dir_source_raw_run", hmi_path.parent / "source_raw.run"),
+            ]
+        )
     if case_root is not None:
         raw_candidates.extend(
             [
                 ("official_compile_same_stem_run", case_root / "official_compile" / f"{stem}.run"),
                 ("official_compile_same_stem_tft", case_root / "official_compile" / f"{stem}.tft"),
-                ("official_compile_source_raw_run", case_root / "official_compile" / "source_raw.run"),
-                ("official_compile_source_raw_tft", case_root / "official_compile" / "source_raw.tft"),
-                ("case_root_lcd_test_tft", case_root / "lcd_test.tft"),
             ]
         )
+        if stem_lower == "source_raw":
+            raw_candidates.extend(
+                [
+                    ("official_compile_source_raw_run", case_root / "official_compile" / "source_raw.run"),
+                    ("official_compile_source_raw_tft", case_root / "official_compile" / "source_raw.tft"),
+                ]
+            )
+        if _allow_case_root_lcd_test(hmi_path):
+            raw_candidates.append(("case_root_lcd_test_tft", case_root / "lcd_test.tft"))
 
     seen: set[Path] = set()
     candidates: list[dict[str, Any]] = []
@@ -118,6 +130,12 @@ def _case_root_for_path(path: Path) -> Path | None:
         if parent.name.startswith("case_"):
             return parent
     return None
+
+
+def _allow_case_root_lcd_test(path: Path) -> bool:
+    if path.parent.name.lower() in {"official_wiki", "extract"} and path.stem.lower() != "lcd_test":
+        return False
+    return True
 
 
 def _candidate_confidence(reason: str) -> str:

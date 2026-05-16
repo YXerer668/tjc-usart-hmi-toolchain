@@ -90,6 +90,13 @@ negative probe. It records the complete `case_49_audio` `post_primary_page_event
 oracle, the partial/unsupported `case_42`/`case_43`/`case_44` oracles, and the
 live-failed page1 slots `0x0C`, `0x10`, and `0x14`.
 
+The 2026-05-16 candidate matcher tightened this further: `official_wiki/*.HMI`
+and `extract/main.HMI` are no longer allowed to fall back to unrelated
+case-root `lcd_test.tft`/`source_raw.run` files. In the current committed matrix,
+`case_42`/`case_43`/`case_44` are therefore `no_probe` until a same-stem official
+compile output is available, rather than being treated as low-confidence seed
+oracles.
+
 The 2026-05-16 matrix also imports the official object-event oracle from
 `timer_autorun_live_probe/official_timer_control_oracle_probe_2026-05-16.json`.
 That oracle proves object-level callback binding for `codesdown` and

@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 from tools.page_event_oracle_batch import (
+    _allow_case_root_lcd_test,
     _best_probe,
     _tft_candidates_for_hmi,
     build_batch_report,
@@ -35,9 +36,62 @@ class PageEventOracleBatchUnitTests(unittest.TestCase):
                 [(item["reason"], item["confidence"]) for item in candidates],
                 [
                     ("official_compile_same_stem_run", "high"),
-                    ("case_root_lcd_test_tft", "low"),
                 ],
             )
+
+    def test_official_wiki_source_raw_without_same_stem_output_does_not_use_lcd_test(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_41_sltext"
+            hmi = root / "official_wiki" / "source_raw.HMI"
+            hmi.parent.mkdir(parents=True)
+            hmi.write_bytes(b"hmi")
+            lcd_test = root / "lcd_test.tft"
+            lcd_test.write_bytes(b"wrong oracle")
+
+            candidates = _tft_candidates_for_hmi(hmi)
+
+            self.assertEqual(candidates, [])
+
+    def test_official_wiki_named_fixture_does_not_use_source_raw_or_lcd_test(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_37_combobox"
+            hmi = root / "official_wiki" / "combobox_demo.HMI"
+            hmi.parent.mkdir(parents=True)
+            hmi.write_bytes(b"hmi")
+            official_source_raw = root / "official_compile" / "source_raw.run"
+            official_source_raw.parent.mkdir()
+            official_source_raw.write_bytes(b"wrong oracle")
+            lcd_test = root / "lcd_test.tft"
+            lcd_test.write_bytes(b"wrong oracle")
+
+            candidates = _tft_candidates_for_hmi(hmi)
+
+            self.assertEqual(candidates, [])
+
+    def test_root_lcd_test_fixture_still_accepts_case_root_lcd_test_tft(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "case_01_text"
+            hmi = root / "lcd_test.HMI"
+            hmi.parent.mkdir(parents=True)
+            hmi.write_bytes(b"hmi")
+            tft = root / "lcd_test.tft"
+            tft.write_bytes(b"tft")
+
+            candidates = _tft_candidates_for_hmi(hmi)
+
+            self.assertEqual(
+                [(item["reason"], "lcd_test.tft" in str(item["path"])) for item in candidates],
+                [("same_dir_same_stem_tft", True)],
+            )
+
+    def test_case_root_lcd_test_guardrail(self) -> None:
+        self.assertFalse(
+            _allow_case_root_lcd_test(Path(r"C:\cases\case_41\official_wiki\source_raw.HMI"))
+        )
+        self.assertFalse(
+            _allow_case_root_lcd_test(Path(r"C:\cases\case_41\official_wiki\demo.HMI"))
+        )
+        self.assertTrue(_allow_case_root_lcd_test(Path(r"C:\cases\case_01\lcd_test.HMI")))
 
     def test_best_probe_ranks_complete_probe_before_confidence(self) -> None:
         probes = [
