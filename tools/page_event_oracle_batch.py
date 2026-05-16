@@ -159,6 +159,7 @@ def _probe_summary(candidate: dict[str, Any], report: dict[str, Any]) -> dict[st
             "length": report["post_primary_page_event"]["length"],
             "error": report["post_primary_page_event"]["error"],
             "matches": report["post_primary_page_event"]["matches"],
+            "descriptors": report["post_primary_page_event"].get("descriptors", []),
         },
         "diagnosis": diagnosis,
     }

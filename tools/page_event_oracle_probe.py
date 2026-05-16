@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -123,6 +124,11 @@ def probe_hmi_tft(
             "hex_prefix": post_primary_page_event[:64].hex(" "),
             "items": decode_event_table(post_primary_page_event),
             "matches": [_offset_item(value) for value in post_primary_matches],
+            "descriptors": _post_primary_descriptors(
+                object_region,
+                post_primary_page_event,
+                post_primary_matches,
+            ),
             "reference_targets": [
                 {
                     "name": "post_primary_page_event_start",
@@ -260,6 +266,53 @@ def _slot_target_matches(value: int, targets: list[dict[str, Any]]) -> list[dict
             }
         )
     return matches
+
+
+def _post_primary_descriptors(
+    region: bytes,
+    event_table: bytes,
+    matches: list[int],
+) -> list[dict[str, Any]]:
+    descriptors = []
+    first_executable = _first_executable_offset(event_table)
+    payload_hash = hashlib.sha256(event_table).hexdigest() if event_table else None
+    for offset in matches:
+        end = offset + len(event_table)
+        first_executable_abs = (
+            offset + first_executable if first_executable is not None else None
+        )
+        descriptors.append(
+            {
+                "offset": offset,
+                "offset_hex": f"0x{offset:X}",
+                "end": end,
+                "end_hex": f"0x{end:X}",
+                "length": len(event_table),
+                "payload_sha256": payload_hash,
+                "item_count": len(decode_event_table(event_table)),
+                "first_executable_offset": first_executable,
+                "first_executable_offset_hex": (
+                    f"0x{first_executable:X}" if first_executable is not None else None
+                ),
+                "first_executable_absolute": first_executable_abs,
+                "first_executable_absolute_hex": (
+                    f"0x{first_executable_abs:X}"
+                    if first_executable_abs is not None
+                    else None
+                ),
+                "references": {
+                    "table_start": [_offset_item(value) for value in _all_u32_references(region, offset)],
+                    "first_executable": (
+                        [_offset_item(value) for value in _all_u32_references(region, first_executable_abs)]
+                        if first_executable_abs is not None
+                        else []
+                    ),
+                },
+                "context_before_hex": region[max(0, offset - 32) : offset].hex(" "),
+                "context_after_hex": region[end : min(len(region), end + 32)].hex(" "),
+            }
+        )
+    return descriptors
 
 
 def _first_executable_offset(event_table: bytes) -> int | None:

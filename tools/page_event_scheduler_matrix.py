@@ -171,6 +171,7 @@ def _oracle_item(item: dict[str, Any]) -> dict[str, Any]:
     candidate = best_probe.get("candidate") or {}
     compile_context = best_probe.get("compile_context") or {}
     page_event_error = best_probe.get("page_event_table_error")
+    post_primary = best_probe.get("post_primary_page_event") or {}
     return {
         "case_id": _case_id(item.get("hmi", "")),
         "hmi": item.get("hmi"),
@@ -185,6 +186,11 @@ def _oracle_item(item: dict[str, Any]) -> dict[str, Any]:
         "page_event_count": item.get("page_event_count"),
         "object_event_count": item.get("object_event_count"),
         "event_name_counts": item.get("event_name_counts", {}),
+        "post_primary_page_event": {
+            "length": post_primary.get("length"),
+            "matches": post_primary.get("matches", []),
+            "descriptors": post_primary.get("descriptors", []),
+        },
         "candidate": {
             "path": candidate.get("path"),
             "reason": candidate.get("reason"),

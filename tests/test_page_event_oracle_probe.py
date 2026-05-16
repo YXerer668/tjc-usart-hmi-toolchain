@@ -78,6 +78,13 @@ class PageEventOracleOfficialFixtureTests(unittest.TestCase):
         self.assertTrue(diagnosis["post_primary_page_event_found"])
         self.assertEqual(diagnosis["scheduler_path"], "post_primary_page_event")
         self.assertEqual(report["post_primary_page_event"]["matches"][0]["hex"], "0x8DA")
+        descriptor = report["post_primary_page_event"]["descriptors"][0]
+        self.assertEqual(descriptor["offset_hex"], "0x8DA")
+        self.assertEqual(descriptor["length"], report["post_primary_page_event"]["length"])
+        self.assertEqual(descriptor["first_executable_offset_hex"], "0x0")
+        self.assertEqual(len(descriptor["payload_sha256"]), 64)
+        self.assertTrue(descriptor["context_before_hex"])
+        self.assertTrue(descriptor["context_after_hex"])
 
     def test_unsupported_datarecord_fixture_fails_soft(self) -> None:
         if not (CASE42_PAGE_EVENT_HMI.exists() and CASE42_ROOT_TFT.exists()):

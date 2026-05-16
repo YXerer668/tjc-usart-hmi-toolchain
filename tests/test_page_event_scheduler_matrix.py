@@ -42,6 +42,12 @@ class PageEventSchedulerMatrixUnitTests(unittest.TestCase):
                 "case_49_audio",
             )
             self.assertEqual(
+                matrix["scheduler_paths"]["post_primary_page_event"]["oracles"][0][
+                    "post_primary_page_event"
+                ]["descriptors"][0]["offset_hex"],
+                "0x8DA",
+            )
+            self.assertEqual(
                 matrix["scheduler_paths"]["unbound_or_empty"]["oracle_quality_counts"],
                 {"unsupported_command": 1},
             )
@@ -151,6 +157,17 @@ def _batch_report() -> dict[str, object]:
                         "scheduler_path": "post_primary_page_event",
                         "upload_risk": "research_only",
                         "recommended_writer_action": "Keep page-load generation fixture-gated.",
+                    },
+                    "post_primary_page_event": {
+                        "length": 32,
+                        "matches": [{"value": 2266, "hex": "0x8DA"}],
+                        "descriptors": [
+                            {
+                                "offset_hex": "0x8DA",
+                                "length": 32,
+                                "payload_sha256": "abc",
+                            }
+                        ],
                     },
                 },
             },

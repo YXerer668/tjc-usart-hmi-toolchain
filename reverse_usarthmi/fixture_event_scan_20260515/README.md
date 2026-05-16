@@ -63,6 +63,9 @@ Evidence:
   - Official audio sample has non-empty `codesload-1`.
   - The normal page event table does not contain the page-load payload.
   - A 32-byte post-primary page event chunk matches the official TFT at relative object-region offset `0x8DA`.
+  - Current descriptor fingerprint:
+    `offset=0x8DA`, `end=0x8FA`, `len=32`,
+    `sha256=351515b69f4905ccc4f36d371113f8a7093031530c7ed0a25e485bbcdbb45cbc`.
   - Classified as `scheduler_path=post_primary_page_event`, `upload_risk=research_only`.
 - `event_demo_live_probe_20260515\page_event_oracle_probe_2026-05-15.json`
   - Generated page-load bytecode is present in the normal page table.

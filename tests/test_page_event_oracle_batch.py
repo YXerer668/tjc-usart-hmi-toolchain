@@ -90,6 +90,13 @@ class PageEventOracleBatchFixtureTests(unittest.TestCase):
             item["best_probe"]["diagnosis"]["scheduler_path"],
             "post_primary_page_event",
         )
+        descriptor = item["best_probe"]["post_primary_page_event"]["descriptors"][0]
+        self.assertEqual(descriptor["offset_hex"], "0x8DA")
+        self.assertEqual(descriptor["length"], 32)
+        self.assertEqual(
+            descriptor["payload_sha256"],
+            "351515b69f4905ccc4f36d371113f8a7093031530c7ed0a25e485bbcdbb45cbc",
+        )
 
 
 if __name__ == "__main__":
