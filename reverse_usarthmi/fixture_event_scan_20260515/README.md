@@ -95,3 +95,22 @@ blind page mirror slot writes, do not extrapolate object callback slots to page
 lifecycle scheduling, and do not treat partial oracles as scheduler truth. The next
 useful path is either a complete official two-page/page-load oracle or a byte-for-byte
 post-primary scheduler descriptor diff.
+
+To compare the current official post-primary oracle against the known unsafe
+generated force-post-primary probe, run:
+
+```powershell
+python tools\page_event_post_primary_diff.py
+```
+
+Current high-signal diff:
+
+- Official `case49_audio`: `offset=0x8DA`, `len=32`, payload hash
+  `351515b69f4905ccc4f36d371113f8a7093031530c7ed0a25e485bbcdbb45cbc`.
+- Generated force-post-primary probe: `offset=0x3C5`, `len=37`, payload hash
+  `4f9ca1251f6da411b4b0d93e00f2dd86613ae0a4fc260bb2b391b8e317cc55fc`.
+- Both sides have zero direct u32 references to table start / first executable,
+  so the scheduler is not a simple recovered pointer slot.
+- The generated force-post-primary probe has live negative evidence: valid
+  checksum and upload, but the runtime command parser became unresponsive
+  except for `connect`.
