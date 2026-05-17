@@ -38,8 +38,10 @@ Stable enough for local use:
 - Scene JSON/YAML validation, layout solving, and PNG preview.
 - Appended page0 TFT generation for the current 800x480 seed project.
 - Text, button, number, image, picture resources, two-state image buttons,
-  custom `.zi` fonts, xfloat, combobox, external-picture, and several basic
-  controls covered by fixtures/tests.
+  custom `.zi` fonts, xfloat, combobox, external-picture, and the current-target
+  supported widget set covered by fixtures/tests. The all-supported-controls
+  offline boundary is audited in
+  `examples/all_supported_controls_completion_audit_2026-05-17.json`.
 
 Experimental but useful:
 
@@ -54,10 +56,10 @@ Experimental but useful:
   working after a full serial upload.
 - Event bytecode assembly/inspection for a small set of commands. Page0
   button `ref obj` is live-proven from scene DSL through TFT upload and
-  camera-verified redraw after a red `fill` overlay. Page0 `tsw obj,0`
-  is live-proven with a raw opcode matrix: only opcode `09` accepted the
-  `target0,0` payload, and a physical tap on the disabled target left
-  `numval.val` at `0`. Page1
+  camera-verified redraw after a red `fill` overlay. Page0 `tsw obj,0/1`
+  compiles and dispatches in the narrow tested path, but serial `click` is not
+  suppressed by `tsw targetbtn,0`; physical-touch lockout proof is tracked
+  separately from the serial-click negative result. Page1
   normal-button events are live-proven for `page 1`, explicit-hex `printh`,
   one-level same-page `click` cascades, and numeric field `++` / `=` / `--`
   operations, plus same-page `vis obj,0/1` show/hide operations. The
@@ -426,11 +428,14 @@ objects and two-state image buttons, with current PLAY fixtures matching
 official TFT outputs byte-for-byte and matching HMI `*.i` / `*.is` resource
 payloads. Additional local tests cover JPG source entries, transparent PNG
 flattening, non-16-aligned dimensions, and large-image shrink-to-budget behavior.
-Multi-page generation, broad widget coverage, event-code authoring, and broader
-font fixture coverage are still outside the proven V1 path. A minimal page0
-full-page rebuild is live-proven for the number demo only: `drop_seed_objects`
-removed seed `t0/b0/p0`, rebuilt `page0/title/incbtn/numval`, and preserved the
-button event through full COM36 upload, serial readback, and camera proof. The
+Multi-page generation, every-widget live behavior coverage, event-code
+authoring, and broader font fixture coverage are still outside the proven V1
+path. The current-target supported widget writer/offline rebuild boundary is
+audited in `examples/all_supported_controls_completion_audit_2026-05-17.json`.
+A minimal page0 full-page rebuild is live-proven for the number demo only:
+`drop_seed_objects` removed seed `t0/b0/p0`, rebuilt
+`page0/title/incbtn/numval`, and preserved the button event through full COM36
+upload, serial readback, and camera proof. The
 accepted visual proof uses `UiCNEN32GBFull.zi` plus `numval.lenth=3`; an earlier
 UTF-8 sparse font build was serial-good but rendered wrong glyphs. A follow-up
 offline reorder fixture, `examples/number_demo/reorder_broadening_scene.json`,
@@ -439,10 +444,11 @@ button before its later `numval` target. `examples/number_demo/event_matrix_scen
 adds offline same-page event-preservation coverage for clean rebuilt `ref`,
 `vis`, `tsw`, and numeric `++` button events. Event bytecode
 assembly has partial support (`printh`/`page`/`click`/`ref`/`vis`/`tsw`/`rawhex`):
-object button events are live-proven, including `printh`, `click`, `ref`, `tsw`,
-and numeric updates. The `examples/number_demo` hardware proof records a page0
-button event that increments `numval.val` from `123` to `125` and emits
-`23 02 4e 31` through `printh`. The isolated
+object button events are live-proven for `printh`, `click`, `ref`, `vis`, and
+numeric updates; `tsw` is compiled and dispatched in the isolated probe below,
+but serial click remains a separate path. The `examples/number_demo` hardware
+proof records a page0 button event that increments `numval.val` from `123` to
+`125` and emits `23 02 4e 31` through `printh`. The isolated
 `examples/number_demo/tsw_promotion_scene.json` live burn is recorded in
 `examples/number_demo/tsw_promotion_serial_click_hardware_verified_2026-05-16.json`:
 it proves the clean-rebuilt page uploads and that `disablebtn`/`enablebtn` reach

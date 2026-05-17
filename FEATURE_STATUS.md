@@ -50,6 +50,11 @@ current-target unsupported controls must stay outside the supported set. The
 2026-05-17 matrix snapshot is in
 `examples/widget_capability_matrix_2026-05-17.json`; its `scene_examples`
 section maps every supported widget type to a concrete scene and evidence file.
+The current-target completion audit is
+`examples/all_supported_controls_completion_audit_2026-05-17.json`: it verifies
+writer paths plus clean full-page rebuild offline coverage for all supported
+widget types, while explicitly excluding controls that the current target's
+official compiler drops. This is not live COM36 behavior proof for every widget.
 
 | Widget / feature | Scene/HMI | Independent TFT | Evidence level |
 | --- | --- | --- | --- |
@@ -91,6 +96,9 @@ section maps every supported widget type to a concrete scene and evidence file.
 
 - Use `examples/menu_demo` or `examples/external_picture_demo` to understand
   the stable scene flow.
+- Use `examples/all_supported_controls_completion_audit_2026-05-17.json` as the
+  "all current-target supported controls" boundary. `legacy_basic_controls_demo`
+  is only a basic visual smoke scene, not all-controls coverage.
 - Use `examples/number_demo/full_page_rebuild_scene.json` when you need the
   smallest live-proven P1.6 full-page rebuild example. It deliberately drops
   seed objects and rebuilds `page0/title/incbtn/numval`. For visual proof, build
