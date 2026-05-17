@@ -55,6 +55,8 @@ The current-target completion audit is
 writer paths plus clean full-page rebuild offline coverage for all supported
 widget types, while explicitly excluding controls that the current target's
 official compiler drops. This is not live COM36 behavior proof for every widget.
+The live-proof gap is tracked separately in
+`examples/live_widget_proof_matrix_2026-05-17.json`.
 
 | Widget / feature | Scene/HMI | Independent TFT | Evidence level |
 | --- | --- | --- | --- |
@@ -99,6 +101,10 @@ official compiler drops. This is not live COM36 behavior proof for every widget.
 - Use `examples/all_supported_controls_completion_audit_2026-05-17.json` as the
   "all current-target supported controls" boundary. `legacy_basic_controls_demo`
   is only a basic visual smoke scene, not all-controls coverage.
+- Use `examples/live_widget_proof_matrix_2026-05-17.json` before claiming
+  runtime/live completion for a widget. It records which supported widgets have
+  committed live artifacts and which still only have smoke recipes or offline
+  coverage.
 - Use `examples/number_demo/full_page_rebuild_scene.json` when you need the
   smallest live-proven P1.6 full-page rebuild example. It deliberately drops
   seed objects and rebuilds `page0/title/incbtn/numval`. For visual proof, build

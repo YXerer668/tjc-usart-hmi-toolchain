@@ -48,6 +48,7 @@ MEDIA_VIDEO_SD_SMOKE_SCENE = Path("examples/media_single_video_sd_smoke/scene.js
 MEDIA_AUDIO_SD_SMOKE_SCENE = Path("examples/media_single_audio_sd_smoke/scene.json")
 WIDGET_CAPABILITY_MATRIX = Path("examples/widget_capability_matrix_2026-05-17.json")
 ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT = Path("examples/all_supported_controls_completion_audit_2026-05-17.json")
+LIVE_WIDGET_PROOF_MATRIX = Path("examples/live_widget_proof_matrix_2026-05-17.json")
 LEGACY_BASIC_CONTROLS_DEMO_SCENE = Path("examples/legacy_basic_controls_demo/scene.json")
 FONT_ZI = Path("build_font_scene.zi")
 GB2312_FONT_ZI = Path("reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi")
@@ -181,6 +182,37 @@ class EditorTftBuildTests(unittest.TestCase):
             },
         )
         self.assertTrue(all(item["status"] == "passed" for item in success_criteria.values()))
+
+    def test_live_widget_proof_matrix_tracks_supported_control_runtime_gap(self) -> None:
+        audit = json.loads(ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT.read_text(encoding="utf-8"))
+        live_matrix = json.loads(LIVE_WIDGET_PROOF_MATRIX.read_text(encoding="utf-8"))
+        supported_types = set(audit["completed_current_target_supported_widget_types"])
+
+        self.assertEqual(live_matrix["target"], audit["target"])
+        self.assertEqual(live_matrix["source_completion_audit"], ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT.as_posix())
+        self.assertEqual(set(live_matrix["widgets"]), supported_types)
+        self.assertIn("live COM36 proof for every widget", live_matrix["not_claimed"])
+
+        valid_statuses = set(live_matrix["status_values"])
+        committed_live_types = set(live_matrix["committed_live_proof_widget_types"])
+        actual_committed_live_types = set()
+        for widget_type, entry in live_matrix["widgets"].items():
+            with self.subTest(widget_type=widget_type):
+                self.assertEqual(entry["scene"], audit["scene_examples"][widget_type]["scene"])
+                self.assertEqual(entry["offline_evidence"], audit["scene_examples"][widget_type]["evidence"])
+                self.assertTrue(Path(entry["scene"]).exists())
+                self.assertTrue(Path(entry["offline_evidence"]).exists())
+                self.assertIn(entry["live_status"], valid_statuses)
+                self.assertTrue(entry["next_live_action"])
+                for evidence_key in ("live_evidence", "live_expectations_or_docs"):
+                    for evidence_path in entry.get(evidence_key, []):
+                        self.assertTrue(Path(evidence_path).exists(), evidence_path)
+                if entry["live_status"] == "committed-live-proof":
+                    actual_committed_live_types.add(widget_type)
+                    self.assertTrue(entry.get("live_evidence"))
+
+        self.assertEqual(actual_committed_live_types, committed_live_types)
+        self.assertLess(len(committed_live_types), len(supported_types))
 
     def test_widget_capability_matrix_scene_examples_build_clean_rebuild_tfts(self) -> None:
         matrix = json.loads(WIDGET_CAPABILITY_MATRIX.read_text(encoding="utf-8"))

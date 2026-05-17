@@ -31,6 +31,8 @@
   `full_page_rebuild_offline_coverage` 记录 clean rebuild 离线覆盖边界。
 - `all_supported_controls_completion_audit_2026-05-17.json`: 当前目标“全部 supported 控件”的完成审计。
   它把 `widget_capability_matrix_2026-05-17.json` 固化成可测试的完工边界，同时明确排除当前目标官方编译会丢对象的高级控件。
+- `live_widget_proof_matrix_2026-05-17.json`: 当前目标 supported 控件的活屏证据缺口矩阵。
+  它把 committed live 证据、仅文档声称、smoke-ready 和 offline-only 分开，避免把离线搭建误说成每个控件都已活屏闭环。
 
 ## 当前稳定边界
 

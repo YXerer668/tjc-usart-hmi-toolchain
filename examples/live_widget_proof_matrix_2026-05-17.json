@@ -1,0 +1,213 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "scope": "runtime/live-proof tracker for the current-target supported widget set",
+  "source_completion_audit": "examples/all_supported_controls_completion_audit_2026-05-17.json",
+  "claim": "This matrix tracks the live-proof gap after the all-supported-controls offline build audit. It does not claim every supported widget has COM36 runtime proof.",
+  "status_values": {
+    "committed-live-proof": "A committed hardware evidence JSON or equivalent result artifact records a live COM36 run for this widget or its narrow behavior family.",
+    "documented-live-proof": "Repository docs claim live proof, but this matrix did not find a dedicated committed result JSON for that widget in this pass.",
+    "smoke-ready": "The scene has a narrow live smoke recipe or expectation file, but no committed successful live result is claimed here.",
+    "offline-only": "The widget is covered by writer/offline clean rebuild evidence only."
+  },
+  "committed_live_proof_widget_types": [
+    "button",
+    "number",
+    "text",
+    "timer"
+  ],
+  "not_claimed": [
+    "live COM36 proof for every widget",
+    "speaker or codec validation for audio",
+    "successful playback for every video encoding",
+    "physical touch lockout proof from serial click",
+    "arbitrary page/widget/event generalization"
+  ],
+  "widgets": {
+    "animation": {
+      "scene": "examples/media_single_gmov_smoke/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/media_single_gmov_smoke/README.md"],
+      "next_live_action": "Build a resource-backed single GMOV TFT, upload with live_tft_smoke, enable gm0.en, and capture camera proof that the animation moves."
+    },
+    "audio": {
+      "scene": "examples/media_single_audio_sd_smoke/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": [
+        "examples/media_single_audio_sd_smoke/smoke.expect.json",
+        "examples/media_single_audio_sd_smoke/play.expect.json"
+      ],
+      "next_live_action": "Run the SD-audio smoke and start/stop expect files on COM36; keep speaker/audio-output validation separate."
+    },
+    "button": {
+      "scene": "examples/builtin_controls_demo/scene.json",
+      "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "committed-live-proof",
+      "live_evidence": [
+        "examples/number_demo/hardware_verified_2026-05-16.json",
+        "examples/event_combo_probe/hardware_verified_2026-05-15.json"
+      ],
+      "next_live_action": "No extra proof needed for the basic button event path; new button styles still need focused proof."
+    },
+    "checkbox": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a one-widget checkbox smoke with serial-readable state and camera/serial evidence."
+    },
+    "combobox": {
+      "scene": "examples/xfloat_combobox_demo/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "documented-live-proof",
+      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
+      "next_live_action": "Commit a dedicated live_tft_smoke result for cbval fields instead of relying only on status documentation."
+    },
+    "crop-image": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a one-widget crop-image smoke with camera proof."
+    },
+    "dual-button": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a dual-button smoke that toggles state and records serial or camera evidence."
+    },
+    "dualstate-button": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Keep this tied to the dual-button fixture unless a separate official/runtime distinction is proven."
+    },
+    "external-picture": {
+      "scene": "examples/external_picture_demo/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "documented-live-proof",
+      "live_expectations_or_docs": [
+        "examples/README.md",
+        "examples/external_picture_demo/smoke.expect.json"
+      ],
+      "next_live_action": "Commit the live_tft_smoke result JSON with exp0.path, guard.txt, sendme, and camera capture."
+    },
+    "gauge": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a gauge smoke with a visible needle/value and camera proof."
+    },
+    "hotspot": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a hotspot smoke with a fixed printh marker and real touch or proven-equivalent input."
+    },
+    "image": {
+      "scene": "examples/builtin_controls_demo/scene.json",
+      "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "documented-live-proof",
+      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
+      "next_live_action": "Commit a dedicated camera/readback artifact for the packed image smoke if this needs to count as closed."
+    },
+    "number": {
+      "scene": "examples/builtin_controls_demo/scene.json",
+      "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "committed-live-proof",
+      "live_evidence": [
+        "examples/number_demo/full_page_rebuild_hardware_verified_2026-05-16.json",
+        "examples/number_demo/hardware_verified_2026-05-16.json"
+      ],
+      "next_live_action": "No extra proof needed for the current number readback/increment path."
+    },
+    "progress": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a progress-bar smoke with visible value changes and camera proof."
+    },
+    "qrcode": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a QR code smoke with camera proof and, if possible, decoded payload verification."
+    },
+    "radio": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a radio-button smoke with state readback or visible selection proof."
+    },
+    "scrolling-text": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a scrolling-text smoke with camera proof over time; keep this separate from unsupported sliding-text."
+    },
+    "slider": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a slider smoke with visible value/readback proof."
+    },
+    "state-button": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a state-button smoke with toggle readback or visible state proof."
+    },
+    "text": {
+      "scene": "examples/builtin_controls_demo/scene.json",
+      "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "committed-live-proof",
+      "live_evidence": [
+        "examples/number_demo/full_page_rebuild_hardware_verified_2026-05-16.json",
+        "examples/number_demo/hardware_verified_2026-05-16.json"
+      ],
+      "next_live_action": "No extra proof needed for basic text display/readback; font coverage remains its own matrix."
+    },
+    "timer": {
+      "scene": "examples/builtin_controls_demo/scene.json",
+      "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "committed-live-proof",
+      "live_evidence": [
+        "examples/timer_numeric_probe/hardware_verified_2026-05-15.json",
+        "examples/button_start_timer_probe/hardware_verified_2026-05-15.json"
+      ],
+      "next_live_action": "Boot/page-load autorun remains separate; runtime enable/callback is already live-proven."
+    },
+    "touch-capture": {
+      "scene": "examples/touch_capture_demo/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a touch-capture smoke with real touch input and serial/camera evidence."
+    },
+    "variable": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a variable smoke with get/set readback proof."
+    },
+    "video": {
+      "scene": "examples/media_single_video_sd_smoke/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/media_single_video_sd_smoke/smoke.expect.json"],
+      "next_live_action": "Run the SD-video smoke on COM36 and record live_tft_smoke output; playback quality stays codec-specific."
+    },
+    "waveform": {
+      "scene": "examples/new_controls_demo/scene.json",
+      "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
+      "live_status": "offline-only",
+      "next_live_action": "Create a waveform smoke that writes sample data and verifies visible drawing or readback."
+    },
+    "xfloat": {
+      "scene": "examples/xfloat_combobox_demo/scene.json",
+      "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
+      "live_status": "documented-live-proof",
+      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
+      "next_live_action": "Commit a dedicated live_tft_smoke result for xval fields instead of relying only on status documentation."
+    }
+  }
+}
