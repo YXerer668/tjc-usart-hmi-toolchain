@@ -48,6 +48,7 @@ MEDIA_VIDEO_SD_SMOKE_SCENE = Path("examples/media_single_video_sd_smoke/scene.js
 MEDIA_AUDIO_SD_SMOKE_SCENE = Path("examples/media_single_audio_sd_smoke/scene.json")
 WIDGET_CAPABILITY_MATRIX = Path("examples/widget_capability_matrix_2026-05-17.json")
 ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT = Path("examples/all_supported_controls_completion_audit_2026-05-17.json")
+LEGACY_BASIC_CONTROLS_DEMO_SCENE = Path("examples/legacy_basic_controls_demo/scene.json")
 FONT_ZI = Path("build_font_scene.zi")
 GB2312_FONT_ZI = Path("reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi")
 BUILTIN_WIDGET_TYPE_CODES = {
@@ -155,13 +156,14 @@ class EditorTftBuildTests(unittest.TestCase):
         self.assertEqual(audit["scene_examples"], matrix["scene_examples"])
         self.assertEqual(set(SUPPORTED_WIDGET_TYPES), set(audit["scene_examples"]))
 
-        legacy_demo = audit["legacy_demos"]["examples/all_controls_demo/scene.json"]
-        legacy_scene = load_scene(Path("examples/all_controls_demo/scene.json"))
+        legacy_demo = audit["legacy_demos"][LEGACY_BASIC_CONTROLS_DEMO_SCENE.as_posix()]
+        legacy_scene = load_scene(LEGACY_BASIC_CONTROLS_DEMO_SCENE)
         legacy_widget_types = {widget.type for page in legacy_scene.pages for widget in page.widgets}
         self.assertEqual(legacy_demo["role"], "basic-smoke-only")
         self.assertTrue(legacy_demo["not_completion_evidence"])
         self.assertEqual(set(legacy_demo["covers_widget_types"]), legacy_widget_types)
         self.assertNotEqual(legacy_widget_types, set(SUPPORTED_WIDGET_TYPES))
+        self.assertFalse(Path("examples/all_controls_demo").exists())
 
         for claim in matrix["not_claimed"]:
             with self.subTest(not_claimed=claim):

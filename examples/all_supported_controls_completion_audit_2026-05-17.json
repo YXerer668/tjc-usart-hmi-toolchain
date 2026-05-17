@@ -137,7 +137,7 @@
     "xfloat": {"scene": "examples/xfloat_combobox_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"}
   },
   "legacy_demos": {
-    "examples/all_controls_demo/scene.json": {
+    "examples/legacy_basic_controls_demo/scene.json": {
       "role": "basic-smoke-only",
       "covers_widget_types": ["button", "image", "text"],
       "not_completion_evidence": true,
@@ -172,8 +172,8 @@
     {
       "id": "legacy-demo-boundary",
       "status": "passed",
-      "evidence": ["examples/all_controls_demo/scene.json", "examples/README.md"],
-      "check": "all_controls_demo is documented as a basic smoke scene, not completion evidence"
+      "evidence": ["examples/legacy_basic_controls_demo/scene.json", "examples/README.md"],
+      "check": "legacy_basic_controls_demo is documented as a basic smoke scene, not completion evidence"
     }
   ],
   "not_claimed": [
@@ -181,7 +181,7 @@
     "live COM36 proof for every widget",
     "arbitrary page/widget/event generalization",
     "support for controls dropped by the current target official compiler",
-    "examples/all_controls_demo/scene.json as all-supported-controls coverage"
+    "examples/legacy_basic_controls_demo/scene.json as all-supported-controls coverage"
   ],
   "verification": [
     {

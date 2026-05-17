@@ -24,7 +24,7 @@
 - `event_combo_probe`: page0 多行按钮事件样例；2026-05-15 活屏确认 `numval.val=10`、`++`、`++`、`--` 按顺序执行，串口读回 `11`。
 - `button_start_timer_probe`: page0 按钮启动/停止 timer 的样例；2026-05-15 活屏确认 `start0.up` 中的 `tm0.en=1` 能启动 `tm0.codestimer-`。
 - `timer_numeric_probe`: page0 `tm0.codestimer-` 数字自增样例；2026-05-15 活屏确认运行时 `tm0.en=1` 后 `numval.val++` 会被 timer 调度执行。
-- `all_controls_demo`: 基础 text/button/image/image-button 视觉冒烟页，不作为“全部控件完成”的覆盖证据。
+- `legacy_basic_controls_demo`: 基础 text/button/image/image-button 视觉冒烟页，不作为“全部控件完成”的覆盖证据。
 - `widget_capability_matrix_2026-05-17.json`: 当前目标控件能力矩阵。
   `scene_examples` 把每个 supported 控件类型映射到一个具体 scene 和证据文件；
   测试会逐个构建这些 scene 并核对 clean rebuild checksum、对象表名称、类型码和连续 ID；

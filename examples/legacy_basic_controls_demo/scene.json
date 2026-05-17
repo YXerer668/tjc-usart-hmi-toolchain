@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "all-controls-demo",
+    "name": "legacy-basic-controls-demo",
     "default_page": "page0",
     "clean_seed_objects": true
   },
