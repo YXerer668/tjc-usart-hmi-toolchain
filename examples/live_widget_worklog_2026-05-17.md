@@ -31,6 +31,18 @@ control.
 - Boundary: camera capture is useful visual evidence, but pixel-level
   image-content matching remains separate.
 
+## Completed Main Lane
+
+- Active item: focused crop-image widget live proof.
+- Result: COM36 full upload and smoke passed on `TJC8048X543_011C`.
+- Evidence:
+  - `examples/crop_image_demo/scene.json`
+  - `examples/crop_image_demo/smoke.expect.json`
+  - `examples/crop_image_demo/hardware_verified_2026-05-17.json`
+- Runtime fields verified: `q0.x` and `q0.picc`.
+- Boundary: camera capture is useful visual evidence, but pixel-level crop
+  visual correctness remains separate.
+
 ## Current Main Lane
 
 - Status: coordinating sidecar closure work.
@@ -92,7 +104,6 @@ control.
 
 ## Remaining Known Gaps
 
-- `crop-image`: needs camera/visual proof beyond current readback set.
 - `hotspot`: needs real touch or proven-equivalent event proof.
 - `touch-capture`: needs real touch input and serial/camera evidence.
 - `waveform`: needs sample write plus visible drawing or readback proof.

@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CROP_DEMO = ROOT / "examples" / "crop_image_demo"
 SCENE_JSON = CROP_DEMO / "scene.json"
 EXPECT_JSON = CROP_DEMO / "smoke.expect.json"
+EVIDENCE_JSON = CROP_DEMO / "hardware_verified_2026-05-17.json"
 HISTORICAL_SMOKE = ROOT / "reverse_usarthmi" / "minimal_control_live" / "case_30_crop_image" / "smoke_result.json"
 SEED_HMI = Path(r"D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI")
 BASELINE_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft")
@@ -34,7 +35,6 @@ class CropImageDemoTests(unittest.TestCase):
         self.assertEqual(widget.type, "crop-image")
         self.assertEqual((widget.x, widget.y, widget.w, widget.h), (0, 0, 60, 60))
         self.assertEqual(widget.resources, {"picc": 65535})
-        self.assertFalse(list(CROP_DEMO.glob("hardware_verified*.json")))
 
     def test_smoke_expect_uses_only_historically_successful_crop_readbacks(self) -> None:
         historical = json.loads(HISTORICAL_SMOKE.read_text(encoding="utf-8"))
@@ -76,6 +76,19 @@ class CropImageDemoTests(unittest.TestCase):
             self.assertEqual([(block.objname, block.type_code) for block in target_page.blocks], [("page0", "y"), ("q0", "q")])
             q0 = target_page.blocks[1]
             self.assertEqual(int.from_bytes(q0.get_field("picc").value, "little"), 65535)
+
+    def test_hardware_evidence_matches_smoke_expect(self) -> None:
+        evidence = json.loads(EVIDENCE_JSON.read_text(encoding="utf-8"))
+        expectations = _load_expectations(str(EXPECT_JSON), [])
+        expected_targets = {item.target: item.expected for item in expectations}
+        passed_targets = {item["target"]: item["actual"] for item in evidence["serial_readback_passed"]}
+
+        self.assertTrue(evidence["summary"]["ok"])
+        self.assertEqual(evidence["expect_json"], EXPECT_JSON.relative_to(ROOT).as_posix())
+        self.assertEqual(passed_targets, expected_targets)
+        self.assertEqual(evidence["upload"]["checksum_hex"], "0xE921CA14")
+        self.assertTrue(evidence["summary"]["camera_ok"])
+        self.assertIn("pixel-level assertion", evidence["not_claimed"][0])
 
 
 if __name__ == "__main__":

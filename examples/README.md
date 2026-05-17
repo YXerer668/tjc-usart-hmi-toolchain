@@ -6,6 +6,7 @@
 
 - `menu_demo`: 最基础的菜单页样例，适合验证文字、图片、按钮、数值区和预览器。
 - `external_picture_demo`: 外部图片控件的默认活屏样例；`hardware_verified_2026-05-17.json` 已记录当前 `TJC8048X543_011C` 上的 COM36 上传、`sendme`、`get exp0.path`、`get guard.txt` 和摄像头捕获证据。
+- `crop_image_demo`: crop-image 控件的聚焦活屏样例；`hardware_verified_2026-05-17.json` 已记录 COM36 上传、`q0.x/q0.picc` 读回和摄像头捕获证据。
 - `image_resource_demo`: 普通 image 控件的新 picture resource 打包活屏样例；`hardware_verified_2026-05-17.json` 已记录 COM36 上传、`photo1.pic/id/x/y/w/h` 读回和摄像头捕获证据。
 - `media_single_gmov_smoke`: 当前推荐的动画控件最小烧录样例，只验证一个内部 GMOV，边界最稳。
 - `media_single_video_sd_smoke`: 单个 SD 视频控件的最小烧录样例，验证 video 对象 tail 和运行时可读字段；不承诺所有视频编码都能播放。

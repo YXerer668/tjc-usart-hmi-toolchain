@@ -14,6 +14,7 @@
     "button",
     "checkbox",
     "combobox",
+    "crop-image",
     "dual-button",
     "dualstate-button",
     "external-picture",
@@ -83,9 +84,9 @@
     "crop-image": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof for the crop-image visual area."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/crop_image_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add pixel-level crop visual correctness only if visual behavior needs to be closed beyond serial field readback and camera capture."
     },
     "dual-button": {
       "scene": "examples/new_controls_demo/scene.json",

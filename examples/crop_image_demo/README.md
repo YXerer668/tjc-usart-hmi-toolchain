@@ -9,8 +9,8 @@ Evidence boundary:
 - Source fixture: `reverse_usarthmi/minimal_control_live/case_30_crop_image/smoke_result.json`.
 - Historical live evidence there showed page `0`, readable `q0.x == 0`, and
   readable `q0.picc == 65535` on the focused crop-image page.
-- This folder does not contain `hardware_verified_*.json`; COM36 validation
-  must be added only after a fresh live run.
+- `hardware_verified_2026-05-17.json` records the fresh COM36 upload, serial
+  readback, and `USB Cam` capture for the current `TJC8048X543_011C` panel.
 - The expect file intentionally stays narrow. It does not claim visual crop
   correctness, arbitrary image-resource behavior, or mixed-page crop-image
   behavior.
@@ -24,7 +24,7 @@ python -m usarthmi --json scene build examples\crop_image_demo\scene.json `
   --out reverse_usarthmi\crop_image_demo_build
 ```
 
-Future live smoke, after the main line decides to use COM36:
+Live smoke command used for the committed hardware proof:
 
 ```powershell
 python tools\live_tft_smoke.py `
@@ -37,7 +37,6 @@ python tools\live_tft_smoke.py `
   --progress --capture
 ```
 
-Risk before promotion: this is a serial-readback smoke plus optional camera
-capture. It proves the focused object exists and its historically successful
-`picc` field reads back, but it still needs a fresh camera-visible crop-image
-check before the proof matrix should be updated.
+Boundary: this is a serial-readback smoke plus camera capture. It proves the
+focused object exists and its historically successful `picc` field reads back;
+pixel-level crop visual correctness still needs a separate image assertion.

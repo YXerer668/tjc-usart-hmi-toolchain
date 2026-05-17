@@ -82,7 +82,7 @@ The live-proof gap is tracked separately in
 | Waveform | Implemented | Experimental | Fixture-backed record generation; broad runtime drawing helpers are not complete. |
 | Checkbox | Implemented | Experimental | Fixture-backed record generation. |
 | Radio | Implemented | Experimental | Fixture-backed record generation. |
-| Crop image | Implemented | Experimental | Fixture-backed record generation. |
+| Crop image | Implemented | Experimental | Fixture-backed record generation plus committed COM36 readback/camera evidence in `examples/crop_image_demo/hardware_verified_2026-05-17.json`; pixel-level crop correctness remains separate. |
 | Scrolling text (`case_22`) | Implemented | Experimental | Fixture-backed record generation. |
 | Touch capture (`case_45`) | Implemented | Experimental | Current-editor fixture-backed record generation. |
 | GMOV animation | Implemented | Experimental | Single internal GMOV smoke path is the recommended media test. |

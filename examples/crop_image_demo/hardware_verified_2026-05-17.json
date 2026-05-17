@@ -1,0 +1,63 @@
+{
+  "schema": "usarthmi-crop-image-live-proof-v1",
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "scope": "live COM36 upload and smoke for a focused crop-image widget page",
+  "scene": "examples/crop_image_demo/scene.json",
+  "expect_json": "examples/crop_image_demo/smoke.expect.json",
+  "source_tft": "reverse_usarthmi/crop_image_demo_build/output.tft",
+  "build": {
+    "command": "python -m usarthmi --json scene build examples\\crop_image_demo\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out reverse_usarthmi\\crop_image_demo_build",
+    "file_size": 11405700,
+    "object_count": 2,
+    "checksum_hex": "0xE921CA14",
+    "checksum_valid": true,
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild"
+  },
+  "command": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\crop_image_demo_build\\output.tft --out-dir reverse_usarthmi\\crop_image_demo_build\\smoke --expect-json examples\\crop_image_demo\\smoke.expect.json --upload --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --progress --capture",
+  "summary": {
+    "ok": true,
+    "checksum_valid": true,
+    "model_preflight_ok": true,
+    "uploaded": true,
+    "serial_checks_ok": true,
+    "camera_captured": true,
+    "camera_ok": true
+  },
+  "model_preflight": {
+    "required_model": "TJC8048X543_011C",
+    "actual_model": "TJC8048X543_011C",
+    "diagnosis": "serial runtime is healthy enough for normal commands and public whmi-wri upload preflight"
+  },
+  "upload": {
+    "file_size": 11405700,
+    "checksum_hex": "0xE921CA14",
+    "bytes_sent": 11405700,
+    "chunks_sent": 2785,
+    "chunk_size": 4096,
+    "elapsed_s": 261.109
+  },
+  "serial_readback_passed": [
+    {"target": "q0.x", "widget": "crop-image", "expected": 0, "actual": 0},
+    {"target": "q0.picc", "widget": "crop-image", "expected": 65535, "actual": 65535}
+  ],
+  "not_claimed": [
+    "pixel-level assertion that the crop-image visual region is correct; this run records serial field readback and a camera capture artifact",
+    "mixed-page crop-image behavior from examples/new_controls_demo",
+    "arbitrary image-resource behavior",
+    "arbitrary page/widget/event generalization"
+  ],
+  "artifacts": {
+    "smoke_result": {
+      "path": "reverse_usarthmi/crop_image_demo_build/smoke/smoke_result.json",
+      "sha256": "6f625f710b4c4e6261423ba4f2107a8bfc0f46bbfcb70894d5653d8e0db5026a",
+      "bytes": 12523
+    },
+    "camera_capture": {
+      "path": "reverse_usarthmi/crop_image_demo_build/smoke/camera_after_smoke.jpg",
+      "sha256": "f191f93c53720409e6c7968d8792b6df65303d50b7e93ad166943590f91497d8",
+      "bytes": 99838
+    }
+  }
+}
