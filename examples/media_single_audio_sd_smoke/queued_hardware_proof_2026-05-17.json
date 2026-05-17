@@ -1,0 +1,41 @@
+{
+  "artifact": "queued_hardware_proof_2026-05-17",
+  "example": "media_single_audio_sd_smoke",
+  "date": "2026-05-17",
+  "status": "queued_hardware_execution",
+  "hardware_verified": false,
+  "offline_build": {
+    "command": "python -m usarthmi --json scene build examples\\media_single_audio_sd_smoke\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out tmp\\reverse\\media_single_audio_sd_smoke_worker_20260517",
+    "output_tft": "tmp\\reverse\\media_single_audio_sd_smoke_worker_20260517\\output.tft",
+    "file_size": 11408136,
+    "checksum_valid": true,
+    "checksum_hex": "0x9ECCF575",
+    "model_series": 3
+  },
+  "queued_commands": {
+    "build": ".\\usarthmi.cmd --json scene build examples\\media_single_audio_sd_smoke\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out reverse_usarthmi\\media_single_audio_sd_smoke_build",
+    "upload_smoke": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\media_single_audio_sd_smoke_build\\output.tft --out-dir reverse_usarthmi\\media_single_audio_sd_smoke_build\\smoke --expect-json examples\\media_single_audio_sd_smoke\\smoke.expect.json --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --upload --progress --capture",
+    "play_smoke": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\media_single_audio_sd_smoke_build\\output.tft --out-dir reverse_usarthmi\\media_single_audio_sd_smoke_build\\play_smoke --expect-json examples\\media_single_audio_sd_smoke\\play.expect.json --port COM36 --baud 9600 --timeout-ms 8000"
+  },
+  "expected_fields": {
+    "smoke": {
+      "wav0.en": 0,
+      "wav0.vid": 0,
+      "wav0.loop": 0,
+      "wav0.fps": 1,
+      "wav0.dis": 100,
+      "wav0.tim": 0,
+      "wav0.path": "invalid_reference"
+    },
+    "play": {
+      "initial.wav0.en": 0,
+      "after_start.wav0.en": 1,
+      "after_stop.wav0.en": 0
+    }
+  },
+  "boundaries": [
+    "No COM36 upload or serial command was executed for this artifact.",
+    "This artifact does not prove physical speaker output, SD-card file presence, amplifier wiring, volume behavior, or WAV codec compatibility.",
+    "Do not rename this to hardware_verified unless upload_smoke and play_smoke have both been run on the panel and their raw JSON evidence is saved."
+  ]
+}

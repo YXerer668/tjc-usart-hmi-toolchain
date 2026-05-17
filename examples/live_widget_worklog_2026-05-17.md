@@ -33,9 +33,9 @@ control.
 
 ## Current Main Lane
 
-- Status: planning.
-- Active item: choose next live-proof target from `audio`, `crop-image`, or
-  `waveform` after committing image evidence.
+- Status: coordinating sidecar closure work.
+- Active item: keep COM36 hardware runs serialized while sidecar workers prepare
+  independent control-specific closure artifacts.
 
 ## Parallel Lanes
 
@@ -65,6 +65,30 @@ control.
     upload smoke with `smoke.expect.json` plus one no-upload play smoke with
     `play.expect.json`; this only proves object fields and `wav0.en`
     start/stop control, not speaker output or WAV compatibility.
+- Audio closure worker:
+  - Agent: `019e355f-9829-7150-948e-f3051c4cafc5`.
+  - Status: completed.
+  - Write scope: `examples/media_single_audio_sd_smoke/**` and optional
+    `tests/test_media_single_audio_live_artifact.py`.
+  - Hardware rule: no COM36; prepare queued proof and offline validation only.
+  - Result: queued proof, README commands, and offline self-check tests are in
+    place; main thread normalized queued COM36 command flags before review.
+- Crop-image closure worker:
+  - Agent: `019e355f-d2c8-7a82-a8c9-e3589ae900c8`.
+  - Status: completed.
+  - Write scope: `examples/crop_image_demo/**` and
+    `tests/test_crop_image_demo.py`.
+  - Hardware rule: no COM36; prepare narrow demo/expect and offline validation.
+  - Result: focused single-control `q0` scene and narrow `q0.x/q0.picc`
+    readback smoke are ready for main-thread hardware execution.
+- Waveform closure worker:
+  - Agent: `019e3560-9733-7c90-9b57-bd3454337793`.
+  - Status: completed.
+  - Write scope: `examples/waveform_demo/**` and `tests/test_waveform_demo.py`.
+  - Hardware rule: no COM36; prepare runtime-step smoke path around
+    `_wfpad*`/`add s0.id,0,50`.
+  - Result: focused waveform scene, runtime pad layout, and `add s0.id,0,50`
+    smoke step are ready for main-thread hardware execution.
 
 ## Remaining Known Gaps
 

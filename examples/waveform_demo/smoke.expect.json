@@ -1,0 +1,69 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": [
+    {
+      "target": "s0.x",
+      "expected": 0,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "b1.txt",
+      "expected": "newtxt",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "set_expectations": [
+    {
+      "target": "b1.txt",
+      "expected": "OK",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "steps": [
+    {
+      "label": "old seed text removed",
+      "command": "get t0.txt",
+      "expected_kind": "invalid_reference",
+      "delay_ms": 100,
+      "attempts": 3
+    },
+    {
+      "label": "old seed button removed",
+      "command": "get b0.txt",
+      "expected_kind": "invalid_reference",
+      "delay_ms": 100,
+      "attempts": 3
+    },
+    {
+      "label": "old seed image removed",
+      "command": "get p0.pic",
+      "expected_kind": "invalid_reference",
+      "delay_ms": 100,
+      "attempts": 3
+    },
+    {
+      "label": "button val before click",
+      "command": "get b1.val",
+      "expected_kind": "number",
+      "expected_value": 0,
+      "delay_ms": 100,
+      "attempts": 3
+    },
+    {
+      "label": "click b1 down",
+      "command": "click b1,1",
+      "expected_kind": "none",
+      "delay_ms": 100
+    },
+    {
+      "label": "waveform add sample",
+      "command": "add s0.id,0,50",
+      "expected_kind": "none",
+      "delay_ms": 100
+    }
+  ]
+}

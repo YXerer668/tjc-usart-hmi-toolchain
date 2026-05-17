@@ -11,32 +11,48 @@ Expected SD-card file:
 sd0/music/official_0.wav
 ```
 
+## Hardware Queue Commands
+
+These commands are the queued hardware-closure path. They are not hardware
+proof until they have run against the real `COM36` panel and their JSON output
+has been saved.
+
 Build:
 
 ```powershell
-python -m usarthmi --json scene build examples\media_single_audio_sd_smoke\scene.json `
+.\usarthmi.cmd --json scene build examples\media_single_audio_sd_smoke\scene.json `
   --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI `
   --baseline-tft C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft `
   --out reverse_usarthmi\media_single_audio_sd_smoke_build
 ```
 
-Live smoke after upload:
+Upload smoke:
 
 ```powershell
 python tools\live_tft_smoke.py `
   --file reverse_usarthmi\media_single_audio_sd_smoke_build\output.tft `
   --out-dir reverse_usarthmi\media_single_audio_sd_smoke_build\smoke `
   --expect-json examples\media_single_audio_sd_smoke\smoke.expect.json `
-  --upload --progress
+  --require-model TJC8048X543_011C `
+  --port COM36 `
+  --baud 9600 `
+  --download-baud 921600 `
+  --chunk-size 4096 `
+  --timeout-ms 8000 `
+  --post-upload-wait-s 2.5 `
+  --upload --progress --capture
 ```
 
-Optional runtime start/stop smoke, after this TFT is already on the panel:
+Play smoke, after this TFT is already on the panel:
 
 ```powershell
 python tools\live_tft_smoke.py `
   --file reverse_usarthmi\media_single_audio_sd_smoke_build\output.tft `
   --out-dir reverse_usarthmi\media_single_audio_sd_smoke_build\play_smoke `
-  --expect-json examples\media_single_audio_sd_smoke\play.expect.json
+  --expect-json examples\media_single_audio_sd_smoke\play.expect.json `
+  --port COM36 `
+  --baud 9600 `
+  --timeout-ms 8000
 ```
 
 Notes:
@@ -52,3 +68,7 @@ Notes:
   checks that it is not runtime-readable instead of treating that as object
   creation failure.
 - Do not mix this with GMOV/video in one TFT until media scheduling is proven.
+- A valid offline checksum only proves that the generated TFT is internally
+  consistent. It does not prove COM36 upload success, SD-card file presence,
+  physical audio output, speaker wiring, amplifier setup, volume behavior, or
+  WAV codec compatibility.

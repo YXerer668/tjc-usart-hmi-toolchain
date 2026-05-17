@@ -1,0 +1,67 @@
+{
+  "project": {
+    "name": "waveform-demo",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "_wfpad1",
+          "type": "text",
+          "x": 799,
+          "y": 479,
+          "w": 1,
+          "h": 1,
+          "text": ""
+        },
+        {
+          "id": "_wfpad2",
+          "type": "button",
+          "x": 799,
+          "y": 479,
+          "w": 1,
+          "h": 1,
+          "text": ""
+        },
+        {
+          "id": "_wfpad3",
+          "type": "image",
+          "x": 799,
+          "y": 479,
+          "w": 1,
+          "h": 1
+        },
+        {
+          "id": "s0",
+          "type": "waveform",
+          "x": 0,
+          "y": 0,
+          "w": 200,
+          "h": 200
+        },
+        {
+          "id": "b1",
+          "type": "button",
+          "x": 0,
+          "y": 220,
+          "w": 120,
+          "h": 56,
+          "text": "newtxt",
+          "value": 0
+        }
+      ]
+    }
+  ]
+}

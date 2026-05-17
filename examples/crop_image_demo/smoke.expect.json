@@ -1,0 +1,18 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": [
+    {
+      "target": "q0.x",
+      "expected": 0,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "q0.picc",
+      "expected": 65535,
+      "expected_kind": "number",
+      "attempts": 3
+    }
+  ]
+}
