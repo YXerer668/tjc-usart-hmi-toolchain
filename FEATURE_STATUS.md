@@ -68,8 +68,8 @@ The live-proof gap is tracked separately in
 | Two-state image button | Implemented | Experimental | Live-proven with normal/pressed PLAY assets. |
 | External picture / SD image | Implemented | Experimental | Live-proven against healthy `case_00_baseline`; `case_46` is fixture/reference only. |
 | Custom font display | Implemented | Experimental | ASCII and full GB2312 baseline fonts visually verified. |
-| Virtual float / xfloat | Implemented | Experimental | Byte-aligned fixture tests and live `get xval.val`. |
-| Combo box | Implemented | Experimental | Byte-aligned fixture tests and live `get cbval.*`. |
+| Virtual float / xfloat | Implemented | Experimental | Byte-aligned fixture tests plus committed COM36 readback evidence in `examples/xfloat_combobox_demo/hardware_verified_2026-05-17.json` for `xval.val` and `xval.vvs1`; `xval.vvs0` runtime semantics remain separate. |
+| Combo box | Implemented | Experimental | Byte-aligned fixture tests plus committed COM36 readback evidence in `examples/xfloat_combobox_demo/hardware_verified_2026-05-17.json` for `cbval.val/down/txt`; dropdown interaction and `cbval.qty` runtime readability remain separate. |
 | Slider | Implemented | Experimental | Fixture-backed record generation; allowed in page1 plain controls. |
 | Gauge | Implemented | Experimental | Fixture-backed record generation; allowed in page1 plain controls. |
 | Progress bar | Implemented | Experimental | Fixture-backed record generation; allowed in page1 plain controls. |

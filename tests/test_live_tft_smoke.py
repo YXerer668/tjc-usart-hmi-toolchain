@@ -62,6 +62,44 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertIn("crop-image runtime attribute readback", evidence["not_claimed"][0])
         self.assertEqual(evidence["upload"]["checksum_hex"], "0xCEC1B698")
 
+    def test_xfloat_combobox_demo_smoke_expect_loads_readbacks(self) -> None:
+        expect_path = Path("examples/xfloat_combobox_demo/smoke.expect.json")
+        config = json.loads(expect_path.read_text(encoding="utf-8"))
+        expectations = _load_expectations(str(expect_path), [])
+        targets = {item.target: item.expected for item in expectations}
+
+        self.assertEqual(config["page_id"], 0)
+        self.assertEqual(config["select_page"], 0)
+        self.assertEqual(
+            targets,
+            {
+                "title.txt": "XFLOAT + COMBO",
+                "xval.val": 123456,
+                "xval.vvs1": 3,
+                "cbval.val": 2,
+                "cbval.down": 1,
+                "cbval.txt": "80V",
+            },
+        )
+        self.assertTrue(all(item.attempts == 3 for item in expectations))
+
+    def test_xfloat_combobox_demo_hardware_evidence_matches_smoke_expect(self) -> None:
+        expect_path = Path("examples/xfloat_combobox_demo/smoke.expect.json")
+        evidence_path = Path("examples/xfloat_combobox_demo/hardware_verified_2026-05-17.json")
+        expectations = _load_expectations(str(expect_path), [])
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        expected_targets = {item.target: item.expected for item in expectations}
+        passed_targets = {item["target"]: item["actual"] for item in evidence["serial_readback_passed"]}
+        first_attempt_targets = {item["target"] for item in evidence["first_attempt_findings"]}
+
+        self.assertTrue(evidence["final_smoke"]["summary"]["ok"])
+        self.assertEqual(evidence["expect_json"], expect_path.as_posix())
+        self.assertEqual(passed_targets, expected_targets)
+        self.assertEqual(evidence["build"]["checksum_hex"], "0x0250F0A0")
+        self.assertIn("xval.vvs0", first_attempt_targets)
+        self.assertIn("cbval.qty", first_attempt_targets)
+        self.assertIn("dropdown interaction", evidence["not_claimed"][0])
+
     def test_ffmpeg_dshow_capture_uses_named_usb_cam_and_warmup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             out_dir = Path(temp_dir)

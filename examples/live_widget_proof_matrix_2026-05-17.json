@@ -13,6 +13,7 @@
   "committed_live_proof_widget_types": [
     "button",
     "checkbox",
+    "combobox",
     "dual-button",
     "dualstate-button",
     "gauge",
@@ -25,7 +26,8 @@
     "state-button",
     "text",
     "timer",
-    "variable"
+    "variable",
+    "xfloat"
   ],
   "not_claimed": [
     "live COM36 proof for every widget",
@@ -72,9 +74,9 @@
     "combobox": {
       "scene": "examples/xfloat_combobox_demo/scene.json",
       "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
-      "live_status": "documented-live-proof",
-      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
-      "next_live_action": "Commit a dedicated live_tft_smoke result for cbval fields instead of relying only on status documentation."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/xfloat_combobox_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add dropdown interaction proof separately; cbval.qty is compiled into the fixture but not runtime-readable on this target."
     },
     "crop-image": {
       "scene": "examples/new_controls_demo/scene.json",
@@ -228,9 +230,9 @@
     "xfloat": {
       "scene": "examples/xfloat_combobox_demo/scene.json",
       "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
-      "live_status": "documented-live-proof",
-      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
-      "next_live_action": "Commit a dedicated live_tft_smoke result for xval fields instead of relying only on status documentation."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/xfloat_combobox_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Close xval.vvs0 runtime semantics separately; the committed smoke proves xval.val and xval.vvs1 readback."
     }
   }
 }

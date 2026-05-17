@@ -1,0 +1,42 @@
+{
+  "page_id": 0,
+  "select_page": 0,
+  "expectations": [
+    {
+      "target": "title.txt",
+      "expected": "XFLOAT + COMBO",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "xval.val",
+      "expected": 123456,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "xval.vvs1",
+      "expected": 3,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "cbval.val",
+      "expected": 2,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "cbval.down",
+      "expected": 1,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "cbval.txt",
+      "expected": "80V",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ]
+}

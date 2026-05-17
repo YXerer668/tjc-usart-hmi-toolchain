@@ -1,0 +1,86 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "scope": "live COM36 smoke for serial-readable xfloat and combobox fields in examples/xfloat_combobox_demo",
+  "scene": "examples/xfloat_combobox_demo/scene.json",
+  "expect_json": "examples/xfloat_combobox_demo/smoke.expect.json",
+  "source_tft": "reverse_usarthmi/xfloat_combobox_demo_smoke_probe/output.tft",
+  "build": {
+    "command": "python -m usarthmi --json scene build examples\\xfloat_combobox_demo\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out reverse_usarthmi\\xfloat_combobox_demo_smoke_probe",
+    "file_size": 11411956,
+    "object_count": 6,
+    "checksum_hex": "0x0250F0A0",
+    "checksum_valid": true
+  },
+  "initial_upload_attempt": {
+    "command": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\xfloat_combobox_demo_smoke_probe\\output.tft --out-dir reverse_usarthmi\\xfloat_combobox_demo_smoke_probe\\smoke --expect-json examples\\xfloat_combobox_demo\\smoke.expect.json --upload --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --progress --capture",
+    "summary": {
+      "ok": false,
+      "checksum_valid": true,
+      "model_preflight_ok": true,
+      "uploaded": true,
+      "serial_checks_ok": false,
+      "camera_ok": true
+    },
+    "upload": {
+      "file_size": 11411956,
+      "bytes_sent": 11411956,
+      "chunks_sent": 2787,
+      "chunk_size": 4096,
+      "elapsed_s": 261.844
+    }
+  },
+  "final_smoke": {
+    "command": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\xfloat_combobox_demo_smoke_probe\\output.tft --out-dir reverse_usarthmi\\xfloat_combobox_demo_smoke_probe\\smoke_fixed --expect-json examples\\xfloat_combobox_demo\\smoke.expect.json --require-model TJC8048X543_011C --port COM36 --baud 9600 --timeout-ms 8000 --post-upload-wait-s 0 --capture",
+    "summary": {
+      "ok": true,
+      "checksum_valid": true,
+      "model_preflight_ok": null,
+      "uploaded": false,
+      "serial_checks_ok": true,
+      "camera_ok": true
+    }
+  },
+  "serial_readback_passed": [
+    {"target": "title.txt", "widget": "text", "expected": "XFLOAT + COMBO", "actual": "XFLOAT + COMBO"},
+    {"target": "xval.val", "widget": "xfloat", "expected": 123456, "actual": 123456},
+    {"target": "xval.vvs1", "widget": "xfloat", "expected": 3, "actual": 3},
+    {"target": "cbval.val", "widget": "combobox", "expected": 2, "actual": 2},
+    {"target": "cbval.down", "widget": "combobox", "expected": 1, "actual": 1},
+    {"target": "cbval.txt", "widget": "combobox", "expected": "80V", "actual": "80V"}
+  ],
+  "first_attempt_findings": [
+    {
+      "target": "xval.vvs0",
+      "expected": 0,
+      "actual": 2,
+      "diagnosis": "The compiled primary fixture field is 0, but this target reports runtime vvs0 as 2; keep this outside the pass set until its semantics are closed."
+    },
+    {
+      "target": "cbval.qty",
+      "expected": 3,
+      "actual": "invalid_reference",
+      "diagnosis": "The combobox quantity field is present in the compiled object/resources, but is not runtime-readable on this target through get cbval.qty."
+    }
+  ],
+  "not_claimed": [
+    "combobox dropdown interaction or option selection behavior",
+    "runtime readability or semantic closure for xval.vvs0",
+    "runtime readability for cbval.qty",
+    "visual assertion beyond camera capture",
+    "arbitrary page/widget/event generalization"
+  ],
+  "artifacts": {
+    "smoke_result": {
+      "path": "reverse_usarthmi/xfloat_combobox_demo_smoke_probe/smoke_fixed/smoke_result.json",
+      "sha256": "6611fa7a32fd520dafc1c863f8e8ced42f9852275eee095daa276ae086741bcb",
+      "bytes": 10369
+    },
+    "camera_capture": {
+      "path": "reverse_usarthmi/xfloat_combobox_demo_smoke_probe/smoke_fixed/camera_after_smoke.jpg",
+      "sha256": "eb1304c952cd6b31cdb7d32197421c99c266cb0d008d105df33f5ddc14d83429",
+      "bytes": 127473
+    }
+  }
+}
