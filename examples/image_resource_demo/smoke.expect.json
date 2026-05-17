@@ -1,0 +1,41 @@
+{
+  "page_id": 0,
+  "expectations": [
+    {
+      "target": "photo1.pic",
+      "expected": 1,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "photo1.id",
+      "expected": 4,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "photo1.x",
+      "expected": 162,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "photo1.y",
+      "expected": 87,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "photo1.w",
+      "expected": 489,
+      "expected_kind": "number",
+      "attempts": 3
+    },
+    {
+      "target": "photo1.h",
+      "expected": 342,
+      "expected_kind": "number",
+      "attempts": 3
+    }
+  ]
+}

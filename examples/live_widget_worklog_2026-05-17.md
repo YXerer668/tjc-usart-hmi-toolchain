@@ -4,9 +4,8 @@ Objective: keep converging the TJC/USART HMI reverse-engineering workspace
 toward committed build and live evidence for every current-target supported
 control.
 
-## Current Main Lane
+## Completed Main Lane
 
-- Status: in progress.
 - Active item: external-picture live proof.
 - Result: COM36 full upload and smoke passed on `TJC8048X543_011C`.
 - Evidence being committed:
@@ -18,6 +17,25 @@ control.
 - Verified result: `4 passed, 26 subtests passed in 3.77s`.
 - Boundary: no pixel-level assertion for SD-card image content beyond serial
   path readback and camera capture.
+
+## Completed Main Lane
+
+- Active item: normal image widget with newly packed picture resource.
+- Result: COM36 full upload and smoke passed on `TJC8048X543_011C`.
+- Evidence:
+  - `examples/image_resource_demo/scene.json`
+  - `examples/image_resource_demo/smoke.expect.json`
+  - `examples/image_resource_demo/hardware_verified_2026-05-17.json`
+- Runtime fields verified: `photo1.pic`, `photo1.id`, `photo1.x`, `photo1.y`,
+  `photo1.w`, and `photo1.h`.
+- Boundary: camera capture is useful visual evidence, but pixel-level
+  image-content matching remains separate.
+
+## Current Main Lane
+
+- Status: planning.
+- Active item: choose next live-proof target from `audio`, `crop-image`, or
+  `waveform` after committing image evidence.
 
 ## Parallel Lanes
 
@@ -37,6 +55,16 @@ control.
     `examples/media_single_audio_sd_smoke`, because smoke and play expect files
     already exist. GMOV needs resource-backed scene work first; video readback
     does not prove playback quality.
+- Audio proof planner:
+  - Agent: `019e3557-0d14-7ec1-8995-d340d6f3c736`.
+  - Status: completed.
+  - Scope: exact build/smoke/play commands and evidence schema for
+    `examples/media_single_audio_sd_smoke`.
+  - Rule: read-only; no hardware or file edits.
+  - Conclusion: build `examples/media_single_audio_sd_smoke`, then run one
+    upload smoke with `smoke.expect.json` plus one no-upload play smoke with
+    `play.expect.json`; this only proves object fields and `wav0.en`
+    start/stop control, not speaker output or WAV compatibility.
 
 ## Remaining Known Gaps
 
@@ -44,7 +72,5 @@ control.
 - `hotspot`: needs real touch or proven-equivalent event proof.
 - `touch-capture`: needs real touch input and serial/camera evidence.
 - `waveform`: needs sample write plus visible drawing or readback proof.
-- `image`: still tracked as documented-live-proof until a dedicated artifact is
-  committed.
 - `animation`, `video`, `audio`: media live artifacts still pending; keep
   playback-quality claims separate from serial field readbacks.

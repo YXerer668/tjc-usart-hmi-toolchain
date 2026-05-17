@@ -1,0 +1,73 @@
+{
+  "schema": "usarthmi-image-resource-live-proof-v1",
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "scope": "live COM36 upload and smoke for a normal image widget backed by a newly packed picture resource",
+  "scene": "examples/image_resource_demo/scene.json",
+  "expect_json": "examples/image_resource_demo/smoke.expect.json",
+  "source_tft": "reverse_usarthmi/image_resource_demo_build/output.tft",
+  "build": {
+    "command": "python -m usarthmi --json scene build examples\\image_resource_demo\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out reverse_usarthmi\\image_resource_demo_build",
+    "file_size": 11409060,
+    "object_count": 5,
+    "added_object": "photo1",
+    "picture_count": 2,
+    "packed_picture_id": 1,
+    "checksum_hex": "0x95AA85C1",
+    "checksum_valid": true,
+    "tft_patch_mode": "experimental_added_objects_tft_patch",
+    "resource_pack_mode": "experimental_tft_picture_resource_pack"
+  },
+  "command": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\image_resource_demo_build\\output.tft --out-dir reverse_usarthmi\\image_resource_demo_build\\smoke_capture --expect-json examples\\image_resource_demo\\smoke.expect.json --upload --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --progress --capture",
+  "summary": {
+    "ok": true,
+    "checksum_valid": true,
+    "model_preflight_ok": true,
+    "uploaded": true,
+    "serial_checks_ok": true,
+    "camera_captured": true,
+    "camera_ok": true
+  },
+  "model_preflight": {
+    "required_model": "TJC8048X543_011C",
+    "actual_model": "TJC8048X543_011C",
+    "diagnosis": "serial runtime is healthy enough for normal commands and public whmi-wri upload preflight"
+  },
+  "upload": {
+    "file_size": 11409060,
+    "checksum_hex": "0x95AA85C1",
+    "bytes_sent": 11409060,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 262.14
+  },
+  "serial_readback_passed": [
+    {"target": "photo1.pic", "widget": "image", "expected": 1, "actual": 1},
+    {"target": "photo1.id", "widget": "image", "expected": 4, "actual": 4},
+    {"target": "photo1.x", "widget": "image", "expected": 162, "actual": 162},
+    {"target": "photo1.y", "widget": "image", "expected": 87, "actual": 87},
+    {"target": "photo1.w", "widget": "image", "expected": 489, "actual": 489},
+    {"target": "photo1.h", "widget": "image", "expected": 342, "actual": 342}
+  ],
+  "not_claimed": [
+    "pixel-level assertion that the packed image content exactly matches the source file; this run records serial field readback and a camera capture artifact",
+    "arbitrary image-resource packing for every size or source format",
+    "image-button pressed-state behavior",
+    "crop-image behavior",
+    "external-picture SD-path behavior",
+    "arbitrary page/widget/event generalization"
+  ],
+  "artifacts": {
+    "smoke_result": {
+      "path": "reverse_usarthmi/image_resource_demo_build/smoke_capture/smoke_result.json",
+      "sha256": "5fac85831ad457c4434d636876ebc32871d815e7d87ec83e3730cd79d32019b3",
+      "bytes": 14996
+    },
+    "camera_capture": {
+      "path": "reverse_usarthmi/image_resource_demo_build/smoke_capture/camera_after_smoke.jpg",
+      "sha256": "ec052feb7c07f51e6040dadc779ab6e628c769042d7627205252bcfc32d2db01",
+      "bytes": 122129
+    }
+  }
+}

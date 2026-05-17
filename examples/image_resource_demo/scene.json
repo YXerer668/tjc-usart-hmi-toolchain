@@ -1,0 +1,38 @@
+{
+  "project": {
+    "name": "image-resource-demo",
+    "default_page": "page0"
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {
+    "photo": {
+      "id": "photo",
+      "source": "C:/Users/SinYu/Desktop/case_for_codex/case_07_image_source_png_jpg/0f8ad442af20a7d889ff1c047a42827d.jpg"
+    }
+  },
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "photo1",
+          "type": "image",
+          "x": 162,
+          "y": 87,
+          "w": 489,
+          "h": 342,
+          "resources": {
+            "asset": "photo"
+          }
+        }
+      ]
+    }
+  ]
+}

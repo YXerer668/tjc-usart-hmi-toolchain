@@ -93,6 +93,42 @@ class LiveTftSmokeTests(unittest.TestCase):
         self.assertTrue(evidence["summary"]["camera_ok"])
         self.assertIn("pixel-level assertion", evidence["not_claimed"][0])
 
+    def test_image_resource_demo_smoke_expect_loads_readbacks(self) -> None:
+        expect_path = Path("examples/image_resource_demo/smoke.expect.json")
+        config = json.loads(expect_path.read_text(encoding="utf-8"))
+        expectations = _load_expectations(str(expect_path), [])
+        targets = {item.target: item.expected for item in expectations}
+
+        self.assertEqual(config["page_id"], 0)
+        self.assertEqual(
+            targets,
+            {
+                "photo1.pic": 1,
+                "photo1.id": 4,
+                "photo1.x": 162,
+                "photo1.y": 87,
+                "photo1.w": 489,
+                "photo1.h": 342,
+            },
+        )
+        self.assertTrue(all(item.attempts == 3 for item in expectations))
+
+    def test_image_resource_demo_hardware_evidence_matches_smoke_expect(self) -> None:
+        expect_path = Path("examples/image_resource_demo/smoke.expect.json")
+        evidence_path = Path("examples/image_resource_demo/hardware_verified_2026-05-17.json")
+        expectations = _load_expectations(str(expect_path), [])
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        expected_targets = {item.target: item.expected for item in expectations}
+        passed_targets = {item["target"]: item["actual"] for item in evidence["serial_readback_passed"]}
+
+        self.assertTrue(evidence["summary"]["ok"])
+        self.assertEqual(evidence["expect_json"], expect_path.as_posix())
+        self.assertEqual(passed_targets, expected_targets)
+        self.assertEqual(evidence["upload"]["checksum_hex"], "0x95AA85C1")
+        self.assertEqual(evidence["build"]["packed_picture_id"], 1)
+        self.assertTrue(evidence["summary"]["camera_ok"])
+        self.assertIn("pixel-level assertion", evidence["not_claimed"][0])
+
     def test_xfloat_combobox_demo_smoke_expect_loads_readbacks(self) -> None:
         expect_path = Path("examples/xfloat_combobox_demo/smoke.expect.json")
         config = json.loads(expect_path.read_text(encoding="utf-8"))

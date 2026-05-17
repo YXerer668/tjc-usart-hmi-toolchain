@@ -18,6 +18,7 @@
     "dualstate-button",
     "external-picture",
     "gauge",
+    "image",
     "number",
     "progress",
     "qrcode",
@@ -123,9 +124,9 @@
     "image": {
       "scene": "examples/builtin_controls_demo/scene.json",
       "offline_evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "documented-live-proof",
-      "live_expectations_or_docs": ["FEATURE_STATUS.md"],
-      "next_live_action": "Commit a dedicated camera/readback artifact for the packed image smoke if this needs to count as closed."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/image_resource_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add pixel-level image-content matching only if visual correctness needs to be closed beyond serial field readback and camera capture."
     },
     "number": {
       "scene": "examples/builtin_controls_demo/scene.json",
