@@ -1145,6 +1145,7 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual(manifest["tft_patch"]["object_count"], 15)
 
             target_page = load_page_file(manifest["target_pa"])
+            output_tft = Path(manifest["output_tft"])
             self.assertEqual(
                 [(block.objname, block.type_code) for block in target_page.blocks],
                 [
@@ -1165,6 +1166,8 @@ class EditorTftBuildTests(unittest.TestCase):
                     ("s0", "\x00"),
                 ],
             )
+            self.assertEqual(_compiled_page_primary_value(output_tft, target_page, "bt0", "5", 0x48, 1), 0)
+            self.assertEqual(_compiled_page_primary_value(output_tft, target_page, "bt1", "5", 0x48, 1), 1)
 
     @unittest.skipUnless(CASE_31_TFT.exists(), "local official multi-page fixture is not available")
     def test_scene_build_reproduces_official_multi_page_case31(self) -> None:

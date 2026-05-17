@@ -1,0 +1,69 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "scope": "live COM36 smoke for value/text-like controls in examples/new_controls_demo after dual-state value patch",
+  "scene": "examples/new_controls_demo/scene.json",
+  "expect_json": "examples/new_controls_demo/smoke.expect.json",
+  "source_tft": "reverse_usarthmi/new_controls_demo_smoke_probe/output.tft",
+  "command": "python tools/live_tft_smoke.py --file reverse_usarthmi/new_controls_demo_smoke_probe/output.tft --out-dir reverse_usarthmi/new_controls_demo_smoke_probe/smoke_fixed --expect-json examples/new_controls_demo/smoke.expect.json --upload --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --progress --capture",
+  "summary": {
+    "ok": true,
+    "checksum_valid": true,
+    "model_preflight_ok": true,
+    "uploaded": true,
+    "serial_checks_ok": true,
+    "camera_ok": true
+  },
+  "model_preflight": {
+    "required_model": "TJC8048X543_011C",
+    "actual_model": "TJC8048X543_011C",
+    "diagnosis": "serial runtime is healthy enough for normal commands and public whmi-wri upload preflight"
+  },
+  "upload": {
+    "file_size": 11420940,
+    "checksum_hex": "0xCEC1B698",
+    "bytes_sent": 11420940,
+    "chunks_sent": 2789,
+    "chunk_size": 4096,
+    "elapsed_s": 263.032
+  },
+  "serial_readback_passed": [
+    {"target": "bar1.val", "widget": "progress", "expected": 68, "actual": 68},
+    {"target": "slider1.val", "widget": "slider", "expected": 42, "actual": 42},
+    {"target": "gauge1.val", "widget": "gauge", "expected": 75, "actual": 75},
+    {"target": "qr1.txt", "widget": "qrcode", "expected": "USART HMI", "actual": "USART HMI"},
+    {"target": "g0.txt", "widget": "scrolling-text", "expected": "SCROLLING TEXT", "actual": "SCROLLING TEXT"},
+    {"target": "bt0.val", "widget": "dual-button", "expected": 0, "actual": 0},
+    {"target": "bt1.val", "widget": "dualstate-button", "expected": 1, "actual": 1},
+    {"target": "sw0.val", "widget": "state-button", "expected": 1, "actual": 1},
+    {"target": "c0.val", "widget": "checkbox", "expected": 1, "actual": 1},
+    {"target": "r0.val", "widget": "radio", "expected": 1, "actual": 1},
+    {"target": "va0.val", "widget": "variable", "expected": 123, "actual": 123}
+  ],
+  "regression_found_and_fixed": {
+    "symptom": "Before the type-5 writer patch, bt1.val compiled from scene value 1 but live runtime read back 0.",
+    "cause": "The clean-rebuild primary writer did not patch type '5' dual-state button runtime value fields.",
+    "fix": "Patch type '5' primary record value at offset 0x48 and guard it in tests/test_editor_tft_build.py."
+  },
+  "not_claimed": [
+    "crop-image runtime attribute readback; q0.picc returned invalid_reference in the first smoke attempt and was removed from the serial expect file",
+    "hotspot physical touch behavior",
+    "waveform drawing behavior",
+    "QR code camera decode",
+    "scrolling movement over time",
+    "arbitrary page/widget/event generalization"
+  ],
+  "artifacts": {
+    "smoke_result": {
+      "path": "reverse_usarthmi/new_controls_demo_smoke_probe/smoke_fixed/smoke_result.json",
+      "sha256": "ce991c3f0b8ea39d8ede39b734f7083ff5bfea9ae3659675211c7556ed907f06",
+      "bytes": 19438
+    },
+    "camera_capture": {
+      "path": "reverse_usarthmi/new_controls_demo_smoke_probe/smoke_fixed/camera_after_smoke.jpg",
+      "sha256": "ef8021f65dc8238a8c87f9fcb4749fd1345e205eb15336a2c6cc17cfb3770459",
+      "bytes": 119184
+    }
+  }
+}

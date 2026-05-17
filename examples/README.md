@@ -10,7 +10,7 @@
 - `media_single_video_sd_smoke`: 单个 SD 视频控件的最小烧录样例，验证 video 对象 tail 和运行时可读字段；不承诺所有视频编码都能播放。
 - `media_single_audio_sd_smoke`: 单个 SD 音频控件的最小烧录样例，验证 wav/audio 对象 tail 和运行时可读字段；不承诺扬声器/音量链路。
 - `media_widgets_demo`: 动画、视频、音频控件的第一版 authoring 样例，目前主要承诺 HMI/预览；视频和音频还不作为独立 TFT 烧录路径。
-- `new_controls_demo`: fixture-backed 非媒体控件的 clean rebuild 离线样例；现在带有 `smoke.expect.json` 作为下一步 COM36 候选，不代表已经活屏闭环。
+- `new_controls_demo`: fixture-backed 非媒体控件的 clean rebuild 样例；`hardware_verified_2026-05-17.json` 已证明其中一批 value/text-like 控件的 COM36 初值读回。
 - `page1_button_event_minimal`: page1 普通按钮跳回 page0 的最小事件样例，需要显式打开 `experimental_multi_page_events`。
 - `page1_button_numeric_event_minimal`: page1 普通按钮执行 `numval.val++` 的最小数字事件样例，已经活屏验证。
 - `page1_button_numeric_event_matrix`: page1 多按钮数字事件矩阵，覆盖 `++`、`=7`、`--`，已经活屏验证。

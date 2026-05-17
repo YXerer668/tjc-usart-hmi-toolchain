@@ -42,11 +42,25 @@ class LiveTftSmokeTests(unittest.TestCase):
                 "sw0.val": 1,
                 "c0.val": 1,
                 "r0.val": 1,
-                "q0.picc": 0,
                 "va0.val": 123,
             },
         )
         self.assertTrue(all(item.attempts == 3 for item in expectations))
+
+    def test_new_controls_demo_hardware_evidence_matches_smoke_expect(self) -> None:
+        expect_path = Path("examples/new_controls_demo/smoke.expect.json")
+        evidence_path = Path("examples/new_controls_demo/hardware_verified_2026-05-17.json")
+        expectations = _load_expectations(str(expect_path), [])
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+        expected_targets = {item.target: item.expected for item in expectations}
+        passed_targets = {item["target"]: item["actual"] for item in evidence["serial_readback_passed"]}
+
+        self.assertTrue(evidence["summary"]["ok"])
+        self.assertEqual(evidence["expect_json"], expect_path.as_posix())
+        self.assertEqual(passed_targets, expected_targets)
+        self.assertIn("bt1.val", passed_targets)
+        self.assertIn("crop-image runtime attribute readback", evidence["not_claimed"][0])
+        self.assertEqual(evidence["upload"]["checksum_hex"], "0xCEC1B698")
 
     def test_ffmpeg_dshow_capture_uses_named_usb_cam_and_warmup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

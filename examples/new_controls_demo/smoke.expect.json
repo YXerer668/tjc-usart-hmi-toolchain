@@ -63,12 +63,6 @@
       "attempts": 3
     },
     {
-      "target": "q0.picc",
-      "expected": 0,
-      "expected_kind": "number",
-      "attempts": 3
-    },
-    {
       "target": "va0.val",
       "expected": 123,
       "expected_kind": "number",

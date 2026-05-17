@@ -2347,6 +2347,8 @@ def _build_primary_block(
             _patch_gauge_record(record, block)
         elif type_code == "j":
             _patch_progress_record(record, block)
+        elif type_code == "5":
+            _patch_dual_state_button_record(record, block)
         elif type_code == "C":
             _patch_state_button_record(record, block)
         elif type_code == "8":
@@ -2687,6 +2689,23 @@ def _patch_progress_record(record: bytearray, block: PageBlock) -> None:
     _write_record_u8_from_field(record, 0x3B, block, "dis")
     _write_record_u16_from_field(record, 0x3C, block, "bco")
     _write_record_u16_from_field(record, 0x3E, block, "pco")
+
+
+def _patch_dual_state_button_record(record: bytearray, block: PageBlock) -> None:
+    _write_record_u8_from_field(record, 0x38, block, "sta")
+    _write_record_u8_from_field(record, 0x39, block, "style")
+    _write_record_u16_from_field(record, 0x3A, block, "borderc")
+    _write_record_u16_from_field(record, 0x3E, block, "bco")
+    _write_record_u16_from_field(record, 0x40, block, "bco2")
+    _write_record_u16_from_field(record, 0x42, block, "pco")
+    _write_record_u16_from_field(record, 0x44, block, "pco2")
+    _write_record_u8_from_field(record, 0x46, block, "xcen")
+    _write_record_u8_from_field(record, 0x47, block, "ycen")
+    _write_record_u8_from_field(record, 0x48, block, "val")
+    _write_record_u16_from_field(record, 0x4A, block, "txt_maxl")
+    _write_record_u16_from_field(record, 0x4C, block, "isbr")
+    _write_record_u16_from_field(record, 0x4E, block, "spax")
+    _write_record_u16_from_field(record, 0x50, block, "spay")
 
 
 def _patch_state_button_record(record: bytearray, block: PageBlock) -> None:

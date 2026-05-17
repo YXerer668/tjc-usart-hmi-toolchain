@@ -12,9 +12,20 @@
   },
   "committed_live_proof_widget_types": [
     "button",
+    "checkbox",
+    "dual-button",
+    "dualstate-button",
+    "gauge",
     "number",
+    "progress",
+    "qrcode",
+    "radio",
+    "scrolling-text",
+    "slider",
+    "state-button",
     "text",
-    "timer"
+    "timer",
+    "variable"
   ],
   "not_claimed": [
     "live COM36 proof for every widget",
@@ -54,9 +65,9 @@
     "checkbox": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate on COM36 and commit the live_tft_smoke result."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add visible selection proof only if UI behavior beyond initial value readback is needed."
     },
     "combobox": {
       "scene": "examples/xfloat_combobox_demo/scene.json",
@@ -75,16 +86,16 @@
     "dual-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add a focused toggle-state proof if initial readback passes."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add a focused toggle-state proof if behavior beyond initial value readback is needed."
     },
     "dualstate-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate; keep runtime distinction from dual-button fixture explicit."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Keep runtime distinction from dual-button fixture explicit in any future toggle proof."
     },
     "external-picture": {
       "scene": "examples/external_picture_demo/scene.json",
@@ -99,9 +110,9 @@
     "gauge": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof for visible needle/value."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add camera proof for visible needle/value if visual behavior needs to be closed."
     },
     "hotspot": {
       "scene": "examples/new_controls_demo/scene.json",
@@ -129,44 +140,44 @@
     "progress": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add visible value-change camera proof."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add visible value-change camera proof if visual behavior needs to be closed."
     },
     "qrcode": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof and decoded payload verification if possible."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add camera proof and decoded payload verification if QR visual behavior needs to be closed."
     },
     "radio": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate and add visible selection proof if initial readback passes."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add visible selection proof if UI behavior beyond initial value readback is needed."
     },
     "scrolling-text": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof over time; keep this separate from unsupported sliding-text."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add camera proof over time for actual scrolling movement; keep this separate from unsupported sliding-text."
     },
     "slider": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add visible value/readback proof for movement."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add visible value/readback proof for movement if interactive behavior needs to be closed."
     },
     "state-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add focused toggle readback or visible state proof."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add focused toggle readback or visible state proof if behavior beyond initial value readback is needed."
     },
     "text": {
       "scene": "examples/builtin_controls_demo/scene.json",
@@ -197,9 +208,9 @@
     "variable": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "smoke-ready",
-      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
-      "next_live_action": "Run the new_controls_demo smoke candidate, then add set/get mutation proof if initial readback passes."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/new_controls_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add set/get mutation proof if behavior beyond initial value readback is needed."
     },
     "video": {
       "scene": "examples/media_single_video_sd_smoke/scene.json",
