@@ -47,6 +47,7 @@ MEDIA_GMOV_SMOKE_SCENE = Path("examples/media_single_gmov_smoke/scene.json")
 MEDIA_VIDEO_SD_SMOKE_SCENE = Path("examples/media_single_video_sd_smoke/scene.json")
 MEDIA_AUDIO_SD_SMOKE_SCENE = Path("examples/media_single_audio_sd_smoke/scene.json")
 WIDGET_CAPABILITY_MATRIX = Path("examples/widget_capability_matrix_2026-05-17.json")
+ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT = Path("examples/all_supported_controls_completion_audit_2026-05-17.json")
 FONT_ZI = Path("build_font_scene.zi")
 GB2312_FONT_ZI = Path("reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi")
 BUILTIN_WIDGET_TYPE_CODES = {
@@ -125,6 +126,59 @@ class EditorTftBuildTests(unittest.TestCase):
                 scene = load_scene(scene_path)
                 widget_types = {widget.type for page in scene.pages for widget in page.widgets}
                 self.assertIn(widget_type, widget_types)
+
+    def test_all_supported_controls_completion_audit_matches_capability_matrix(self) -> None:
+        matrix = json.loads(WIDGET_CAPABILITY_MATRIX.read_text(encoding="utf-8"))
+        audit = json.loads(ALL_SUPPORTED_CONTROLS_COMPLETION_AUDIT.read_text(encoding="utf-8"))
+
+        self.assertEqual(audit["target"], matrix["target"])
+        self.assertEqual(audit["source_capability_matrix"], WIDGET_CAPABILITY_MATRIX.as_posix())
+        self.assertEqual(set(audit["completed_current_target_supported_widget_types"]), set(SUPPORTED_WIDGET_TYPES))
+        self.assertEqual(audit["excluded_current_target_unsupported"], UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES)
+        self.assertEqual(audit["current_target_unsupported_evidence"], matrix["current_target_unsupported_evidence"])
+        self.assertTrue(Path(audit["current_target_unsupported_evidence"]).exists())
+
+        writer_evidence = audit["writer_path_evidence"]
+        built_in_writer_types = set(writer_evidence["built_in_writer_types"])
+        fixture_writer_cases = writer_evidence["fixture_backed_writer_types"]
+        self.assertEqual(built_in_writer_types, set(matrix["built_in_writer_types"]))
+        self.assertEqual(fixture_writer_cases, matrix["fixture_backed_writer_types"])
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), built_in_writer_types | set(fixture_writer_cases))
+
+        self.assertEqual(audit["full_page_rebuild_offline_coverage"], matrix["full_page_rebuild_offline_coverage"])
+        covered_types = set()
+        for group in audit["full_page_rebuild_offline_coverage"].values():
+            covered_types.update(group["types"])
+            self.assertTrue(Path(group["evidence"]).exists())
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), covered_types)
+
+        self.assertEqual(audit["scene_examples"], matrix["scene_examples"])
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), set(audit["scene_examples"]))
+
+        legacy_demo = audit["legacy_demos"]["examples/all_controls_demo/scene.json"]
+        legacy_scene = load_scene(Path("examples/all_controls_demo/scene.json"))
+        legacy_widget_types = {widget.type for page in legacy_scene.pages for widget in page.widgets}
+        self.assertEqual(legacy_demo["role"], "basic-smoke-only")
+        self.assertTrue(legacy_demo["not_completion_evidence"])
+        self.assertEqual(set(legacy_demo["covers_widget_types"]), legacy_widget_types)
+        self.assertNotEqual(legacy_widget_types, set(SUPPORTED_WIDGET_TYPES))
+
+        for claim in matrix["not_claimed"]:
+            with self.subTest(not_claimed=claim):
+                self.assertIn(claim, audit["not_claimed"])
+
+        success_criteria = {item["id"]: item for item in audit["success_criteria"]}
+        self.assertEqual(
+            set(success_criteria),
+            {
+                "current-target-supported-set",
+                "writer-paths",
+                "offline-scene-coverage",
+                "unsupported-target-drops",
+                "legacy-demo-boundary",
+            },
+        )
+        self.assertTrue(all(item["status"] == "passed" for item in success_criteria.values()))
 
     def test_widget_capability_matrix_scene_examples_build_clean_rebuild_tfts(self) -> None:
         matrix = json.loads(WIDGET_CAPABILITY_MATRIX.read_text(encoding="utf-8"))

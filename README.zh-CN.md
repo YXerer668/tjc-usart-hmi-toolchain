@@ -53,6 +53,7 @@
 - 外部图片、单 GMOV 动画。
 
 这些控件并不都等价于“全生态稳定支持”。很多控件目前是“当前 seed + 当前屏幕 + 当前 fixture”条件下可构建，换型号或换资源布局需要重新验证。
+当前目标 supported 控件的离线完工边界见 `examples/all_supported_controls_completion_audit_2026-05-17.json`；它只证明 writer path 和 clean full-page rebuild 覆盖，不等于每个控件都有 COM36 活屏行为闭环。
 
 ## 还没完全解决的部分
 

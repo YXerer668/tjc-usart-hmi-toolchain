@@ -1,0 +1,196 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "objective": "Audit the current-target meaning of completing all controls: every supported scene widget type has a writer path and clean full-page rebuild offline coverage; controls dropped by the official compiler stay excluded.",
+  "source_capability_matrix": "examples/widget_capability_matrix_2026-05-17.json",
+  "completed_current_target_supported_widget_types": [
+    "animation",
+    "audio",
+    "button",
+    "checkbox",
+    "combobox",
+    "crop-image",
+    "dual-button",
+    "dualstate-button",
+    "external-picture",
+    "gauge",
+    "hotspot",
+    "image",
+    "number",
+    "progress",
+    "qrcode",
+    "radio",
+    "scrolling-text",
+    "slider",
+    "state-button",
+    "text",
+    "timer",
+    "touch-capture",
+    "variable",
+    "video",
+    "waveform",
+    "xfloat"
+  ],
+  "writer_path_evidence": {
+    "built_in_writer_types": [
+      "button",
+      "image",
+      "number",
+      "text",
+      "timer"
+    ],
+    "fixture_backed_writer_types": {
+      "animation": {"case": "case_47_gmov", "type": "0x02"},
+      "audio": {"case": "case_49_audio", "type": "0x04"},
+      "slider": {"case": "case_17_slider", "type": "0x01"},
+      "gauge": {"case": "case_18_gauge", "type": "z"},
+      "progress": {"case": "case_20_progress", "type": "j"},
+      "qrcode": {"case": "case_21_qrcode", "type": ":"},
+      "scrolling-text": {"case": "case_22_scrolling_text", "type": "7"},
+      "dual-button": {"case": "case_23_dual_state_button", "type": "5"},
+      "dualstate-button": {"case": "case_23_dual_state_button", "type": "5"},
+      "state-button": {"case": "case_24_state_button", "type": "C"},
+      "hotspot": {"case": "case_25_hotspot_touch_area", "type": "m"},
+      "variable": {"case": "case_26_variable_numeric_string", "type": "4"},
+      "waveform": {"case": "case_27_waveform_basic", "type": "0x00"},
+      "checkbox": {"case": "case_28_checkbox", "type": "8"},
+      "radio": {"case": "case_29_radio", "type": "9"},
+      "crop-image": {"case": "case_30_crop_image", "type": "q"},
+      "xfloat": {"case": "case_36_xfloat", "type": ";"},
+      "combobox": {"case": "case_37_combobox", "type": "="},
+      "touch-capture": {"case": "case_45_touchcap_current_gui", "type": "0x05"},
+      "external-picture": {"case": "case_46_expicture_current_gui", "type": "<"},
+      "video": {"case": "case_48_video", "type": "0x03"}
+    }
+  },
+  "excluded_current_target_unsupported": {
+    "text-select": "case_38_text_select was dropped by the official compiler for TJC8048X543_011C",
+    "sliding-text": "case_41_sltext was dropped by the official compiler for TJC8048X543_011C",
+    "data-record": "case_42_datarecord was dropped by the official compiler for TJC8048X543_011C",
+    "file-browser": "case_43_filebrowser was dropped by the official compiler for TJC8048X543_011C",
+    "file-stream": "case_44_filestream was dropped by the official compiler for TJC8048X543_011C"
+  },
+  "current_target_unsupported_evidence": "examples/current_target_unsupported_official_drop_verified_2026-05-17.json",
+  "full_page_rebuild_offline_coverage": {
+    "built_in_controls": {
+      "types": ["button", "image", "number", "text", "timer"],
+      "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"
+    },
+    "fixture_backed_non_media_controls": {
+      "types": [
+        "checkbox",
+        "crop-image",
+        "dual-button",
+        "dualstate-button",
+        "gauge",
+        "hotspot",
+        "progress",
+        "qrcode",
+        "radio",
+        "scrolling-text",
+        "slider",
+        "state-button",
+        "variable",
+        "waveform"
+      ],
+      "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"
+    },
+    "fixture_backed_extra_and_single_media_controls": {
+      "types": [
+        "animation",
+        "audio",
+        "combobox",
+        "external-picture",
+        "touch-capture",
+        "video",
+        "xfloat"
+      ],
+      "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"
+    }
+  },
+  "scene_examples": {
+    "animation": {"scene": "examples/media_single_gmov_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "audio": {"scene": "examples/media_single_audio_sd_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "button": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "checkbox": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "combobox": {"scene": "examples/xfloat_combobox_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "crop-image": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "dual-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "dualstate-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "external-picture": {"scene": "examples/external_picture_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "gauge": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "hotspot": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "image": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "number": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "progress": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "qrcode": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "radio": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "scrolling-text": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "slider": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "state-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "text": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "timer": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "touch-capture": {"scene": "examples/touch_capture_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "variable": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "video": {"scene": "examples/media_single_video_sd_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "waveform": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "xfloat": {"scene": "examples/xfloat_combobox_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"}
+  },
+  "legacy_demos": {
+    "examples/all_controls_demo/scene.json": {
+      "role": "basic-smoke-only",
+      "covers_widget_types": ["button", "image", "text"],
+      "not_completion_evidence": true,
+      "reason": "This legacy scene remains useful for a simple visual smoke test, but it is not the all-supported-controls coverage source."
+    }
+  },
+  "success_criteria": [
+    {
+      "id": "current-target-supported-set",
+      "status": "passed",
+      "evidence": ["usarthmi/scene.py:SUPPORTED_WIDGET_TYPES", "examples/widget_capability_matrix_2026-05-17.json"],
+      "check": "completed_current_target_supported_widget_types equals SUPPORTED_WIDGET_TYPES"
+    },
+    {
+      "id": "writer-paths",
+      "status": "passed",
+      "evidence": ["usarthmi/editor.py:FIXTURE_WIDGET_TEMPLATE_CASES", "tests/test_editor_tft_build.py::test_current_target_supported_widget_types_have_tft_writer_path"],
+      "check": "built-in writer types plus fixture-backed writer types cover every current-target supported widget type"
+    },
+    {
+      "id": "offline-scene-coverage",
+      "status": "passed",
+      "evidence": ["examples/widget_capability_matrix_2026-05-17.json:full_page_rebuild_offline_coverage"],
+      "check": "the union of full-page rebuild offline coverage groups equals the supported widget set"
+    },
+    {
+      "id": "unsupported-target-drops",
+      "status": "passed",
+      "evidence": ["CURRENT_TARGET_LIMITATIONS.md", "examples/current_target_unsupported_official_drop_verified_2026-05-17.json"],
+      "check": "controls dropped by the current target official compiler are excluded and hard-fail in scene validation"
+    },
+    {
+      "id": "legacy-demo-boundary",
+      "status": "passed",
+      "evidence": ["examples/all_controls_demo/scene.json", "examples/README.md"],
+      "check": "all_controls_demo is documented as a basic smoke scene, not completion evidence"
+    }
+  ],
+  "not_claimed": [
+    "runtime behavior for every widget",
+    "live COM36 proof for every widget",
+    "arbitrary page/widget/event generalization",
+    "support for controls dropped by the current target official compiler",
+    "examples/all_controls_demo/scene.json as all-supported-controls coverage"
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_all_supported_controls_completion_audit_matches_capability_matrix -q",
+      "expected": "1 passed"
+    },
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_widget_capability_matrix_scene_examples_build_clean_rebuild_tfts -q",
+      "expected": "1 passed, 8 subtests passed"
+    }
+  ]
+}
