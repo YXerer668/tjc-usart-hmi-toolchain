@@ -1,0 +1,376 @@
+{
+  "source": "codex_live_tsw_promotion_serial_click_fallback",
+  "date": "2026-05-16",
+  "scope": "page0 clean rebuild 的 isolated tsw promotion 烧录闭环和 serial click fallback 实机结果。该文件记录串口 click 路径行为，不声明 physical touch lockout。",
+  "user_instruction": [
+    "每一轮起码做一次烧录闭环。",
+    "用 click 代替触摸就行。",
+    "这些证据记录好，之后用户有空再一起做真实触摸。"
+  ],
+  "artifact": {
+    "scene": "examples/number_demo/tsw_promotion_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+    "sha256": "3d86df296964064400db04446bdbc8621669946827fc0e7d064a3c394f081b2f",
+    "file_size": 11409900,
+    "checksum": {
+      "stored_hex": "0x8AA3D6C3",
+      "calculated_hex": "0x8AA3D6C3",
+      "valid": true
+    }
+  },
+  "preflight": {
+    "pytest": {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline",
+      "result": "1 passed in 6.86s"
+    },
+    "connect": {
+      "port": "COM36",
+      "baud": 9600,
+      "model": "TJC8048X543_011C",
+      "ok": true
+    },
+    "camera": {
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/pre_upload_camera_20260516_2006.jpg",
+      "sha256": "aa337bdeca6fcb0c5181b40b7ae35fcbed2a0cedeb61dc532463e74e63cc693e",
+      "visual_observation": "烧录前 USB Cam 可用；屏幕仍是上一轮 VIS PROMOTION 页面。"
+    }
+  },
+  "upload": {
+    "command": "usarthmi.cmd --json tft upload --file reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --expected-model TJC8048X543_011C --verify-after-upload --verify-get title.txt=TSW PROMOTION --verify-get disablebtn.txt=DISABLE --verify-get enablebtn.txt=ENABLE --verify-get targetbtn.txt=TARGET",
+    "bytes_sent": 11409900,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 211.094,
+    "uploaded_at_utc": "2026-05-16T12:12:00.165582Z",
+    "post_upload_health_attempt": 2,
+    "post_upload_readback": {
+      "sendme": 0,
+      "title.txt": "TSW PROMOTION",
+      "disablebtn.txt": "DISABLE",
+      "enablebtn.txt": "ENABLE",
+      "targetbtn.txt": "TARGET",
+      "ok": true
+    },
+    "last_upload_manifest": ".usarthmi_last_upload.json"
+  },
+  "camera_evidence": [
+    {
+      "stage": "after_upload",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_upload_tsw_20260516_2012.jpg",
+      "sha256": "6aa88855f9c52f371d682be4b5e051c90a282265d1dc12d0fc496704083de71e",
+      "visual_observation": "烧录后页面显示 TSW PROMOTION、DISABLE、ENABLE、TARGET。"
+    },
+    {
+      "stage": "after_serial_click_fallback",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_click_fallback_20260516_2014.jpg",
+      "sha256": "914921ce3e47514e22e8fa61ea3164ff5f929a751cc250f6c0f491dcf0b42d54",
+      "visual_observation": "serial click fallback 后页面仍健康；按钮处于点击后的绿色显示状态。"
+    },
+    {
+      "stage": "after_user_reported_touch",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_user_reported_touch_20260516_2016.jpg",
+      "sha256": "becfbc0565cf9101998f42e6110bb02b3cc766006e805cc79ab0d4a709f9b98f",
+      "visual_observation": "用户报告自己触摸过屏幕后，USB Cam 复拍显示页面仍健康且按钮处于正常视觉状态；该时刻没有串口监听，不能判断是否产生 TG marker。"
+    },
+    {
+      "stage": "after_explicit_release_retest",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_explicit_release_retest_20260516_2018.jpg",
+      "sha256": "c9b6300202da122e2387ea7511156a061d97f1a95b1315324e625bcf00664ead",
+      "visual_observation": "显式 click 1/0 复测并释放后，页面仍健康。"
+    }
+  ],
+  "serial_click_fallback": {
+    "input_path": "serial click command, not physical touch",
+    "note": "第一轮按用户指示用 click 代替触摸时只发送 click obj,1；用户随后指出 click 可能不会自动松手。显式 1/0 复测确认 click 需要 release 才会恢复视觉状态，但没有改变 serial click 不受 tsw targetbtn,0 抑制的结论。",
+    "steps": [
+      {
+        "label": "initial target click",
+        "command": "click targetbtn,1",
+        "expected_hex": "23 02 54 47",
+        "actual_hex": "23 02 54 47",
+        "ascii_preview": "#\\u0002TG",
+        "ok": true
+      },
+      {
+        "label": "disable target touch",
+        "command": "click disablebtn,1",
+        "expected_hex": "23 02 54 30",
+        "actual_hex": "23 02 54 30",
+        "ascii_preview": "#\\u0002T0",
+        "ok": true
+      },
+      {
+        "label": "target click after tsw targetbtn,0",
+        "command": "click targetbtn,1",
+        "expected_for_serial_suppression": "no 23 02 54 47 marker",
+        "actual_hex": "23 02 54 47",
+        "ascii_preview": "#\\u0002TG",
+        "ok": false,
+        "interpretation": "serial click still triggers targetbtn after tsw targetbtn,0; serial click is not suppressed by this touch-disable command on the tested path."
+      },
+      {
+        "label": "enable target touch",
+        "command": "click enablebtn,1",
+        "expected_hex": "23 02 54 31",
+        "actual_hex": "23 02 54 31",
+        "ascii_preview": "#\\u0002T1",
+        "ok": true
+      },
+      {
+        "label": "target click after tsw targetbtn,1",
+        "command": "click targetbtn,1",
+        "expected_hex": "23 02 54 47",
+        "actual_hex": "23 02 54 47",
+        "ascii_preview": "#\\u0002TG",
+        "ok": true
+      }
+    ],
+    "serial_click_path_tsw_suppression_live_observed": false,
+    "serial_click_path_result": "negative",
+    "physical_touch_lockout_live_observed": false,
+    "explicit_down_up_retest": {
+      "reason": "用户指出 click 可能不会自动松手，因此追加每次 down 后显式 up 的完整 tap 序列。",
+      "click_requires_explicit_release_for_visual_state": true,
+      "results": [
+        {
+          "label": "release target before retest",
+          "command": "click targetbtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "release disable before retest",
+          "command": "click disablebtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "release enable before retest",
+          "command": "click enablebtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "baseline target down",
+          "command": "click targetbtn,1",
+          "expected_hex": "23 02 54 47",
+          "actual_hex": "23 02 54 47",
+          "ok": true
+        },
+        {
+          "label": "baseline target up",
+          "command": "click targetbtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "disable down",
+          "command": "click disablebtn,1",
+          "expected_hex": "23 02 54 30",
+          "actual_hex": "23 02 54 30",
+          "ok": true
+        },
+        {
+          "label": "disable up",
+          "command": "click disablebtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "target down after disable",
+          "command": "click targetbtn,1",
+          "expected_for_serial_suppression": "no 23 02 54 47 marker",
+          "actual_hex": "23 02 54 47",
+          "ok": false,
+          "interpretation": "即使用完整 down/up tap，tsw targetbtn,0 后 serial click targetbtn,1 仍会触发 TG。"
+        },
+        {
+          "label": "target up after disable",
+          "command": "click targetbtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "enable down",
+          "command": "click enablebtn,1",
+          "expected_hex": "23 02 54 31",
+          "actual_hex": "23 02 54 31",
+          "ok": true
+        },
+        {
+          "label": "enable up",
+          "command": "click enablebtn,0",
+          "actual_hex": "",
+          "ok": true
+        },
+        {
+          "label": "target down after enable",
+          "command": "click targetbtn,1",
+          "expected_hex": "23 02 54 47",
+          "actual_hex": "23 02 54 47",
+          "ok": true
+        },
+        {
+          "label": "target up after enable",
+          "command": "click targetbtn,0",
+          "actual_hex": "",
+          "ok": true
+        }
+      ],
+      "summary": {
+        "suppression_step_ok": false,
+        "serial_click_path_tsw_suppression_live_observed": false
+      }
+    },
+    "fast_timing_scan": {
+      "reason": "用户指出前一轮可能是指令发得太慢，因此追加同一串口会话内的紧凑时序扫描。",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/fast_click_timing_scan_20260516_2034.json",
+      "sha256": "f129f4aad8742c07f98b28ad2ca4bb64b53d3a34fbd776bb9ca0d08195d4853f",
+      "intervals_s": [
+        0.0,
+        0.01,
+        0.02,
+        0.05,
+        0.1,
+        0.2
+      ],
+      "repeats_per_interval": 3,
+      "total_critical_trials": 18,
+      "any_suppressed": false,
+      "all_critical_saw_disable_marker": true,
+      "target_after_disable_total": 18,
+      "critical_hex_observed_each_trial": "23 02 54 30 23 02 54 47",
+      "interpretation": "在 0~200 ms 的紧凑串口 click 扫描中，disable 阶段每次都先看到 T0，随后 target click 每次仍看到 TG；因此 serial-click-path 的负结果不是慢延迟导致的漏判。该扫描仍不等价于 physical touch lockout 证明。"
+    },
+    "user_reported_real_touch": {
+      "status": "partial_visual_and_serial_marker_capture",
+      "reported_by_user": true,
+      "image_attached_in_chat": true,
+      "local_follow_up_capture": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_user_reported_touch_20260516_2016.jpg",
+      "real_touch_listener": {
+        "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/real_touch_listen_20260516_2020.json",
+        "sha256": "2b8ea83adf4ca17a7f25c99dca539fa8a057643f0852569689b46aa17aa68517",
+        "started_at_utc": "2026-05-16T12:22:04.878472+00:00",
+        "listen_s": 90,
+        "summary": {
+          "TG_target_count": 19,
+          "T0_disable_count": 8,
+          "T1_enable_count": 7
+        }
+      },
+      "user_reported_physical_lockout_observation": {
+        "reported_at_local": "2026-05-16 20:37",
+        "observation": "用户报告自己按下 DISABLE 后，TARGET 在视觉/物理触摸上已经按不了。",
+        "evidence_class": "user-reported physical observation",
+        "interpretation": "该观察与 serial click 负结果并不矛盾：serial click 可能绕过真实触摸门控，而手指触摸走 physical touch path。"
+      },
+      "follow_up_segmented_attempts": [
+        {
+          "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/segmented_real_touch_pass_20260516_2040.json",
+          "sha256": "859a7a36d23479af702a95050ae8331221f1bf1ee88d5832930405b287b1f427",
+          "method": "beep-timed three-window listener",
+          "summary": {
+            "baseline_tg_count": 0,
+            "disabled_tg_count": 0,
+            "reenabled_tg_count": 0,
+            "state_markers_ok": true
+          },
+          "interpretation": "同步失败：baseline/recovery 都没有捕获 TG，不能作为 physical lockout 反证。"
+        },
+        {
+          "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/segmented_real_touch_title_guided_20260516_2042.json",
+          "sha256": "8a919d98b67bb8fcaedb6abf0cf4d1e651145bb71328aa033f5fb1c8ab8da6a1",
+          "method": "title-guided marker-driven listener",
+          "summary": {
+            "baseline_tg_count": 0,
+            "disabled_tg_count": 0,
+            "reenabled_tg_count": 0,
+            "state_markers_ok": true
+          },
+          "interpretation": "仍未同步到用户 TARGET 触摸：baseline/recovery 都没有捕获 TG，不能作为 physical lockout 反证。"
+        },
+        {
+          "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/panel_guided_real_touch_pass_20260516_2048.json",
+          "sha256": "79bced682deba605163fd09a2643d53b48856612825c2d78973694309d0aaced",
+          "method": "panel-visible title plus target text prompts",
+          "reason": "用户说明没有看到聊天提示，因此改成屏幕自身提示。",
+          "summary": {
+            "baseline_tg_count": 1,
+            "disabled_tg_count": 3,
+            "reenabled_tg_count": 1,
+            "state_markers_ok": true
+          },
+          "interpretation": "同步成功，但该版本在 disable 后写了 targetbtn.txt=\"TRY\" 并 ref targetbtn，可能刷新/扰动目标对象状态；disabled 窗口 3 个 TG 不能作为干净 physical lockout 反证。"
+        },
+        {
+          "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/panel_guided_real_touch_title_only_20260516_2049.json",
+          "sha256": "3e1acec535b6f7ea4edfabcf5d9ba66e95ea8e998c1ac5d5f2404e780712689c",
+          "method": "panel-visible title-only prompts, no target object write after disable",
+          "summary": {
+            "baseline_tg_count": 0,
+            "disabled_tg_count": 0,
+            "reenabled_tg_count": 0,
+            "state_markers_ok": true
+          },
+          "interpretation": "干净但未同步：baseline/recovery 都没有捕获 TG，不能作为 physical lockout 反证。"
+        }
+      ],
+      "post_attempt_recovery": {
+        "page_reload_command": "page 0",
+        "title_readback": "TSW PROMOTION",
+        "camera_path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/after_title_only_touch_attempt_20260516_2054.jpg",
+        "camera_sha256": "218793d2c3e3da48dc324d81742bf6bdafa84eead787cc73b3d12173dd0c302e",
+        "ok": true
+      },
+      "interpretation": "用户参与真实触摸，90 秒串口监听捕获到了真实触摸路径上的 TG/T0/T1 markers，证明手指触摸会触发这些事件。用户随后报告按下 DISABLE 后 TARGET 已不能被手指按下，这支持 physical touch lockout 在真实触摸路径上有效；但可复现分段机器证据仍未闭合：聊天提示和 title-only 提示未同步到 baseline/recovery，title+target 文本提示同步成功但扰动了 targetbtn。尚不能把该观察升级成完全机器捕获的 segmented proof。"
+    }
+  },
+  "claims_allowed": [
+    "isolated page0 clean rebuild 的 tsw promotion TFT 已成功烧录到 COM36，并通过串口读回和相机证明页面健康。",
+    "disablebtn/enablebtn 的事件在实机上会执行并发出 T0/T1 markers，因此 tsw targetbtn,0/1 命令 dispatch 在该 fixture 中已实机到达。",
+    "serial click fallback 证明：在该实机路径上，tsw targetbtn,0 后 serial click targetbtn,1 仍会触发 TG marker；显式 click 1/0 release 复测后结论不变。",
+    "fast timing scan 证明：同一串口会话内用 0/10/20/50/100/200 ms 间隔重复 18 次 disable->target 序列，全部先看到 T0 再看到 TG，因此 serial-click-path 的负结果不是指令发得太慢造成的。",
+    "user-reported physical observation：用户报告真实手指按下 DISABLE 后 TARGET 已不能按下；该观察支持 serial click 与 physical touch path 不等价。"
+  ],
+  "claims_blocked": [
+    "已用完全机器捕获的分段证据证明 physical touch lockout。",
+    "serial click 可替代真实手指触摸证明禁触。",
+    "tsw 结论可泛化到 ref、混合 event_matrix、page-load、media、timer、跨页或任意控件。"
+  ],
+  "next_real_touch_work": {
+    "status": "partial_marker_capture_done_needs_structured_retest",
+    "latest_listener": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/real_touch_listen_20260516_2020.json",
+    "latest_noninteractive_reburn_loop": {
+      "path": "examples/number_demo/tsw_heartbeat_reburn_verified_2026-05-16_2058.json",
+      "summary": "Heartbeat loop freshly re-uploaded the isolated TSW PROMOTION TFT to COM36, verified title/disablebtn/enablebtn/targetbtn readback and camera evidence, and made no new physical-touch claim."
+    },
+    "controlled_runner": {
+      "path": "tools/tsw_physical_touch_proof.py",
+      "script_sha256": "9ab7d87228b7ad3b5971c94c7895b73291fc6c5df96b58bd333f8d2ae24b0b13",
+      "dry_run_report": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/physical_touch_proof_dry_run_20260516.json",
+      "dry_run_sha256": "2f397c48c3cd20d20a721948c231e2e6d1e38300878eb8eb707da262b37655ae",
+      "unit_tests": {
+        "path": "tests/test_tsw_physical_touch_proof.py",
+        "command": "python -m pytest tests/test_tsw_physical_touch_proof.py -q",
+        "sha256": "d0c2228a707b03abb37f0287b72da0af8f8b8c1cd1b82ce2616b959649215934",
+        "result": "6 passed in 0.94s",
+        "coverage_focus": [
+          "GBK string response decode 可读 title.txt",
+          "runner 开始触摸前可确认 title.txt 是 TSW PROMOTION，错页面直接 wrong_page 退出",
+          "set_title 只写 title/ref title，不写/ref targetbtn",
+          "没有用户确认时不会打开串口",
+          "baseline TG 超时时不会进入 disable 阶段",
+          "只有 baseline TG、disabled window 无 TG、recovery TG 三者满足时才给出 physical_touch_lockout_live_observed=true"
+        ]
+      },
+      "summary": "Controlled future proof runner: blocks on wait_user_ack.ps1, verifies title.txt before touch unless skipped, uses title-only prompts, aborts before disable unless baseline TG is captured, never writes/ref targetbtn after disable, and restores page 0 at exit."
+    },
+    "latest_segmented_attempts": [
+      "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/segmented_real_touch_pass_20260516_2040.json",
+      "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/segmented_real_touch_title_guided_20260516_2042.json",
+      "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/panel_guided_real_touch_pass_20260516_2048.json",
+      "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/panel_guided_real_touch_title_only_20260516_2049.json"
+    ],
+    "goal": "下一次用分段受控流程时，直接运行 tools/tsw_physical_touch_proof.py；提示必须显示在屏幕上但不能写/ref targetbtn；先以 baseline TG 作为用户已同步的门槛，再进入 disable 观察窗口。用户报告的 DISABLE 后 TARGET 按不了应保留为 physical touch path 正向观察，但机器证据仍需 baseline/disable/recovery 三段闭环。旧 fallback 协议已移除，避免多入口维护。"
+  }
+}

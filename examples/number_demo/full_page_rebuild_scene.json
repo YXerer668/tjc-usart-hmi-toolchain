@@ -1,8 +1,8 @@
 {
   "project": {
-    "name": "number-demo",
+    "name": "number-demo-full-page-rebuild",
     "default_page": "page0",
-    "clean_seed_objects": true
+    "drop_seed_objects": true
   },
   "canvas": {
     "width": 800,
@@ -33,22 +33,6 @@
           }
         },
         {
-          "id": "numval",
-          "type": "number",
-          "x": 310,
-          "y": 170,
-          "w": 180,
-          "h": 70,
-          "value": 123,
-          "style": {
-            "font_id": 0,
-            "length": 3,
-            "background_color": 65504,
-            "foreground_color": 0,
-            "border_color": 0
-          }
-        },
-        {
           "id": "incbtn",
           "type": "button",
           "x": 310,
@@ -67,6 +51,22 @@
               "numval.val++",
               "printh 23 02 4e 31"
             ]
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 310,
+          "y": 170,
+          "w": 180,
+          "h": 70,
+          "value": 123,
+          "style": {
+            "font_id": 0,
+            "length": 3,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "border_color": 0
           }
         }
       ]

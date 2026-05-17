@@ -1,0 +1,105 @@
+{
+  "project": {
+    "name": "number-demo-reorder-broadening",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "status",
+          "type": "text",
+          "x": 232,
+          "y": 44,
+          "w": 336,
+          "h": 40,
+          "text": "REORDER OK",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 2016,
+            "style": 1
+          }
+        },
+        {
+          "id": "incbtn",
+          "type": "button",
+          "x": 310,
+          "y": 270,
+          "w": 180,
+          "h": 72,
+          "text": "+1",
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "numval.val++",
+              "printh 23 02 4e 31"
+            ]
+          }
+        },
+        {
+          "id": "title",
+          "type": "text",
+          "x": 180,
+          "y": 88,
+          "w": 440,
+          "h": 52,
+          "text": "NUMBER DEMO",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "style": 1
+          }
+        },
+        {
+          "id": "footer",
+          "type": "text",
+          "x": 240,
+          "y": 380,
+          "w": 320,
+          "h": 40,
+          "text": "GB2312 FONT",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 33808,
+            "style": 1
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 310,
+          "y": 170,
+          "w": 180,
+          "h": 70,
+          "value": 123,
+          "style": {
+            "font_id": 0,
+            "length": 3,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "border_color": 0
+          }
+        }
+      ]
+    }
+  ]
+}

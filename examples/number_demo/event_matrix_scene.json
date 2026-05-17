@@ -1,0 +1,134 @@
+{
+  "project": {
+    "name": "number-demo-event-matrix",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "refbtn",
+          "type": "button",
+          "x": 72,
+          "y": 76,
+          "w": 150,
+          "h": 52,
+          "text": "REF",
+          "style": {
+            "font_id": 0,
+            "background_color": 33808,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "ref label0"
+            ]
+          }
+        },
+        {
+          "id": "visbtn",
+          "type": "button",
+          "x": 72,
+          "y": 146,
+          "w": 150,
+          "h": 52,
+          "text": "VIS",
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "vis label0,0"
+            ]
+          }
+        },
+        {
+          "id": "tswbtn",
+          "type": "button",
+          "x": 72,
+          "y": 216,
+          "w": 150,
+          "h": 52,
+          "text": "TSW",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "tsw label0,0"
+            ]
+          }
+        },
+        {
+          "id": "incbtn",
+          "type": "button",
+          "x": 72,
+          "y": 286,
+          "w": 150,
+          "h": 52,
+          "text": "INC",
+          "style": {
+            "font_id": 0,
+            "background_color": 31,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "numval.val++"
+            ]
+          }
+        },
+        {
+          "id": "label0",
+          "type": "text",
+          "x": 300,
+          "y": 104,
+          "w": 360,
+          "h": 64,
+          "text": "EVENT TARGET",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "style": 1
+          }
+        },
+        {
+          "id": "numval",
+          "type": "number",
+          "x": 360,
+          "y": 220,
+          "w": 180,
+          "h": 70,
+          "value": 123,
+          "style": {
+            "font_id": 0,
+            "length": 3,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "border_color": 0
+          }
+        }
+      ]
+    }
+  ]
+}

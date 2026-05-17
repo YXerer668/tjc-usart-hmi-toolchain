@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -9,8 +11,10 @@ from usarthmi.tft_download import (
     PUBLIC_WHMI_CHUNK_SIZE,
     _wait_for_ack,
     _write_command,
+    evaluate_skip_if_current,
     plan_upload,
     upload_tft,
+    write_last_upload_manifest,
 )
 
 
@@ -95,6 +99,80 @@ class TftDownloadTests(unittest.TestCase):
             self.assertEqual(result["known_current_file_size"], len(payload))
             self.assertIn("upload skipped", result["skip_reason"])
             self.assertEqual(result["public_whmi_chunk_size"], PUBLIC_WHMI_CHUNK_SIZE)
+
+    def test_last_upload_manifest_allows_current_skip_by_hash_target_and_port(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manifest = root / ".usarthmi_last_upload.json"
+            candidate = root / "candidate.tft"
+            candidate.write_bytes(b"current TFT bytes")
+
+            saved = write_last_upload_manifest(
+                candidate,
+                manifest_path=manifest,
+                port="COM36",
+                baud=9600,
+                download_baud=921600,
+                chunk_size=4096,
+                target_model="TJC8048X543_011C",
+                tool_version="test",
+                git_head="abcdef123456",
+                upload_result={"bytes_sent": 17, "chunks_sent": 1},
+                uploaded_at=datetime(2026, 5, 16, tzinfo=timezone.utc),
+            )
+            data = json.loads(manifest.read_text(encoding="utf-8"))
+            decision = evaluate_skip_if_current(
+                candidate,
+                manifest_path=manifest,
+                port="com36",
+                baud=9600,
+                expected_model="TJC8048X543_011C",
+            )
+
+            self.assertEqual(saved["path"], str(manifest.resolve()))
+            self.assertTrue(data["success"])
+            self.assertEqual(data["tft_size"], len(b"current TFT bytes"))
+            self.assertEqual(data["git_head"], "abcdef123456")
+            self.assertTrue(decision["skip"])
+            self.assertIn("matches", decision["reason"])
+
+    def test_last_upload_manifest_refuses_target_mismatch_and_corruption(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            manifest = root / ".usarthmi_last_upload.json"
+            candidate = root / "candidate.tft"
+            candidate.write_bytes(b"current TFT bytes")
+            write_last_upload_manifest(
+                candidate,
+                manifest_path=manifest,
+                port="COM36",
+                baud=9600,
+                download_baud=921600,
+                chunk_size=4096,
+                target_model="TJC8048X543_011C",
+                tool_version="test",
+            )
+
+            wrong_model = evaluate_skip_if_current(
+                candidate,
+                manifest_path=manifest,
+                port="COM36",
+                baud=9600,
+                expected_model="TJC8048X550_011",
+            )
+            manifest.write_text("{not json", encoding="utf-8")
+            corrupt = evaluate_skip_if_current(
+                candidate,
+                manifest_path=manifest,
+                port="COM36",
+                baud=9600,
+                expected_model="TJC8048X543_011C",
+            )
+
+            self.assertFalse(wrong_model["skip"])
+            self.assertIn("target model differs", wrong_model["reason"])
+            self.assertFalse(corrupt["skip"])
+            self.assertIn("not valid JSON", corrupt["reason"])
 
     def test_upload_rejects_non_4096_chunk_size_before_serial_open(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

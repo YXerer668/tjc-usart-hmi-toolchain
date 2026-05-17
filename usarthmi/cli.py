@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import subprocess
 import sys
 import time
 from typing import Any
@@ -36,7 +37,15 @@ from .protocol import (
 from .runtime_preview import build_scene_runtime_commands, push_scene_runtime_preview
 from .scene import SceneError, WidgetSpec, load_scene, save_scene_json, validate_scene
 from .serial_health import probe_serial_health
-from .tft_download import DEFAULT_DOWNLOAD_BAUD, PUBLIC_WHMI_CHUNK_SIZE, plan_upload, upload_tft
+from .tft_download import (
+    DEFAULT_DOWNLOAD_BAUD,
+    DEFAULT_LAST_UPLOAD_MANIFEST,
+    PUBLIC_WHMI_CHUNK_SIZE,
+    evaluate_skip_if_current,
+    plan_upload,
+    upload_tft,
+    write_last_upload_manifest,
+)
 from .tft_case_diff import compare_case_folder
 from .tft_checksum import inspect_tft_checksum
 from .tft_font_pack import TftFontPackError, inspect_tft_font_run, pack_tft_font_run
@@ -107,6 +116,12 @@ def main(argv: list[str] | None = None) -> int:
         getattr(args, "command", None) == "tft"
         and getattr(args, "tft_command", None) in {"health", "preflight"}
         and not result.get("summary", {}).get("healthy", False)
+    ):
+        exit_code = 1
+    if (
+        getattr(args, "command", None) == "tft"
+        and getattr(args, "tft_command", None) == "upload"
+        and result.get("post_upload_verification", {}).get("summary", {}).get("ok") is False
     ):
         exit_code = 1
 
@@ -193,6 +208,8 @@ def _build_parser() -> argparse.ArgumentParser:
     scene_build.add_argument("--seed", required=True, help="Seed HMI file")
     scene_build.add_argument("--out", required=True, help="Output directory")
     scene_build.add_argument("--baseline-tft", help="Optional baseline TFT used to emit output.tft")
+    scene_build.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
+    scene_build.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
 
     hmi_parser = subparsers.add_parser("hmi", help="Scene authoring helpers")
     hmi_sub = hmi_parser.add_subparsers(dest="hmi_command")
@@ -263,6 +280,8 @@ def _build_parser() -> argparse.ArgumentParser:
     hmi_build.add_argument("--seed", required=True, help="Seed HMI")
     hmi_build.add_argument("--out", required=True, help="Output directory")
     hmi_build.add_argument("--baseline-tft", help="Optional baseline TFT used to emit output.tft")
+    hmi_build.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
+    hmi_build.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
     hmi_preview_pa = hmi_sub.add_parser("preview-pa", help="Render an extracted .pa page to a PNG preview")
     hmi_preview_pa.add_argument("--pa", required=True, help="Extracted page file such as 0.pa")
     hmi_preview_pa.add_argument("--out", required=True, help="Preview PNG path")
@@ -300,6 +319,8 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_build.add_argument("--seed", required=True, help="Seed HMI")
     tft_build.add_argument("--baseline-tft", help="Baseline TFT used to emit output.tft")
     tft_build.add_argument("--out", required=True, help="Output directory")
+    tft_build.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
+    tft_build.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
     tft_inspect = tft_sub.add_parser("inspect", help="Inspect an existing TFT file using the local TFTTool")
     tft_inspect.add_argument("--file", required=True, help="TFT file path")
     tft_reverse = tft_sub.add_parser("reverse-tail", help="Probe compiled TFT object data against a parsed HMI .pa page")
@@ -382,6 +403,92 @@ def _build_parser() -> argparse.ArgumentParser:
         "--skip-if-identical",
         action="store_true",
         help="If --file exactly matches --known-current, skip opening the serial port and do not upload",
+    )
+    tft_upload.add_argument(
+        "--skip-if-current",
+        action="store_true",
+        help=(
+            "Skip upload when --file matches the last successful upload manifest for "
+            "the same port, baud, and expected model"
+        ),
+    )
+    tft_upload.add_argument(
+        "--current-manifest",
+        default=DEFAULT_LAST_UPLOAD_MANIFEST,
+        help="Path to the last successful upload manifest",
+    )
+    tft_upload.add_argument(
+        "--no-record-current",
+        action="store_true",
+        help="Do not update the last successful upload manifest after a successful upload",
+    )
+    tft_upload.add_argument(
+        "--verify-after-upload",
+        action="store_true",
+        help="Run serial health and optional get assertions after upload or current-manifest skip",
+    )
+    tft_upload.add_argument(
+        "--verify-wait-ms",
+        type=int,
+        default=1000,
+        help="Wait before --verify-after-upload serial checks",
+    )
+    tft_upload.add_argument(
+        "--verify-health-attempts",
+        type=int,
+        default=3,
+        help="Maximum serial-health attempts during --verify-after-upload",
+    )
+    tft_upload.add_argument(
+        "--verify-health-retry-delay-ms",
+        type=int,
+        default=300,
+        help="Delay between serial-health retries during --verify-after-upload",
+    )
+    tft_upload.add_argument(
+        "--verify-get",
+        action="append",
+        default=[],
+        help="Post-upload get assertion as obj.attr=value; repeatable. Without =, only requires a readable response.",
+    )
+    tft_upload.add_argument(
+        "--verify-step",
+        action="append",
+        default=[],
+        help=(
+            "Post-upload runtime step as a raw command or JSON object; repeatable. "
+            "Raw commands may use 'COMMAND => EXPECTED', 'COMMAND => hex:AA BB', or 'COMMAND => ascii:TEXT'. "
+            "JSON fields include command, label, delay_ms, attempts, expect_response, "
+            "expected_kind, expected_value, expected_hex, and expected_ascii_preview."
+        ),
+    )
+    tft_upload.add_argument(
+        "--verify-capture",
+        action="store_true",
+        help="Capture a camera frame as part of --verify-after-upload evidence",
+    )
+    tft_upload.add_argument(
+        "--verify-capture-output",
+        help="Optional output path for --verify-capture; defaults under reverse_usarthmi/upload_verify_captures",
+    )
+    tft_upload.add_argument("--verify-camera-index", type=int, default=1, help="Camera index for --verify-capture")
+    tft_upload.add_argument(
+        "--verify-camera-backend",
+        choices=["default", "dshow", "msmf"],
+        default="msmf",
+        help="OpenCV backend for --verify-capture",
+    )
+    tft_upload.add_argument(
+        "--verify-camera-warmup-frames",
+        type=int,
+        default=3,
+        help="Warmup frames before --verify-capture saves an image",
+    )
+    tft_upload.add_argument(
+        "--verify-capture-timeout-ms",
+        type=int,
+        default=30000,
+        help="Maximum time to wait for --verify-capture",
     )
     tft_upload.add_argument(
         "--prepare-delay-ms",
@@ -501,7 +608,14 @@ def _handle_scene_command(args: argparse.Namespace) -> dict[str, Any]:
         }
     if args.scene_command == "build":
         scene = load_scene(args.scene_path)
-        return build_scene(scene, args.seed, args.out, baseline_tft=args.baseline_tft)
+        return build_scene(
+            scene,
+            args.seed,
+            args.out,
+            baseline_tft=args.baseline_tft,
+            font_zi=args.font_zi,
+            font_entry=args.font_entry,
+        )
     raise SceneError("Unsupported scene subcommand")
 
 
@@ -605,7 +719,14 @@ def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
 
     if args.hmi_command == "build":
         scene = load_scene(args.scene)
-        return build_scene(scene, args.seed, args.out, baseline_tft=args.baseline_tft)
+        return build_scene(
+            scene,
+            args.seed,
+            args.out,
+            baseline_tft=args.baseline_tft,
+            font_zi=args.font_zi,
+            font_entry=args.font_entry,
+        )
 
     if args.hmi_command == "preview-pa":
         return render_pa_preview(
@@ -683,7 +804,14 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
         if not args.baseline_tft:
             raise SceneError("tft build requires --baseline-tft")
         scene = load_scene(args.scene)
-        result = build_scene(scene, args.seed, args.out, baseline_tft=args.baseline_tft)
+        result = build_scene(
+            scene,
+            args.seed,
+            args.out,
+            baseline_tft=args.baseline_tft,
+            font_zi=args.font_zi,
+            font_entry=args.font_entry,
+        )
         result["mode"] = "experimental_scene_tft_build"
         return result
     if args.tft_command == "inspect":
@@ -767,8 +895,10 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
     if args.tft_command == "upload":
         preflight_checksum = None
         preflight_health = None
+        skip_current_decision = None
         run_checksum_preflight = args.require_valid_checksum or not args.no_preflight
         run_runtime_preflight = args.require_runtime_healthy or not args.no_preflight
+        expected_model = str(args.expected_model or "") or None
         if run_checksum_preflight:
             preflight_checksum = inspect_tft_checksum(args.file)
             if not preflight_checksum["valid"]:
@@ -777,8 +907,25 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
                     f"(stored={preflight_checksum['stored_hex']}, "
                     f"calculated={preflight_checksum['calculated_hex']})"
                 )
+        if args.skip_if_current:
+            skip_current_decision = evaluate_skip_if_current(
+                args.file,
+                manifest_path=args.current_manifest,
+                port=args.port,
+                baud=args.baud,
+                expected_model=expected_model,
+            )
+            if skip_current_decision["skip"]:
+                result = _skipped_current_upload_result(
+                    args,
+                    skip_current_decision=skip_current_decision,
+                )
+                if preflight_checksum is not None:
+                    result["preflight_checksum"] = preflight_checksum
+                if args.verify_after_upload:
+                    result["post_upload_verification"] = _run_post_upload_verification(args)
+                return result
         if run_runtime_preflight:
-            expected_model = str(args.expected_model or "") or None
             preflight_health = probe_serial_health(
                 port=args.port,
                 baud=args.baud,
@@ -810,10 +957,38 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             allow_unsafe_chunk_size=args.allow_unsafe_chunk_size,
             progress=progress,
         ).to_dict()
+        if skip_current_decision is not None:
+            result["skip_current_manifest"] = skip_current_decision
         if preflight_checksum is not None:
             result["preflight_checksum"] = preflight_checksum
         if preflight_health is not None:
             result["preflight_health"] = preflight_health
+        if args.verify_after_upload:
+            result["post_upload_verification"] = _run_post_upload_verification(args)
+        verification_ok = _post_upload_verification_ok(result)
+        if (
+            not args.no_record_current
+            and not result.get("skipped")
+            and result.get("file_path")
+            and verification_ok
+        ):
+            try:
+                result["last_upload_manifest"] = write_last_upload_manifest(
+                    result["file_path"],
+                    manifest_path=args.current_manifest,
+                    port=args.port,
+                    baud=args.baud,
+                    download_baud=args.download_baud,
+                    chunk_size=args.chunk_size,
+                    target_model=expected_model,
+                    tool_version=__version__,
+                    git_head=_current_git_head(),
+                    upload_result=result,
+                )
+            except OSError as exc:
+                warnings = result.setdefault("warnings", [])
+                if isinstance(warnings, list):
+                    warnings.append(f"failed to write last-upload manifest: {exc}")
         return result
     if args.tft_command == "plan-upload":
         return plan_upload(
@@ -874,6 +1049,400 @@ def _make_upload_progress():
         )
 
     return progress
+
+
+def _skipped_current_upload_result(
+    args: argparse.Namespace,
+    *,
+    skip_current_decision: dict[str, object],
+) -> dict[str, Any]:
+    candidate = skip_current_decision["candidate"]
+    if not isinstance(candidate, dict):
+        raise TftToolchainError("Internal error: skip-if-current decision has no candidate fingerprint")
+    return {
+        "port": args.port,
+        "initial_baud": args.baud,
+        "download_baud": args.download_baud,
+        "file_path": candidate["path"],
+        "file_size": candidate["size"],
+        "bytes_sent": 0,
+        "chunks_sent": 0,
+        "chunk_size": args.chunk_size,
+        "elapsed_s": 0.0,
+        "address": args.address,
+        "prepare_delay_ms": args.prepare_delay_ms,
+        "prepare_wait_ms": args.prepare_wait_ms,
+        "skipped": True,
+        "skip_reason": "candidate matches last successful upload manifest; upload skipped",
+        "public_whmi_chunk_size": PUBLIC_WHMI_CHUNK_SIZE,
+        "skip_current_manifest": skip_current_decision,
+    }
+
+
+def _run_post_upload_verification(args: argparse.Namespace) -> dict[str, Any]:
+    wait_ms = max(0, int(args.verify_wait_ms))
+    if wait_ms:
+        time.sleep(wait_ms / 1000.0)
+
+    health = _probe_post_upload_serial_health(args)
+    get_checks = [_run_verify_get(args, item) for item in args.verify_get]
+    runtime_steps = [_run_verify_step(args, item, index=index + 1) for index, item in enumerate(args.verify_step)]
+    camera = _capture_post_upload_frame(args) if args.verify_capture else None
+    health_ok = bool(health.get("summary", {}).get("healthy"))
+    get_ok = all(item["ok"] for item in get_checks)
+    runtime_steps_ok = all(item["ok"] for item in runtime_steps)
+    camera_ok = camera is None or bool(camera.get("ok"))
+    return {
+        "wait_ms": wait_ms,
+        "serial_health": health,
+        "get_checks": get_checks,
+        "runtime_steps": runtime_steps,
+        "camera": camera,
+        "summary": {
+            "ok": health_ok and get_ok and runtime_steps_ok and camera_ok,
+            "serial_health_ok": health_ok,
+            "get_checks_ok": get_ok,
+            "runtime_steps_ok": runtime_steps_ok,
+            "camera_ok": camera_ok,
+            "camera_captured": bool(camera and camera.get("ok")),
+        },
+    }
+
+
+def _probe_post_upload_serial_health(args: argparse.Namespace) -> dict[str, Any]:
+    expected_model = str(args.expected_model or "") or None
+    attempts = max(1, int(getattr(args, "verify_health_attempts", 1) or 1))
+    retry_delay_ms = max(0, int(getattr(args, "verify_health_retry_delay_ms", 0) or 0))
+    history: list[dict[str, Any]] = []
+    for attempt in range(1, attempts + 1):
+        health = probe_serial_health(
+            port=args.port,
+            baud=args.baud,
+            timeout_ms=args.health_timeout_ms,
+            expected_model=expected_model,
+            verbose=args.verbose,
+        )
+        summary = health.get("summary", {})
+        if bool(summary.get("healthy")) or attempt >= attempts:
+            health["attempt"] = attempt
+            health["attempts"] = attempts
+            if history:
+                health["retry_history"] = history
+            return health
+        history.append(
+            {
+                "attempt": attempt,
+                "summary": summary,
+            }
+        )
+        if retry_delay_ms:
+            time.sleep(retry_delay_ms / 1000.0)
+
+    raise TftToolchainError("Internal error: post-upload serial health produced no result")
+
+
+def _run_verify_get(args: argparse.Namespace, expression: str) -> dict[str, Any]:
+    target, expected = _parse_verify_get_expression(expression)
+    command_text = build_get(target)
+    config = SerialConfig(
+        port=args.port,
+        baud=args.baud,
+        timeout_ms=args.health_timeout_ms,
+        verbose=args.verbose,
+    )
+    payload, response = SerialTransport(config).transact(command_text)
+    parsed = parse_response(response).to_dict()
+    actual = parsed.get("value")
+    readable = parsed.get("kind") not in {None, "none", "invalid_reference"}
+    value_ok = True if expected is None else actual == expected
+    return {
+        "target": target,
+        "expected": expected,
+        "command": command_text,
+        "sent_hex": payload.hex(" "),
+        "response": parsed,
+        "actual": actual,
+        "ok": readable and value_ok,
+    }
+
+
+def _parse_verify_get_expression(expression: str) -> tuple[str, Any | None]:
+    if "=" not in expression:
+        target = expression.strip()
+        expected = None
+    else:
+        target, raw_expected = expression.split("=", 1)
+        target = target.strip()
+        expected = _coerce_cli_value(raw_expected.strip())
+    if not target:
+        raise TftToolchainError("--verify-get target cannot be empty")
+    return target, expected
+
+
+def _run_verify_step(args: argparse.Namespace, expression: str, *, index: int) -> dict[str, Any]:
+    step = _parse_verify_step_expression(expression, index=index)
+    delay_ms = max(0, int(step.get("delay_ms") or 0))
+    if delay_ms:
+        time.sleep(delay_ms / 1000.0)
+
+    attempts = max(1, int(step.get("attempts") or 1))
+    retry_delay_ms = max(0, int(step.get("retry_delay_ms") or 100))
+    config = SerialConfig(
+        port=args.port,
+        baud=args.baud,
+        timeout_ms=args.health_timeout_ms,
+        verbose=args.verbose,
+    )
+    last_result: dict[str, Any] | None = None
+    retry_history: list[dict[str, Any]] = []
+    for attempt in range(1, attempts + 1):
+        payload, response = SerialTransport(config).transact(str(step["command"]))
+        parsed = parse_response(response).to_dict()
+        result = _evaluate_verify_step_response(step, payload, parsed, attempt=attempt, attempts=attempts)
+        if result["ok"] or attempt >= attempts:
+            if retry_history:
+                result["retry_history"] = retry_history
+            return result
+        retry_history.append(
+            {
+                "attempt": attempt,
+                "ok": result["ok"],
+                "response": result["response"],
+                "mismatches": result.get("mismatches", []),
+            }
+        )
+        if retry_delay_ms:
+            time.sleep(retry_delay_ms / 1000.0)
+        last_result = result
+
+    if last_result is None:
+        raise TftToolchainError("Internal error: verify step produced no result")
+    return last_result
+
+
+def _parse_verify_step_expression(expression: str, *, index: int) -> dict[str, Any]:
+    raw = expression.strip()
+    if not raw:
+        raise TftToolchainError("--verify-step cannot be empty")
+    if raw.startswith("{"):
+        try:
+            parsed = json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise TftToolchainError(f"--verify-step #{index} JSON is invalid: {exc}") from exc
+        if not isinstance(parsed, dict):
+            raise TftToolchainError(f"--verify-step #{index} JSON must be an object")
+        step = dict(parsed)
+    elif "=>" in raw:
+        command, expected = raw.split("=>", 1)
+        step = {"command": command.strip()}
+        step.update(_parse_verify_step_expected(expected, command=command))
+    else:
+        step = {"command": raw}
+    command = str(step.get("command") or "").strip()
+    if not command:
+        raise TftToolchainError(f"--verify-step #{index} command cannot be empty")
+    step["command"] = command
+    step.setdefault("label", f"step_{index}")
+    return step
+
+
+def _parse_verify_step_expected(expected: str, *, command: str) -> dict[str, Any]:
+    raw_expected = expected.strip()
+    if not raw_expected:
+        raise TftToolchainError("--verify-step shorthand expected value cannot be empty")
+    lowered = raw_expected.lower()
+    if lowered.startswith("hex:"):
+        return {"expected_hex": raw_expected[4:].strip()}
+    if lowered.startswith("ascii:"):
+        return {"expected_ascii_preview": raw_expected[6:]}
+    if lowered.startswith("kind:"):
+        return {"expected_kind": raw_expected[5:].strip()}
+    if lowered.startswith("value:"):
+        raw_expected = raw_expected[6:].strip()
+    value = _coerce_cli_value(raw_expected)
+    result: dict[str, Any] = {"expected_value": value}
+    command_text = command.strip().lower()
+    if command_text.startswith("get "):
+        result["expected_kind"] = "number" if isinstance(value, int) and not isinstance(value, bool) else "string"
+    elif command_text == "sendme" and isinstance(value, int) and not isinstance(value, bool):
+        result["expected_kind"] = "page_id"
+    return result
+
+
+def _evaluate_verify_step_response(
+    step: dict[str, Any],
+    payload: bytes,
+    parsed: dict[str, Any],
+    *,
+    attempt: int,
+    attempts: int,
+) -> dict[str, Any]:
+    kind = parsed.get("kind")
+    value = parsed.get("value")
+    response_hex = _normalize_hex_text(str(parsed.get("hex", "")))
+    mismatches: list[str] = []
+
+    expected_kind = step.get("expected_kind")
+    expected_value = step.get("expected_value")
+    expected_hex = step.get("expected_hex")
+    expected_ascii_preview = step.get("expected_ascii_preview")
+    has_expectations = any(
+        key in step
+        for key in (
+            "expected_kind",
+            "expected_value",
+            "expected_hex",
+            "expected_ascii_preview",
+        )
+    )
+    expect_response = bool(step.get("expect_response", True))
+
+    if expected_kind is not None and kind != expected_kind:
+        mismatches.append(f"expected kind {expected_kind!r}, got {kind!r}")
+    if "expected_value" in step and value != expected_value:
+        mismatches.append(f"expected value {expected_value!r}, got {value!r}")
+    if expected_hex is not None and response_hex != _normalize_hex_text(str(expected_hex)):
+        mismatches.append(f"expected hex {_normalize_hex_text(str(expected_hex))!r}, got {response_hex!r}")
+    if expected_ascii_preview is not None and parsed.get("ascii_preview") != expected_ascii_preview:
+        mismatches.append(
+            f"expected ascii_preview {expected_ascii_preview!r}, got {parsed.get('ascii_preview')!r}"
+        )
+    if expect_response and not has_expectations and kind in {None, "none", "invalid_reference", "invalid_waveform"}:
+        mismatches.append(f"expected readable response, got {kind!r}")
+    if expect_response and has_expectations and kind == "none":
+        mismatches.append("expected a response, got none")
+
+    result: dict[str, Any] = {
+        "label": step.get("label"),
+        "command": step["command"],
+        "sent_hex": payload.hex(" "),
+        "response": parsed,
+        "attempt": attempt,
+        "attempts": attempts,
+        "expect_response": expect_response,
+        "ok": not mismatches,
+    }
+    for key in (
+        "expected_kind",
+        "expected_value",
+        "expected_hex",
+        "expected_ascii_preview",
+        "delay_ms",
+        "retry_delay_ms",
+    ):
+        if key in step:
+            result[key] = step[key]
+    if mismatches:
+        result["mismatches"] = mismatches
+    return result
+
+
+def _normalize_hex_text(value: str) -> str:
+    compact = value.lower().replace("0x", " ").replace(",", " ")
+    parts = compact.split()
+    if not parts:
+        return ""
+    return " ".join(f"{int(part, 16):02x}" for part in parts)
+
+
+def _post_upload_verification_ok(result: dict[str, Any]) -> bool:
+    verification = result.get("post_upload_verification")
+    if verification is None:
+        return True
+    return bool(verification.get("summary", {}).get("ok"))
+
+
+def _capture_post_upload_frame(args: argparse.Namespace) -> dict[str, Any]:
+    script_path = Path.cwd() / "tools" / "capture_hmi_screen.py"
+    if not script_path.exists():
+        return {
+            "ok": False,
+            "error": f"capture helper not found: {script_path}",
+        }
+
+    output_path = _post_upload_capture_output_path(args)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    command = [
+        sys.executable,
+        str(script_path),
+        "--camera-index",
+        str(args.verify_camera_index),
+        "--backend",
+        args.verify_camera_backend,
+        "--warmup-frames",
+        str(args.verify_camera_warmup_frames),
+        "--output-dir",
+        str(output_path.parent),
+        "--filename",
+        output_path.name,
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=Path.cwd(),
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=max(1, int(args.verify_capture_timeout_ms)) / 1000.0,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {
+            "ok": False,
+            "path": str(output_path),
+            "command": command,
+            "error": str(exc),
+        }
+
+    parsed: dict[str, Any] | None = None
+    if completed.stdout.strip():
+        try:
+            parsed = json.loads(completed.stdout)
+        except json.JSONDecodeError:
+            parsed = None
+    exists = output_path.exists()
+    result = {
+        "ok": completed.returncode == 0 and exists,
+        "path": str(output_path),
+        "command": command,
+        "returncode": completed.returncode,
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+    }
+    if parsed is not None:
+        result["capture"] = parsed
+    if exists:
+        result["bytes"] = output_path.stat().st_size
+    if completed.returncode != 0 and not result.get("error"):
+        result["error"] = "capture helper returned non-zero"
+    elif not exists and not result.get("error"):
+        result["error"] = "capture output was not created"
+    return result
+
+
+def _post_upload_capture_output_path(args: argparse.Namespace) -> Path:
+    if args.verify_capture_output:
+        return Path(args.verify_capture_output).resolve()
+    stem = Path(args.file).stem or "upload"
+    filename = f"{stem}_verify_{time.strftime('%Y%m%d_%H%M%S')}.jpg"
+    return (Path.cwd() / "reverse_usarthmi" / "upload_verify_captures" / filename).resolve()
+
+
+def _current_git_head() -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "--short=12", "HEAD"],
+            cwd=Path.cwd(),
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    value = completed.stdout.strip()
+    return value or None
 
 
 def _build_command_text(args: argparse.Namespace) -> str:

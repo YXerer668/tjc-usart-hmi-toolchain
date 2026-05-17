@@ -1,0 +1,106 @@
+{
+  "schema": "usarthmi-control-full-rebuild-broadening-v1",
+  "date": "2026-05-17",
+  "claim": "drop_seed_objects can rebuild page0 for the listed fixture-backed control slices and single-media smoke slices, and produce valid TFT checksums in the local seed/baseline path.",
+  "not_claimed": [
+    "No new COM36 upload, serial readback, camera proof, or physical touch proof is claimed by this file.",
+    "Mixed GMOV/video/audio rebuilds are explicitly guarded against in the high-level scene build path until mixed-media scheduling is proven.",
+    "This does not prove arbitrary page rebuilds, page-load behavior, timers, cross-page behavior, or runtime behavior beyond the checked offline structures."
+  ],
+  "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+  "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+  "verified_slices": [
+    {
+      "name": "xfloat_combobox_demo",
+      "scene": "examples/xfloat_combobox_demo/scene.json",
+      "mode": "experimental_clean_page_tft_rebuild",
+      "object_order": [
+        ["page0", "y"],
+        ["title", "t"],
+        ["xval", ";"],
+        ["cbval", "="],
+        ["hint", "t"],
+        ["hint2", "t"]
+      ],
+      "checked_fields": {
+        "xval.val": 123456,
+        "xval.vvs0": 0,
+        "xval.vvs1": 3,
+        "cbval.val": 2,
+        "cbval.down": 1,
+        "cbval.qty": 3
+      }
+    },
+    {
+      "name": "external_picture_demo",
+      "scene": "examples/external_picture_demo/scene.json",
+      "mode": "experimental_clean_page_tft_rebuild",
+      "object_order": [
+        ["page0", "y"],
+        ["title", "t"],
+        ["badge", "t"],
+        ["frame", "t"],
+        ["exp0", "<"],
+        ["status", "t"],
+        ["pathbox", "t"],
+        ["guard", "t"],
+        ["footer", "t"]
+      ],
+      "checked_fields": {
+        "exp0.path": "sd0/1.jpg",
+        "resource_header": "unchanged from case_00_baseline",
+        "object_section_address": "unchanged from case_00_baseline"
+      }
+    },
+    {
+      "name": "touch_capture_minimal",
+      "scene": "examples/touch_capture_demo/scene.json",
+      "mode": "experimental_clean_page_tft_rebuild",
+      "object_order": [
+        ["page0", "y"],
+        ["title", "t"],
+        ["tc0", "0x05"]
+      ],
+      "checked_fields": {
+        "tc0.type": "touch-capture"
+      }
+    }
+  ],
+  "single_media_smoke_slices": [
+    {
+      "scene": "examples/media_single_gmov_smoke/scene.json",
+      "object": ["gm0", "0x02"],
+      "mode": "experimental_clean_page_tft_rebuild"
+    },
+    {
+      "scene": "examples/media_single_video_sd_smoke/scene.json",
+      "object": ["v0", "0x03"],
+      "path": "sd0/video/official_0.video",
+      "mode": "experimental_clean_page_tft_rebuild"
+    },
+    {
+      "scene": "examples/media_single_audio_sd_smoke/scene.json",
+      "object": ["wav0", "0x04"],
+      "path": "sd0/music/official_0.wav",
+      "mode": "experimental_clean_page_tft_rebuild"
+    }
+  ],
+  "guarded_boundaries": [
+    {
+      "boundary": "mixed_media_page",
+      "scene": "examples/media_widgets_demo/scene.json",
+      "expected_error": "media widgets path supports only one media fixture per page",
+      "applies_to": ["clean_seed_objects", "drop_seed_objects"]
+    }
+  ],
+  "test_results": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_xfloat_combobox_demo_full_page_rebuild_covers_value_controls tests/test_editor_tft_build.py::EditorTftBuildTests::test_touch_capture_full_page_rebuild_minimal_control tests/test_editor_tft_build.py::EditorTftBuildTests::test_external_picture_demo_full_page_rebuild_preserves_sd_path_object tests/test_editor_tft_build.py::EditorTftBuildTests::test_external_picture_demo_builds_with_live_healthy_baseline -q",
+      "result": "4 passed in 14.89s"
+    },
+    {
+      "command": "python -m pytest tests/test_media_widgets.py::MediaWidgetTests::test_media_demo_rejects_tft_build_with_clear_error tests/test_media_widgets.py::MediaWidgetTests::test_single_sd_media_smoke_examples_build_tfts tests/test_media_widgets.py::MediaWidgetTests::test_scene_build_can_drop_seed_objects_for_minimal_gmov_page -q",
+      "result": "3 passed, 5 subtests passed in 18.92s"
+    }
+  ]
+}

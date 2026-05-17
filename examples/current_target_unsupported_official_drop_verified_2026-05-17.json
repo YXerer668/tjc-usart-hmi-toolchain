@@ -1,0 +1,63 @@
+{
+  "schema": "usarthmi-current-target-unsupported-widget-proof-v1",
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "claim": "The listed official widgets are intentionally unsupported for the current target because the current-target official compile output keeps only the seed page objects.",
+  "not_claimed": [
+    "This does not claim these widgets are absent on every TJC model.",
+    "This does not claim their official wiki source objects are unparseable.",
+    "This does not implement TFT writers for these controls."
+  ],
+  "expected_current_target_output": {
+    "page_names": ["page0"],
+    "object_names": ["b0", "p0", "t0"],
+    "pa_blocks": [
+      ["page0", "y"],
+      ["t0", "t"],
+      ["b0", "b"],
+      ["p0", "p"]
+    ]
+  },
+  "cases": [
+    {
+      "widget_type": "text-select",
+      "case": "case_38_text_select",
+      "source_type": "D",
+      "current_target_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_38_text_select/lcd_test.HMI"
+    },
+    {
+      "widget_type": "sliding-text",
+      "case": "case_41_sltext",
+      "source_type": ">",
+      "current_target_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_41_sltext/lcd_test.HMI"
+    },
+    {
+      "widget_type": "data-record",
+      "case": "case_42_datarecord",
+      "source_type": "B",
+      "current_target_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_42_datarecord/lcd_test.HMI"
+    },
+    {
+      "widget_type": "file-browser",
+      "case": "case_43_filebrowser",
+      "source_type": "A",
+      "current_target_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_43_filebrowser/lcd_test.HMI"
+    },
+    {
+      "widget_type": "file-stream",
+      "case": "case_44_filestream",
+      "source_type": "?",
+      "current_target_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_44_filestream/lcd_test.HMI"
+    }
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/test_scene_layout.py::SceneLayoutTests::test_current_target_unsupported_fixture_outputs_keep_only_seed_objects -q",
+      "expected": "1 passed, 5 subtests passed"
+    },
+    {
+      "command": "python -m pytest tests/test_scene_layout.py::SceneLayoutTests::test_current_target_unsupported_advanced_widget_aliases_fail_clearly -q",
+      "expected": "1 passed, 5 subtests passed"
+    }
+  ]
+}

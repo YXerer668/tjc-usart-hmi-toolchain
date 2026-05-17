@@ -5,10 +5,14 @@ import tempfile
 import unittest
 
 from usarthmi.layout import resolve_page_layout
+from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.page_format import BlockField, PageBlock, PageFile
 from usarthmi.preview import render_page_preview, render_scene_preview
 from usarthmi.scene import SceneError, WidgetSpec, load_scene, validate_scene
 from PIL import Image
+
+
+CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
 
 
 class SceneLayoutTests(unittest.TestCase):
@@ -163,6 +167,34 @@ class SceneLayoutTests(unittest.TestCase):
                             ],
                         }
                     )
+
+    @unittest.skipUnless(
+        all((CASE_ROOT / case_name / "lcd_test.HMI").exists() for case_name in (
+            "case_38_text_select",
+            "case_41_sltext",
+            "case_42_datarecord",
+            "case_43_filebrowser",
+            "case_44_filestream",
+        )),
+        "local current-target unsupported widget fixtures are not available",
+    )
+    def test_current_target_unsupported_fixture_outputs_keep_only_seed_objects(self) -> None:
+        cases = {
+            "text-select": "case_38_text_select",
+            "sliding-text": "case_41_sltext",
+            "data-record": "case_42_datarecord",
+            "file-browser": "case_43_filebrowser",
+            "file-stream": "case_44_filestream",
+        }
+        for widget_type, case_name in cases.items():
+            with self.subTest(widget_type=widget_type):
+                inspection = inspect_hmi(CASE_ROOT / case_name / "lcd_test.HMI")
+                self.assertEqual(inspection.page_names, ["page0"])
+                self.assertEqual(inspection.object_names, ["b0", "p0", "t0"])
+                self.assertEqual(
+                    [(block.objname, block.type_code) for block in inspection.pa_blocks],
+                    [("page0", "y"), ("t0", "t"), ("b0", "b"), ("p0", "p")],
+                )
 
     def test_scene_preview_renders_png(self) -> None:
         base = Path(__file__).resolve().parents[1] / "examples" / "menu_demo"

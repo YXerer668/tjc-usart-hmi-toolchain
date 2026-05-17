@@ -31,6 +31,12 @@
 
 这次复查的意义是排除了“只是官方例程没改板子型号”的主要误判路径。
 
+可运行的仓库守卫记录在
+`examples/current_target_unsupported_official_drop_verified_2026-05-17.json`：
+`tests/test_scene_layout.py::SceneLayoutTests::test_current_target_unsupported_fixture_outputs_keep_only_seed_objects`
+会直接解析这些 case 的当前目标 `lcd_test.HMI`，确认输出仍只有
+`page0/t0/b0/p0`。
+
 ## 容易混淆的名字
 
 - `scrolling-text` 是已经有 fixture 的滚动文本，对应 `case_22`。

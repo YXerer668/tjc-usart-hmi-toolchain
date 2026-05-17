@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "source": "codex_live_promotion_candidate_eval",
+  "evaluated_at": "2026-05-16T19:01:00+08:00",
+  "latest_live_boundary": "examples/number_demo/full_page_rebuild_hardware_verified_2026-05-16.json",
+  "candidate_scope": "评估 examples/number_demo/event_matrix_scene.json 在已有离线字节码/结构证明后是否应该烧录。",
+  "decision": {
+    "flash_now": false,
+    "reason": "暂时不烧完整 event matrix。numeric update 已经在 number-demo 实机证明中有清晰的 COM36 串口读回；ref/vis/tsw 的运行时行为需要相机或触摸状态证据，而不是简单串口读回。直接烧完整矩阵会在证明边界不够窄时扩大运行时声明。",
+    "safe_next_action_taken": "已把 event-matrix pytest 从只检查 token 保留，增强为解码已编译的 ref/vis/tsw/property-event payload，继续走 fixture-backed 字节码证据路线。"
+  },
+  "external_opinions": [
+    {
+      "source": "external reviewer A",
+      "role": "第二意见",
+      "result": "同意默认不烧录。建议把操作数级目标绑定作为核心证据；在没有更窄实机证明前，不声明 ref/vis/tsw 的运行时行为。"
+    },
+    {
+      "source": "external reviewer B",
+      "role": "第三意见",
+      "result": "同意不烧完整矩阵。建议做更窄的单控件实机探针并带串口反馈；其中 dynamic printh 细节未采纳，因为当前本地证据只支持固定 printh payload 和 get 读回，不支持把数值动态 printh 出来。"
+    },
+    {
+      "source": "external reviewer C",
+      "role": "第四意见",
+      "result": "本轮不可用：一个可选外部 CLI 非交互调用未登录。"
+    }
+  ],
+  "candidates": [
+    {
+      "event_family": "numeric_update",
+      "example": "numval.val++",
+      "current_evidence": "已在 number-demo 路径通过 COM36 实机证明，串口读回为 123 -> 124 -> 125，并收到 printh 23 02 4e 31。",
+      "promotion_value": "低",
+      "promotion_risk": "低",
+      "recommendation": "不要为了在 event matrix 里重复证明同一件事再烧一次。"
+    },
+    {
+      "event_family": "ref",
+      "example": "ref label0",
+      "current_evidence": "离线 event matrix 已证明 clean rebuild 页面中的已编译 payload 可解码为 ref label0。",
+      "promotion_value": "中",
+      "promotion_risk": "中",
+      "recommendation": "只用单目的、相机可见的重绘测试做 promotion，不放进完整 event matrix 一起烧。"
+    },
+    {
+      "event_family": "vis",
+      "example": "vis label0,0",
+      "current_evidence": "离线 event matrix 已证明 clean rebuild 页面中的已编译 payload 可解码为 vis label0,0。",
+      "promotion_value": "中",
+      "promotion_risk": "中",
+      "recommendation": "只用可恢复的视觉/相机测试证明 hide/show 行为；不声明单纯串口读回可证明它。"
+    },
+    {
+      "event_family": "tsw",
+      "example": "tsw label0,0",
+      "current_evidence": "离线 event matrix 已证明 clean rebuild 页面中的已编译 payload 可解码为 tsw label0,0。",
+      "promotion_value": "中",
+      "promotion_risk": "中",
+      "recommendation": "只用窄范围触摸使能/禁用探针并保留清晰恢复路径；不要和 ref/vis promotion 混在一次烧录里。"
+    }
+  ],
+  "claims_allowed": [
+    "event matrix 是离线 clean-rebuild 字节码和结构证明。",
+    "已编译的 ref/vis/tsw/numeric payload 可解码到预期命令，numeric update 指向重建后的 numval user slot。",
+    "没有声明新的 ref/vis/tsw 运行时行为。"
+  ],
+  "claims_blocked": [
+    "event matrix 已证明 ref/vis/tsw 的运行时行为。",
+    "所有同页命令都能在 clean rebuild 后保持。",
+    "page-load、media、timer、跨页或任意控件的事件保持已经被证明。"
+  ]
+}

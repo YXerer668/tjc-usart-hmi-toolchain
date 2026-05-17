@@ -1,0 +1,100 @@
+{
+  "project": {
+    "name": "number-demo-tsw-promotion",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "title",
+          "type": "text",
+          "x": 150,
+          "y": 42,
+          "w": 500,
+          "h": 52,
+          "text": "TSW PROMOTION",
+          "style": {
+            "font_id": 0,
+            "background_color": 65535,
+            "foreground_color": 0,
+            "style": 1
+          }
+        },
+        {
+          "id": "disablebtn",
+          "type": "button",
+          "x": 72,
+          "y": 150,
+          "w": 190,
+          "h": 66,
+          "text": "DISABLE",
+          "style": {
+            "font_id": 0,
+            "background_color": 63488,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "tsw targetbtn,0",
+              "printh 23 02 54 30"
+            ]
+          }
+        },
+        {
+          "id": "enablebtn",
+          "type": "button",
+          "x": 72,
+          "y": 250,
+          "w": 190,
+          "h": 66,
+          "text": "ENABLE",
+          "style": {
+            "font_id": 0,
+            "background_color": 2016,
+            "foreground_color": 65535,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "tsw targetbtn,1",
+              "printh 23 02 54 31"
+            ]
+          }
+        },
+        {
+          "id": "targetbtn",
+          "type": "button",
+          "x": 340,
+          "y": 188,
+          "w": 260,
+          "h": 92,
+          "text": "TARGET",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "border_color": 0
+          },
+          "events": {
+            "down": [
+              "printh 23 02 54 47"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -256,13 +256,18 @@ class MediaWidgetTests(unittest.TestCase):
 
     @unittest.skipUnless(SEED_HMI.exists(), "seed HMI is not available")
     def test_media_demo_rejects_tft_build_with_clear_error(self) -> None:
-        scene = load_scene(Path(__file__).resolve().parents[1] / "examples" / "media_widgets_demo" / "scene.json")
+        scene_path = Path(__file__).resolve().parents[1] / "examples" / "media_widgets_demo" / "scene.json"
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
         if not baseline_tft.exists():
             self.skipTest("baseline TFT is not available")
-        with tempfile.TemporaryDirectory() as temp_dir:
-            with self.assertRaisesRegex(EditorError, "media widgets"):
-                build_scene(scene, SEED_HMI, temp_dir, baseline_tft=baseline_tft)
+        for force_drop_seed in (False, True):
+            with self.subTest(force_drop_seed=force_drop_seed), tempfile.TemporaryDirectory() as temp_dir:
+                scene = load_scene(scene_path)
+                if force_drop_seed:
+                    scene.project.pop("clean_seed_objects", None)
+                    scene.project["drop_seed_objects"] = True
+                with self.assertRaisesRegex(EditorError, "media widgets path supports only one media fixture per page"):
+                    build_scene(scene, SEED_HMI, temp_dir, baseline_tft=baseline_tft)
 
     @unittest.skipUnless(
         SEED_HMI.exists() and (CASE_ROOT / "case_00_baseline" / "lcd_test.tft").exists(),
@@ -382,21 +387,24 @@ class MediaWidgetTests(unittest.TestCase):
     )
     def test_single_sd_media_smoke_examples_build_tfts(self) -> None:
         examples = [
-            ("media_single_video_sd_smoke", "v0", "\x03"),
-            ("media_single_audio_sd_smoke", "wav0", "\x04"),
+            ("media_single_gmov_smoke", "gm0", "\x02", None),
+            ("media_single_video_sd_smoke", "v0", "\x03", "sd0/video/official_0.video"),
+            ("media_single_audio_sd_smoke", "wav0", "\x04", "sd0/music/official_0.wav"),
         ]
         baseline_tft = CASE_ROOT / "case_00_baseline" / "lcd_test.tft"
-        for example_name, object_name, type_code in examples:
+        for example_name, object_name, type_code, expected_path in examples:
             with self.subTest(example=example_name), tempfile.TemporaryDirectory() as temp_dir:
                 scene = load_scene(Path(__file__).resolve().parents[1] / "examples" / example_name / "scene.json")
                 manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=baseline_tft)
 
                 self.assertIsNotNone(manifest["output_tft"])
                 self.assertTrue(manifest["tft_checksum"]["valid"])
+                self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
                 page = load_page_file(Path(manifest["target_pa"]))
                 generated = {block.objname: block for block in page.blocks}
                 self.assertEqual(generated[object_name].type_code, type_code)
-                self.assertIn("path", {field.name for field in generated[object_name].fields})
+                if expected_path is not None:
+                    self.assertEqual(generated[object_name].get_field("path").value.decode("ascii"), expected_path)
 
     @unittest.skipUnless(
         all(

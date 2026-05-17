@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "source": "codex_offline_number_demo_event_matrix",
+  "verified_at": "2026-05-16T18:44:48+08:00",
+  "scope": "Offline structural and bytecode fixture only. This deliberately did not flash COM36 because the slice broadens event-preservation coverage without adding a new hardware-facing claim.",
+  "artifact": {
+    "scene": "examples/number_demo/event_matrix_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_event_matrix_gb2312font_20260516/output.tft",
+    "file_size": 11412412,
+    "sha256": "60e8b5b63fad6e7de8d5f7f54f39c059d0bccccee44fee71eec6616e89ca3105",
+    "checksum": {
+      "stored_hex": "0x59354ECE",
+      "calculated_hex": "0x59354ECE",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+    "font_info": {
+      "font_name": "UiCNEN32GBFull",
+      "encoding_name": "gb2312",
+      "char_height": 32,
+      "char_count": 8273
+    }
+  },
+  "structural_evidence": {
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild",
+    "object_count": 7,
+    "objects": [
+      {
+        "name": "page0",
+        "type": "y",
+        "id": 0,
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 480
+      },
+      {
+        "name": "refbtn",
+        "type": "b",
+        "id": 1,
+        "x": 72,
+        "y": 76,
+        "w": 150,
+        "h": 52
+      },
+      {
+        "name": "visbtn",
+        "type": "b",
+        "id": 2,
+        "x": 72,
+        "y": 146,
+        "w": 150,
+        "h": 52
+      },
+      {
+        "name": "tswbtn",
+        "type": "b",
+        "id": 3,
+        "x": 72,
+        "y": 216,
+        "w": 150,
+        "h": 52
+      },
+      {
+        "name": "incbtn",
+        "type": "b",
+        "id": 4,
+        "x": 72,
+        "y": 286,
+        "w": 150,
+        "h": 52
+      },
+      {
+        "name": "label0",
+        "type": "t",
+        "id": 5,
+        "x": 300,
+        "y": 104,
+        "w": 360,
+        "h": 64
+      },
+      {
+        "name": "numval",
+        "type": "6",
+        "id": 6,
+        "x": 360,
+        "y": 220,
+        "w": 180,
+        "h": 70,
+        "val": 123,
+        "lenth": 3,
+        "format": 0
+      }
+    ],
+    "removed_seed_objects": [
+      "t0",
+      "b0",
+      "p0"
+    ],
+    "forward_targets": "The four event buttons are built before their same-page targets label0 and numval, so event preservation is checked against rebuilt objects rather than seed leftovers."
+  },
+  "callback_evidence": {
+    "codesdown_callbacks": [
+      "refbtn",
+      "visbtn",
+      "tswbtn",
+      "incbtn"
+    ],
+    "assertion": "The pytest fixture builds the event layout and asserts every event-button codesdown callback offset is present, non-negative, and not 0xFFFFFFFF."
+  },
+  "event_matrix": [
+    {
+      "button": "refbtn",
+      "command": "ref label0",
+      "compiled_payload": "09 03 04 6c 61 62 65 6c 30",
+      "decoded": {
+        "command": "ref",
+        "args": "label0"
+      }
+    },
+    {
+      "button": "visbtn",
+      "command": "vis label0,0",
+      "compiled_payload": "09 05 04 6c 61 62 65 6c 30 2c 30",
+      "decoded": {
+        "command": "vis",
+        "args": "label0,0"
+      }
+    },
+    {
+      "button": "tswbtn",
+      "command": "tsw label0,0",
+      "compiled_payload": "09 09 04 6c 61 62 65 6c 30 2c 30",
+      "decoded": {
+        "command": "tsw",
+        "args": "label0,0"
+      }
+    },
+    {
+      "button": "incbtn",
+      "command": "numval.val++",
+      "compiled_target": "The pytest fixture recompiles incbtn against the rebuilt object list and asserts the numeric ++ bytecode points at rebuilt numval's local user slot.",
+      "decoded": {
+        "kind": "property_event",
+        "operator": "++"
+      }
+    }
+  ],
+  "tests": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_preserves_same_page_event_matrix_offline",
+      "result": "1 passed in 6.81s"
+    }
+  ],
+  "conclusion": {
+    "offline_event_matrix": "Closed for the smallest low-risk slice: a clean full-page rebuild preserves same-page ref, vis, tsw, and numeric-update event payloads for rebuilt text/number targets, deletes seed objects, patches the verified GB2312 font, and emits a valid checksum without flashing.",
+    "live_boundary": "No new hardware claim is made here. The latest live panel proof remains examples/number_demo/full_page_rebuild_hardware_verified_2026-05-16.json."
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "source": "codex_tsw_touch_gate_batch",
+  "date": "2026-05-16",
+  "scope": "page0 clean rebuild 的 single-family tsw promotion live-gate 批次评估。目标是判断是否已有足够输入路径证明 touch-disable；本批次不烧录 tsw TFT。",
+  "candidate": {
+    "scene": "examples/number_demo/tsw_promotion_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+    "offline_evidence": "examples/number_demo/tsw_promotion_offline_verified_2026-05-16.json",
+    "checksum": {
+      "stored_hex": "0x8AA3D6C3",
+      "calculated_hex": "0x8AA3D6C3",
+      "valid": true,
+      "file_size": 11409900
+    }
+  },
+  "memory_recall": {
+    "query": "TJC USART HMI tsw live gate touch path serial click camera COM36 oracle fixture",
+    "relevant_memories": [
+      "mem_mp8adw9d_2b0ce62bd9c8",
+      "mem_mp8a45xa_fb763b9cff44",
+      "mem_mp8adqqw_a373baa65cee"
+    ],
+    "summary": "记忆与当前文件一致：tsw 候选仍 blocked_pending_touch_path；不要把 serial click 当成 physical touch lockout 证明。"
+  },
+  "local_tool_search": {
+    "searched_terms": [
+      "touch",
+      "finger",
+      "HID",
+      "digitizer",
+      "inject",
+      "tap",
+      "serial click",
+      "USB Cam"
+    ],
+    "finding": "仓库内现成工具覆盖串口 click、camera capture、live smoke、touch-capture/hotspot fixture，但没有找到自动物理触摸、HID digitizer、tap/inject 或其他可证明等价的触摸输入路径。",
+    "relevant_tools": [
+      "tools/capture_usb_cam.ps1",
+      "tools/live_tft_smoke.py",
+      "tools/live_case_smoke.py",
+      "tools/capture_hmi_screen.py",
+      "tools/camera_probe.py"
+    ]
+  },
+  "non_destructive_hardware_preflight": {
+    "connect": {
+      "port": "COM36",
+      "baud": 9600,
+      "model": "TJC8048X543_011C",
+      "ok": true
+    },
+    "sendme": {
+      "page_id": 0,
+      "ok": true
+    },
+    "camera": {
+      "device": "USB Cam",
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/touch_gate_camera_preflight_20260516_1955.jpg",
+      "sha256": "679763344a31d15047bbd3c21b0dd519058d992422b52ab06dc268b4eb99af59",
+      "length": 118692,
+      "visual_observation": "相机可用；当前屏仍是上一轮 VIS PROMOTION 页面，不是 tsw 候选页面。"
+    }
+  },
+  "external_opinion_bundle": {
+    "reviewer_a": {
+      "status": "used",
+      "model": "external reviewer A",
+      "accepted_points": [
+        "serial click 无 marker 不能证明 physical touch lockout。",
+        "若烧录，最多只能命名为 serial-click-path suppression，不可冒充真实触摸禁用证明。"
+      ],
+      "local_decision": "本批次按用户自动化约束选择不烧录，先补输入路径或 oracle 对照。"
+    },
+    "reviewer_b": {
+      "status": "used_but_rejected_where_conflicting",
+      "model": "external reviewer B",
+      "reason": "回答把 README 中 not_proven_by_serial_only 的事实读反，错误声称已有 physical touch lockout 证明；本地证据优先。"
+    },
+    "reviewer_c": {
+      "status": "used_but_rejected_for_core_decision",
+      "model": "external reviewer C",
+      "reason": "回答混淆了 TJC HMI 的 tsw 命令语义并给出与本地证据不匹配的泛化建议；本地证据优先。"
+    },
+    "single_opinion_exception": false
+  },
+  "validation": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_vis_promotion_offline tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_preserves_same_page_event_matrix_offline",
+      "result": "3 passed in 22.72s"
+    },
+    {
+      "command": "usarthmi.cmd --json tft checksum --file reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+      "result": "valid checksum 0x8AA3D6C3"
+    }
+  ],
+  "decision": {
+    "burn_now": false,
+    "reason": "COM36 和 USB Cam 可用，但缺少真实触摸或已证明等价的输入路径。烧录后只能得到 serial-click-path 行为，不能闭合 physical touch-disable；用户自动化要求没有清晰真实输入路径时不要硬烧。",
+    "blocked_on": [
+      "真实触摸动作的可重复记录路径",
+      "或可证明等价的触摸注入路径",
+      "或官方 oracle/fixture 继续收敛 tsw 输入门语义"
+    ]
+  },
+  "follow_up_live_burn": {
+    "path": "examples/number_demo/tsw_promotion_serial_click_hardware_verified_2026-05-16.json",
+    "reason": "用户随后要求每轮至少做一次烧录闭环，并明确允许用 click 代替触摸。",
+    "result": "isolated tsw TFT 烧录成功；T0/T1 dispatch 已实机证明；serial click targetbtn,1 在 tsw targetbtn,0 后仍返回 TG，因此 serial-click-path suppression 为 false，真实触摸证据后续再做。"
+  },
+  "allowed_claims": [
+    "tsw promotion candidate 的 payload、对象绑定、checksum 和相关离线测试仍然干净。",
+    "COM36 和 USB Cam 在本批次可用，当前屏是上一轮 VIS PROMOTION 页面。",
+    "现有工具没有自动物理触摸或等价触发能力，所以 tsw live promotion 仍被输入路径阻塞。"
+  ],
+  "blocked_claims": [
+    "当前已经实机证明 isolated page0 clean rebuild 的 tsw physical touch-disable。",
+    "serial click 可等价于手指触摸。",
+    "可以把结论泛化到 ref、混合 event_matrix、page-load、media、timer、跨页或任意控件。"
+  ],
+  "next_batch": [
+    "后续真实触摸证明统一走 tools/tsw_physical_touch_proof.py。",
+    "runner 必须先以 baseline TG 作为用户同步门槛，再进入 disable/recovery 分段窗口，且 disable 后不能写或 ref targetbtn。",
+    "serial click fallback 成功时只能记录 serial_click_path_tsw_suppression_live_observed，不能记录 physical_touch_lockout_live_observed。"
+  ]
+}

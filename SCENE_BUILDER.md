@@ -126,6 +126,56 @@ python -m usarthmi hmi import-image .\examples\menu_demo\assets\play.png --out .
   embedded into both `output.hmi` and `output.tft` when referenced by widgets.
 - The TFT path can append scene-generated `text`, `button`, and `image` widgets
   to the current 800x480 seed layout.
+- `drop_seed_objects` can now be used for the smallest live-proven full-page
+  rebuild slice in `examples/number_demo/full_page_rebuild_scene.json`. That
+  proof replaces the seed page object list with `page0/title/incbtn/numval`,
+  removes `t0/b0/p0`, and verifies the button event on COM36. The visually
+  accepted proof uses the full GB2312 `UiCNEN32GBFull.zi` font and
+  `numval.lenth=3`; a UTF-8 sparse font build passed serial checks but rendered
+  wrong glyphs. Keep broader rebuild claims fixture-gated.
+- `examples/number_demo/reorder_broadening_scene.json` is the next offline
+  reorder fixture. It broadens the same full-page rebuild path to
+  `page0/status/incbtn/title/footer/numval`, keeping the button before its
+  later number target and preserving the known-good event tokens without making
+  a new live-panel claim.
+- `examples/number_demo/event_matrix_scene.json` is an offline event-preservation
+  fixture for clean rebuilt pages. It rebuilds same-page `ref`, `vis`, `tsw`,
+  and numeric `++` button events against later rebuilt text/number targets and
+  checks compiled payload bytes without making page-load, media, timer, or live
+  runtime claims.
+- `examples/number_demo/vis_promotion_scene.json` is the narrower single-family
+  live-proven promotion after the event matrix. It rebuilds
+  `page0/title/hidebtn/showbtn/label0`, checks `vis label0,0/1` plus fixed
+  `printh 23 02 56 30/31` click markers against the later rebuilt `label0`,
+  and has COM36 plus USB Cam hide/show evidence. This only promotes `vis` for
+  the isolated page0 clean-rebuild fixture.
+- `examples/number_demo/tsw_promotion_scene.json` is the single-family `tsw`
+  candidate. It rebuilds `page0/title/disablebtn/enablebtn/targetbtn`,
+  checks `tsw targetbtn,0/1` plus fixed `printh 23 02 54 30/31/47` markers
+  against the later rebuilt `targetbtn`, and deliberately avoids claiming that
+  runtime touch-disable behavior is proven. The touch-gate follow-up evidence in
+  `examples/number_demo/tsw_touch_gate_batch_2026-05-16.json` keeps that boundary:
+  COM36 and USB Cam are usable, but no current repo tool can provide physical
+  touch or a proven equivalent input path. The current operational path is
+  `tools/tsw_physical_touch_proof.py`: block on user acknowledgement, capture a
+  baseline TG marker before disable, avoid writing/ref'ing `targetbtn` after
+  disable, and record disabled/recovery windows separately.
+  The serial-click fallback burn is recorded in
+  `examples/number_demo/tsw_promotion_serial_click_hardware_verified_2026-05-16.json`;
+  it proves T0/T1 dispatch on hardware but shows serial `click targetbtn,1` still
+  emits TG after `tsw targetbtn,0`. A fast timing scan in the same serial session
+  tested 0/10/20/50/100/200 ms delay windows, 18 critical trials total, and still
+  saw T0 followed by TG every time; this rules out slow serial command timing for
+  the serial-click-path result. A later 90 s real-touch listener captured TG/T0/T1
+  markers from the user's finger touches, and the user reported that after pressing
+  DISABLE by hand, TARGET could no longer be pressed. Two follow-up segmented
+  listeners did not catch baseline/recovery TG, so they are synchronization misses,
+  not physical-lockout negatives. A panel-visible prompt pass did catch baseline
+  and recovery TG, but that version wrote/refreshed `targetbtn` after disable and
+  is treated as contaminated for the disabled window. The next controlled path is
+  `tools/tsw_physical_touch_proof.py`: it blocks on `tools/wait_user_ack.ps1`,
+  uses title-only prompts, aborts before disable unless baseline TG is captured,
+  never writes or refs `targetbtn` after disable, and restores `page 0` at exit.
 - New PNG/JPG assets are packed into TFT picture resources for appended `image`
   widgets and assigned sequential `pic` ids after the seed resources.
 - Picture imports now preserve original JPG/JPEG payloads in `.is`, flatten
@@ -140,8 +190,10 @@ python -m usarthmi hmi import-image .\examples\menu_demo\assets\play.png --out .
   / `case14` TFT files now match official outputs byte-for-byte for the current
   PLAY image fixtures.
 - Custom fonts can be generated with `font generate-zi` and patched into a built
-  TFT with `tft patch-font`; this safe pass replaces the first embedded `.zi`
-  in place and keeps all section addresses unchanged.
+  TFT with `tft patch-font`; `scene build`, `hmi build`, and `tft build` can
+  also take `--font-zi` to patch the same file into `output.hmi` and the safe
+  in-place TFT font slot during the build. This safe pass replaces the first
+  embedded `.zi` in place and keeps all section addresses unchanged.
 - PNG/JPG picture-resource encoding now uses the recovered official JPEG settings
   (`quality=96`, 4:2:0 subsampling, 96 DPI). More official-editor fixtures are
   still useful before claiming compatibility for every image source shape, but

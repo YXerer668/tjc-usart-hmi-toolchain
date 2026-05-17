@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "source": "codex_live_number_demo_full_page_rebuild_visual_verify",
+  "verified_at": "2026-05-16T18:21:40+08:00",
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "expected_model": "TJC8048X543_011C"
+  },
+  "artifact": {
+    "scene": "examples/number_demo/full_page_rebuild_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_full_page_rebuild_gb2312font_digits_20260516/output.tft",
+    "file_size": 11408540,
+    "sha256": "809ddd4d92f5246adb39b979b72d09c55fb0ef1e123d32ae400a1da1a1bddabd",
+    "checksum": {
+      "stored_hex": "0x771EF87C",
+      "calculated_hex": "0x771EF87C",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+    "font_info": {
+      "font_name": "UiCNEN32GBFull",
+      "encoding_name": "gb2312",
+      "char_height": 32,
+      "char_count": 8273
+    }
+  },
+  "full_page_rebuild_evidence": {
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild",
+    "object_count": 4,
+    "objects": [
+      {
+        "name": "page0",
+        "type": "y",
+        "id": 0,
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 480
+      },
+      {
+        "name": "title",
+        "type": "t",
+        "id": 1,
+        "x": 180,
+        "y": 80,
+        "w": 440,
+        "h": 52
+      },
+      {
+        "name": "incbtn",
+        "type": "b",
+        "id": 2,
+        "x": 310,
+        "y": 270,
+        "w": 180,
+        "h": 72
+      },
+      {
+        "name": "numval",
+        "type": "6",
+        "id": 3,
+        "x": 310,
+        "y": 170,
+        "w": 180,
+        "h": 70,
+        "val": 123,
+        "lenth": 3,
+        "format": 0
+      }
+    ],
+    "removed_seed_objects": [
+      "t0",
+      "b0",
+      "p0"
+    ],
+    "event_forward_reference": "incbtn is object id 2 and its down event references numval.val on object id 3.",
+    "event_tokens": [
+      "codesdown-2",
+      "numval.val++",
+      "printh 23 02 4e 31"
+    ]
+  },
+  "upload": {
+    "skipped": false,
+    "bytes_sent": 11408540,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 210.75,
+    "manifest_path": ".usarthmi_last_upload.json",
+    "manifest_sha256": "809ddd4d92f5246adb39b979b72d09c55fb0ef1e123d32ae400a1da1a1bddabd"
+  },
+  "serial_health": {
+    "preflight_healthy": true,
+    "post_upload_healthy": true,
+    "post_upload_attempt": 2,
+    "post_upload_attempts": 3,
+    "post_upload_retry_note": "The first post-upload connect probe did not return comok, but sendme/get_dim were runtime-healthy and retry attempt 2 returned the expected model."
+  },
+  "serial_evidence": [
+    {
+      "command": "get title.txt",
+      "expected_kind": "string",
+      "expected_value": "NUMBER DEMO",
+      "actual": "NUMBER DEMO",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 123,
+      "actual": 123,
+      "ok": true
+    },
+    {
+      "command": "click incbtn,1",
+      "expected_hex": "23 02 4e 31",
+      "actual_hex": "23 02 4e 31",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 124,
+      "actual": 124,
+      "ok": true
+    },
+    {
+      "command": "click incbtn,1",
+      "expected_hex": "23 02 4e 31",
+      "actual_hex": "23 02 4e 31",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 125,
+      "actual": 125,
+      "ok": true
+    }
+  ],
+  "camera_evidence": {
+    "ok": true,
+    "path": "reverse_usarthmi/upload_verify_captures/number_demo_full_page_rebuild_gb2312font_digits_verify_20260516.jpg",
+    "backend": "msmf",
+    "camera_index": 1,
+    "width": 2560,
+    "height": 1440,
+    "bytes": 411109,
+    "visual_readback": {
+      "title": "NUMBER DEMO",
+      "number": "125",
+      "button": "+1"
+    }
+  },
+  "rejected_variants": [
+    {
+      "artifact": "reverse_usarthmi/number_demo_full_page_rebuild_20260516/output.tft",
+      "font_zi": "build_font_scene.zi",
+      "result": "Serial get/click checks passed, but the panel rendered ASCII text as repeated U-like glyphs. Treat this UTF-8 sparse font build as a visual regression, not a visual proof."
+    },
+    {
+      "artifact": "reverse_usarthmi/number_demo_full_page_rebuild_builtin_font_20260516/output.tft",
+      "font_zi": null,
+      "result": "Full upload completed but post-upload verification saw page 255 and invalid references; camera showed a blank white screen. This is not a usable rebuild proof."
+    },
+    {
+      "artifact": "reverse_usarthmi/number_demo_full_page_rebuild_gb2312font_20260516/output.tft",
+      "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+      "result": "Text rendered correctly, but the number template kept lenth=5 and displayed 00125 after two clicks."
+    }
+  ],
+  "conclusion": {
+    "full_page_rebuild": "Live-proven minimal P1.6 slice: the seed page object list was replaced by page0/title/incbtn/numval and old seed objects t0/b0/p0 were removed.",
+    "event_regression": "Live-proven P1-event-001 still works after rebuild: incbtn down increments numval.val and emits printh 23 02 4e 31.",
+    "visual_regression_fixed": "The final accepted proof uses the full GB2312 UiCNEN32GBFull.zi font and numval.lenth=3. Camera evidence shows NUMBER DEMO, 125, and +1.",
+    "scope": "This is not a claim of arbitrary full-page rebuild support. Page-load scheduling, media scheduling, arbitrary cross-page events, and broad reorder coverage remain fixture-gated."
+  }
+}

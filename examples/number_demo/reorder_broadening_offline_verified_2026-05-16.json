@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "source": "codex_offline_number_demo_reorder_broadening",
+  "verified_at": "2026-05-16T18:33:12+08:00",
+  "scope": "Offline structural fixture only. This deliberately did not flash COM36 because the prior minimal P1.6 visual proof is already live-proven and this slice only broadens text/button/number object ordering.",
+  "artifact": {
+    "scene": "examples/number_demo/reorder_broadening_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_reorder_broadening_gb2312font_20260516/output.tft",
+    "file_size": 11411060,
+    "sha256": "24fe84092f042c1544d518f1f44a68b1323b65747af7efae57dcda1ef2bc2eb1",
+    "checksum": {
+      "stored_hex": "0x6E54CC25",
+      "calculated_hex": "0x6E54CC25",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+    "font_info": {
+      "font_name": "UiCNEN32GBFull",
+      "encoding_name": "gb2312",
+      "char_height": 32,
+      "char_count": 8273
+    }
+  },
+  "structural_evidence": {
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild",
+    "object_count": 6,
+    "objects": [
+      {
+        "name": "page0",
+        "type": "y",
+        "id": 0,
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 480
+      },
+      {
+        "name": "status",
+        "type": "t",
+        "id": 1,
+        "x": 232,
+        "y": 44,
+        "w": 336,
+        "h": 40
+      },
+      {
+        "name": "incbtn",
+        "type": "b",
+        "id": 2,
+        "x": 310,
+        "y": 270,
+        "w": 180,
+        "h": 72
+      },
+      {
+        "name": "title",
+        "type": "t",
+        "id": 3,
+        "x": 180,
+        "y": 88,
+        "w": 440,
+        "h": 52
+      },
+      {
+        "name": "footer",
+        "type": "t",
+        "id": 4,
+        "x": 240,
+        "y": 380,
+        "w": 320,
+        "h": 40
+      },
+      {
+        "name": "numval",
+        "type": "6",
+        "id": 5,
+        "x": 310,
+        "y": 170,
+        "w": 180,
+        "h": 70,
+        "val": 123,
+        "lenth": 3,
+        "format": 0
+      }
+    ],
+    "removed_seed_objects": [
+      "t0",
+      "b0",
+      "p0"
+    ],
+    "reorder_shape": "The button is object id 2, while its referenced number target is the later object id 5. Additional text objects occupy ids 1, 3, and 4.",
+    "compiled_event_target": "The pytest fixture recompiles incbtn's event table against the rebuilt object list and asserts the numeric ++ bytecode points at the rebuilt numval local user slot, not a stale seed object.",
+    "event_tokens": [
+      "codesdown-2",
+      "numval.val++",
+      "printh 23 02 4e 31"
+    ]
+  },
+  "tests": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_reorders_supported_widgets_with_gb2312_font",
+      "result": "1 passed in 9.02s"
+    }
+  ],
+  "conclusion": {
+    "offline_reorder_broadening": "Closed for the smallest low-risk slice: a full-page rebuild can reorder supported text/button/number objects, preserve the known-good forward button event, delete seed objects, patch the verified GB2312 font, and emit a valid checksum without flashing.",
+    "live_boundary": "No new hardware claim is made here. The latest live panel proof remains examples/number_demo/full_page_rebuild_hardware_verified_2026-05-16.json."
+  }
+}

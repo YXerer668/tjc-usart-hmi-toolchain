@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "source": "codex_live_number_demo_event_click_verify",
+  "verified_at": "2026-05-16T16:55:46+08:00",
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "expected_model": "TJC8048X543_011C"
+  },
+  "artifact": {
+    "scene": "examples/number_demo/scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_font_build_20260516/output.tft",
+    "file_size": 11411992,
+    "sha256": "37b79c1639b1287257ac9de5354972670c64f223dbffd1f911c532b209554adf",
+    "checksum": {
+      "stored_hex": "0x2CD4EB1A",
+      "calculated_hex": "0x2CD4EB1A",
+      "valid": true
+    },
+    "font_zi": "build_font_scene.zi"
+  },
+  "upload": {
+    "skipped": true,
+    "skip_reason": "candidate matches last successful upload manifest; upload skipped",
+    "bytes_sent": 0,
+    "chunks_sent": 0,
+    "manifest_path": ".usarthmi_last_upload.json",
+    "manifest_sha256": "37b79c1639b1287257ac9de5354972670c64f223dbffd1f911c532b209554adf"
+  },
+  "serial_health": {
+    "connect_ok": true,
+    "model": "TJC8048X543_011C",
+    "model_ok": true,
+    "runtime_ok": true,
+    "public_upload_ready": true,
+    "healthy": true,
+    "attempt": 1,
+    "attempts": 3
+  },
+  "serial_evidence": [
+    {
+      "command": "get title.txt",
+      "expected_kind": "string",
+      "expected_value": "NUMBER DEMO",
+      "actual": "NUMBER DEMO",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 123,
+      "actual": 123,
+      "ok": true
+    },
+    {
+      "command": "click incbtn,1",
+      "expected_hex": "23 02 4e 31",
+      "actual_hex": "23 02 4e 31",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 124,
+      "actual": 124,
+      "ok": true
+    },
+    {
+      "command": "click incbtn,1",
+      "expected_hex": "23 02 4e 31",
+      "actual_hex": "23 02 4e 31",
+      "ok": true
+    },
+    {
+      "command": "get numval.val",
+      "expected_kind": "number",
+      "expected_value": 125,
+      "actual": 125,
+      "ok": true
+    }
+  ],
+  "camera_evidence": {
+    "ok": true,
+    "path": "reverse_usarthmi/upload_verify_captures/number_demo_event_click_verify_20260516.jpg",
+    "backend": "msmf",
+    "camera_index": 1,
+    "width": 2560,
+    "height": 1440,
+    "bytes": 300858
+  },
+  "conclusion": {
+    "button_down_event": "Live-proven: incbtn down executes numval.val++ on the panel.",
+    "serial_side_channel": "Live-proven: incbtn down emits printh 23 02 4e 31.",
+    "scope": "This proves generated page0 button runtime events for the number demo. Page-load scheduling is not involved and remains a separate fixture-gated problem."
+  }
+}

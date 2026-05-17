@@ -2,7 +2,7 @@
   "project": {
     "name": "new-controls-demo",
     "default_page": "page0",
-    "clean_seed_objects": true
+    "drop_seed_objects": true
   },
   "canvas": {
     "width": 800,
@@ -90,9 +90,19 @@
           "value": 0
         },
         {
+          "id": "bt1",
+          "type": "dualstate-button",
+          "x": 148,
+          "y": 226,
+          "w": 96,
+          "h": 64,
+          "text": "DUAL2",
+          "value": 1
+        },
+        {
           "id": "sw0",
           "type": "state-button",
-          "x": 170,
+          "x": 272,
           "y": 226,
           "w": 120,
           "h": 42,
@@ -102,7 +112,7 @@
         {
           "id": "c0",
           "type": "checkbox",
-          "x": 332,
+          "x": 430,
           "y": 236,
           "w": 24,
           "h": 24,
@@ -111,7 +121,7 @@
         {
           "id": "r0",
           "type": "radio",
-          "x": 392,
+          "x": 490,
           "y": 236,
           "w": 24,
           "h": 24,
@@ -120,7 +130,7 @@
         {
           "id": "m0",
           "type": "hotspot",
-          "x": 450,
+          "x": 545,
           "y": 220,
           "w": 90,
           "h": 70

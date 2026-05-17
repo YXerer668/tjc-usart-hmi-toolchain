@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "source": "codex_live_number_demo_vis_promotion",
+  "verified_at": "2026-05-16T19:31:55+08:00",
+  "scope": "page0 clean rebuild 的单事件家族 vis promotion 实机证明。这里只证明当前 isolated vis fixture 中 hidebtn/showbtn 对同页重建文本 label0 的 hide/show 行为；不声明 ref、tsw、page-load、media、timer、跨页或任意控件泛化。",
+  "scene": "examples/number_demo/vis_promotion_scene.json",
+  "offline_evidence": "examples/number_demo/vis_promotion_offline_verified_2026-05-16.json",
+  "artifact": {
+    "output_tft": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft",
+    "file_size": 11409856,
+    "sha256": "195ba57849ae47f9f3d9c63800690f30a2b4fef0e5e3bd1962bb3981080a7aa3",
+    "checksum": {
+      "stored_hex": "0xE9DE787A",
+      "calculated_hex": "0xE9DE787A",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi"
+  },
+  "preflight": {
+    "pytest": {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_vis_promotion_offline",
+      "result": "1 passed in 7.60s"
+    },
+    "checksum_command": "usarthmi.cmd --json tft checksum --file reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft",
+    "camera_preflight": {
+      "path": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/preflight_camera.jpg",
+      "visual_observation": "USB Cam 可用；烧录前拍到上一轮已知 good 的 NUMBER DEMO 页面。"
+    },
+    "connect": {
+      "port": "COM36",
+      "baud": 9600,
+      "model": "TJC8048X543_011C",
+      "mcu_code": "10501",
+      "firmware": "277",
+      "serial": "FC8B3401B1A6086E"
+    }
+  },
+  "upload": {
+    "command": "usarthmi.cmd --json tft upload --file reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --expected-model TJC8048X543_011C --verify-after-upload --verify-wait-ms 2500 --verify-health-attempts 8 --verify-health-retry-delay-ms 1000 --verify-get title.txt=VIS PROMOTION --verify-get hidebtn.txt=HIDE --verify-get showbtn.txt=SHOW --verify-get label0.txt=VISIBLE TARGET --progress",
+    "result": {
+      "bytes_sent": 11409856,
+      "chunks_sent": 2786,
+      "chunk_size": 4096,
+      "elapsed_s": 210.828,
+      "skipped": false,
+      "post_upload_serial_health": "healthy on attempt 2 of 8",
+      "last_upload_manifest": ".usarthmi_last_upload.json",
+      "uploaded_at": "2026-05-16T11:30:54.804663Z"
+    }
+  },
+  "post_upload_serial_readback": {
+    "sendme": {
+      "expected_page": 0,
+      "actual_page": 0,
+      "ok": true
+    },
+    "get_checks": [
+      {
+        "target": "title.txt",
+        "expected": "VIS PROMOTION",
+        "actual": "VIS PROMOTION",
+        "ok": true
+      },
+      {
+        "target": "hidebtn.txt",
+        "expected": "HIDE",
+        "actual": "HIDE",
+        "ok": true
+      },
+      {
+        "target": "showbtn.txt",
+        "expected": "SHOW",
+        "actual": "SHOW",
+        "ok": true
+      },
+      {
+        "target": "label0.txt",
+        "expected": "VISIBLE TARGET",
+        "actual": "VISIBLE TARGET",
+        "ok": true
+      }
+    ]
+  },
+  "runtime_event_proof": [
+    {
+      "step": "hide",
+      "command": "click hidebtn,1",
+      "response_hex": "23 02 56 30",
+      "ascii_preview": "#\\u0002V0",
+      "camera_path": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/after_hide.jpg",
+      "camera_sha256": "7da0b5125528733f8977ef49ef9f47602a7abdd90417cbabae54e5c567d3c3bb",
+      "visual_observation": "label0 的黄色 VISIBLE TARGET 区域消失，页面只保留 VIS PROMOTION、HIDE、SHOW。"
+    },
+    {
+      "step": "show",
+      "command": "click showbtn,1",
+      "response_hex": "23 02 56 31",
+      "ascii_preview": "#\\u0002V1",
+      "camera_path": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/after_show.jpg",
+      "camera_sha256": "7dae6e43ac7baa4241195e659ec150767f723183370949c745ef20618acad984",
+      "visual_observation": "label0 的黄色 VISIBLE TARGET 区域恢复可见。"
+    }
+  ],
+  "camera_baseline": {
+    "path": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/after_upload_visible.jpg",
+    "sha256": "4885ed8b608ae9250b1adda7afc22a6d721efa806f25f264a061401d2de22840",
+    "visual_observation": "上传后初始页面显示 VIS PROMOTION、HIDE、SHOW 和黄色 VISIBLE TARGET。"
+  },
+  "conclusion": {
+    "live_vis_promotion": "closed",
+    "allowed_claim": "当前 page0 clean rebuild 的 isolated vis fixture 已实机证明 hide/show 同页重建文本 label0，且串口 fixed printh 标记和 USB Cam 视觉证据一致。",
+    "blocked_claims": [
+      "不证明 ref 或 tsw 运行时行为。",
+      "不证明完整 event_matrix 的混合运行时行为。",
+      "不证明 page-load、media、timer、跨页或任意控件泛化。"
+    ]
+  }
+}

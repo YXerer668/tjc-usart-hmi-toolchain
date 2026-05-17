@@ -1,0 +1,137 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "scope": "current-target scene widget support and TFT writer-path guard",
+  "claim": "Every current-target supported scene widget type has either a built-in TFT writer path or a fixture-backed template path; current-target dropped controls remain unsupported.",
+  "built_in_writer_types": [
+    "button",
+    "image",
+    "number",
+    "text",
+    "timer"
+  ],
+  "fixture_backed_writer_types": {
+    "animation": {"case": "case_47_gmov", "type": "0x02"},
+    "audio": {"case": "case_49_audio", "type": "0x04"},
+    "slider": {"case": "case_17_slider", "type": "0x01"},
+    "gauge": {"case": "case_18_gauge", "type": "z"},
+    "progress": {"case": "case_20_progress", "type": "j"},
+    "qrcode": {"case": "case_21_qrcode", "type": ":"},
+    "scrolling-text": {"case": "case_22_scrolling_text", "type": "7"},
+    "dual-button": {"case": "case_23_dual_state_button", "type": "5"},
+    "dualstate-button": {"case": "case_23_dual_state_button", "type": "5"},
+    "state-button": {"case": "case_24_state_button", "type": "C"},
+    "hotspot": {"case": "case_25_hotspot_touch_area", "type": "m"},
+    "variable": {"case": "case_26_variable_numeric_string", "type": "4"},
+    "waveform": {"case": "case_27_waveform_basic", "type": "0x00"},
+    "checkbox": {"case": "case_28_checkbox", "type": "8"},
+    "radio": {"case": "case_29_radio", "type": "9"},
+    "crop-image": {"case": "case_30_crop_image", "type": "q"},
+    "xfloat": {"case": "case_36_xfloat", "type": ";"},
+    "combobox": {"case": "case_37_combobox", "type": "="},
+    "touch-capture": {"case": "case_45_touchcap_current_gui", "type": "0x05"},
+    "external-picture": {"case": "case_46_expicture_current_gui", "type": "<"},
+    "video": {"case": "case_48_video", "type": "0x03"}
+  },
+  "current_target_unsupported": {
+    "text-select": "case_38_text_select was dropped by the official compiler for TJC8048X543_011C",
+    "sliding-text": "case_41_sltext was dropped by the official compiler for TJC8048X543_011C",
+    "data-record": "case_42_datarecord was dropped by the official compiler for TJC8048X543_011C",
+    "file-browser": "case_43_filebrowser was dropped by the official compiler for TJC8048X543_011C",
+    "file-stream": "case_44_filestream was dropped by the official compiler for TJC8048X543_011C"
+  },
+  "current_target_unsupported_evidence": "examples/current_target_unsupported_official_drop_verified_2026-05-17.json",
+  "full_page_rebuild_offline_coverage": {
+    "built_in_controls": {
+      "types": ["button", "image", "number", "text", "timer"],
+      "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"
+    },
+    "fixture_backed_non_media_controls": {
+      "types": [
+        "checkbox",
+        "crop-image",
+        "dual-button",
+        "dualstate-button",
+        "gauge",
+        "hotspot",
+        "progress",
+        "qrcode",
+        "radio",
+        "scrolling-text",
+        "slider",
+        "state-button",
+        "variable",
+        "waveform"
+      ],
+      "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"
+    },
+    "fixture_backed_extra_and_single_media_controls": {
+      "types": [
+        "animation",
+        "audio",
+        "combobox",
+        "external-picture",
+        "touch-capture",
+        "video",
+        "xfloat"
+      ],
+      "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"
+    }
+  },
+  "scene_examples": {
+    "animation": {"scene": "examples/media_single_gmov_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "audio": {"scene": "examples/media_single_audio_sd_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "button": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "checkbox": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "combobox": {"scene": "examples/xfloat_combobox_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "crop-image": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "dual-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "dualstate-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "external-picture": {"scene": "examples/external_picture_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "gauge": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "hotspot": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "image": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "number": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "progress": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "qrcode": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "radio": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "scrolling-text": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "slider": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "state-button": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "text": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "timer": {"scene": "examples/builtin_controls_demo/scene.json", "evidence": "examples/builtin_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "touch-capture": {"scene": "examples/touch_capture_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "variable": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "video": {"scene": "examples/media_single_video_sd_smoke/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"},
+    "waveform": {"scene": "examples/new_controls_demo/scene.json", "evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json"},
+    "xfloat": {"scene": "examples/xfloat_combobox_demo/scene.json", "evidence": "examples/full_rebuild_control_broadening_2026-05-17.json"}
+  },
+  "verification": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_current_target_supported_widget_types_have_tft_writer_path -q",
+      "expected": "1 passed"
+    },
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_widget_capability_matrix_matches_code_constants -q",
+      "expected": "1 passed, 50 subtests passed"
+    },
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_widget_capability_matrix_scene_examples_build_clean_rebuild_tfts -q",
+      "expected": "1 passed, 8 subtests passed"
+    },
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_builtin_controls_demo_full_page_rebuild_covers_builtin_controls -q",
+      "expected": "1 passed"
+    },
+    {
+      "command": "python -m pytest tests/test_scene_layout.py::SceneLayoutTests::test_current_target_unsupported_fixture_outputs_keep_only_seed_objects -q",
+      "expected": "1 passed, 5 subtests passed"
+    }
+  ],
+  "not_claimed": [
+    "runtime behavior for every widget",
+    "live COM36 proof for every widget",
+    "arbitrary page/widget/event generalization",
+    "support for controls dropped by the current target official compiler"
+  ]
+}

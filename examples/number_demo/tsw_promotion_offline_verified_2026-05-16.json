@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "source": "codex_offline_number_demo_tsw_promotion_candidate",
+  "verified_at": "2026-05-16T19:42:05+08:00",
+  "scope": "page0 clean rebuild 的单事件家族 tsw promotion 离线候选证明。这里只验证 clean rebuild 后 disablebtn/enablebtn/targetbtn 的对象顺序、后置目标绑定、tsw payload、固定 printh marker、GB2312 字体和 checksum；没有烧录 COM36，也不声明禁触运行时行为。",
+  "decision": {
+    "selected_event_family": "tsw",
+    "reason": "vis 已实机闭合后，tsw 比 ref 更适合下一步候选：它可以构造 targetbtn marker 的正/负串口闭环计划；ref 的重绘视觉更容易和自动刷新或赋值混淆。",
+    "flash_now": false,
+    "flash_gate": "本轮只做离线 fixture/pytest/字节码对照。只有在确认 click 命令是否受 tsw touch-disable 影响、且 COM36+USB Cam 可用时，才把它提升为实机测试。"
+  },
+  "opinion_bundle_status": {
+    "reviewer_a": {
+      "status": "used",
+      "model": "external reviewer A",
+      "summary": "建议本轮选择 tsw，不选 ref；离线 fixture 应验证 drop_seed_objects 后无 seed 残留、对象名/ID/type/顺序、三个按钮 down event offset、payload 解码、tsw targetbtn,0/1 绑定到 rebuilt targetbtn、printh TG/T0/T1 marker 和 checksum。最大风险是串口 click 可能不等价于真实触摸，未来 live promotion 不能只靠软件 click 下结论。"
+    },
+    "reviewer_b": {
+      "status": "used",
+      "model": "external reviewer B",
+      "summary": "建议本轮选择 tsw；离线验证 tsw/printh 指令解析、目标按钮状态切换意图、事件触发组合；最大风险是离线验证与实机行为不一致。"
+    },
+    "reviewer_c": {
+      "status": "used",
+      "model": "external reviewer C",
+      "summary": "建议选择 tsw，因为它不涉及显示刷新且比 ref 更容易形成正/负闭环；最大风险是实机上 tsw 参数生效延迟或 marker 缓存导致误判。"
+    },
+    "single_opinion_exception": false,
+    "local_judgment": "采纳外部审阅里 tsw 优先级方向，但不采纳任何把实机禁触效果说成离线可证明的部分；离线只证明 payload 和绑定，禁触效果必须实机验证。"
+  },
+  "artifact": {
+    "scene": "examples/number_demo/tsw_promotion_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+    "file_size": 11409900,
+    "sha256": "3d86df296964064400db04446bdbc8621669946827fc0e7d064a3c394f081b2f",
+    "checksum": {
+      "stored_hex": "0x8AA3D6C3",
+      "calculated_hex": "0x8AA3D6C3",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+    "font_info": {
+      "font_name": "UiCNEN32GBFull",
+      "encoding_name": "gb2312",
+      "char_height": 32,
+      "char_count": 8273
+    }
+  },
+  "follow_up_hardware_evidence": {
+    "path": "examples/number_demo/tsw_promotion_serial_click_hardware_verified_2026-05-16.json",
+    "summary": "后续已按用户指令烧录 isolated tsw 候选，并用 serial click fallback 闭环。结果：页面上传/readback/camera 正常，disablebtn/enablebtn 的 T0/T1 marker 到达；但 tsw targetbtn,0 后 serial click targetbtn,1 仍返回 TG，因此 serial-click-path suppression 为 false。用户随后真实触摸并开 90 秒监听，捕获 TG/T0/T1 markers，证明手指触摸路径能触发事件；但顺序不够受控，physical touch lockout 仍需分段同步复测。"
+  },
+  "structural_evidence": {
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild",
+    "object_count": 5,
+    "objects": [
+      {
+        "name": "page0",
+        "type": "y",
+        "id": 0,
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 480
+      },
+      {
+        "name": "title",
+        "type": "t",
+        "id": 1,
+        "x": 150,
+        "y": 42,
+        "w": 500,
+        "h": 52
+      },
+      {
+        "name": "disablebtn",
+        "type": "b",
+        "id": 2,
+        "x": 72,
+        "y": 150,
+        "w": 190,
+        "h": 66
+      },
+      {
+        "name": "enablebtn",
+        "type": "b",
+        "id": 3,
+        "x": 72,
+        "y": 250,
+        "w": 190,
+        "h": 66
+      },
+      {
+        "name": "targetbtn",
+        "type": "b",
+        "id": 4,
+        "x": 340,
+        "y": 188,
+        "w": 260,
+        "h": 92
+      }
+    ],
+    "removed_seed_objects": [
+      "t0",
+      "b0",
+      "p0"
+    ],
+    "forward_targets": "disablebtn 和 enablebtn 都在 targetbtn 之前生成，离线验证的是 clean rebuild 后 tsw 仍绑定到后置重建目标，而不是旧 seed 对象。"
+  },
+  "event_evidence": [
+    {
+      "button": "disablebtn",
+      "commands": [
+        "tsw targetbtn,0",
+        "printh 23 02 54 30"
+      ],
+      "compiled_tsw_payload": "09 09 04 74 61 72 67 65 74 62 74 6e 2c 30",
+      "compiled_marker_payload": "09 0f 08 32 33 20 30 32 20 35 34 20 33 30",
+      "decoded": [
+        {
+          "command": "tsw",
+          "args": "targetbtn,0"
+        },
+        {
+          "command": "printh",
+          "args": "23 02 54 30"
+        }
+      ]
+    },
+    {
+      "button": "enablebtn",
+      "commands": [
+        "tsw targetbtn,1",
+        "printh 23 02 54 31"
+      ],
+      "compiled_tsw_payload": "09 09 04 74 61 72 67 65 74 62 74 6e 2c 31",
+      "compiled_marker_payload": "09 0f 08 32 33 20 30 32 20 35 34 20 33 31",
+      "decoded": [
+        {
+          "command": "tsw",
+          "args": "targetbtn,1"
+        },
+        {
+          "command": "printh",
+          "args": "23 02 54 31"
+        }
+      ]
+    },
+    {
+      "button": "targetbtn",
+      "commands": [
+        "printh 23 02 54 47"
+      ],
+      "compiled_marker_payload": "09 0f 08 32 33 20 30 32 20 35 34 20 34 37",
+      "decoded": [
+        {
+          "command": "printh",
+          "args": "23 02 54 47"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline",
+      "result": "1 passed in 7.33s"
+    },
+    {
+      "command": "usarthmi.cmd --json tft checksum --file reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+      "result": "valid checksum 0x8AA3D6C3"
+    },
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline",
+      "result": "re-run after live-gate assessment: 1 passed in 8.91s"
+    },
+    {
+      "command": "git diff --check",
+      "result": "clean after live-gate assessment edits"
+    }
+  ],
+  "possible_live_plan": {
+    "status": "blocked_pending_touch_path",
+    "gate_assessed_at": "2026-05-16T19:48:00+08:00",
+    "local_evidence": [
+      {
+        "source": "examples/page1_button_ref_tsw_event_probe/hardware_verified_2026-05-16.json",
+        "finding": "page1 ref/tsw upload、对象读回、串口 click dispatch 和相机布局已实机证明，但 physical_tsw_touch_lockout 明确标为 not_proven_by_serial_only。"
+      },
+      {
+        "source": "examples/page1_event_matrix_smoke/hardware_verified_2026-05-16.json",
+        "finding": "page1 event matrix 中 vis/ref/tsw command dispatch 已实机证明，但 physical_tsw_touch_lockout 仍明确标为 not_proven_by_serial_only。"
+      },
+      {
+        "source": "examples/page1_button_ref_tsw_event_probe/README.md",
+        "finding": "README 明确说明 serial click 不是手指触摸路径，不能单独证明 touch lockout。"
+      },
+      {
+        "source": "usarthmi/protocol.py",
+        "finding": "build_click 只构造公共串口命令 click obj,0/1；本地代码没有证据表明该命令会经过屏幕物理触摸使能门。"
+      }
+    ],
+    "gate_decision": "不要把 click targetbtn,1 在 tsw targetbtn,0 后无 marker 当作默认有效负例。现有证据只支持把它列为待验证假设；若 click 绕过触摸门，用它烧录只能证明串口命令行为，不能证明 physical touch-disable。",
+    "latest_touch_gate_batch": {
+      "evidence": "examples/number_demo/tsw_touch_gate_batch_2026-05-16.json",
+      "status": "still_blocked",
+      "summary": "COM36 和 USB Cam 可用，当前屏仍是上一轮 VIS PROMOTION 页面；仓库没有现成自动物理触摸或可证明等价的触摸注入路径。本批次重跑 checksum 和 3 个相关 pytest，全部通过，但不烧录 tsw。",
+      "opinion_bundle": "外部审阅已咨询；边界判断中与本地证据一致的部分可用，与本地证据冲突的部分被驳回。"
+    },
+    "minimum_checks_before_flash": [
+      "重新跑 tsw target pytest 和 checksum。",
+      "确认 COM36 型号仍为 TJC8048X543_011C。",
+      "先证明 click targetbtn,1 是否经过 tsw touch-disable 门；若无法证明，改用真实触摸或可观测触摸注入路径。"
+    ],
+    "candidate_runtime_sequence": [
+      "click targetbtn,1 => hex:23 02 54 47",
+      "click disablebtn,1 => hex:23 02 54 30",
+      "真实触摸 targetbtn => no TG marker, or click targetbtn,1 => no TG marker only after click is separately proven to respect tsw",
+      "click enablebtn,1 => hex:23 02 54 31",
+      "真实触摸 targetbtn => hex:23 02 54 47, or click targetbtn,1 => hex:23 02 54 47 only after click is separately proven to respect tsw"
+    ],
+    "camera_role": "USB Cam 只能辅助确认页面仍健康并记录真实触摸动作；tsw 的核心证明应是 targetbtn marker 在禁用/恢复状态下的可达/不可达，且输入路径必须是物理触摸或已证明等价的触发路径。"
+  },
+  "claims_allowed": [
+    "tsw_promotion_scene 是 page0 clean rebuild 的单事件家族离线候选。",
+    "disablebtn/enablebtn 的 tsw payload 可解码到 targetbtn,0 和 targetbtn,1，且目标是重建后的 targetbtn。",
+    "targetbtn 自身有固定 printh marker，可作为未来正/负实机闭环的探针。"
+  ],
+  "claims_blocked": [
+    "当前已经实机证明 page0 clean rebuild 的 tsw 禁触行为。",
+    "click 命令一定受 tsw touch-disable 影响。",
+    "ref、完整 event_matrix、page-load、media、timer、跨页或任意控件泛化已经被证明。"
+  ]
+}

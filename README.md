@@ -47,6 +47,11 @@ Experimental but useful:
 - Multi-page seed-page button patching for narrow two-way navigation probes:
   `patch_seed_page0_widgets` can edit an existing page0 button event while
   keeping the seed object layout intact.
+- A minimal page0 full-page rebuild path through `drop_seed_objects`.
+  `examples/number_demo/full_page_rebuild_scene.json` is live-proven on
+  `COM36`: the generated TFT removed seed `t0/b0/p0`, rebuilt
+  `page0/title/incbtn/numval`, and kept the `incbtn -> numval.val++` event
+  working after a full serial upload.
 - Event bytecode assembly/inspection for a small set of commands. Page0
   button `ref obj` is live-proven from scene DSL through TFT upload and
   camera-verified redraw after a red `fill` overlay. Page0 `tsw obj,0`
@@ -55,7 +60,10 @@ Experimental but useful:
   `numval.val` at `0`. Page1
   normal-button events are live-proven for `page 1`, explicit-hex `printh`,
   one-level same-page `click` cascades, and numeric field `++` / `=` / `--`
-  operations, plus same-page `vis obj,0/1` show/hide operations. Page0 timer
+  operations, plus same-page `vis obj,0/1` show/hide operations. The
+  `examples/number_demo` page0 `incbtn` down event is also live-proven: two
+  serial `click incbtn,1` steps advanced `numval.val` from `123` to `125` and
+  emitted `23 02 4e 31` through `printh`. Page0 timer
   `codestimer-` callbacks are live-proven for `numval.val++` after runtime
   `tm0.en=1`; boot/page-load autorun is still open.
   media/audio assignments and `play` events are fixture-backed, while live
@@ -82,6 +90,14 @@ For a clearer implemented / experimental / missing matrix, see
 - Live smoke upload helpers use the same serial-health preflight as the CLI:
   a matching `connect` model is not enough; `sendme` and `get dim` must also
   respond before public `whmi-wri` upload is attempted.
+- For burn-and-check loops, add `--verify-after-upload` and one or more
+  `--verify-get obj.attr=value` assertions. The verification runs even when
+  `--skip-if-current` skips an identical file, and a failed verification keeps
+  the upload result from being recorded as the new known-current manifest. Add
+  repeatable `--verify-step` commands for runtime actions such as `sendme`,
+  `get numval.val => 124`, `click incbtn,1 => hex:23 02 4e 31`, media enable
+  toggles, or follow-up reads. Add `--verify-capture` when the visual state also
+  matters.
 - Do not copy official `work\a-*\output\*.tft` while the official serial
   download is actively transferring. Copy it before starting transfer or after
   the transfer has fully finished.
@@ -105,6 +121,8 @@ For a clearer implemented / experimental / missing matrix, see
   baselines.
 - Experimental in-place TFT font replacement: a generated `.zi` can replace the
   embedded font resource in a TFT while preserving section addresses.
+- Scene/TFT builds can take `--font-zi` to patch the same `.zi` into
+  `output.hmi` and the safe in-place TFT font slot in one build.
 - TFT inspection/checksum helpers using a small vendored copy of TFTTool.
 - Experimental same-layout TFT patching for text/coordinate changes.
 - Experimental appended-object TFT tail generation for the current seed layout:
@@ -257,11 +275,35 @@ python -m usarthmi --json tft upload `
   --baud 9600 `
   --download-baud 921600 `
   --expected-model TJC8048X543_011C `
+  --skip-if-current `
+  --verify-after-upload `
+  --verify-get t0.txt=nihao `
+  --verify-step '{"command":"sendme","expected_kind":"page_id","expected_value":0}' `
+  --verify-capture `
   --progress
 ```
 
 `tft upload` runs checksum and serial-health preflight by default. Use
 `--no-preflight` only for deliberate recovery or reverse-engineering probes.
+After a successful public upload the CLI writes `.usarthmi_last_upload.json`
+atomically. A later upload with `--skip-if-current` compares the candidate TFT's
+SHA256/size plus the target port, baud, and expected model against that manifest
+and skips before runtime preflight/upload when they match. The manifest is only a
+record of the last successful upload performed by this tool; it is not proof that
+the screen has not been changed by SD-card flashing, the official downloader, or
+another machine.
+Add `--verify-after-upload` plus `--verify-get obj.attr=value` assertions when
+the upload must be followed by serial readback. If verification fails, the
+command returns non-zero and does not update the known-current manifest.
+Add repeatable `--verify-step` entries when the post-upload proof needs runtime
+actions, for example `{"command":"sendme","expected_kind":"page_id","expected_value":0}`.
+For common readback/click checks, shorthand is usually easier:
+`get numval.val => 124` or `click incbtn,1 => hex:23 02 4e 31`. Media
+sequences can still use JSON, such as `{"command":"wav0.en=1","expect_response":false}`
+followed by `{"command":"get wav0.en","expected_kind":"number","expected_value":1}`.
+For visual evidence, add `--verify-capture`; by default it saves a camera frame
+under `reverse_usarthmi/upload_verify_captures/` using the local MSMF camera
+path that has been reliable on this workstation.
 
 Replace the embedded TFT font with a generated `.zi`:
 
@@ -270,6 +312,17 @@ python -m usarthmi --json tft patch-font `
   --baseline-tft output.tft `
   --font custom.zi `
   --out output_custom_font.tft
+```
+
+Patch a generated `.zi` during a normal scene/TFT build:
+
+```powershell
+python -m usarthmi --json tft build `
+  --scene examples\number_demo\scene.json `
+  --seed D:\MySTM32\H723ZGT6\Program\ISP_Test\lcd_test.HMI `
+  --baseline-tft C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd_test.tft `
+  --font-zi reverse_usarthmi\font_baselines\ui_cn_en_32\UiCNEN32GBFull.zi `
+  --out reverse_usarthmi\number_demo_font_build
 ```
 
 Generate the verified Chinese/English 32px baseline font:
@@ -374,10 +427,32 @@ official TFT outputs byte-for-byte and matching HMI `*.i` / `*.is` resource
 payloads. Additional local tests cover JPG source entries, transparent PNG
 flattening, non-16-aligned dimensions, and large-image shrink-to-budget behavior.
 Multi-page generation, broad widget coverage, event-code authoring, and broader
-font fixture coverage are still outside the proven V1 path. Event bytecode
+font fixture coverage are still outside the proven V1 path. A minimal page0
+full-page rebuild is live-proven for the number demo only: `drop_seed_objects`
+removed seed `t0/b0/p0`, rebuilt `page0/title/incbtn/numval`, and preserved the
+button event through full COM36 upload, serial readback, and camera proof. The
+accepted visual proof uses `UiCNEN32GBFull.zi` plus `numval.lenth=3`; an earlier
+UTF-8 sparse font build was serial-good but rendered wrong glyphs. A follow-up
+offline reorder fixture, `examples/number_demo/reorder_broadening_scene.json`,
+extends this path to `page0/status/incbtn/title/footer/numval` while keeping the
+button before its later `numval` target. `examples/number_demo/event_matrix_scene.json`
+adds offline same-page event-preservation coverage for clean rebuilt `ref`,
+`vis`, `tsw`, and numeric `++` button events. Event bytecode
 assembly has partial support (`printh`/`page`/`click`/`ref`/`vis`/`tsw`/`rawhex`):
 object button events are live-proven, including `printh`, `click`, `ref`, `tsw`,
-and numeric updates. The `examples/event_combo_probe` smoke test proves a
+and numeric updates. The `examples/number_demo` hardware proof records a page0
+button event that increments `numval.val` from `123` to `125` and emits
+`23 02 4e 31` through `printh`. The isolated
+`examples/number_demo/tsw_promotion_scene.json` live burn is recorded in
+`examples/number_demo/tsw_promotion_serial_click_hardware_verified_2026-05-16.json`:
+it proves the clean-rebuilt page uploads and that `disablebtn`/`enablebtn` reach
+their T0/T1 `tsw targetbtn,0/1` event markers, but serial `click targetbtn,1`
+still emits TG after `tsw targetbtn,0`. Treat that as a negative
+serial-click-path result, not as physical touch-lockout proof; a fast
+same-session 0/10/20/50/100/200 ms timing scan still saw T0 followed by TG in
+all 18 critical trials, so the serial result is not caused by commands being
+sent too slowly. The
+`examples/event_combo_probe` smoke test proves a
 single page0 button can execute multiple numeric event lines in order
 (`val=10`, `++`, `++`, `--`) and be verified by serial readback.
 Media event bytecode is now decoded in oracle reports, with official audio

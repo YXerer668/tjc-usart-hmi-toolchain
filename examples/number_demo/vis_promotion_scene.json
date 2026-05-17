@@ -1,8 +1,8 @@
 {
   "project": {
-    "name": "number-demo",
+    "name": "number-demo-vis-promotion",
     "default_page": "page0",
-    "clean_seed_objects": true
+    "drop_seed_objects": true
   },
   "canvas": {
     "width": 800,
@@ -21,10 +21,10 @@
           "id": "title",
           "type": "text",
           "x": 180,
-          "y": 80,
+          "y": 50,
           "w": 440,
           "h": 52,
-          "text": "NUMBER DEMO",
+          "text": "VIS PROMOTION",
           "style": {
             "font_id": 0,
             "background_color": 65535,
@@ -33,29 +33,34 @@
           }
         },
         {
-          "id": "numval",
-          "type": "number",
-          "x": 310,
+          "id": "hidebtn",
+          "type": "button",
+          "x": 96,
           "y": 170,
           "w": 180,
-          "h": 70,
-          "value": 123,
+          "h": 68,
+          "text": "HIDE",
           "style": {
             "font_id": 0,
-            "length": 3,
-            "background_color": 65504,
-            "foreground_color": 0,
+            "background_color": 63488,
+            "foreground_color": 65535,
             "border_color": 0
+          },
+          "events": {
+            "down": [
+              "vis label0,0",
+              "printh 23 02 56 30"
+            ]
           }
         },
         {
-          "id": "incbtn",
+          "id": "showbtn",
           "type": "button",
-          "x": 310,
+          "x": 96,
           "y": 270,
           "w": 180,
-          "h": 72,
-          "text": "+1",
+          "h": 68,
+          "text": "SHOW",
           "style": {
             "font_id": 0,
             "background_color": 2016,
@@ -64,9 +69,24 @@
           },
           "events": {
             "down": [
-              "numval.val++",
-              "printh 23 02 4e 31"
+              "vis label0,1",
+              "printh 23 02 56 31"
             ]
+          }
+        },
+        {
+          "id": "label0",
+          "type": "text",
+          "x": 330,
+          "y": 188,
+          "w": 360,
+          "h": 110,
+          "text": "VISIBLE TARGET",
+          "style": {
+            "font_id": 0,
+            "background_color": 65504,
+            "foreground_color": 0,
+            "style": 1
           }
         }
       ]

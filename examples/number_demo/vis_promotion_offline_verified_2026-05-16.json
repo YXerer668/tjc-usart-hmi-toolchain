@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "source": "codex_offline_number_demo_vis_promotion_candidate",
+  "verified_at": "2026-05-16T19:19:35+08:00",
+  "scope": "单事件家族 live promotion 的离线候选证明。这里只验证 clean rebuild 后 vis hide/show payload、固定 printh 点击标记、对象顺序、目标绑定、GB2312 字体和 checksum；没有烧录 COM36，也不声明新的运行时 vis 行为。",
+  "decision": {
+    "selected_event_family": "vis",
+    "reason": "vis 比 ref 更适合做下一步单目的相机证明：hide/show 的视觉差异清楚、可逆、恢复路径简单；ref 重绘是否独立生效更容易和文本赋值/自动刷新混在一起。",
+    "flash_now": false,
+    "flash_gate": "只有在本 fixture 继续保持结构/checksum/pytest 干净，并且要补 camera proof 时，才烧录 reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft。"
+  },
+  "artifact": {
+    "scene": "examples/number_demo/vis_promotion_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft",
+    "file_size": 11409856,
+    "sha256": "195ba57849ae47f9f3d9c63800690f30a2b4fef0e5e3bd1962bb3981080a7aa3",
+    "checksum": {
+      "stored_hex": "0xE9DE787A",
+      "calculated_hex": "0xE9DE787A",
+      "valid": true
+    },
+    "font_zi": "reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi",
+    "font_info": {
+      "font_name": "UiCNEN32GBFull",
+      "encoding_name": "gb2312",
+      "char_height": 32,
+      "char_count": 8273
+    }
+  },
+  "structural_evidence": {
+    "tft_patch_mode": "experimental_clean_page_tft_rebuild",
+    "object_count": 5,
+    "objects": [
+      {
+        "name": "page0",
+        "type": "y",
+        "id": 0,
+        "x": 0,
+        "y": 0,
+        "w": 800,
+        "h": 480
+      },
+      {
+        "name": "title",
+        "type": "t",
+        "id": 1,
+        "x": 180,
+        "y": 50,
+        "w": 440,
+        "h": 52
+      },
+      {
+        "name": "hidebtn",
+        "type": "b",
+        "id": 2,
+        "x": 96,
+        "y": 170,
+        "w": 180,
+        "h": 68
+      },
+      {
+        "name": "showbtn",
+        "type": "b",
+        "id": 3,
+        "x": 96,
+        "y": 270,
+        "w": 180,
+        "h": 68
+      },
+      {
+        "name": "label0",
+        "type": "t",
+        "id": 4,
+        "x": 330,
+        "y": 188,
+        "w": 360,
+        "h": 110
+      }
+    ],
+    "removed_seed_objects": [
+      "t0",
+      "b0",
+      "p0"
+    ],
+    "forward_targets": "hidebtn/showbtn 都在 label0 之前生成，离线验证的是 clean rebuild 后事件仍绑定到后置重建目标，而不是旧 seed 对象。"
+  },
+  "event_evidence": [
+    {
+      "button": "hidebtn",
+      "commands": [
+        "vis label0,0",
+        "printh 23 02 56 30"
+      ],
+      "compiled_vis_payload": "09 05 04 6c 61 62 65 6c 30 2c 30",
+      "compiled_marker_payload": "09 0f 08 32 33 20 30 32 20 35 36 20 33 30",
+      "decoded": [
+        {
+          "command": "vis",
+          "args": "label0,0"
+        },
+        {
+          "command": "printh",
+          "args": "23 02 56 30"
+        }
+      ]
+    },
+    {
+      "button": "showbtn",
+      "commands": [
+        "vis label0,1",
+        "printh 23 02 56 31"
+      ],
+      "compiled_vis_payload": "09 05 04 6c 61 62 65 6c 30 2c 31",
+      "compiled_marker_payload": "09 0f 08 32 33 20 30 32 20 35 36 20 33 31",
+      "decoded": [
+        {
+          "command": "vis",
+          "args": "label0,1"
+        },
+        {
+          "command": "printh",
+          "args": "23 02 56 31"
+        }
+      ]
+    }
+  ],
+  "tests": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_vis_promotion_offline",
+      "result": "1 passed in 6.85s"
+    },
+    {
+      "command": "Get-Content examples/number_demo/vis_promotion_scene.json -Raw | ConvertFrom-Json",
+      "result": "valid JSON"
+    },
+    {
+      "command": "usarthmi.cmd --json tft checksum --file reverse_usarthmi/number_demo_vis_promotion_gb2312font_20260516/output.tft",
+      "result": "valid checksum 0xE9DE787A"
+    }
+  ],
+  "live_promotion_plan": {
+    "when_to_flash": "只在需要把 vis 从离线候选提升为当前 page0 clean rebuild 实机证明时烧录。",
+    "minimum_hardware_checks": [
+      "上传前重新跑 checksum 和目标 pytest。",
+      "COM36 上传后执行 sendme，确认 page0。",
+      "get title.txt、get hidebtn.txt、get showbtn.txt、get label0.txt，确认对象可读且文字正确。",
+      "click hidebtn,1 后等待固定 printh 标记 23 02 56 30，并用 USB Cam 拍到 label0 消失。",
+      "click showbtn,1 后等待固定 printh 标记 23 02 56 31，并用 USB Cam 拍到 label0 恢复。",
+      "如果视觉失败，恢复最近已实机证明的 number_demo_full_page_rebuild_gb2312font_digits 输出。"
+    ],
+    "serial_marker_boundary": "固定 printh 标记只证明对应按钮事件被调度；label0 的隐藏/显示必须由相机证明。"
+  },
+  "external_opinion_status": {
+    "primary": "已发起外部第二意见请求，但没有得到可用于 ref vs vis 选择的最终回答；本轮结论以本地结构、测试和既有 live 边界为准。",
+    "secondary": "一个可选外部 CLI 非交互调用未登录；没有得到可用意见。",
+    "tertiary": {
+      "model": "external reviewer",
+      "queried_at": "2026-05-16T19:25:00+08:00",
+      "result_summary": [
+        "路线合理：基于离线证据和实机基础，vis 候选是逻辑下一步。",
+        "值得烧 isolated vis 候选：可快速获得实机视觉证明，弥补离线缺失。",
+        "若烧，最小闭环是 USB Cam 拍 hidebtn/showbtn 对 label0 的可见性控制，并监听串口输出。",
+        "若不烧，离线证据很难完全替代，因为 vis 行为依赖实机渲染差异。",
+        "最大风险是 vis 与串口命令时序或 ID 绑定错误导致视觉反馈不符，但无硬件损坏风险。",
+        "最小修正建议是烧前确认 hidebtn/showbtn 的 vis 对象 ID 与 label0 一致，且 printh 参数正确。"
+      ]
+    }
+  },
+  "claims_allowed": [
+    "vis_promotion_scene 是 page0 clean rebuild 的单事件家族离线候选。",
+    "hide/show 两个按钮的 vis payload 可解码到 label0,0 和 label0,1，且目标是重建后的 label0。",
+    "固定 printh marker 可作为下一步实机点击调度的串口侧标记。"
+  ],
+  "claims_blocked": [
+    "当前已经实机证明 page0 clean rebuild 的 vis hide/show 行为。",
+    "ref 或 tsw 已被本 fixture 提升为实机证明。",
+    "page-load、media、timer、跨页或任意控件泛化已经被证明。"
+  ]
+}

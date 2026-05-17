@@ -8,6 +8,8 @@ __pycache__/
 .venv*/
 venv/
 .tools/
+.usarthmi_last_upload.json
+.usarthmi_last_upload.json.tmp
 
 # Local/reverse-engineering artifacts and generated builds.
 build_*/

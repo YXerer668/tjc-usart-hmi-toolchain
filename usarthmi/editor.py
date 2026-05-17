@@ -13,7 +13,9 @@ from .layout import resolve_page_layout
 from .page_format import find_block_by_objname, load_page_file, parse_page_data
 from .preview import render_scene_preview
 from .scene import SceneModel, save_scene_json, widget_to_dict
+from .font_toolchain import replace_hmi_font
 from .tft_checksum import inspect_tft_checksum
+from .tft_fonts import patch_tft_font
 from .tft_images import compile_hmi_picture_resource, pack_picture_resources_into_tft
 from .tft_media import pack_gmov_resources_into_tft
 from .tft_patch import (
@@ -67,6 +69,8 @@ STYLE_FIELD_ALIASES = {
     "font_id": "font",
     "enabled": "en",
     "interval_ms": "tim",
+    "length": "lenth",
+    "digits": "lenth",
 }
 RESOURCE_FIELD_ALIASES = {
     "normal": "pic",
@@ -117,6 +121,8 @@ def build_scene(
     out_dir: str | Path,
     *,
     baseline_tft: str | Path | None = None,
+    font_zi: str | Path | None = None,
+    font_entry: str = "0.zi",
 ) -> dict[str, Any]:
     seed_path = Path(seed_hmi).resolve()
     build_dir = Path(out_dir).resolve()
@@ -148,9 +154,13 @@ def build_scene(
         manifest_assets[asset_key] = _import_scene_asset(asset, asset_dir)
     packed_picture_ids = _assign_tft_picture_resource_ids(seed_path, normalized_scene, manifest_assets)
     gmov_sources = _collect_tft_gmov_sources(normalized_scene)
+    font_zi_path = Path(font_zi).resolve() if font_zi is not None else None
 
     output_hmi = build_dir / "output.hmi"
     hmi_picture_resources = build_hmi(normalized_scene, manifest_assets, seed_path, output_hmi)
+    hmi_font_patch = None
+    if font_zi_path is not None:
+        hmi_font_patch = replace_hmi_font(output_hmi, font_zi_path, output_hmi, entry_name=font_entry)
     preview_png = render_scene_preview(normalized_scene, build_dir / "preview.png", manifest_assets=manifest_assets)
     baseline_pa = build_dir / "seed_0.pa"
     target_pa = build_dir / "target_0.pa"
@@ -166,10 +176,13 @@ def build_scene(
     tft_checksum = None
     tft_picture_pack = None
     tft_gmov_pack = None
+    tft_font_patch = None
     resource_seed_tft = None
     warnings = [
         "Image assets are normalized and assigned resource ids; TFT image resource packing is experimental.",
     ]
+    if font_zi_path is not None:
+        warnings.append("Scene font .zi replacement is experimental and limited to an existing HMI/TFT font slot.")
     if baseline_tft is not None:
         baseline_tft_path = Path(baseline_tft).resolve()
         tft_seed_path = baseline_tft_path
@@ -194,9 +207,25 @@ def build_scene(
             tft_seed_path = resource_seed_tft_path
             resource_seed_tft = str(resource_seed_tft_path)
             tft_gmov_pack = pack_result.to_dict()
+        if font_zi_path is not None:
+            font_seed_tft_path = build_dir / "resource_seed_font.tft"
+            font_result = patch_tft_font(
+                tft_seed_path,
+                font_path=font_zi_path,
+                out_tft=font_seed_tft_path,
+            )
+            tft_seed_path = font_seed_tft_path
+            resource_seed_tft = str(font_seed_tft_path)
+            tft_font_patch = font_result.to_dict()
         output_tft_path = build_dir / "output.tft"
         if len(target_pages) == 1:
             if normalized_scene.project.get("drop_seed_objects"):
+                _validate_tft_target_support(
+                    baseline_pa,
+                    target_pa,
+                    packed_picture_ids=packed_picture_ids,
+                    clean_rebuild=True,
+                )
                 patch_result = patch_rebuild_page_tft(
                     tft_seed_path,
                     seed_pa=baseline_pa,
@@ -241,7 +270,9 @@ def build_scene(
         "output_tft": output_tft,
         "tft_picture_pack": tft_picture_pack,
         "tft_gmov_pack": tft_gmov_pack,
+        "tft_font_patch": tft_font_patch,
         "hmi_picture_resources": hmi_picture_resources,
+        "hmi_font_patch": hmi_font_patch,
         "preview_png": str(preview_png),
         "tft_patch": tft_patch,
         "tft_checksum": tft_checksum,
@@ -442,6 +473,7 @@ def _build_widget_block(
         _apply_common_widget_fields(block, widget, next_id)
         block.set_int("val", int(widget.value or 0), width=4)
         _apply_color_fields(block, widget)
+        _apply_number_fields(block, widget)
     elif widget.type == "text":
         block = text_proto.clone()
         _apply_common_widget_fields(block, widget, next_id)
@@ -604,6 +636,21 @@ def _apply_color_fields(block, widget) -> None:
         block.set_int("borderc", int(widget.style["border_color"]), width=2)
     if "style" in widget.style and block.get_field("style"):
         block.set_int("style", int(widget.style["style"]), width=1)
+
+
+def _apply_number_fields(block, widget) -> None:
+    for style_name in ("length", "digits", "lenth", "format"):
+        if style_name not in widget.style:
+            continue
+        field_name = STYLE_FIELD_ALIASES.get(style_name, style_name)
+        if block.get_field(field_name) is None:
+            raise EditorError(
+                f"Style field {style_name!r} is not supported by widget {widget.id!r} ({widget.type})"
+            )
+        value = int(widget.style[style_name])
+        if field_name == "lenth" and not 1 <= value <= 10:
+            raise EditorError(f"Number widget {widget.id!r} length must be 1..10, got {value}")
+        _set_existing_int_field(block, field_name, value, owner=widget.id)
 
 
 def _apply_asset_fields(block, widget, manifest_assets: dict[str, Any]) -> None:
@@ -1129,21 +1176,22 @@ def _validate_tft_target_support(
     target_pa: Path,
     *,
     packed_picture_ids: set[int] | None = None,
+    clean_rebuild: bool = False,
 ) -> None:
     baseline_page = load_page_file(baseline_pa)
     target_page = load_page_file(target_pa)
     existing_pics = _existing_picture_ids(baseline_page.blocks)
     packed_pics = set(packed_picture_ids or set())
     allowed_pics = existing_pics | packed_pics
-    added_blocks = target_page.blocks[len(baseline_page.blocks) :]
-    media_blocks = [block for block in added_blocks if block.type_code in MEDIA_WIDGET_TYPE_CODES]
+    checked_blocks = target_page.blocks[1:] if clean_rebuild else target_page.blocks[len(baseline_page.blocks) :]
+    media_blocks = [block for block in checked_blocks if block.type_code in MEDIA_WIDGET_TYPE_CODES]
     if len(media_blocks) > 1:
         names = ", ".join(repr(block.objname) for block in media_blocks)
         raise EditorError(
             "TFT scene build media widgets path supports only one media fixture per page in this pass: "
             f"{names}. Split GMOV/video/audio smoke tests into separate TFTs until mixed-media scheduling is proven."
         )
-    for block in added_blocks:
+    for block in checked_blocks:
         if block.type_code not in TYPE_RECORD_LENGTHS:
             raise EditorError(
                 "TFT scene build does not know how to compile this object type yet: "

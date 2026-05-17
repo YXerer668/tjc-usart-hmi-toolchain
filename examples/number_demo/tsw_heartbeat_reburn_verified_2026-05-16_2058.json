@@ -1,0 +1,72 @@
+{
+  "source": "codex_heartbeat_tsw_reburn_closed_loop",
+  "date": "2026-05-16",
+  "created_at_utc": "2026-05-16T12:58:30Z",
+  "scope": "Heartbeat burn/restore/verify loop for the isolated page0 clean-rebuild TSW PROMOTION fixture. This evidence does not make a new physical-touch lockout claim.",
+  "artifact": {
+    "scene": "examples/number_demo/tsw_promotion_scene.json",
+    "output_tft": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft",
+    "sha256": "3d86df296964064400db04446bdbc8621669946827fc0e7d064a3c394f081b2f",
+    "file_size": 11409900,
+    "checksum": {
+      "stored_hex": "0x8AA3D6C3",
+      "calculated_hex": "0x8AA3D6C3",
+      "valid": true
+    }
+  },
+  "preflight": {
+    "pytest": {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_prepares_single_family_vis_promotion_offline tests/test_editor_tft_build.py::EditorTftBuildTests::test_scene_full_page_rebuild_preserves_same_page_event_matrix_offline -q",
+      "result": "3 passed in 20.47s"
+    },
+    "connect": {
+      "port": "COM36",
+      "baud": 9600,
+      "model": "TJC8048X543_011C",
+      "ok": true
+    },
+    "pre_reburn_camera": {
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/heartbeat_pre_reburn_20260516_2053.jpg",
+      "sha256": "1a29936170b55aec6d9ba6a87fe0176396facf0ba693d308be25848fb59b9109"
+    }
+  },
+  "upload": {
+    "command": "usarthmi.cmd --json tft upload --file reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/output.tft --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --expected-model TJC8048X543_011C --verify-after-upload --verify-get title.txt=TSW PROMOTION --verify-get disablebtn.txt=DISABLE --verify-get enablebtn.txt=ENABLE --verify-get targetbtn.txt=TARGET --progress",
+    "skipped": false,
+    "bytes_sent": 11409900,
+    "chunks_sent": 2786,
+    "chunk_size": 4096,
+    "elapsed_s": 209.297,
+    "uploaded_at_utc": "2026-05-16T12:57:36.726896Z",
+    "post_upload_health_attempt": 2,
+    "last_upload_manifest": ".usarthmi_last_upload.json"
+  },
+  "post_upload_verification": {
+    "sendme_page": 0,
+    "get_checks": {
+      "title.txt": "TSW PROMOTION",
+      "disablebtn.txt": "DISABLE",
+      "enablebtn.txt": "ENABLE",
+      "targetbtn.txt": "TARGET"
+    },
+    "ok": true,
+    "post_reburn_camera": {
+      "path": "reverse_usarthmi/number_demo_tsw_promotion_gb2312font_20260516/heartbeat_after_reburn_20260516_2058.jpg",
+      "sha256": "743e623878837ddac937580cb698e1e55b5bb4dec436b650887a3a1fce101727"
+    }
+  },
+  "interactive_plan_mode_policy": {
+    "user_request": "Use an explicit plan/notification mode when user participation is needed.",
+    "decision": "Do not rely on chat-only instructions for physical touch. For future physical-touch proof, emit an automation NOTIFY and use panel-visible prompts. If the user is not explicitly present, continue non-interactive burn/readback/camera/oracle work and do not claim physical-touch lockout.",
+    "next_touch_protocol": "Screen-visible prompt must not write or ref targetbtn after disable; first capture baseline TG as the synchronization gate, then run disabled window, then recovery."
+  },
+  "claims_allowed": [
+    "The isolated TSW PROMOTION TFT was freshly re-uploaded to COM36 in this heartbeat loop and verified by serial readback plus camera capture.",
+    "This loop preserves the existing serial-click-path conclusion and does not add a new physical-touch lockout claim."
+  ],
+  "claims_blocked": [
+    "Do not treat serial click as equivalent to physical touch.",
+    "Do not claim a fully machine-captured segmented physical-touch lockout proof from this heartbeat.",
+    "Do not generalize to ref, mixed event_matrix, page-load, media, timer, cross-page, or arbitrary widgets."
+  ]
+}

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
+import hashlib
+import json
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 import time
 
 import serial
@@ -12,6 +15,9 @@ from .transport import TERMINATOR, SerialTransportError
 
 PUBLIC_WHMI_CHUNK_SIZE = 4096
 DEFAULT_DOWNLOAD_BAUD = 921600
+DEFAULT_LAST_UPLOAD_MANIFEST = ".usarthmi_last_upload.json"
+LAST_UPLOAD_SCHEMA_VERSION = 1
+LAST_UPLOAD_METHOD = "public_whmi_wri"
 
 
 @dataclass(slots=True)
@@ -123,6 +129,166 @@ class TftUploadPlan:
                 }
             )
         return result
+
+
+def tft_file_fingerprint(file_path: str | Path) -> dict[str, object]:
+    source = Path(file_path).resolve()
+    digest = hashlib.sha256()
+    size = 0
+    with source.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            size += len(chunk)
+            digest.update(chunk)
+    return {
+        "path": str(source),
+        "size": size,
+        "sha256": digest.hexdigest(),
+    }
+
+
+def evaluate_skip_if_current(
+    file_path: str | Path,
+    *,
+    manifest_path: str | Path = DEFAULT_LAST_UPLOAD_MANIFEST,
+    port: str,
+    baud: int,
+    expected_model: str | None,
+) -> dict[str, object]:
+    manifest = Path(manifest_path).resolve()
+    candidate = tft_file_fingerprint(file_path)
+    decision: dict[str, object] = {
+        "mode": "last_upload_manifest_skip_check",
+        "manifest_path": str(manifest),
+        "candidate": candidate,
+        "skip": False,
+    }
+    try:
+        raw_manifest = json.loads(manifest.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        decision["reason"] = "last-upload manifest not found"
+        return decision
+    except json.JSONDecodeError as exc:
+        decision["reason"] = "last-upload manifest is not valid JSON"
+        decision["manifest_error"] = str(exc)
+        return decision
+
+    if not isinstance(raw_manifest, dict):
+        decision["reason"] = "last-upload manifest is not an object"
+        return decision
+    decision["manifest"] = _manifest_summary(raw_manifest)
+
+    if raw_manifest.get("schema_version") != LAST_UPLOAD_SCHEMA_VERSION:
+        decision["reason"] = "last-upload manifest schema version is unsupported"
+        return decision
+    if raw_manifest.get("success") is not True:
+        decision["reason"] = "last-upload manifest does not record a successful upload"
+        return decision
+    if raw_manifest.get("upload_method") != LAST_UPLOAD_METHOD:
+        decision["reason"] = "last-upload manifest was not written by the public whmi-wri uploader"
+        return decision
+    if raw_manifest.get("tft_size") != candidate["size"]:
+        decision["reason"] = "candidate size differs from last successful upload"
+        return decision
+    if raw_manifest.get("tft_sha256") != candidate["sha256"]:
+        decision["reason"] = "candidate SHA256 differs from last successful upload"
+        return decision
+    if _normalize_port(raw_manifest.get("port")) != _normalize_port(port):
+        decision["reason"] = "serial port differs from last successful upload"
+        return decision
+    manifest_baud = _safe_int(raw_manifest.get("baud"))
+    if manifest_baud != int(baud):
+        decision["reason"] = "initial baud differs from last successful upload"
+        return decision
+    if not expected_model:
+        decision["reason"] = "expected model is not set, so manifest cannot prove the target model"
+        return decision
+    if raw_manifest.get("target_model") != expected_model:
+        decision["reason"] = "target model differs from last successful upload"
+        return decision
+
+    decision["skip"] = True
+    decision["reason"] = "candidate matches last successful upload manifest"
+    return decision
+
+
+def write_last_upload_manifest(
+    file_path: str | Path,
+    *,
+    manifest_path: str | Path = DEFAULT_LAST_UPLOAD_MANIFEST,
+    port: str,
+    baud: int,
+    download_baud: int,
+    chunk_size: int,
+    target_model: str | None,
+    tool_version: str,
+    git_head: str | None = None,
+    upload_result: dict[str, object] | None = None,
+    uploaded_at: datetime | None = None,
+) -> dict[str, object]:
+    fingerprint = tft_file_fingerprint(file_path)
+    manifest = Path(manifest_path).resolve()
+    upload_result = upload_result or {}
+    timestamp = uploaded_at or datetime.now(timezone.utc)
+    data: dict[str, object] = {
+        "schema_version": LAST_UPLOAD_SCHEMA_VERSION,
+        "success": True,
+        "upload_method": LAST_UPLOAD_METHOD,
+        "uploaded_at": timestamp.isoformat().replace("+00:00", "Z"),
+        "tft_path": fingerprint["path"],
+        "tft_size": fingerprint["size"],
+        "tft_sha256": fingerprint["sha256"],
+        "port": port,
+        "baud": int(baud),
+        "download_baud": int(download_baud),
+        "chunk_size": int(chunk_size),
+        "target_model": target_model,
+        "tool_version": tool_version,
+    }
+    if git_head:
+        data["git_head"] = git_head
+    for key in ("bytes_sent", "chunks_sent", "elapsed_s", "prepare_delay_ms", "prepare_wait_ms"):
+        if key in upload_result:
+            data[key] = upload_result[key]
+
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = manifest.with_name(f"{manifest.name}.tmp")
+    temp_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temp_path.replace(manifest)
+    return {
+        "path": str(manifest),
+        "manifest": _manifest_summary(data),
+    }
+
+
+def _manifest_summary(manifest: dict[str, Any]) -> dict[str, object]:
+    keys = (
+        "schema_version",
+        "success",
+        "upload_method",
+        "uploaded_at",
+        "tft_path",
+        "tft_size",
+        "tft_sha256",
+        "port",
+        "baud",
+        "download_baud",
+        "chunk_size",
+        "target_model",
+        "tool_version",
+        "git_head",
+    )
+    return {key: manifest[key] for key in keys if key in manifest}
+
+
+def _normalize_port(value: object) -> str:
+    return str(value or "").strip().upper()
+
+
+def _safe_int(value: object) -> int | None:
+    try:
+        return int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return None
 
 
 def upload_tft(

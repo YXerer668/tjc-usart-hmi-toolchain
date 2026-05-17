@@ -1,19 +1,29 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import tempfile
 import unittest
 
 from usarthmi.editor import (
+    FIXTURE_WIDGET_TEMPLATE_CASES,
     build_scene,
     _is_supported_experimental_page1_event_widget,
     _is_supported_experimental_page1_page_events,
 )
+from usarthmi.event_bytecode import decode_event_table
 from usarthmi.hmi_inspect import inspect_hmi
 from usarthmi.object_hash import object_name_hash
 from usarthmi.page_format import load_page_file
-from usarthmi.scene import WidgetSpec, load_scene, validate_scene
+from usarthmi.scene import (
+    SUPPORTED_WIDGET_TYPES,
+    UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES,
+    WidgetSpec,
+    load_scene,
+    validate_scene,
+)
 from usarthmi.tft_patch import TYPE_RECORD_LENGTHS, TYPE_USER_SLOT_COUNTS, _record_header_flag
+from usarthmi.tft_patch import _build_event_compile_context, _build_event_layout, _build_object_event_table, _user_slot_count
 from usarthmi.tft_reverse import reverse_tft_tail
 from usarthmi.tft_toolchain import inspect_tft
 
@@ -23,6 +33,32 @@ BASELINE_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_00_baseline\lcd
 SOURCE_IMAGE = next(Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_07_image_source_png_jpg").glob("*"), None)
 BUTTON_NORMAL = Path("examples/menu_demo/assets/play.png")
 BUTTON_PRESSED = Path("examples/menu_demo/assets/play_pressed.png")
+NUMBER_DEMO_FULL_REBUILD_SCENE = Path("examples/number_demo/full_page_rebuild_scene.json")
+NUMBER_DEMO_REORDER_SCENE = Path("examples/number_demo/reorder_broadening_scene.json")
+NUMBER_DEMO_EVENT_MATRIX_SCENE = Path("examples/number_demo/event_matrix_scene.json")
+NUMBER_DEMO_VIS_PROMOTION_SCENE = Path("examples/number_demo/vis_promotion_scene.json")
+NUMBER_DEMO_TSW_PROMOTION_SCENE = Path("examples/number_demo/tsw_promotion_scene.json")
+BUILTIN_CONTROLS_DEMO_SCENE = Path("examples/builtin_controls_demo/scene.json")
+NEW_CONTROLS_DEMO_SCENE = Path("examples/new_controls_demo/scene.json")
+XFLOAT_COMBOBOX_DEMO_SCENE = Path("examples/xfloat_combobox_demo/scene.json")
+EXTERNAL_PICTURE_DEMO_SCENE = Path("examples/external_picture_demo/scene.json")
+TOUCH_CAPTURE_DEMO_SCENE = Path("examples/touch_capture_demo/scene.json")
+MEDIA_GMOV_SMOKE_SCENE = Path("examples/media_single_gmov_smoke/scene.json")
+MEDIA_VIDEO_SD_SMOKE_SCENE = Path("examples/media_single_video_sd_smoke/scene.json")
+MEDIA_AUDIO_SD_SMOKE_SCENE = Path("examples/media_single_audio_sd_smoke/scene.json")
+WIDGET_CAPABILITY_MATRIX = Path("examples/widget_capability_matrix_2026-05-17.json")
+FONT_ZI = Path("build_font_scene.zi")
+GB2312_FONT_ZI = Path("reverse_usarthmi/font_baselines/ui_cn_en_32/UiCNEN32GBFull.zi")
+BUILTIN_WIDGET_TYPE_CODES = {
+    "button": "b",
+    "image": "p",
+    "number": "6",
+    "text": "t",
+    "timer": "3",
+}
+SCENE_WIDGET_TYPE_CODES = BUILTIN_WIDGET_TYPE_CODES | {
+    widget_type: type_code for widget_type, (_case_name, type_code) in FIXTURE_WIDGET_TEMPLATE_CASES.items()
+}
 CASE_12_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_12_text_yellow_font0\lcd_test.HMI")
 CASE_12_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_12_text_yellow_font0\lcd_test.tft")
 CASE_13_TFT = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_13_image_button_only\lcd_test.tft")
@@ -40,6 +76,142 @@ CASE_14_EXTRACT = CASE_COMPARE_ROOT / "case_14_text_plus_image_button" / "extrac
 
 @unittest.skipUnless(SEED_HMI.exists() and BASELINE_TFT.exists(), "local TJC seed HMI/TFT fixtures are not available")
 class EditorTftBuildTests(unittest.TestCase):
+    def test_current_target_supported_widget_types_have_tft_writer_path(self) -> None:
+        built_in_writer_types = {"button", "image", "number", "text", "timer"}
+        fixture_writer_types = set(FIXTURE_WIDGET_TEMPLATE_CASES)
+        writer_types = built_in_writer_types | fixture_writer_types
+        unsupported_types = set(UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES)
+
+        self.assertFalse(set(SUPPORTED_WIDGET_TYPES) & unsupported_types)
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES) - writer_types, set())
+
+    def test_widget_capability_matrix_matches_code_constants(self) -> None:
+        matrix = json.loads(WIDGET_CAPABILITY_MATRIX.read_text(encoding="utf-8"))
+        built_in_writer_types = set(matrix["built_in_writer_types"])
+        fixture_writer_cases = matrix["fixture_backed_writer_types"]
+        fixture_writer_types = set(fixture_writer_cases)
+        unsupported_types = set(matrix["current_target_unsupported"])
+
+        self.assertEqual(built_in_writer_types, {"button", "image", "number", "text", "timer"})
+        self.assertEqual(fixture_writer_types, set(FIXTURE_WIDGET_TEMPLATE_CASES))
+        for widget_type, (case_name, type_code) in FIXTURE_WIDGET_TEMPLATE_CASES.items():
+            with self.subTest(fixture_widget_type=widget_type):
+                self.assertEqual(
+                    fixture_writer_cases[widget_type],
+                    {"case": case_name, "type": _matrix_type_code(type_code)},
+                )
+        self.assertEqual(unsupported_types, set(UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES))
+        self.assertEqual(matrix["current_target_unsupported"], UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES)
+        self.assertTrue(Path(matrix["current_target_unsupported_evidence"]).exists())
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), built_in_writer_types | fixture_writer_types)
+        full_rebuild_coverage = matrix["full_page_rebuild_offline_coverage"]
+        covered_types = set()
+        for group_name, group in full_rebuild_coverage.items():
+            covered_types.update(group["types"])
+            evidence_path = Path(group["evidence"])
+            self.assertTrue(evidence_path.exists())
+            evidence_types = _matrix_evidence_widget_types(evidence_path)
+            with self.subTest(coverage_group=group_name):
+                self.assertEqual(set(group["types"]) - evidence_types, set())
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), covered_types)
+        scene_examples = matrix["scene_examples"]
+        self.assertEqual(set(SUPPORTED_WIDGET_TYPES), set(scene_examples))
+        for widget_type, example in scene_examples.items():
+            with self.subTest(widget_type=widget_type):
+                scene_path = Path(example["scene"])
+                evidence_path = Path(example["evidence"])
+                self.assertTrue(scene_path.exists())
+                self.assertTrue(evidence_path.exists())
+                scene = load_scene(scene_path)
+                widget_types = {widget.type for page in scene.pages for widget in page.widgets}
+                self.assertIn(widget_type, widget_types)
+
+    def test_widget_capability_matrix_scene_examples_build_clean_rebuild_tfts(self) -> None:
+        matrix = json.loads(WIDGET_CAPABILITY_MATRIX.read_text(encoding="utf-8"))
+        unique_scene_paths = sorted({Path(example["scene"]) for example in matrix["scene_examples"].values()})
+
+        self.assertEqual(
+            set(unique_scene_paths),
+            {
+                BUILTIN_CONTROLS_DEMO_SCENE,
+                NEW_CONTROLS_DEMO_SCENE,
+                XFLOAT_COMBOBOX_DEMO_SCENE,
+                EXTERNAL_PICTURE_DEMO_SCENE,
+                TOUCH_CAPTURE_DEMO_SCENE,
+                MEDIA_GMOV_SMOKE_SCENE,
+                MEDIA_VIDEO_SD_SMOKE_SCENE,
+                MEDIA_AUDIO_SD_SMOKE_SCENE,
+            },
+        )
+        for scene_path in unique_scene_paths:
+            with self.subTest(scene=str(scene_path)), tempfile.TemporaryDirectory() as temp_dir:
+                scene = load_scene(scene_path)
+                manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+                target_page = load_page_file(manifest["target_pa"])
+                expected_objects = [("page0", "y")] + [
+                    (widget.id, SCENE_WIDGET_TYPE_CODES[widget.type]) for widget in scene.pages[0].widgets
+                ]
+
+                self.assertTrue(Path(manifest["output_tft"]).exists())
+                self.assertTrue(manifest["tft_checksum"]["valid"])
+                self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+                self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+                self.assertEqual([(block.objname, block.type_code) for block in target_page.blocks], expected_objects)
+                self.assertEqual([_field_int(block, "id") for block in target_page.blocks], list(range(len(expected_objects))))
+
+    @unittest.skipUnless(
+        BUILTIN_CONTROLS_DEMO_SCENE.exists(),
+        "local builtin-controls full-rebuild scene is not available",
+    )
+    def test_builtin_controls_demo_full_page_rebuild_covers_builtin_controls(self) -> None:
+        scene = load_scene(BUILTIN_CONTROLS_DEMO_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            target_page = load_page_file(manifest["target_pa"])
+            self.assertTrue(output_tft.exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["object_count"], 6)
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [(block.objname, block.type_code) for block in target_page.blocks],
+                [
+                    ("page0", "y"),
+                    ("title", "t"),
+                    ("btn0", "b"),
+                    ("num0", "6"),
+                    ("pic0", "p"),
+                    ("tm0", "3"),
+                ],
+            )
+
+            blocks = {block.objname: block for block in target_page.blocks}
+            self.assertEqual(_field_int(blocks["num0"], "val"), 7)
+            self.assertEqual(_field_int(blocks["num0"], "lenth"), 3)
+            self.assertEqual(_field_int(blocks["pic0"], "pic"), 0)
+            self.assertEqual(_field_int(blocks["tm0"], "tim"), 1000)
+            self.assertEqual(_field_int(blocks["tm0"], "en"), 0)
+            self.assertIn("num0.val++", blocks["btn0"].event_tokens)
+            self.assertIn("printh 23 02 42 49", blocks["btn0"].event_tokens)
+            self.assertIn("num0.val++", blocks["tm0"].event_tokens)
+
+            context = _build_event_compile_context(target_page.blocks)
+            number_slot_start = sum(
+                _user_slot_count(block) for block in target_page.blocks[: target_page.blocks.index(blocks["num0"])]
+            )
+            local_ref = (number_slot_start + 27).to_bytes(4, "little")
+            button_event_table = _build_object_event_table(blocks["btn0"], context=context)
+            timer_event_table = _build_object_event_table(blocks["tm0"], context=context)
+            self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", button_event_table)
+            self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", timer_event_table)
+            self.assertIn(
+                len(b"\x09\x0f\x0823 02 42 49").to_bytes(4, "little") + b"\x09\x0f\x0823 02 42 49",
+                button_event_table,
+            )
+
     def test_scene_build_emits_multi_object_tft(self) -> None:
         scene = validate_scene(
             {
@@ -163,6 +335,7 @@ class EditorTftBuildTests(unittest.TestCase):
                                 "value": 12345,
                                 "style": {
                                     "font_id": 0,
+                                    "length": 5,
                                     "background_color": 65535,
                                     "foreground_color": 0,
                                 },
@@ -189,6 +362,7 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual(number.objname, "numval")
             self.assertEqual(number.type_code, "6")
             self.assertEqual(_field_int(number, "val"), 12345)
+            self.assertEqual(_field_int(number, "lenth"), 5)
 
     @unittest.skipUnless(CASE_36_TFT.exists(), "local official xfloat fixture is not available")
     def test_scene_build_matches_official_xfloat_tail_layout(self) -> None:
@@ -351,6 +525,43 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x5D, 1), 3)
 
     @unittest.skipUnless(
+        XFLOAT_COMBOBOX_DEMO_SCENE.exists()
+        and all((CASE_ROOT / case_name / "lcd_test.HMI").exists() for case_name in ("case_36_xfloat", "case_37_combobox")),
+        "local xfloat/combobox full-rebuild fixtures are not available",
+    )
+    def test_xfloat_combobox_demo_full_page_rebuild_covers_value_controls(self) -> None:
+        scene = load_scene(XFLOAT_COMBOBOX_DEMO_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            target_pa = Path(manifest["target_pa"])
+            target_page = load_page_file(target_pa)
+            self.assertTrue(output_tft.exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["object_count"], 6)
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [(block.objname, block.type_code) for block in target_page.blocks],
+                [
+                    ("page0", "y"),
+                    ("title", "t"),
+                    ("xval", ";"),
+                    ("cbval", "="),
+                    ("hint", "t"),
+                    ("hint2", "t"),
+                ],
+            )
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x44, 4), 123456)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x48, 1), 0)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "xval", ";", 0x49, 1), 3)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x5F, 1), 2)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x65, 1), 1)
+            self.assertEqual(_compiled_primary_value(output_tft, target_pa, "cbval", "=", 0x5D, 1), 3)
+
+    @unittest.skipUnless(
         all(
             (CASE_ROOT / case_name / "lcd_test.tft").exists()
             and (CASE_ROOT / case_name / "lcd_test.HMI").exists()
@@ -445,6 +656,28 @@ class EditorTftBuildTests(unittest.TestCase):
             target_page = load_page_file(manifest["target_pa"])
             self.assertEqual(target_page.blocks[-1].objname, "tc_scene")
             self.assertEqual(target_page.blocks[-1].type_code, "\x05")
+
+    @unittest.skipUnless(
+        TOUCH_CAPTURE_DEMO_SCENE.exists()
+        and (CASE_ROOT / "case_45_touchcap_current_gui" / "lcd_test.HMI").exists(),
+        "local touch-capture fixture or demo scene is not available",
+    )
+    def test_touch_capture_full_page_rebuild_minimal_control(self) -> None:
+        scene = load_scene(TOUCH_CAPTURE_DEMO_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            target_page = load_page_file(manifest["target_pa"])
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["object_count"], 3)
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [(block.objname, block.type_code) for block in target_page.blocks],
+                [("page0", "y"), ("title", "t"), ("tc0", "\x05")],
+            )
 
     @unittest.skipUnless(
         CASE_46_TFT.exists()
@@ -596,7 +829,7 @@ class EditorTftBuildTests(unittest.TestCase):
         "local external-picture demo fixture is not available",
     )
     def test_external_picture_demo_builds_with_live_healthy_baseline(self) -> None:
-        scene = load_scene(Path(__file__).resolve().parents[1] / "examples" / "external_picture_demo" / "scene.json")
+        scene = load_scene(EXTERNAL_PICTURE_DEMO_SCENE)
 
         with tempfile.TemporaryDirectory() as temp_dir:
             manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
@@ -611,6 +844,49 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertTrue(manifest["tft_checksum"]["valid"])
             self.assertIn("exp0", object_names)
             self.assertIn("guard", object_names)
+            self.assertIn(b"sd0/1.jpg", output_tft.read_bytes())
+            self.assertEqual(exp0_user_path, exp0_primary_path)
+            self.assertEqual(output_info["Header1"]["ressource_files_size"], baseline_info["Header1"]["ressource_files_size"])
+            self.assertEqual(output_info["Header1"]["ressource_files_crc"], baseline_info["Header1"]["ressource_files_crc"])
+            self.assertEqual(output_info["Header2"]["unknown_objects_address"], baseline_info["Header2"]["unknown_objects_address"])
+
+    @unittest.skipUnless(
+        EXTERNAL_PICTURE_DEMO_SCENE.exists()
+        and (CASE_ROOT / "case_46_expicture_current_gui" / "lcd_test.HMI").exists(),
+        "local external-picture demo fixture is not available",
+    )
+    def test_external_picture_demo_full_page_rebuild_preserves_sd_path_object(self) -> None:
+        scene = load_scene(EXTERNAL_PICTURE_DEMO_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            output_tft = Path(manifest["output_tft"])
+            output_info = inspect_tft(output_tft)["parsed"]
+            baseline_info = inspect_tft(BASELINE_TFT)["parsed"]
+            target_page = load_page_file(manifest["target_pa"])
+            exp0_primary_path = _compiled_page_primary_value(output_tft, target_page, "exp0", "<", 0x3C, 4)
+            exp0_user_path = _compiled_page_user_record_word1(output_tft, target_page, "exp0", slot_index=19)
+
+            self.assertTrue(output_tft.exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["object_count"], 9)
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [(block.objname, block.type_code) for block in target_page.blocks],
+                [
+                    ("page0", "y"),
+                    ("title", "t"),
+                    ("badge", "t"),
+                    ("frame", "t"),
+                    ("exp0", "<"),
+                    ("status", "t"),
+                    ("pathbox", "t"),
+                    ("guard", "t"),
+                    ("footer", "t"),
+                ],
+            )
             self.assertIn(b"sd0/1.jpg", output_tft.read_bytes())
             self.assertEqual(exp0_user_path, exp0_primary_path)
             self.assertEqual(output_info["Header1"]["ressource_files_size"], baseline_info["Header1"]["ressource_files_size"])
@@ -747,6 +1023,60 @@ class EditorTftBuildTests(unittest.TestCase):
                         _compiled_primary_value(output_tft, target_pa, name, type_code, offset, width),
                         expected,
                     )
+
+    @unittest.skipUnless(
+        SEED_HMI.exists()
+        and BASELINE_TFT.exists()
+        and NEW_CONTROLS_DEMO_SCENE.exists()
+        and all((CASE_ROOT / case_name / "lcd_test.HMI").exists() for case_name in (
+            "case_17_slider",
+            "case_18_gauge",
+            "case_20_progress",
+            "case_21_qrcode",
+            "case_22_scrolling_text",
+            "case_23_dual_state_button",
+            "case_24_state_button",
+            "case_25_hotspot_touch_area",
+            "case_26_variable_numeric_string",
+            "case_27_waveform_basic",
+            "case_28_checkbox",
+            "case_29_radio",
+            "case_30_crop_image",
+        )),
+        "local new-controls full-rebuild fixtures are not available",
+    )
+    def test_new_controls_demo_full_page_rebuild_covers_fixture_backed_controls(self) -> None:
+        scene = load_scene(NEW_CONTROLS_DEMO_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(scene, SEED_HMI, temp_dir, baseline_tft=BASELINE_TFT)
+
+            self.assertTrue(Path(manifest["output_tft"]).exists())
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["object_count"], 15)
+
+            target_page = load_page_file(manifest["target_pa"])
+            self.assertEqual(
+                [(block.objname, block.type_code) for block in target_page.blocks],
+                [
+                    ("page0", "y"),
+                    ("bar1", "j"),
+                    ("slider1", "\x01"),
+                    ("gauge1", "z"),
+                    ("qr1", ":"),
+                    ("g0", "7"),
+                    ("bt0", "5"),
+                    ("bt1", "5"),
+                    ("sw0", "C"),
+                    ("c0", "8"),
+                    ("r0", "9"),
+                    ("m0", "m"),
+                    ("q0", "q"),
+                    ("va0", "4"),
+                    ("s0", "\x00"),
+                ],
+            )
 
     @unittest.skipUnless(CASE_31_TFT.exists(), "local official multi-page fixture is not available")
     def test_scene_build_reproduces_official_multi_page_case31(self) -> None:
@@ -1627,6 +1957,358 @@ class EditorTftBuildTests(unittest.TestCase):
             self.assertEqual(target_page.blocks[-1].objname, "note1")
             self.assertTrue(manifest["tft_checksum"]["valid"])
 
+    def test_scene_full_page_rebuild_drops_seed_and_keeps_number_button_event(self) -> None:
+        scene = load_scene(NUMBER_DEMO_FULL_REBUILD_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+            )
+
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [item["name"] for item in manifest["tft_patch"]["objects"]],
+                ["page0", "title", "incbtn", "numval"],
+            )
+            self.assertEqual(
+                [item["id"] for item in manifest["tft_patch"]["objects"]],
+                [0, 1, 2, 3],
+            )
+            self.assertEqual(
+                [item["type"] for item in manifest["tft_patch"]["objects"]],
+                ["y", "t", "b", "6"],
+            )
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+
+            target_page = load_page_file(manifest["target_pa"])
+            target_names = [block.objname for block in target_page.blocks]
+            self.assertEqual(target_names, ["page0", "title", "incbtn", "numval"])
+            self.assertFalse({"t0", "b0", "p0"} & set(target_names))
+            self.assertEqual([_field_int(block, "id") for block in target_page.blocks], [0, 1, 2, 3])
+            self.assertEqual(len({object_name_hash(name) for name in target_names}), len(target_names))
+
+            incbtn = next(block for block in target_page.blocks if block.objname == "incbtn")
+            self.assertIn("codesdown-2", incbtn.event_tokens)
+            self.assertIn("numval.val++", incbtn.event_tokens)
+            self.assertIn("printh 23 02 4e 31", incbtn.event_tokens)
+
+            numval = next(block for block in target_page.blocks if block.objname == "numval")
+            self.assertEqual(_field_int(numval, "val"), 123)
+            self.assertEqual(_field_int(numval, "lenth"), 3)
+
+    @unittest.skipUnless(GB2312_FONT_ZI.exists(), "local verified GB2312 .zi font fixture is not available")
+    def test_scene_full_page_rebuild_reorders_supported_widgets_with_gb2312_font(self) -> None:
+        scene = load_scene(NUMBER_DEMO_REORDER_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+                font_zi=GB2312_FONT_ZI,
+            )
+
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [item["name"] for item in manifest["tft_patch"]["objects"]],
+                ["page0", "status", "incbtn", "title", "footer", "numval"],
+            )
+            self.assertEqual(
+                [item["id"] for item in manifest["tft_patch"]["objects"]],
+                [0, 1, 2, 3, 4, 5],
+            )
+            self.assertEqual(
+                [item["type"] for item in manifest["tft_patch"]["objects"]],
+                ["y", "t", "b", "t", "t", "6"],
+            )
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["font_name"], "UiCNEN32GBFull")
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["encoding_name"], "gb2312")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+
+            target_page = load_page_file(manifest["target_pa"])
+            target_names = [block.objname for block in target_page.blocks]
+            self.assertEqual(target_names, ["page0", "status", "incbtn", "title", "footer", "numval"])
+            self.assertFalse({"t0", "b0", "p0"} & set(target_names))
+            self.assertEqual(len({object_name_hash(name) for name in target_names}), len(target_names))
+
+            incbtn = next(block for block in target_page.blocks if block.objname == "incbtn")
+            self.assertEqual(_field_int(incbtn, "id"), 2)
+            self.assertIn("codesdown-2", incbtn.event_tokens)
+            self.assertIn("numval.val++", incbtn.event_tokens)
+            self.assertIn("printh 23 02 4e 31", incbtn.event_tokens)
+
+            numval = next(block for block in target_page.blocks if block.objname == "numval")
+            self.assertEqual(_field_int(numval, "id"), 5)
+            self.assertEqual(_field_int(numval, "val"), 123)
+            self.assertEqual(_field_int(numval, "lenth"), 3)
+
+            number_slot_start = sum(_user_slot_count(block) for block in target_page.blocks[: target_page.blocks.index(numval)])
+            local_ref = (number_slot_start + 27).to_bytes(4, "little")
+            compiled = _build_object_event_table(incbtn, context=_build_event_compile_context(target_page.blocks))
+            self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", compiled)
+
+    @unittest.skipUnless(GB2312_FONT_ZI.exists(), "local verified GB2312 .zi font fixture is not available")
+    def test_scene_full_page_rebuild_preserves_same_page_event_matrix_offline(self) -> None:
+        scene = load_scene(NUMBER_DEMO_EVENT_MATRIX_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+                font_zi=GB2312_FONT_ZI,
+            )
+
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [item["name"] for item in manifest["tft_patch"]["objects"]],
+                ["page0", "refbtn", "visbtn", "tswbtn", "incbtn", "label0", "numval"],
+            )
+            self.assertEqual(
+                [item["id"] for item in manifest["tft_patch"]["objects"]],
+                [0, 1, 2, 3, 4, 5, 6],
+            )
+            self.assertEqual(
+                [item["type"] for item in manifest["tft_patch"]["objects"]],
+                ["y", "b", "b", "b", "b", "t", "6"],
+            )
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["font_name"], "UiCNEN32GBFull")
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["encoding_name"], "gb2312")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+
+            target_page = load_page_file(manifest["target_pa"])
+            target_names = [block.objname for block in target_page.blocks]
+            self.assertEqual(target_names, ["page0", "refbtn", "visbtn", "tswbtn", "incbtn", "label0", "numval"])
+            self.assertFalse({"t0", "b0", "p0"} & set(target_names))
+            self.assertEqual(len({object_name_hash(name) for name in target_names}), len(target_names))
+
+            blocks = {block.objname: block for block in target_page.blocks}
+            self.assertEqual(_field_int(blocks["label0"], "id"), 5)
+            self.assertEqual(_field_int(blocks["numval"], "id"), 6)
+            self.assertEqual(_field_int(blocks["numval"], "val"), 123)
+            self.assertEqual(_field_int(blocks["numval"], "lenth"), 3)
+
+            self.assertIn("codesdown-1", blocks["refbtn"].event_tokens)
+            self.assertIn("ref label0", blocks["refbtn"].event_tokens)
+            self.assertIn("codesdown-1", blocks["visbtn"].event_tokens)
+            self.assertIn("vis label0,0", blocks["visbtn"].event_tokens)
+            self.assertIn("codesdown-1", blocks["tswbtn"].event_tokens)
+            self.assertIn("tsw label0,0", blocks["tswbtn"].event_tokens)
+            self.assertIn("codesdown-1", blocks["incbtn"].event_tokens)
+            self.assertIn("numval.val++", blocks["incbtn"].event_tokens)
+
+            context = _build_event_compile_context(target_page.blocks)
+            event_layout = _build_event_layout(target_page.blocks, 0, image_button_layout=False)
+            for object_name in ("refbtn", "visbtn", "tswbtn", "incbtn"):
+                callback_offset = event_layout.callbacks[target_page.blocks.index(blocks[object_name])]["codesdown-"]
+                self.assertNotEqual(callback_offset, 0xFFFFFFFF)
+                self.assertGreaterEqual(callback_offset, 0)
+
+            self.assertIn(
+                len(b"\x09\x03\x04label0").to_bytes(4, "little") + b"\x09\x03\x04label0",
+                _build_object_event_table(blocks["refbtn"], context=context),
+            )
+            ref_items = decode_event_table(_build_object_event_table(blocks["refbtn"], context=context))
+            self.assertEqual([(item.get("command"), item.get("args")) for item in ref_items if item["kind"] == "command"], [("ref", "label0")])
+            self.assertIn(
+                len(b"\x09\x05\x04label0,0").to_bytes(4, "little") + b"\x09\x05\x04label0,0",
+                _build_object_event_table(blocks["visbtn"], context=context),
+            )
+            vis_items = decode_event_table(_build_object_event_table(blocks["visbtn"], context=context))
+            self.assertEqual([(item.get("command"), item.get("args")) for item in vis_items if item["kind"] == "command"], [("vis", "label0,0")])
+            self.assertIn(
+                len(b"\x09\x09\x04label0,0").to_bytes(4, "little") + b"\x09\x09\x04label0,0",
+                _build_object_event_table(blocks["tswbtn"], context=context),
+            )
+            tsw_items = decode_event_table(_build_object_event_table(blocks["tswbtn"], context=context))
+            self.assertEqual([(item.get("command"), item.get("args")) for item in tsw_items if item["kind"] == "command"], [("tsw", "label0,0")])
+            number_slot_start = sum(
+                _user_slot_count(block) for block in target_page.blocks[: target_page.blocks.index(blocks["numval"])]
+            )
+            local_ref = (number_slot_start + 27).to_bytes(4, "little")
+            inc_event_table = _build_object_event_table(blocks["incbtn"], context=context)
+            self.assertIn(b"\x07\x00\x00\x00\x01" + local_ref + b"++", inc_event_table)
+            inc_items = decode_event_table(inc_event_table)
+            self.assertEqual(
+                [(item.get("kind"), item.get("operator"), item.get("slot")) for item in inc_items if item["kind"] == "property_event"],
+                [("property_event", "++", int.from_bytes(local_ref, "little"))],
+            )
+
+    @unittest.skipUnless(GB2312_FONT_ZI.exists(), "local verified GB2312 .zi font fixture is not available")
+    def test_scene_full_page_rebuild_prepares_single_family_vis_promotion_offline(self) -> None:
+        scene = load_scene(NUMBER_DEMO_VIS_PROMOTION_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+                font_zi=GB2312_FONT_ZI,
+            )
+
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [item["name"] for item in manifest["tft_patch"]["objects"]],
+                ["page0", "title", "hidebtn", "showbtn", "label0"],
+            )
+            self.assertEqual(
+                [item["id"] for item in manifest["tft_patch"]["objects"]],
+                [0, 1, 2, 3, 4],
+            )
+            self.assertEqual(
+                [item["type"] for item in manifest["tft_patch"]["objects"]],
+                ["y", "t", "b", "b", "t"],
+            )
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["font_name"], "UiCNEN32GBFull")
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["encoding_name"], "gb2312")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+
+            target_page = load_page_file(manifest["target_pa"])
+            target_names = [block.objname for block in target_page.blocks]
+            self.assertEqual(target_names, ["page0", "title", "hidebtn", "showbtn", "label0"])
+            self.assertFalse({"t0", "b0", "p0"} & set(target_names))
+            self.assertEqual(len({object_name_hash(name) for name in target_names}), len(target_names))
+
+            blocks = {block.objname: block for block in target_page.blocks}
+            self.assertEqual(_field_int(blocks["label0"], "id"), 4)
+            self.assertIn("vis label0,0", blocks["hidebtn"].event_tokens)
+            self.assertIn("printh 23 02 56 30", blocks["hidebtn"].event_tokens)
+            self.assertIn("vis label0,1", blocks["showbtn"].event_tokens)
+            self.assertIn("printh 23 02 56 31", blocks["showbtn"].event_tokens)
+
+            context = _build_event_compile_context(target_page.blocks)
+            event_layout = _build_event_layout(target_page.blocks, 0, image_button_layout=False)
+            for object_name in ("hidebtn", "showbtn"):
+                callback_offset = event_layout.callbacks[target_page.blocks.index(blocks[object_name])]["codesdown-"]
+                self.assertNotEqual(callback_offset, 0xFFFFFFFF)
+                self.assertGreaterEqual(callback_offset, 0)
+
+            hide_event_table = _build_object_event_table(blocks["hidebtn"], context=context)
+            show_event_table = _build_object_event_table(blocks["showbtn"], context=context)
+            self.assertIn(
+                len(b"\x09\x05\x04label0,0").to_bytes(4, "little") + b"\x09\x05\x04label0,0",
+                hide_event_table,
+            )
+            self.assertIn(
+                len(b"\x09\x05\x04label0,1").to_bytes(4, "little") + b"\x09\x05\x04label0,1",
+                show_event_table,
+            )
+            hide_marker = b"\x09\x0f\x0823 02 56 30"
+            show_marker = b"\x09\x0f\x0823 02 56 31"
+            self.assertIn(len(hide_marker).to_bytes(4, "little") + hide_marker, hide_event_table)
+            self.assertIn(len(show_marker).to_bytes(4, "little") + show_marker, show_event_table)
+
+            hide_items = decode_event_table(hide_event_table)
+            show_items = decode_event_table(show_event_table)
+            self.assertEqual(
+                [(item.get("command"), item.get("args")) for item in hide_items if item.get("command") == "vis"],
+                [("vis", "label0,0")],
+            )
+            self.assertIn(("printh", "23 02 56 30"), [(item.get("command"), item.get("args")) for item in hide_items])
+            self.assertEqual(
+                [(item.get("command"), item.get("args")) for item in show_items if item.get("command") == "vis"],
+                [("vis", "label0,1")],
+            )
+            self.assertIn(("printh", "23 02 56 31"), [(item.get("command"), item.get("args")) for item in show_items])
+
+    @unittest.skipUnless(GB2312_FONT_ZI.exists(), "local verified GB2312 .zi font fixture is not available")
+    def test_scene_full_page_rebuild_prepares_single_family_tsw_promotion_offline(self) -> None:
+        scene = load_scene(NUMBER_DEMO_TSW_PROMOTION_SCENE)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+                font_zi=GB2312_FONT_ZI,
+            )
+
+            self.assertEqual(manifest["tft_patch"]["mode"], "experimental_clean_page_tft_rebuild")
+            self.assertEqual(manifest["tft_patch"]["removed_seed_objects"], ["t0", "b0", "p0"])
+            self.assertEqual(
+                [item["name"] for item in manifest["tft_patch"]["objects"]],
+                ["page0", "title", "disablebtn", "enablebtn", "targetbtn"],
+            )
+            self.assertEqual(
+                [item["id"] for item in manifest["tft_patch"]["objects"]],
+                [0, 1, 2, 3, 4],
+            )
+            self.assertEqual(
+                [item["type"] for item in manifest["tft_patch"]["objects"]],
+                ["y", "t", "b", "b", "b"],
+            )
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["font_name"], "UiCNEN32GBFull")
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["encoding_name"], "gb2312")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
+
+            target_page = load_page_file(manifest["target_pa"])
+            target_names = [block.objname for block in target_page.blocks]
+            self.assertEqual(target_names, ["page0", "title", "disablebtn", "enablebtn", "targetbtn"])
+            self.assertFalse({"t0", "b0", "p0"} & set(target_names))
+            self.assertEqual(len({object_name_hash(name) for name in target_names}), len(target_names))
+
+            blocks = {block.objname: block for block in target_page.blocks}
+            self.assertEqual(_field_int(blocks["targetbtn"], "id"), 4)
+            self.assertIn("tsw targetbtn,0", blocks["disablebtn"].event_tokens)
+            self.assertIn("printh 23 02 54 30", blocks["disablebtn"].event_tokens)
+            self.assertIn("tsw targetbtn,1", blocks["enablebtn"].event_tokens)
+            self.assertIn("printh 23 02 54 31", blocks["enablebtn"].event_tokens)
+            self.assertIn("printh 23 02 54 47", blocks["targetbtn"].event_tokens)
+
+            context = _build_event_compile_context(target_page.blocks)
+            event_layout = _build_event_layout(target_page.blocks, 0, image_button_layout=False)
+            for object_name in ("disablebtn", "enablebtn", "targetbtn"):
+                callback_offset = event_layout.callbacks[target_page.blocks.index(blocks[object_name])]["codesdown-"]
+                self.assertNotEqual(callback_offset, 0xFFFFFFFF)
+                self.assertGreaterEqual(callback_offset, 0)
+
+            disable_event_table = _build_object_event_table(blocks["disablebtn"], context=context)
+            enable_event_table = _build_object_event_table(blocks["enablebtn"], context=context)
+            target_event_table = _build_object_event_table(blocks["targetbtn"], context=context)
+            self.assertIn(
+                len(b"\x09\x09\x04targetbtn,0").to_bytes(4, "little") + b"\x09\x09\x04targetbtn,0",
+                disable_event_table,
+            )
+            self.assertIn(
+                len(b"\x09\x09\x04targetbtn,1").to_bytes(4, "little") + b"\x09\x09\x04targetbtn,1",
+                enable_event_table,
+            )
+            disable_marker = b"\x09\x0f\x0823 02 54 30"
+            enable_marker = b"\x09\x0f\x0823 02 54 31"
+            target_marker = b"\x09\x0f\x0823 02 54 47"
+            self.assertIn(len(disable_marker).to_bytes(4, "little") + disable_marker, disable_event_table)
+            self.assertIn(len(enable_marker).to_bytes(4, "little") + enable_marker, enable_event_table)
+            self.assertIn(len(target_marker).to_bytes(4, "little") + target_marker, target_event_table)
+
+            disable_items = decode_event_table(disable_event_table)
+            enable_items = decode_event_table(enable_event_table)
+            target_items = decode_event_table(target_event_table)
+            self.assertEqual(
+                [(item.get("command"), item.get("args")) for item in disable_items if item.get("command") == "tsw"],
+                [("tsw", "targetbtn,0")],
+            )
+            self.assertIn(("printh", "23 02 54 30"), [(item.get("command"), item.get("args")) for item in disable_items])
+            self.assertEqual(
+                [(item.get("command"), item.get("args")) for item in enable_items if item.get("command") == "tsw"],
+                [("tsw", "targetbtn,1")],
+            )
+            self.assertIn(("printh", "23 02 54 31"), [(item.get("command"), item.get("args")) for item in enable_items])
+            self.assertEqual(
+                [(item.get("command"), item.get("args")) for item in target_items if item.get("command") == "printh"],
+                [("printh", "23 02 54 47")],
+            )
+
     def test_scene_build_patches_text_record_metadata(self) -> None:
         scene = validate_scene(
             {
@@ -1723,6 +2405,50 @@ class EditorTftBuildTests(unittest.TestCase):
                 baseline_tft=BASELINE_TFT,
             )
             self.assertEqual(Path(manifest["output_tft"]).read_bytes(), CASE_12_TFT.read_bytes())
+
+    @unittest.skipUnless(FONT_ZI.exists(), "local generated .zi font fixture is not available")
+    def test_scene_build_can_patch_hmi_and_tft_font(self) -> None:
+        scene = validate_scene(
+            {
+                "project": {"name": "font-patched-scene", "default_page": "page0"},
+                "canvas": {"width": 800, "height": 480, "background_color": 65535},
+                "assets": {},
+                "pages": [
+                    {
+                        "id": "page0",
+                        "layout": {"type": "absolute"},
+                        "widgets": [
+                            {
+                                "id": "fontmsg",
+                                "type": "text",
+                                "x": 80,
+                                "y": 70,
+                                "w": 640,
+                                "h": 120,
+                                "text": "FONT TEST 123",
+                                "style": {"font_id": 0},
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            manifest = build_scene(
+                scene,
+                SEED_HMI,
+                temp_dir,
+                baseline_tft=BASELINE_TFT,
+                font_zi=FONT_ZI,
+            )
+
+            output_hmi = Path(manifest["output_hmi"])
+            self.assertEqual(_hmi_entry_data(output_hmi, "0.zi"), FONT_ZI.read_bytes())
+            self.assertEqual(manifest["hmi_font_patch"]["entry_name"], "0.zi")
+            self.assertEqual(manifest["hmi_font_patch"]["zi_size"], FONT_ZI.stat().st_size)
+            self.assertEqual(manifest["tft_font_patch"]["font_info"]["font_name"], "SimSun32scene")
+            self.assertTrue(manifest["tft_checksum"]["valid"])
 
     def test_scene_tft_build_rejects_unpacked_new_image_resources(self) -> None:
         scene = validate_scene(
@@ -2090,6 +2816,39 @@ def _field_int(block, name: str) -> int:
     field = block.get_field(name)
     assert field is not None
     return int.from_bytes(field.value, "little")
+
+
+def _matrix_type_code(type_code: str) -> str:
+    if len(type_code) == 1 and ord(type_code) < 0x20:
+        return f"0x{ord(type_code):02X}"
+    return type_code
+
+
+def _matrix_evidence_widget_types(evidence_path: Path) -> set[str]:
+    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    scene_paths: set[Path] = set()
+    for key in ("scene", "artifact"):
+        value = evidence.get(key)
+        if isinstance(value, str) and value.endswith(".json"):
+            scene_paths.add(Path(value))
+    for slice_info in evidence.get("verified_slices", []):
+        value = slice_info.get("scene")
+        if isinstance(value, str):
+            scene_paths.add(Path(value))
+    for slice_info in evidence.get("single_media_smoke_slices", []):
+        value = slice_info.get("scene")
+        if isinstance(value, str):
+            scene_paths.add(Path(value))
+
+    widget_types = {
+        rebuilt_object["widget"]
+        for rebuilt_object in evidence.get("rebuilt_objects", [])
+        if isinstance(rebuilt_object, dict) and "widget" in rebuilt_object
+    }
+    for scene_path in scene_paths:
+        scene = load_scene(scene_path)
+        widget_types.update(widget.type for page in scene.pages for widget in page.widgets)
+    return widget_types
 
 
 def _resource_dir_u32(path: Path, offset: int) -> int:

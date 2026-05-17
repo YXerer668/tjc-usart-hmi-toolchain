@@ -1,0 +1,45 @@
+{
+  "artifact": "examples/new_controls_demo/scene.json",
+  "date": "2026-05-17",
+  "scope": "offline clean full-page rebuild fixture for fixture-backed non-media controls on TJC8048X543_011C",
+  "claim": "drop_seed_objects can rebuild page0 with the listed supported controls and produce a valid TFT checksum in the local seed/baseline path",
+  "not_claimed": [
+    "live COM36 upload",
+    "camera proof",
+    "runtime behavior of these controls",
+    "page-load behavior",
+    "timer/media/cross-page generalization",
+    "unsupported current-target widgets"
+  ],
+  "scene_project": {
+    "name": "new-controls-demo",
+    "drop_seed_objects": true
+  },
+  "rebuilt_objects": [
+    {"name": "page0", "type": "y"},
+    {"name": "bar1", "type": "j", "widget": "progress"},
+    {"name": "slider1", "type": "0x01", "widget": "slider"},
+    {"name": "gauge1", "type": "z", "widget": "gauge"},
+    {"name": "qr1", "type": ":", "widget": "qrcode"},
+    {"name": "g0", "type": "7", "widget": "scrolling-text"},
+    {"name": "bt0", "type": "5", "widget": "dual-button"},
+    {"name": "bt1", "type": "5", "widget": "dualstate-button"},
+    {"name": "sw0", "type": "C", "widget": "state-button"},
+    {"name": "c0", "type": "8", "widget": "checkbox"},
+    {"name": "r0", "type": "9", "widget": "radio"},
+    {"name": "m0", "type": "m", "widget": "hotspot"},
+    {"name": "q0", "type": "q", "widget": "crop-image"},
+    {"name": "va0", "type": "4", "widget": "variable"},
+    {"name": "s0", "type": "0x00", "widget": "waveform"}
+  ],
+  "verification": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_new_controls_demo_full_page_rebuild_covers_fixture_backed_controls -q",
+      "result": "1 passed in 4.91s"
+    },
+    {
+      "command": "python -m pytest tests/test_scene_layout.py::SceneLayoutTests::test_current_target_unsupported_advanced_widget_aliases_fail_clearly -q",
+      "result": "1 passed, 5 subtests passed in 0.06s"
+    }
+  ]
+}

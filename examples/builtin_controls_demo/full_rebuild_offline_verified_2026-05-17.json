@@ -1,0 +1,44 @@
+{
+  "schema": "usarthmi-builtin-controls-full-rebuild-proof-v1",
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "claim": "drop_seed_objects can rebuild a page0 slice containing the built-in text, button, number, image, and timer controls, producing a valid TFT checksum with the local seed/baseline path.",
+  "not_claimed": [
+    "No new COM36 upload, serial readback, camera proof, or timer runtime scheduling proof is claimed by this file.",
+    "The image object reuses existing seed picture id 0; this file does not claim new picture-resource packing.",
+    "The timer event bytecode is checked offline; this file does not claim boot/page-load timer autorun."
+  ],
+  "scene": "examples/builtin_controls_demo/scene.json",
+  "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+  "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+  "verified_structure": {
+    "mode": "experimental_clean_page_tft_rebuild",
+    "removed_seed_objects": ["t0", "b0", "p0"],
+    "object_order": [
+      ["page0", "y"],
+      ["title", "t"],
+      ["btn0", "b"],
+      ["num0", "6"],
+      ["pic0", "p"],
+      ["tm0", "3"]
+    ],
+    "checked_fields": {
+      "num0.val": 7,
+      "num0.lenth": 3,
+      "pic0.pic": 0,
+      "tm0.tim": 1000,
+      "tm0.en": 0
+    },
+    "checked_events": [
+      "btn0 down contains num0.val++",
+      "btn0 down contains printh 23 02 42 49",
+      "tm0 timer contains num0.val++"
+    ]
+  },
+  "test_results": [
+    {
+      "command": "python -m pytest tests/test_editor_tft_build.py::EditorTftBuildTests::test_builtin_controls_demo_full_page_rebuild_covers_builtin_controls -q",
+      "result": "1 passed in 3.81s"
+    }
+  ]
+}
