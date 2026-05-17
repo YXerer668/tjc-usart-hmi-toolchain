@@ -16,6 +16,7 @@
     "combobox",
     "dual-button",
     "dualstate-button",
+    "external-picture",
     "gauge",
     "number",
     "progress",
@@ -102,12 +103,9 @@
     "external-picture": {
       "scene": "examples/external_picture_demo/scene.json",
       "offline_evidence": "examples/full_rebuild_control_broadening_2026-05-17.json",
-      "live_status": "documented-live-proof",
-      "live_expectations_or_docs": [
-        "examples/README.md",
-        "examples/external_picture_demo/smoke.expect.json"
-      ],
-      "next_live_action": "Commit the live_tft_smoke result JSON with exp0.path, guard.txt, sendme, and camera capture."
+      "live_status": "committed-live-proof",
+      "live_evidence": ["examples/external_picture_demo/hardware_verified_2026-05-17.json"],
+      "next_live_action": "Add pixel-level image-content assertion only if SD-card visual correctness needs to be closed beyond serial path readback and camera capture."
     },
     "gauge": {
       "scene": "examples/new_controls_demo/scene.json",

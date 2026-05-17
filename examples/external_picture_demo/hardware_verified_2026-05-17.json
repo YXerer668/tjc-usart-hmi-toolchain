@@ -1,0 +1,61 @@
+{
+  "date": "2026-05-17",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "scope": "live COM36 upload and smoke for the external-picture demo built from the healthy case_00 baseline",
+  "scene": "examples/external_picture_demo/scene.json",
+  "expect_json": "examples/external_picture_demo/smoke.expect.json",
+  "source_tft": "reverse_usarthmi/external_picture_demo_build/output.tft",
+  "build": {
+    "command": "python -m usarthmi --json scene build examples\\external_picture_demo\\scene.json --seed D:\\MySTM32\\H723ZGT6\\Program\\ISP_Test\\lcd_test.HMI --baseline-tft C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_00_baseline\\lcd_test.tft --out reverse_usarthmi\\external_picture_demo_build",
+    "file_size": 11414788,
+    "object_count": 9,
+    "checksum_hex": "0x046E5517",
+    "checksum_valid": true
+  },
+  "command": "python tools\\live_tft_smoke.py --file reverse_usarthmi\\external_picture_demo_build\\output.tft --out-dir reverse_usarthmi\\external_picture_demo_build\\smoke_capture --expect-json examples\\external_picture_demo\\smoke.expect.json --upload --require-model TJC8048X543_011C --port COM36 --baud 9600 --download-baud 921600 --chunk-size 4096 --timeout-ms 8000 --post-upload-wait-s 2.5 --progress --capture",
+  "summary": {
+    "ok": true,
+    "checksum_valid": true,
+    "model_preflight_ok": true,
+    "uploaded": true,
+    "serial_checks_ok": true,
+    "camera_captured": true,
+    "camera_ok": true
+  },
+  "model_preflight": {
+    "required_model": "TJC8048X543_011C",
+    "actual_model": "TJC8048X543_011C",
+    "diagnosis": "serial runtime is healthy enough for normal commands and public whmi-wri upload preflight"
+  },
+  "upload": {
+    "file_size": 11414788,
+    "checksum_hex": "0x046E5517",
+    "bytes_sent": 11414788,
+    "chunks_sent": 2787,
+    "chunk_size": 4096,
+    "elapsed_s": 262.031
+  },
+  "serial_readback_passed": [
+    {"target": "exp0.path", "widget": "external-picture", "expected": "sd0/1.jpg", "actual": "sd0/1.jpg"},
+    {"target": "guard.txt", "widget": "text", "expected": "guard.txt ok", "actual": "guard.txt ok"}
+  ],
+  "not_claimed": [
+    "pixel-level assertion that the SD-card image content is correct; this run records serial path readback and a camera capture artifact",
+    "case_46_expicture_current_gui as a live-safe upload baseline",
+    "arbitrary SD-card path behavior",
+    "arbitrary page/widget/event generalization"
+  ],
+  "artifacts": {
+    "smoke_result": {
+      "path": "reverse_usarthmi/external_picture_demo_build/smoke_capture/smoke_result.json",
+      "sha256": "c5d08a6c0a243427026ff657e5b3c950d52a90ef9b1768b0b410c75050abe5ad",
+      "bytes": 12539
+    },
+    "camera_capture": {
+      "path": "reverse_usarthmi/external_picture_demo_build/smoke_capture/camera_after_smoke.jpg",
+      "sha256": "e86abd6eada515e3dba8c77d1bba5140a1281f5e4cc3cd3cf5b8c8c4d7ef0a08",
+      "bytes": 111375
+    }
+  }
+}

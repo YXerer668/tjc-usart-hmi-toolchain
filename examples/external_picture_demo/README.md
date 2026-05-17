@@ -23,6 +23,11 @@ Add `--smoke --capture` to reuse the current TFT on the panel and collect
 serial plus camera evidence. Add `--upload --progress` only when you want to
 burn the generated TFT first.
 
+The committed hardware evidence for the current `TJC8048X543_011C` panel is in
+`hardware_verified_2026-05-17.json`. It records a full COM36 upload from the
+healthy `case_00_baseline`, serial readback of `exp0.path` and `guard.txt`, and
+a `USB Cam` capture artifact.
+
 Live smoke checklist:
 
 - `sendme` returns page `0`.

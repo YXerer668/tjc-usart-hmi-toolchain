@@ -5,7 +5,7 @@
 ## 推荐入口
 
 - `menu_demo`: 最基础的菜单页样例，适合验证文字、图片、按钮、数值区和预览器。
-- `external_picture_demo`: 外部图片控件的默认活屏样例，已经在当前 `TJC8048X543_011C` 上验证过 `sendme`、`get exp0.path`、`get guard.txt` 和摄像头显示。
+- `external_picture_demo`: 外部图片控件的默认活屏样例；`hardware_verified_2026-05-17.json` 已记录当前 `TJC8048X543_011C` 上的 COM36 上传、`sendme`、`get exp0.path`、`get guard.txt` 和摄像头捕获证据。
 - `media_single_gmov_smoke`: 当前推荐的动画控件最小烧录样例，只验证一个内部 GMOV，边界最稳。
 - `media_single_video_sd_smoke`: 单个 SD 视频控件的最小烧录样例，验证 video 对象 tail 和运行时可读字段；不承诺所有视频编码都能播放。
 - `media_single_audio_sd_smoke`: 单个 SD 音频控件的最小烧录样例，验证 wav/audio 对象 tail 和运行时可读字段；不承诺扬声器/音量链路。
