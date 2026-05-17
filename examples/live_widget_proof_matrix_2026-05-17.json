@@ -54,8 +54,9 @@
     "checkbox": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a one-widget checkbox smoke with serial-readable state and camera/serial evidence."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate on COM36 and commit the live_tft_smoke result."
     },
     "combobox": {
       "scene": "examples/xfloat_combobox_demo/scene.json",
@@ -67,20 +68,23 @@
     "crop-image": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a one-widget crop-image smoke with camera proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof for the crop-image visual area."
     },
     "dual-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a dual-button smoke that toggles state and records serial or camera evidence."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add a focused toggle-state proof if initial readback passes."
     },
     "dualstate-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Keep this tied to the dual-button fixture unless a separate official/runtime distinction is proven."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate; keep runtime distinction from dual-button fixture explicit."
     },
     "external-picture": {
       "scene": "examples/external_picture_demo/scene.json",
@@ -95,8 +99,9 @@
     "gauge": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a gauge smoke with a visible needle/value and camera proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof for visible needle/value."
     },
     "hotspot": {
       "scene": "examples/new_controls_demo/scene.json",
@@ -124,38 +129,44 @@
     "progress": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a progress-bar smoke with visible value changes and camera proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add visible value-change camera proof."
     },
     "qrcode": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a QR code smoke with camera proof and, if possible, decoded payload verification."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof and decoded payload verification if possible."
     },
     "radio": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a radio-button smoke with state readback or visible selection proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate and add visible selection proof if initial readback passes."
     },
     "scrolling-text": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a scrolling-text smoke with camera proof over time; keep this separate from unsupported sliding-text."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add camera proof over time; keep this separate from unsupported sliding-text."
     },
     "slider": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a slider smoke with visible value/readback proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add visible value/readback proof for movement."
     },
     "state-button": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a state-button smoke with toggle readback or visible state proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add focused toggle readback or visible state proof."
     },
     "text": {
       "scene": "examples/builtin_controls_demo/scene.json",
@@ -186,8 +197,9 @@
     "variable": {
       "scene": "examples/new_controls_demo/scene.json",
       "offline_evidence": "examples/new_controls_demo/full_rebuild_offline_verified_2026-05-17.json",
-      "live_status": "offline-only",
-      "next_live_action": "Create a variable smoke with get/set readback proof."
+      "live_status": "smoke-ready",
+      "live_expectations_or_docs": ["examples/new_controls_demo/smoke.expect.json"],
+      "next_live_action": "Run the new_controls_demo smoke candidate, then add set/get mutation proof if initial readback passes."
     },
     "video": {
       "scene": "examples/media_single_video_sd_smoke/scene.json",

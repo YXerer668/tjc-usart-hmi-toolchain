@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from argparse import Namespace
@@ -20,6 +21,33 @@ from tools.live_tft_smoke import (
 
 
 class LiveTftSmokeTests(unittest.TestCase):
+    def test_new_controls_demo_smoke_expect_loads_candidate_readbacks(self) -> None:
+        expect_path = Path("examples/new_controls_demo/smoke.expect.json")
+        config = json.loads(expect_path.read_text(encoding="utf-8"))
+        expectations = _load_expectations(str(expect_path), [])
+        targets = {item.target: item.expected for item in expectations}
+
+        self.assertEqual(config["page_id"], 0)
+        self.assertEqual(config["select_page"], 0)
+        self.assertEqual(
+            targets,
+            {
+                "bar1.val": 68,
+                "slider1.val": 42,
+                "gauge1.val": 75,
+                "qr1.txt": "USART HMI",
+                "g0.txt": "SCROLLING TEXT",
+                "bt0.val": 0,
+                "bt1.val": 1,
+                "sw0.val": 1,
+                "c0.val": 1,
+                "r0.val": 1,
+                "q0.picc": 0,
+                "va0.val": 123,
+            },
+        )
+        self.assertTrue(all(item.attempts == 3 for item in expectations))
+
     def test_ffmpeg_dshow_capture_uses_named_usb_cam_and_warmup(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             out_dir = Path(temp_dir)
