@@ -14,6 +14,7 @@ class Page1FilebrowserCompiledDataEliminationReportArtifactTests(unittest.TestCa
 
         self.assertEqual(payload["status"], "compiled-data-eliminated")
         self.assertTrue(payload["evidence"]["authoring_gap_separated"])
+        self.assertTrue(payload["evidence"]["header_globals_do_not_expose_filebrowser_specific_bit"])
         self.assertTrue(payload["evidence"]["pointer_closure_valid"])
         self.assertTrue(payload["evidence"]["attr_user_header_identical"])
         self.assertTrue(payload["evidence"]["object_local_user_and_mirror_identical"])

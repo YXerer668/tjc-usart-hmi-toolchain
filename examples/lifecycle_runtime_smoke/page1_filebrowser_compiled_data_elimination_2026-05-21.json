@@ -5,6 +5,7 @@
   "status": "compiled-data-eliminated",
   "evidence": {
     "authoring_gap_separated": true,
+    "header_globals_do_not_expose_filebrowser_specific_bit": true,
     "pointer_closure_valid": true,
     "attr_user_header_identical": true,
     "object_local_user_and_mirror_identical": true,
