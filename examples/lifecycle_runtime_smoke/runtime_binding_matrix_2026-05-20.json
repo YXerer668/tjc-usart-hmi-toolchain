@@ -6,10 +6,11 @@
     "page0_advanced_positive_count": 5,
     "page1_runtime_page_mapping_confirmed": true,
     "page1_ordinary_binding_positive_count": 1,
-    "page1_advanced_binding_positive_count": 3,
+    "page1_advanced_binding_positive_count": 4,
+    "page1_advanced_binding_negative_count": 1,
     "page1_load_marker_recovered": false,
-    "page1_remaining_controls_requiring_correct_page_recheck_count": 2,
-    "highest_leverage_gap": "page-load scheduler recovery and corrected-page revalidation of remaining page1 advanced controls"
+    "page1_remaining_controls_requiring_correct_page_recheck_count": 0,
+    "highest_leverage_gap": "page-load scheduler recovery and page1 file-browser-specific runtime binding"
   },
   "rows": [
     {
@@ -122,6 +123,19 @@
       "meaning": "the official GUI page1 text-select minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe"
     },
     {
+      "id": "page1_sliding_text_positive_mapping_corrected",
+      "page": 1,
+      "class": "advanced_readback_positive",
+      "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_page": 0,
+      "runtime_readback": {
+        "slt0.txt": "000\r\n111\r\n222\r\n333\r\n444\r\n666\r\n777\r\n777\r\n888\r\n999"
+      },
+      "meaning": "the official GUI page1 sliding-text minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe"
+    },
+    {
       "id": "page1_data_record_positive_mapping_corrected",
       "page": 1,
       "class": "advanced_readback_positive",
@@ -150,28 +164,15 @@
       "meaning": "the official GUI page1 file-stream minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe"
     },
     {
-      "id": "page1_sliding_text",
+      "id": "page1_file_browser_runtime_negative",
       "page": 1,
-      "class": "advanced_runtime_recheck_pending",
-      "source": "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
+      "class": "advanced_runtime_negative",
+      "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
       "compiled_positive": true,
-      "runtime_positive": null,
-      "runtime_signal": "stale_wrong_runtime_page_probe",
-      "page_switch_ok": true,
-      "sendme_ok": true,
-      "meaning": "the historical page1 sliding-text probe switched to runtime page 1 before reading back; correct runtime page 0 revalidation is still pending"
-    },
-    {
-      "id": "page1_file_browser",
-      "page": 1,
-      "class": "advanced_runtime_recheck_pending",
-      "source": "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json",
-      "compiled_positive": true,
-      "runtime_positive": null,
-      "runtime_signal": "stale_wrong_runtime_page_probe",
-      "page_switch_ok": true,
-      "sendme_ok": true,
-      "meaning": "the historical page1 file-browser probe switched to runtime page 1 before reading back; correct runtime page 0 revalidation is still pending"
+      "runtime_positive": false,
+      "runtime_page": 0,
+      "runtime_signal": "invalid_reference",
+      "meaning": "the official GUI page1 file-browser clone still returns invalid_reference even on the corrected runtime page 0, so this remains a real page1 advanced runtime negative"
     }
   ],
   "interpretation": {
@@ -179,9 +180,9 @@
     "runtime_page_0_maps_to_generated_page1": true,
     "likely_shared_breakpoint": [
       "fresh live re-verification now proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, not runtime page 1",
-      "the local ordinary page1 text probe and official GUI page1 text-select/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
-      "the remaining unrecovered gap is narrower: page1 object binding is not generally absent, but page-level load scheduling is still missing and the remaining advanced controls need corrected-page revalidation"
+      "the local ordinary page1 text probe and official GUI page1 text-select/sliding-text/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
+      "the remaining unrecovered gap is narrower: page1 object binding is broadly alive, page1 file-browser is the only advanced object still negative on the corrected runtime page, and page-level load scheduling is still missing"
     ],
-    "recommended_next_step": "keep lifecycle recovery focused on page-load scheduling, and re-run the remaining page1 advanced controls on runtime page 0 before treating any of them as real negatives"
+    "recommended_next_step": "keep lifecycle recovery focused on page-load scheduling, and narrow the page1 file-browser-specific runtime binding gap instead of treating page1 advanced controls as a whole as unsupported"
   }
 }

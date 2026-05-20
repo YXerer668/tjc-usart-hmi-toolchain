@@ -64,6 +64,24 @@
         }
       }
     },
+    "official_gui_page1_sliding_text": {
+      "tft": "C:/Users/SinYu/Desktop/case_for_codex/case_74_page1_sltext_minimal_official_oracle/official_compile_probe_20260519/output/lcd_test.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_slt0_txt": {
+          "kind": "string",
+          "value": "000\r\n111\r\n222\r\n333\r\n444\r\n666\r\n777\r\n777\r\n888\r\n999",
+          "hex": "70 30 30 30 0d 0a 31 31 31 0d 0a 32 32 32 0d 0a 33 33 33 0d 0a 34 34 34 0d 0a 36 36 36 0d 0a 37 37 37 0d 0a 37 37 37 0d 0a 38 38 38 0d 0a 39 39 39 ff ff ff"
+        }
+      },
+      "runtime_page_1": {
+        "sendme": 1,
+        "get_slt0_txt": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      }
+    },
     "official_gui_page1_data_record": {
       "tft": "reverse_usarthmi/page1_datarecord_official_compile_20260519/output/lcd_test.tft",
       "runtime_page_0": {
@@ -109,19 +127,36 @@
           "hex": "1a ff ff ff"
         }
       }
+    },
+    "official_gui_page1_file_browser": {
+      "tft": "C:/Users/SinYu/Desktop/case_for_codex/case_B4_page1_filebrowser_hmi_clone_oracle/official_compile_probe_20260520/output/lcd_test.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_fbrowser0_dir": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        },
+        "get_fbrowser0_filter": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        },
+        "get_fbrowser0_txt": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      }
     }
   },
   "conclusions": {
     "runtime_page_0_is_generated_or_official_page1": true,
     "local_page1_ordinary_text_binding_positive": true,
     "official_page1_text_select_binding_positive": true,
+    "official_page1_sliding_text_binding_positive": true,
     "official_page1_data_record_binding_positive": true,
     "official_page1_file_stream_binding_positive": true,
+    "official_page1_file_browser_binding_positive": false,
     "page1_load_scheduler_recovered": false,
     "stale_negative_methodology": "probing page 1 / sendme 1 on case31-style two-page builds checks the seed page0 runtime page, not the generated or official page1 content"
   },
-  "next_revalidation_targets": [
-    "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
-    "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json"
-  ]
+  "next_revalidation_targets": []
 }

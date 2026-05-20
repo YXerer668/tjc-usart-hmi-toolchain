@@ -58,21 +58,19 @@ def build_report() -> dict[str, Any]:
         {
             "id": "page1_advanced_runtime_binding",
             "status": "unfinished",
-            "scope": "page1 page-load scheduling plus corrected-page revalidation of the remaining advanced controls",
+            "scope": "page1 page-load scheduling plus the remaining page1 file-browser-specific runtime gap",
             "why_unfinished": [
                 "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
-                "official GUI page1 text-select, official GUI page1 data-record, and official GUI page1 file-stream now all read back correctly on runtime page 0, but sliding-text and file-browser still need corrected-page live revalidation",
+                "official GUI page1 text-select, sliding-text, data-record, and file-stream now all read back correctly on runtime page 0, but page1 file-browser still remains invalid_reference on that corrected runtime page",
                 "the local generated page1 load probe now reads p1title.txt correctly on runtime page 0, but the page-level load marker is still not observed when switching back to that runtime page",
             ],
             "blocks": [
-                "corrected-page live revalidation for page1 sliding-text",
-                "corrected-page live revalidation for page1 file-browser",
+                "page1 file-browser-specific runtime binding recovery",
                 "page1 advanced event dispatch after corrected-page proof",
                 "page1 page-load scheduler recovery",
             ],
             "evidence": [
                 "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
-                "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
                 "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json",
             ],
         },

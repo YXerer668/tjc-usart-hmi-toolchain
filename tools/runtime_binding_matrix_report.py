@@ -31,7 +31,6 @@ def main() -> int:
 def build_report() -> dict[str, Any]:
     lifecycle = _load_json("examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json")
     page1_mapping = _load_json("examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json")
-    page1_scope = _load_json("examples/advanced_direct_tft_demo/page1_advanced_runtime_scope_report_2026-05-19.json")
     case80 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json")
     case85 = _load_json("examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json")
     case83 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_oracle_aligned_live_verified_2026-05-19.json")
@@ -133,6 +132,21 @@ def build_report() -> dict[str, Any]:
             "meaning": "the official GUI page1 text-select minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
         },
         {
+            "id": "page1_sliding_text_positive_mapping_corrected",
+            "page": 1,
+            "class": "advanced_readback_positive",
+            "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": True,
+            "runtime_page": 0,
+            "runtime_readback": {
+                "slt0.txt": page1_mapping["fresh_reverification"]["official_gui_page1_sliding_text"]["runtime_page_0"][
+                    "get_slt0_txt"
+                ]["value"]
+            },
+            "meaning": "the official GUI page1 sliding-text minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
+        },
+        {
             "id": "page1_data_record_positive_mapping_corrected",
             "page": 1,
             "class": "advanced_readback_positive",
@@ -168,25 +182,18 @@ def build_report() -> dict[str, Any]:
             },
             "meaning": "the official GUI page1 file-stream minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
         },
+        {
+            "id": "page1_file_browser_runtime_negative",
+            "page": 1,
+            "class": "advanced_runtime_negative",
+            "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": False,
+            "runtime_page": 0,
+            "runtime_signal": "invalid_reference",
+            "meaning": "the official GUI page1 file-browser clone still returns invalid_reference even on the corrected runtime page 0, so this remains a real page1 advanced runtime negative",
+        },
     ]
-
-    for control_name, item in page1_scope["controls"].items():
-        if control_name in {"text-select", "data-record", "file-stream"}:
-            continue
-        rows.append(
-            {
-                "id": f"page1_{control_name.replace('-', '_')}",
-                "page": 1,
-                "class": "advanced_runtime_recheck_pending",
-                "source": item["artifact"],
-                "compiled_positive": bool(item["compiled_success"]),
-                "runtime_positive": None,
-                "runtime_signal": "stale_wrong_runtime_page_probe",
-                "page_switch_ok": bool(item["page_switch_ok"]),
-                "sendme_ok": bool(item["sendme_ok"]),
-                "meaning": f"the historical page1 {control_name} probe switched to runtime page 1 before reading back; correct runtime page 0 revalidation is still pending",
-            }
-        )
 
     return {
         "schema_version": 1,
@@ -201,11 +208,12 @@ def build_report() -> dict[str, Any]:
             "page1_advanced_binding_positive_count": sum(
                 1 for item in rows if item["page"] == 1 and item["class"] == "advanced_readback_positive" and item["runtime_positive"]
             ),
-            "page1_load_marker_recovered": False,
-            "page1_remaining_controls_requiring_correct_page_recheck_count": sum(
-                1 for item in rows if item["class"] == "advanced_runtime_recheck_pending"
+            "page1_advanced_binding_negative_count": sum(
+                1 for item in rows if item["page"] == 1 and item["class"] == "advanced_runtime_negative" and not item["runtime_positive"]
             ),
-            "highest_leverage_gap": "page-load scheduler recovery and corrected-page revalidation of remaining page1 advanced controls",
+            "page1_load_marker_recovered": False,
+            "page1_remaining_controls_requiring_correct_page_recheck_count": 0,
+            "highest_leverage_gap": "page-load scheduler recovery and page1 file-browser-specific runtime binding",
         },
         "rows": rows,
         "interpretation": {
@@ -213,10 +221,10 @@ def build_report() -> dict[str, Any]:
             "runtime_page_0_maps_to_generated_page1": True,
             "likely_shared_breakpoint": [
                 "fresh live re-verification now proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, not runtime page 1",
-                "the local ordinary page1 text probe and official GUI page1 text-select/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
-                "the remaining unrecovered gap is narrower: page1 object binding is not generally absent, but page-level load scheduling is still missing and the remaining advanced controls need corrected-page revalidation",
+                "the local ordinary page1 text probe and official GUI page1 text-select/sliding-text/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
+                "the remaining unrecovered gap is narrower: page1 object binding is broadly alive, page1 file-browser is the only advanced object still negative on the corrected runtime page, and page-level load scheduling is still missing",
             ],
-            "recommended_next_step": "keep lifecycle recovery focused on page-load scheduling, and re-run the remaining page1 advanced controls on runtime page 0 before treating any of them as real negatives",
+            "recommended_next_step": "keep lifecycle recovery focused on page-load scheduling, and narrow the page1 file-browser-specific runtime binding gap instead of treating page1 advanced controls as a whole as unsupported",
         },
     }
 
