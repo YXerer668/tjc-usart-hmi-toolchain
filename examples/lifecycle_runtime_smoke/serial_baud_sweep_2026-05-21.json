@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "status": "swept",
+  "rows": [
+    {
+      "baud": 2400,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 4800,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 9600,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 19200,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 57600,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 115200,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 230400,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 256000,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 512000,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    {
+      "baud": 921600,
+      "connect_kind": "none",
+      "sendme_kind": "none",
+      "get_dim_kind": "none",
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    }
+  ],
+  "conclusions": {
+    "all_common_and_high_bauds_silent": true,
+    "not_explained_by_simple_command_baud_drift": true
+  }
+}
