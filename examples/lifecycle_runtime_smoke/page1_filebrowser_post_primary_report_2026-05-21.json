@@ -1,0 +1,552 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "post-primary-compared",
+  "cases": {
+    "single_page_filebrowser_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\output.tft",
+      "target_page": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\target_0.pa",
+      "primary_offset": 583,
+      "primary_size": 1152,
+      "primary_end": 1735,
+      "post_primary_length": 19,
+      "post_primary_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 4,
+          "payload_hex": "09 1f 04 34",
+          "kind": "separator",
+          "command": "post_primary_page_load",
+          "args": "4"
+        },
+        {
+          "index": 1,
+          "offset": 8,
+          "offset_hex": "0x8",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 2,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "post_primary_head_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_head_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 4,
+          "payload_hex": "09 1f 04 34",
+          "kind": "separator",
+          "command": "post_primary_page_load",
+          "args": "4"
+        },
+        {
+          "index": 1,
+          "offset": 8,
+          "offset_hex": "0x8",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 2,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "page0_hash_offset": null
+    },
+    "page1_filebrowser_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
+      "target_page": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\target_1.pa",
+      "primary_offset": 589,
+      "primary_size": 1152,
+      "primary_end": 1741,
+      "post_primary_length": 129,
+      "post_primary_hex": "03 00 00 00 09 30 08 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "post_primary_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 1,
+          "offset": 7,
+          "offset_hex": "0x7",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 2,
+          "offset": 11,
+          "offset_hex": "0xB",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 4,
+          "offset": 23,
+          "offset_hex": "0x17",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 5,
+          "offset": 27,
+          "offset_hex": "0x1B",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 6,
+          "offset": 33,
+          "offset_hex": "0x21",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 7,
+          "offset": 37,
+          "offset_hex": "0x25",
+          "length": 6,
+          "payload_hex": "75 6e 6c 6f 61 64",
+          "kind": "marker",
+          "name": "unload"
+        },
+        {
+          "index": 8,
+          "offset": 47,
+          "offset_hex": "0x2F",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 9,
+          "offset": 51,
+          "offset_hex": "0x33",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 10,
+          "offset": 55,
+          "offset_hex": "0x37",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 11,
+          "offset": 63,
+          "offset_hex": "0x3F",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 12,
+          "offset": 67,
+          "offset_hex": "0x43",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 13,
+          "offset": 73,
+          "offset_hex": "0x49",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 14,
+          "offset": 77,
+          "offset_hex": "0x4D",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 15,
+          "offset": 81,
+          "offset_hex": "0x51",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 16,
+          "offset": 89,
+          "offset_hex": "0x59",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 17,
+          "offset": 93,
+          "offset_hex": "0x5D",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 18,
+          "offset": 99,
+          "offset_hex": "0x63",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 19,
+          "offset": 103,
+          "offset_hex": "0x67",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 20,
+          "offset": 107,
+          "offset_hex": "0x6B",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 21,
+          "offset": 115,
+          "offset_hex": "0x73",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 22,
+          "offset": 119,
+          "offset_hex": "0x77",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 23,
+          "offset": 125,
+          "offset_hex": "0x7D",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "post_primary_head_hex": "03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_head_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 1,
+          "offset": 7,
+          "offset_hex": "0x7",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "page0_hash_offset": 1870
+    },
+    "page1_filestream_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\output.tft",
+      "target_page": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\target_1.pa",
+      "primary_offset": 527,
+      "primary_size": 388,
+      "primary_end": 915,
+      "post_primary_length": 129,
+      "post_primary_hex": "03 00 00 00 09 30 08 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+      "post_primary_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 1,
+          "offset": 7,
+          "offset_hex": "0x7",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 2,
+          "offset": 11,
+          "offset_hex": "0xB",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 3,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 4,
+          "offset": 23,
+          "offset_hex": "0x17",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 5,
+          "offset": 27,
+          "offset_hex": "0x1B",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 6,
+          "offset": 33,
+          "offset_hex": "0x21",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 7,
+          "offset": 37,
+          "offset_hex": "0x25",
+          "length": 6,
+          "payload_hex": "75 6e 6c 6f 61 64",
+          "kind": "marker",
+          "name": "unload"
+        },
+        {
+          "index": 8,
+          "offset": 47,
+          "offset_hex": "0x2F",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 9,
+          "offset": 51,
+          "offset_hex": "0x33",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 10,
+          "offset": 55,
+          "offset_hex": "0x37",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 11,
+          "offset": 63,
+          "offset_hex": "0x3F",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 12,
+          "offset": 67,
+          "offset_hex": "0x43",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 13,
+          "offset": 73,
+          "offset_hex": "0x49",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 14,
+          "offset": 77,
+          "offset_hex": "0x4D",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 15,
+          "offset": 81,
+          "offset_hex": "0x51",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 16,
+          "offset": 89,
+          "offset_hex": "0x59",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 17,
+          "offset": 93,
+          "offset_hex": "0x5D",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 18,
+          "offset": 99,
+          "offset_hex": "0x63",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 19,
+          "offset": 103,
+          "offset_hex": "0x67",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 20,
+          "offset": 107,
+          "offset_hex": "0x6B",
+          "length": 4,
+          "payload_hex": "64 6f 77 6e",
+          "kind": "marker",
+          "name": "down"
+        },
+        {
+          "index": 21,
+          "offset": 115,
+          "offset_hex": "0x73",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        },
+        {
+          "index": 22,
+          "offset": 119,
+          "offset_hex": "0x77",
+          "length": 2,
+          "payload_hex": "75 70",
+          "kind": "marker",
+          "name": "up"
+        },
+        {
+          "index": 23,
+          "offset": 125,
+          "offset_hex": "0x7D",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "post_primary_head_hex": "03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_head_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 1,
+          "offset": 7,
+          "offset_hex": "0x7",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "page0_hash_offset": 1044
+    }
+  },
+  "conclusions": {
+    "single_page_filebrowser_has_post_primary_page_load_marker": true,
+    "current_local_page1_filebrowser_lacks_single_page_post_primary_marker": true,
+    "current_local_page1_filestream_also_lacks_single_page_post_primary_marker": true,
+    "post_primary_marker_absence_is_not_a_general_advanced_page_failure_explanation": true,
+    "post_primary_marker_remains_a_specific_a_type_probe_candidate": true
+  }
+}
