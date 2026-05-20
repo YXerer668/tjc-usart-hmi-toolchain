@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "no-post-mirror-service-tail",
+  "cases": {
+    "single_page_filebrowser_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\output.tft",
+      "mirror_record_length": 176,
+      "records": [
+        {
+          "objname": "page0",
+          "type_code": "y",
+          "record_offset": 6702,
+          "record_offset_hex": "0x1a2e"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 6878,
+          "record_offset_hex": "0x1ade"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 7054,
+          "record_offset_hex": "0x1b8e"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 7230,
+          "record_offset_hex": "0x1c3e"
+        },
+        {
+          "objname": "fbrowser0",
+          "type_code": "A",
+          "record_offset": 7406,
+          "record_offset_hex": "0x1cee"
+        }
+      ],
+      "last_record_end": 7582,
+      "trailing_bytes_after_last_record": 6,
+      "trailing_hex": "ff ff b5 96 68 6d"
+    },
+    "single_page_filestream_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\output.tft",
+      "mirror_record_length": 156,
+      "records": [
+        {
+          "objname": "page0",
+          "type_code": "y",
+          "record_offset": 4903,
+          "record_offset_hex": "0x1327"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 5059,
+          "record_offset_hex": "0x13c3"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 5215,
+          "record_offset_hex": "0x145f"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 5371,
+          "record_offset_hex": "0x14fb"
+        },
+        {
+          "objname": "fs0",
+          "type_code": "?",
+          "record_offset": 5527,
+          "record_offset_hex": "0x1597"
+        }
+      ],
+      "last_record_end": 5683,
+      "trailing_bytes_after_last_record": 5,
+      "trailing_hex": "ff f2 44 82 14"
+    },
+    "page1_filebrowser_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
+      "mirror_record_length": 176,
+      "page1_records": [
+        {
+          "objname": "page1",
+          "type_code": "y",
+          "record_offset": 10673,
+          "record_offset_hex": "0x29b1"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 10849,
+          "record_offset_hex": "0x2a61"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 11025,
+          "record_offset_hex": "0x2b11"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 11201,
+          "record_offset_hex": "0x2bc1"
+        },
+        {
+          "objname": "fbrowser0",
+          "type_code": "A",
+          "record_offset": 11377,
+          "record_offset_hex": "0x2c71"
+        }
+      ],
+      "page0_records": [
+        {
+          "objname": "page0",
+          "type_code": "y",
+          "record_offset": 11553,
+          "record_offset_hex": "0x2d21"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 11729,
+          "record_offset_hex": "0x2dd1"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 11905,
+          "record_offset_hex": "0x2e81"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 12081,
+          "record_offset_hex": "0x2f31"
+        }
+      ],
+      "gap_between_page1_last_and_page0_first": 0,
+      "page0_last_record_end": 12257,
+      "trailing_bytes_after_last_record": 7,
+      "trailing_hex": "ff ff ff 65 d2 84 b0"
+    },
+    "page1_filestream_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\output.tft",
+      "mirror_record_length": 156,
+      "page1_records": [
+        {
+          "objname": "page1",
+          "type_code": "y",
+          "record_offset": 8863,
+          "record_offset_hex": "0x229f"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 9019,
+          "record_offset_hex": "0x233b"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 9175,
+          "record_offset_hex": "0x23d7"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 9331,
+          "record_offset_hex": "0x2473"
+        },
+        {
+          "objname": "fs0",
+          "type_code": "?",
+          "record_offset": 9487,
+          "record_offset_hex": "0x250f"
+        }
+      ],
+      "page0_records": [
+        {
+          "objname": "page0",
+          "type_code": "y",
+          "record_offset": 9643,
+          "record_offset_hex": "0x25ab"
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset": 9799,
+          "record_offset_hex": "0x2647"
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset": 9955,
+          "record_offset_hex": "0x26e3"
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset": 10111,
+          "record_offset_hex": "0x277f"
+        }
+      ],
+      "gap_between_page1_last_and_page0_first": 0,
+      "page0_last_record_end": 10267,
+      "trailing_bytes_after_last_record": 5,
+      "trailing_hex": "ff 80 1e 98 bb"
+    }
+  },
+  "conclusions": {
+    "page1_to_page0_mirror_sets_are_adjacent_in_multipt_filebrowser": true,
+    "page1_to_page0_mirror_sets_are_adjacent_in_multipt_filestream": true,
+    "final_mirror_record_to_file_end_is_tiny_across_cases": true,
+    "no_room_for_meaningful_post_mirror_global_service_table": true
+  }
+}
