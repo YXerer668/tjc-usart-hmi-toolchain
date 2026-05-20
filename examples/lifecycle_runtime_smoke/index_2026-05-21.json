@@ -17,7 +17,8 @@
     "desktop_bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
     "desktop_bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip",
     "desktop_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
-    "desktop_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd"
+    "desktop_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd",
+    "desktop_status_summary": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md"
   },
   "post_recovery_runner": {
     "orchestrator": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture",

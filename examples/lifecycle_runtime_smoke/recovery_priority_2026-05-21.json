@@ -4,14 +4,14 @@
   "target": "TJC8048X543_011C",
   "status": "prepared",
   "top_priority_after_panel_recovery": {
-    "id": "recover_then_seed_side_orchestrator",
-    "reason": "the page1 file-browser compiled-data envelope is largely exhausted offline, and the latest real run proved the panel is still transport-silent after a local official-recovery attempt. the next highest-value move is therefore one orchestrated entrypoint that re-checks serial health, retries the official recovery lane when needed, and only then runs the seed-side runtime limitation discriminator.",
-    "command": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture"
+    "id": "desktop_sd_recovery_handoff",
+    "reason": "the page1 file-browser compiled-data envelope is largely exhausted offline, and the latest real runs proved the panel is transport-silent even at the public whmi-wri entrypoint. the highest-value move is now the prepared desktop SD recovery handoff bundle, which already contains verification and follow-up scripts.",
+    "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd"
   },
   "secondary_priority_after_panel_recovery": {
-    "id": "seed_side_runtime_limitation_falsification",
-    "reason": "use the direct runner only when the panel is already responsive or when you intentionally want to bypass the integrated recovery step.",
-    "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
+    "id": "recover_then_seed_side_orchestrator",
+    "reason": "after the SD recovery completes and the SD card is removed, use the prepared follow-up script, which will clear SD recovery state and continue with the serial/orchestrated runtime checks.",
+    "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd"
   },
   "external_recovery_package": {
     "id": "sd_recovery_case31_backup",

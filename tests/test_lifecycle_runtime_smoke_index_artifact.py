@@ -15,6 +15,7 @@ class LifecycleRuntimeSmokeIndexArtifactTests(unittest.TestCase):
         self.assertEqual(payload["status"], "prepared")
         self.assertTrue(any(item.endswith("transport_silence_status_2026-05-21.json") for item in payload["current_blocker"]["artifacts"]))
         self.assertTrue(payload["external_recovery"]["desktop_bundle_dir"].endswith("TJC_SD_RECOVERY_CURRENT"))
+        self.assertTrue(payload["external_recovery"]["desktop_status_summary"].endswith("当前状态摘要.md"))
         self.assertIn("recover_then_run_seed_side_runtime_limit.py", payload["post_recovery_runner"]["orchestrator"])
         self.assertIn("run_seed_side_multipt_runtime_limit_smokes.py", payload["post_recovery_runner"]["direct_runner"])
         self.assertTrue(any(item.endswith("current_target_full_completion_audit_2026-05-20.json") for item in payload["top_status_files"]))

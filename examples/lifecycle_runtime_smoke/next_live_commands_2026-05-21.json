@@ -6,24 +6,20 @@
   "precondition": "panel has been hard power-cycled or otherwise externally recovered from the current connect/sendme silent state; the latest local orchestrated recovery attempt was still silent",
   "recommended_order": [
     {
-      "label": "If the panel is still transport-silent, use the repo SD recovery package first",
-      "command": "open reverse_usarthmi/recovery_sd_card/README_恢复说明.md"
+      "label": "If the panel is still transport-silent, first verify the prepared desktop SD recovery bundle",
+      "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd"
     },
     {
-      "label": "Top-level orchestrator: check serial health, retry official recovery when needed, then run the seed-side runtime limitation chain",
-      "command": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture"
+      "label": "Perform SD recovery, then use the prepared desktop follow-up entrypoint",
+      "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd"
     },
     {
-      "label": "If the orchestrator reaches the seed-side runner, inspect the runner summary for the D/?/A classification",
+      "label": "If the follow-up run reaches the seed-side runner, inspect the D/?/A summary",
       "command": "open reverse_usarthmi/recover_then_seed_side_run_20260521/seed_side_runner/seed_side_multipt_runtime_limit_summary.json"
-    },
-    {
-      "label": "If the orchestrator still ends in transport silence, inspect the captured recovery summary instead of re-running ad hoc byte patching",
-      "command": "open examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json"
     }
   ],
   "notes": [
-    "The top-level orchestrator is now the highest-value next live entrypoint because it preserves COM36 serialization and records whether transport recovered before attempting the seed-side runner.",
+    "The desktop SD handoff bundle is now the most direct recovery entrypoint because the latest local orchestrated run and the public whmi-wri entry probe both stayed silent.",
     "The text-select control is the strongest seed-side control sample, file-stream is second, and file-browser is the target falsification sample."
   ]
 }

@@ -13,10 +13,10 @@ class RecoveryPriorityArtifactTests(unittest.TestCase):
         payload = json.loads(ARTIFACT.read_text(encoding="utf-8"))
 
         self.assertEqual(payload["status"], "prepared")
-        self.assertEqual(payload["top_priority_after_panel_recovery"]["id"], "recover_then_seed_side_orchestrator")
-        self.assertIn("recover_then_run_seed_side_runtime_limit.py", payload["top_priority_after_panel_recovery"]["command"])
-        self.assertEqual(payload["secondary_priority_after_panel_recovery"]["id"], "seed_side_runtime_limitation_falsification")
-        self.assertIn("run_seed_side_multipt_runtime_limit_smokes.py", payload["secondary_priority_after_panel_recovery"]["command"])
+        self.assertEqual(payload["top_priority_after_panel_recovery"]["id"], "desktop_sd_recovery_handoff")
+        self.assertIn("00_先双击_校验恢复包.cmd", payload["top_priority_after_panel_recovery"]["command"])
+        self.assertEqual(payload["secondary_priority_after_panel_recovery"]["id"], "recover_then_seed_side_orchestrator")
+        self.assertIn("01_SD恢复完成后双击_继续验证.cmd", payload["secondary_priority_after_panel_recovery"]["command"])
         self.assertEqual(payload["external_recovery_package"]["id"], "sd_recovery_case31_backup")
         self.assertTrue(payload["external_recovery_package"]["tft"].endswith("recovery_sd_card/lcd_test.tft"))
 
