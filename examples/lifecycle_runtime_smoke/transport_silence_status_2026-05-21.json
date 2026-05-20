@@ -40,6 +40,11 @@
       "artifact": "examples/lifecycle_runtime_smoke/dtr_rts_pulse_probe_summary_2026-05-21.json",
       "no_change_after_pulse": true
     },
+    "usb_uart_reenumeration_probe": {
+      "artifact": "examples/lifecycle_runtime_smoke/usb_uart_reenumeration_probe_summary_2026-05-21.json",
+      "disable_enable_ok": true,
+      "no_change_after_reenumeration": true
+    },
     "camera_status": {
       "artifact": "examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json",
       "screen_not_black": true,
@@ -69,6 +74,7 @@
     "official_gui_start_failure_not_explained_by_disabled_button": true,
     "public_whmi_entry_is_also_silent": true,
     "dtr_rts_recovery_path_showed_no_change": true,
+    "usb_uart_reenumeration_showed_no_change": true,
     "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": true,
     "external_sd_recovery_bundle_is_ready": true,
     "best_current_repo_side_state": "local software automation is prepared; the panel is visibly powered but transport-silent all the way up through the public upload entrypoint, so further progress now depends on external recovery restoring at least one responsive command path"

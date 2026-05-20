@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-summarized",
+  "instance_id": "USB\\VID_10C4&PID_EA60\\0001",
+  "disable_ok": true,
+  "enable_ok": true,
+  "before_connect_kind": "none",
+  "after_connect_kind": "none",
+  "conclusions": {
+    "usb_uart_bridge_reenumeration_succeeds_but_screen_stays_silent": true,
+    "no_change_after_reenumeration": true
+  }
+}

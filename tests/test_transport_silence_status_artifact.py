@@ -20,6 +20,8 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertTrue(evidence["serial_modem_status"]["bridge_opens"])
         self.assertTrue(evidence["serial_modem_status"]["all_inbound_modem_lines_low"])
         self.assertTrue(evidence["dtr_rts_pulse_probe"]["no_change_after_pulse"])
+        self.assertTrue(evidence["usb_uart_reenumeration_probe"]["disable_enable_ok"])
+        self.assertTrue(evidence["usb_uart_reenumeration_probe"]["no_change_after_reenumeration"])
         self.assertTrue(evidence["camera_status"]["screen_not_black"])
         self.assertTrue(evidence["official_gui_button_probe"]["all_local_methods_failed"])
         self.assertTrue(evidence["official_gui_button_probe"]["bm_click_invoked"])
@@ -36,6 +38,7 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertTrue(conclusions["official_gui_local_interaction_not_sufficient_to_start_download"])
         self.assertTrue(conclusions["public_whmi_entry_is_also_silent"])
         self.assertTrue(conclusions["dtr_rts_recovery_path_showed_no_change"])
+        self.assertTrue(conclusions["usb_uart_reenumeration_showed_no_change"])
         self.assertTrue(conclusions["seed_side_runtime_limiter_runner_is_currently_blocked_by_transport"])
         self.assertTrue(conclusions["external_sd_recovery_bundle_is_ready"])
 
