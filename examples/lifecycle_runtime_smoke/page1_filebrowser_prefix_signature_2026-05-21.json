@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "prefix-signature-compared",
+  "single_page_lengths": {
+    "filebrowser": 545,
+    "filestream": 494
+  },
+  "multi_page_lengths": {
+    "filebrowser": 551,
+    "filestream": 489
+  },
+  "diff_counts": {
+    "single_fb_vs_fs": 430,
+    "multi_fb_vs_fs": 417,
+    "shifted_overlap": 405
+  },
+  "overlap_ratio": {
+    "single_shifted_covered_by_multi": 0.9418604651162791,
+    "multi_covered_by_single_shifted": 0.9712230215827338
+  },
+  "single_only_groups": [
+    {
+      "start_hex": "0x193",
+      "end_hex": "0x193",
+      "length": 1
+    },
+    {
+      "start_hex": "0x197",
+      "end_hex": "0x198",
+      "length": 2
+    },
+    {
+      "start_hex": "0x19b",
+      "end_hex": "0x19d",
+      "length": 3
+    },
+    {
+      "start_hex": "0x19f",
+      "end_hex": "0x1a2",
+      "length": 4
+    },
+    {
+      "start_hex": "0x1a6",
+      "end_hex": "0x1a7",
+      "length": 2
+    },
+    {
+      "start_hex": "0x1aa",
+      "end_hex": "0x1ad",
+      "length": 4
+    },
+    {
+      "start_hex": "0x1b2",
+      "end_hex": "0x1b2",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1c0",
+      "end_hex": "0x1c0",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1c4",
+      "end_hex": "0x1c4",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1cc",
+      "end_hex": "0x1cc",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1d0",
+      "end_hex": "0x1d1",
+      "length": 2
+    },
+    {
+      "start_hex": "0x1da",
+      "end_hex": "0x1da",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1de",
+      "end_hex": "0x1de",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1e6",
+      "end_hex": "0x1e6",
+      "length": 1
+    }
+  ],
+  "multi_only_groups": [
+    {
+      "start_hex": "0x1bb",
+      "end_hex": "0x1bc",
+      "length": 2
+    },
+    {
+      "start_hex": "0x1c1",
+      "end_hex": "0x1c1",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1d5",
+      "end_hex": "0x1d6",
+      "length": 2
+    },
+    {
+      "start_hex": "0x1db",
+      "end_hex": "0x1db",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1ec",
+      "end_hex": "0x1ec",
+      "length": 1
+    },
+    {
+      "start_hex": "0x1ef",
+      "end_hex": "0x1f3",
+      "length": 5
+    }
+  ],
+  "sample_bytes": {
+    "multi_fb_suffix_from_0x1B0": "00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+    "multi_fs_suffix_from_0x1B0": "00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00"
+  },
+  "conclusions": {
+    "a_type_prefix_signature_is_mostly_preserved_in_multipt": true,
+    "remaining_prefix_signature_mismatch_is_concentrated_in_small_suffix_region": true,
+    "prefix_head_is_not_obviously_wholesale_missing_for_a_type": true,
+    "small_multipt_suffix_region_remains_a_page_global_candidate": true
+  }
+}
