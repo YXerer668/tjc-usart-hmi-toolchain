@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "captured",
+  "current_camera": {
+    "path": "reverse_usarthmi\\transport_silence_camera_20260521\\camera_current.jpg",
+    "size": [
+      2560,
+      1440
+    ],
+    "mean_luma": 141.3127281358507,
+    "min_luma": 0,
+    "max_luma": 199
+  },
+  "coarse_similarity": {
+    "page1_filebrowser_whiteboard": {
+      "path": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\camera_page0_20260521_024931.jpg",
+      "hamming_8x8_ahash": 1
+    },
+    "page1_textselect_positive": {
+      "path": "reverse_usarthmi\\page1_textselect_local_multipt_probe_20260521\\camera_20260521_014544.jpg",
+      "hamming_8x8_ahash": 0
+    },
+    "page1_filestream_positive": {
+      "path": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\camera_20260521_015505.jpg",
+      "hamming_8x8_ahash": 0
+    }
+  },
+  "conclusions": {
+    "screen_not_black": true,
+    "panel_appears_powered_enough_for_camera_visibility": true,
+    "camera_similarity_only_is_not_strong_enough_to_identify_the_exact_page_state": true
+  }
+}
