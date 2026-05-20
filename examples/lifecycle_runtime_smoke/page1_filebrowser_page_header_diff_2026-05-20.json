@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "page-header-diffed",
+  "single_page_working_header": {
+    "count_field": 327680,
+    "hash_offset": 545,
+    "user_offset": 1790,
+    "primary_pre_string_len": 472
+  },
+  "multi_page_page1_header": {
+    "count_field": 262145,
+    "hash_offset": 1852,
+    "user_offset": 7167,
+    "primary_pre_string_len": 308
+  },
+  "conclusions": {
+    "narrowing": "actual on-disk page-header tuples differ sharply between working single-page file-browser and failing multi-page page1 file-browser. after single-object user-record and mirror-record patches proved insufficient, this outer page-header/mirror-page-header layer becomes the next best target."
+  }
+}

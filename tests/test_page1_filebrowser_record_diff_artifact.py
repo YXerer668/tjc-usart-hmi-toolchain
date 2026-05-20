@@ -17,8 +17,10 @@ class Page1FilebrowserRecordDiffArtifactTests(unittest.TestCase):
         self.assertEqual(payload["fbrowser_user_slot_count"], 60)
         self.assertEqual(payload["fbrowser_user_slot_diffs"], [])
         self.assertEqual(payload["fbrowser_mirror_value_diffs"], [])
-        self.assertIn("76 00 00 00", payload["fbrowser_fixed_header_single_hex"])
-        self.assertIn("4e 00 00 00", payload["fbrowser_fixed_header_multi_hex"])
+        self.assertEqual(payload["working_single_second_event_offset"], 0x207)
+        self.assertEqual(payload["failing_multi_second_event_offset"], 0x1E5)
+        self.assertEqual(payload["working_single_hits_hex"], ["0xae037f", "0xae1cee"])
+        self.assertEqual(payload["failing_multi_hits_hex"], ["0xae035d", "0xae2c5f"])
         self.assertTrue(payload["conclusions"]["user_slot_body_identical"])
         self.assertTrue(payload["conclusions"]["mirror_value_tail_identical"])
 

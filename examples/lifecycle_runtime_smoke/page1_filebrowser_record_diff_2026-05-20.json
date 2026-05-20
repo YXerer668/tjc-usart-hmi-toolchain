@@ -3,19 +3,27 @@
   "date": "2026-05-20",
   "target": "TJC8048X543_011C",
   "status": "record-diffed",
-  "single_page_source": "reverse_usarthmi/advanced_direct_tft_file_browser_20260518/target_0.pa",
-  "multi_page_source": "reverse_usarthmi/page1_filebrowser_load_wrapper_probe_20260520/target_1.pa",
+  "single_page_source": "reverse_usarthmi/advanced_direct_tft_file_browser_20260518/output.tft",
+  "multi_page_source": "reverse_usarthmi/page1_filebrowser_load_wrapper_probe_20260520/output.tft",
+  "working_single_hits_hex": [
+    "0xae037f",
+    "0xae1cee"
+  ],
+  "failing_multi_hits_hex": [
+    "0xae035d",
+    "0xae2c5f"
+  ],
   "fbrowser_user_slot_count": 60,
   "fbrowser_user_slot_diffs": [],
   "fbrowser_mirror_value_count_single": 60,
   "fbrowser_mirror_value_count_multi": 60,
   "fbrowser_mirror_value_diffs": [],
-  "fbrowser_fixed_header_single_hex": "41 04 00 37 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 48 01 00 00 00 00 7f 00 00 00 00 00 00 00 00 00 f0 00 f0 00 ef 00 ef 00 76 00 00 00",
-  "fbrowser_fixed_header_multi_hex": "41 04 00 37 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff 48 01 00 00 00 00 7f 00 00 00 00 00 00 00 00 00 f0 00 f0 00 ef 00 ef 00 4e 00 00 00",
+  "working_single_second_event_offset": 519,
+  "failing_multi_second_event_offset": 485,
   "conclusions": {
     "user_slot_body_identical": true,
     "mirror_value_tail_identical": true,
-    "fixed_header_diff_focus": "mirror header differs mainly at the final 4-byte event-offset field: single-page working record uses 0x76 while multi-page page1 record uses 0x4e",
-    "narrowing": "the failing page1 file-browser probe does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. the remaining structural delta is in the surrounding multi-page machinery, especially the mirror/page header and event-offset side of the page1 record path."
+    "fixed_header_diff_focus": "actual on-disk second fbrowser0 record event_offset differs: single-page working uses 0x207 while multi-page page1 failing uses 0x1E5",
+    "narrowing": "the failing page1 file-browser probe does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. the meaningful on-disk single-object delta is the second fbrowser0 record event_offset, but even patching that field to the working on-disk value does not recover enumeration. the remaining structural delta is therefore pushed outward into surrounding multi-page page-header/mirror-page-header machinery."
   }
 }
