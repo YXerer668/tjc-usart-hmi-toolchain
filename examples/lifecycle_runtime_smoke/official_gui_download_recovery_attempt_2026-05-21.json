@@ -1,0 +1,21 @@
+{
+    "schema_version":  1,
+    "date":  "2026-05-21",
+    "target":  "TJC8048X543_011C",
+    "status":  "attempted_not_recovered",
+    "hmi":  "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/lcd_test.HMI",
+    "configured_port":  "COM36",
+    "configured_download_baud":  "921600",
+    "start_download_clicked":  true,
+    "dialog_observation":  {
+                               "start_button_text_stayed":  "联机并开始下载",
+                               "estimated_download_time_text":  "文件大小:11411952 预计下载时间:5439秒",
+                               "interpretation":  "the embedded download panel did not transition into a normal active transfer state under this automation attempt"
+                           },
+    "post_attempt_runtime":  {
+                                 "connect_kind":  "connect",
+                                 "connect_model":  "TJC8048X543_011C",
+                                 "sendme_kind":  "none",
+                                 "diagnosis":  "panel remained in runtime-wedged state after the attempted official GUI recovery click path"
+                             }
+}
