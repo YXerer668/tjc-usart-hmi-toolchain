@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "prepared",
+  "current_blocker": {
+    "summary": "panel is silent not only for runtime commands but also at the public whmi-wri upload entrypoint; further progress depends on external recovery before the prepared seed-side live falsification can run",
+    "artifacts": [
+      "examples/lifecycle_runtime_smoke/transport_silence_status_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json"
+    ]
+  },
+  "external_recovery": {
+    "bundle_report": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json",
+    "desktop_bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
+    "desktop_bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip",
+    "desktop_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
+    "desktop_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd"
+  },
+  "post_recovery_runner": {
+    "orchestrator": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture",
+    "direct_runner": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control",
+    "runner_artifacts": [
+      "examples/lifecycle_runtime_smoke/seed_side_multipt_runtime_limit_probes_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/seed_side_multipt_probe_fidelity_2026-05-21.json"
+    ]
+  },
+  "top_status_files": [
+    "examples/current_target_full_completion_audit_2026-05-20.json",
+    "examples/lifecycle_runtime_smoke/recovery_priority_2026-05-21.json",
+    "examples/lifecycle_runtime_smoke/next_live_commands_2026-05-21.json",
+    "examples/lifecycle_runtime_smoke/page1_filebrowser_compiled_data_elimination_2026-05-21.json"
+  ]
+}
