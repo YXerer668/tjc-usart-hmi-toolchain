@@ -1,0 +1,34 @@
+{
+  "source_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
+  "output_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_post_primary_marker_probe_20260521\\output.tft",
+  "insert_offset_hex": "0xae06cd",
+  "inserted_hex": "04 00 00 00 09 1f 04 34",
+  "old_post_primary_head_hex": "03 00 00 00 09 30 08 00 00 00 00",
+  "new_post_primary_head_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+  "old_attr_relative_hex": "0x8cd",
+  "new_attr_relative_hex": "0x8d5",
+  "old_user_relative_hex": "0x8f1",
+  "new_user_relative_hex": "0x8f9",
+  "old_picture_relative_hex": "0x2991",
+  "new_picture_relative_hex": "0x2999",
+  "old_page1_row_hex": "00 00 05 00 27 02 00 00 f1 08 00 00 d8 01 00 00",
+  "new_page1_row_hex": "00 00 05 00 27 02 00 00 f9 08 00 00 d8 01 00 00",
+  "old_page0_row_hex": "01 00 04 00 4e 07 00 00 11 1c 00 00 34 01 00 00",
+  "new_page0_row_hex": "01 00 04 00 56 07 00 00 19 1c 00 00 34 01 00 00",
+  "old_page0_hash_offset_hex": "0x74e",
+  "new_page0_hash_offset_hex": "0x756",
+  "new_page1_hash_offset_hex": "0x227",
+  "page0_record_offsets_hex": [
+    "0xae29b9",
+    "0xae2a69",
+    "0xae2b19",
+    "0xae2bc9"
+  ],
+  "page0_event_offsets_hex": [
+    "0x19f",
+    "0x1c7",
+    "0x1e1",
+    "0x1fb"
+  ],
+  "note": "inserted the single-page file-browser post_primary_page_load marker block before page0 sections and adjusted later headers/rows/page0 event offsets for a future live probe"
+}
