@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-prepared",
+  "probe_dir": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521",
+  "build_report": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521\\build_report.json",
+  "output_tft": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521\\output.tft",
+  "page0_blocks": [
+    [
+      "page0",
+      "y"
+    ],
+    [
+      "t0",
+      "t"
+    ],
+    [
+      "b0",
+      "b"
+    ],
+    [
+      "p0",
+      "p"
+    ],
+    [
+      "fbrowser0",
+      "A"
+    ]
+  ],
+  "page1_blocks": [
+    [
+      "page1",
+      "y"
+    ]
+  ],
+  "build_summary": {
+    "file_size": 11411976,
+    "object_count": 6,
+    "section_offsets": {
+      "hash": {
+        "value": 692,
+        "hex": "0x2B4"
+      },
+      "primary": {
+        "value": 726,
+        "hex": "0x2D6"
+      },
+      "attr": {
+        "value": 1893,
+        "hex": "0x765"
+      },
+      "user": {
+        "value": 1929,
+        "hex": "0x789"
+      },
+      "pic": {
+        "value": 7617,
+        "hex": "0x1DC1"
+      },
+      "padding": {
+        "value": 8705,
+        "hex": "0x2201"
+      },
+      "prefix_delta": {
+        "value": 6,
+        "hex": "0x6"
+      },
+      "tail": {
+        "value": 8712,
+        "hex": "0x2208"
+      }
+    },
+    "warnings": [
+      "Experimental multi-page V1 supports the official case31 page-order layout.",
+      "Non-seed-page controls are limited to text/button/number/progress/slider/gauge.",
+      "Do not use this yet for arbitrary page events, timers, resources, waveform, or arbitrary multi-page layouts."
+    ]
+  },
+  "live_hypothesis": {
+    "runtime_mapping": {
+      "page 0": "extra page (blank page1)",
+      "page 1": "seed-side page0 carrying fbrowser0"
+    },
+    "commands": [
+      "sendme",
+      "page 1",
+      "sendme",
+      "get fbrowser0.dir",
+      "get fbrowser0.filter",
+      "get fbrowser0.qty",
+      "get fbrowser0.txt"
+    ],
+    "interpretation": {
+      "if_page1_reads_fbrowser_fields": "extra-page/page1-specific runtime limitation is weakened",
+      "if_page1_still_fails_like_page1_filebrowser": "current target likely rejects multi-page A-type more generally, not only the extra-page placement"
+    }
+  }
+}
