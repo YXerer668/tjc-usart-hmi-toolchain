@@ -148,12 +148,47 @@
       }
     ]
   },
+  "single_page_filestream_reference": {
+    "tft": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\output.tft",
+    "post_primary_head_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+    "post_primary_items": [
+      {
+        "index": 0,
+        "offset": 0,
+        "offset_hex": "0x0",
+        "length": 4,
+        "payload_hex": "09 1f 04 34",
+        "kind": "separator",
+        "command": "post_primary_page_load",
+        "args": "4"
+      },
+      {
+        "index": 1,
+        "offset": 8,
+        "offset_hex": "0x8",
+        "length": 3,
+        "payload_hex": "09 30 08",
+        "kind": "separator",
+        "command": "loadend"
+      },
+      {
+        "index": 2,
+        "offset": 15,
+        "offset_hex": "0xF",
+        "length": 0,
+        "payload_hex": "",
+        "kind": "empty"
+      }
+    ]
+  },
   "conclusions": {
     "probe_inserts_single_page_post_primary_head": true,
     "probe_page1_hash_offset_still_matches_target_hash_block": true,
     "probe_page0_hash_offset_still_matches_target_hash_block": true,
     "probe_page0_user_offset_still_matches_target_slot_span": true,
     "probe_changes_only_expected_page0_follow_on_offsets": true,
+    "single_page_filestream_shares_same_post_primary_head": true,
+    "probe_hypothesis_strength_reduced_by_page1_filestream_positive_without_marker": true,
     "probe_is_ready_for_next_live_reburn": true
   }
 }

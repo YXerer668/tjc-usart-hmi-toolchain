@@ -73,6 +73,75 @@
       ],
       "page0_hash_offset": null
     },
+    "single_page_filestream_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\output.tft",
+      "target_page": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\target_0.pa",
+      "primary_offset": 532,
+      "primary_size": 388,
+      "primary_end": 920,
+      "post_primary_length": 19,
+      "post_primary_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 4,
+          "payload_hex": "09 1f 04 34",
+          "kind": "separator",
+          "command": "post_primary_page_load",
+          "args": "4"
+        },
+        {
+          "index": 1,
+          "offset": 8,
+          "offset_hex": "0x8",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 2,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "post_primary_head_hex": "04 00 00 00 09 1f 04 34 03 00 00 00 09 30 08 00 00 00 00",
+      "post_primary_head_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 4,
+          "payload_hex": "09 1f 04 34",
+          "kind": "separator",
+          "command": "post_primary_page_load",
+          "args": "4"
+        },
+        {
+          "index": 1,
+          "offset": 8,
+          "offset_hex": "0x8",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 2,
+          "offset": 15,
+          "offset_hex": "0xF",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "page0_hash_offset": null
+    },
     "page1_filebrowser_local_multipt": {
       "tft": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
       "target_page": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\target_1.pa",
@@ -544,9 +613,11 @@
   },
   "conclusions": {
     "single_page_filebrowser_has_post_primary_page_load_marker": true,
+    "single_page_filestream_has_post_primary_page_load_marker": true,
     "current_local_page1_filebrowser_lacks_single_page_post_primary_marker": true,
     "current_local_page1_filestream_also_lacks_single_page_post_primary_marker": true,
-    "post_primary_marker_absence_is_not_a_general_advanced_page_failure_explanation": true,
-    "post_primary_marker_remains_a_specific_a_type_probe_candidate": true
+    "post_primary_marker_absence_is_a_general_single_page_to_current_multipt_delta": true,
+    "post_primary_marker_absence_is_not_sufficient_to_explain_page1_filebrowser_failure": true,
+    "post_primary_marker_probe_is_structurally_ready_but_not_a_primary_root_cause_hypothesis": true
   }
 }

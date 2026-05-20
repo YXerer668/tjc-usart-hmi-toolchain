@@ -15,14 +15,18 @@ class Page1FilebrowserPostPrimaryProbeReportArtifactTests(unittest.TestCase):
         baseline = payload["baseline_local_multi_page"]
         probe = payload["post_primary_probe"]
         single = payload["single_page_reference"]
+        single_fs = payload["single_page_filestream_reference"]
         conclusions = payload["conclusions"]
 
         self.assertEqual(payload["status"], "probe-ready-offline")
         self.assertEqual(probe["post_primary_head_hex"], single["post_primary_head_hex"])
+        self.assertEqual(single_fs["post_primary_head_hex"], single["post_primary_head_hex"])
         self.assertEqual(baseline["page1_hash_offset"], probe["page1_hash_offset"])
         self.assertEqual(probe["page0_hash_offset"] - baseline["page0_hash_offset"], 8)
         self.assertEqual(probe["page0_event_offsets"], [415, 455, 481, 507])
         self.assertTrue(conclusions["probe_inserts_single_page_post_primary_head"])
+        self.assertTrue(conclusions["single_page_filestream_shares_same_post_primary_head"])
+        self.assertTrue(conclusions["probe_hypothesis_strength_reduced_by_page1_filestream_positive_without_marker"])
         self.assertTrue(conclusions["probe_page1_hash_offset_still_matches_target_hash_block"])
         self.assertTrue(conclusions["probe_page0_hash_offset_still_matches_target_hash_block"])
         self.assertTrue(conclusions["probe_page0_user_offset_still_matches_target_slot_span"])

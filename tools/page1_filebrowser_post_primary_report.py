@@ -24,6 +24,11 @@ CASES = {
         ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_browser_20260518" / "target_0.pa",
         None,
     ),
+    "single_page_filestream_working": (
+        ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_stream_20260518" / "output.tft",
+        ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_stream_20260518" / "target_0.pa",
+        None,
+    ),
     "page1_filebrowser_local_multipt": (
         ROOT / "reverse_usarthmi" / "page1_filebrowser_local_multipt_probe_20260521" / "output.tft",
         ROOT / "reverse_usarthmi" / "page1_filebrowser_local_multipt_probe_20260521" / "target_1.pa",
@@ -49,6 +54,9 @@ def main() -> int:
             "single_page_filebrowser_has_post_primary_page_load_marker": (
                 cases["single_page_filebrowser_working"]["post_primary_items"][0]["command"] == "post_primary_page_load"
             ),
+            "single_page_filestream_has_post_primary_page_load_marker": (
+                cases["single_page_filestream_working"]["post_primary_items"][0]["command"] == "post_primary_page_load"
+            ),
             "current_local_page1_filebrowser_lacks_single_page_post_primary_marker": not any(
                 item.get("command") == "post_primary_page_load"
                 for item in cases["page1_filebrowser_local_multipt"]["post_primary_head_items"]
@@ -57,10 +65,14 @@ def main() -> int:
                 item.get("command") == "post_primary_page_load"
                 for item in cases["page1_filestream_local_multipt"]["post_primary_head_items"]
             ),
-            "post_primary_marker_absence_is_not_a_general_advanced_page_failure_explanation": (
-                cases["page1_filestream_local_multipt"]["post_primary_head_items"][0]["command"] == "loadend"
+            "post_primary_marker_absence_is_a_general_single_page_to_current_multipt_delta": (
+                cases["single_page_filebrowser_working"]["post_primary_items"][0]["command"] == "post_primary_page_load"
+                and cases["single_page_filestream_working"]["post_primary_items"][0]["command"] == "post_primary_page_load"
+                and cases["page1_filebrowser_local_multipt"]["post_primary_head_items"][0]["command"] == "loadend"
+                and cases["page1_filestream_local_multipt"]["post_primary_head_items"][0]["command"] == "loadend"
             ),
-            "post_primary_marker_remains_a_specific_a_type_probe_candidate": True,
+            "post_primary_marker_absence_is_not_sufficient_to_explain_page1_filebrowser_failure": True,
+            "post_primary_marker_probe_is_structurally_ready_but_not_a_primary_root_cause_hypothesis": True,
         },
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

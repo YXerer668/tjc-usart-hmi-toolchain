@@ -27,6 +27,7 @@ from usarthmi.tft_toolchain import inspect_tft
 BASELINE_TFT = ROOT / "reverse_usarthmi" / "page1_filebrowser_local_multipt_probe_20260521" / "output.tft"
 PROBE_TFT = ROOT / "reverse_usarthmi" / "page1_filebrowser_post_primary_marker_probe_20260521" / "output.tft"
 SINGLE_TFT = ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_browser_20260518" / "output.tft"
+SINGLE_FS_TFT = ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_stream_20260518" / "output.tft"
 PAGE1_PA = ROOT / "reverse_usarthmi" / "page1_filebrowser_local_multipt_probe_20260521" / "target_1.pa"
 PAGE0_PA = ROOT / "reverse_usarthmi" / "page1_filebrowser_local_multipt_probe_20260521" / "target_0.pa"
 OUT_PATH = ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_post_primary_probe_report_2026-05-21.json"
@@ -36,6 +37,10 @@ def main() -> int:
     baseline = _analyze_multi_page(BASELINE_TFT)
     probe = _analyze_multi_page(PROBE_TFT)
     single = _analyze_single_page(SINGLE_TFT)
+    single_fs = _analyze_single_page(
+        SINGLE_FS_TFT,
+        ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_stream_20260518" / "target_0.pa",
+    )
 
     payload = {
         "schema_version": 1,
@@ -45,6 +50,7 @@ def main() -> int:
         "baseline_local_multi_page": baseline,
         "post_primary_probe": probe,
         "single_page_reference": single,
+        "single_page_filestream_reference": single_fs,
         "conclusions": {
             "probe_inserts_single_page_post_primary_head": probe["post_primary_head_hex"] == single["post_primary_head_hex"],
             "probe_page1_hash_offset_still_matches_target_hash_block": probe["page1_row"]["hash_offset_matches_target_hash_block"],
@@ -54,6 +60,8 @@ def main() -> int:
                 probe["page0_hash_offset"] - baseline["page0_hash_offset"] == 8
                 and all(after - before == 8 for before, after in zip(baseline["page0_event_offsets"], probe["page0_event_offsets"]))
             ),
+            "single_page_filestream_shares_same_post_primary_head": single_fs["post_primary_head_hex"] == single["post_primary_head_hex"],
+            "probe_hypothesis_strength_reduced_by_page1_filestream_positive_without_marker": True,
             "probe_is_ready_for_next_live_reburn": True,
         },
     }
@@ -62,7 +70,7 @@ def main() -> int:
     return 0
 
 
-def _analyze_single_page(tft_path: Path) -> dict[str, Any]:
+def _analyze_single_page(tft_path: Path, pa_path: Path | None = None) -> dict[str, Any]:
     raw = tft_path.read_bytes()
     inspection = inspect_tft(tft_path)
     header2 = _header(inspection, "Header2")
@@ -70,7 +78,7 @@ def _analyze_single_page(tft_path: Path) -> dict[str, Any]:
     attr_offset = _header_int(header2, "static_usercode_address")
     if object_start is None or attr_offset is None:
         raise RuntimeError(f"Missing required TFT offsets in {tft_path}")
-    page = parse_page_data((ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_browser_20260518" / "target_0.pa").read_bytes())
+    page = parse_page_data((pa_path or (ROOT / "reverse_usarthmi" / "advanced_direct_tft_file_browser_20260518" / "target_0.pa")).read_bytes())
     tail = raw[object_start:]
     hash_offset, hash_data = _find_hash_block(tail, _expected_hashes(page))
     primary_size_field = hash_offset + 4 + len(hash_data)
