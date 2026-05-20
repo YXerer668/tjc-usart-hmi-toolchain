@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "prepared",
+  "precondition": "panel has been hard power-cycled or otherwise recovered from the current connect/sendme silent state",
+  "recommended_order": [
+    {
+      "label": "Seed-side runtime limitation runner with D/?/A control chain",
+      "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
+    },
+    {
+      "label": "If the runner shows textselect+filestream positive but filebrowser negative, treat that as very strong evidence for A-type-specific multi-page runtime limitation",
+      "command": "open reverse_usarthmi/seed_side_runtime_limit_run_20260521/seed_side_multipt_runtime_limit_summary.json"
+    },
+    {
+      "label": "If the runner is blocked by transport or panel state, retry the official recovery lane",
+      "command": "python tools/official_hmi_download_recovery.py reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/lcd_test.HMI --port COM36 --download-baud 921600 --start-download --download-wait-s 260"
+    }
+  ],
+  "notes": [
+    "The seed-side runner is now the highest-value next live discriminator because the compiled-data envelope for page1 file-browser has been largely exhausted offline.",
+    "The text-select control is the strongest seed-side control sample, file-stream is second, and file-browser is the target falsification sample."
+  ]
+}
