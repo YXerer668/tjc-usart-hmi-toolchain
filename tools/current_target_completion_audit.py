@@ -71,6 +71,7 @@ def build_report() -> dict[str, Any]:
             "why_unfinished": [
                 "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
                 "fresh local multi-page rebuilds now also have live proof for page1 text-select and page1 file-stream on the current target, so the remaining direct-runtime gap is narrower than 'the local multi-page advanced builder is generally broken'",
+                "a new local isolation artifact now makes that boundary explicit: under the same local multi-page route, page1 text-select (type D) and page1 file-stream (type ?) are live-positive while page1 file-browser (type A) still has field binding alive but enumeration/display dead",
                 "the local direct-TFT page1 file-browser probe now reads back dir/filter/txt on runtime page 0, but a new refresh probe shows qty stays 0 and the camera remains a white surface even after ref fbrowser0 and a page1->page0 cycle",
                 "the official GUI page1 file-browser path still fails even earlier and does not preserve an A-type object into 1.pa, so the authoring/save lane is still blocked independently of the local direct-TFT lane",
                 "two stricter direct-TFT narrowing probes also stayed negative: renaming the page1 companion objects away from page0 names did not change qty=0 white-surface behavior, and transplanting the exact known-good page0 file-browser cluster onto page1 still stayed qty=0 white-surface. this rules out cross-page companion naming and gross page0-vs-page1 geometry/style mismatch as the primary cause",
@@ -91,6 +92,7 @@ def build_report() -> dict[str, Any]:
                 "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_textselect_local_multipt_live_probe_2026-05-21.json",
                 "examples/lifecycle_runtime_smoke/page1_filestream_local_multipt_live_probe_2026-05-21.json",
+                "examples/lifecycle_runtime_smoke/page1_local_multipt_advanced_isolation_2026-05-21.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page0_filebrowser_qty_semantics_probe_2026-05-20.json",
