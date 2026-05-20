@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "live-negative",
+  "claim": "trimming the local page1 load probe down to an official-style 29-byte wrapper prefix and moving the mirror event_offset_0x34 to wrapper-end is still not enough to reproduce official page1 load dispatch",
+  "variant": {
+    "source_tft": "reverse_usarthmi/page1_load_printh_probe_20260520/output.tft",
+    "patched_tft": "reverse_usarthmi/page1_load_wrapper_trim_variant_20260520/output.tft",
+    "patch_report": "reverse_usarthmi/page1_load_wrapper_trim_variant_20260520/variant_report.json",
+    "wrapper_len": 29,
+    "original_table_len": 65,
+    "tail_zeroed_range_hex": [
+      "0x168",
+      "0x18c"
+    ],
+    "old_event_offset_hex": "0x14b",
+    "new_event_offset_hex": "0x168",
+    "checksum_hex": "0x8F9EFF8C",
+    "checksum_valid": true
+  },
+  "live_sequence": [
+    {
+      "command": "sendme",
+      "result_kind": "page_id",
+      "value": 0,
+      "hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "page 1",
+      "result_kind": "none",
+      "hex": ""
+    },
+    {
+      "command": "page 0",
+      "result_kind": "none",
+      "hex": ""
+    },
+    {
+      "command": "sendme",
+      "result_kind": "page_id",
+      "value": 0,
+      "hex": "66 00 ff ff ff"
+    }
+  ],
+  "conclusions": {
+    "page_switching_preserved": true,
+    "local_wrapper_trim_recovers_page1_load_dispatch": false,
+    "narrowing": "the missing layer is deeper than just removing the trailing normal page-event table markers and pointing event_offset_0x34 at wrapper-end. the official page1 load path still depends on additional page-local wrapper or mirror-record structure not reproduced by this narrow patch."
+  }
+}
