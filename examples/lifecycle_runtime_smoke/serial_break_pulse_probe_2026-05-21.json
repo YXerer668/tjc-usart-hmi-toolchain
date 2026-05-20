@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probed",
+  "port": "COM36",
+  "before": {
+    "port": "COM36",
+    "baud": 9600,
+    "timeout_ms": 2000,
+    "expected_model": "TJC8048X543_011C",
+    "summary": {
+      "connect_ok": false,
+      "model": null,
+      "model_ok": false,
+      "runtime_ok": false,
+      "public_upload_ready": false,
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    "commands": [
+      {
+        "name": "connect",
+        "command": "connect",
+        "required_kind": "connect",
+        "sent_hex": "63 6f 6e 6e 65 63 74 ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      },
+      {
+        "name": "sendme",
+        "command": "sendme",
+        "required_kind": "page_id",
+        "sent_hex": "73 65 6e 64 6d 65 ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      },
+      {
+        "name": "get_dim",
+        "command": "get dim",
+        "required_kind": "number",
+        "sent_hex": "67 65 74 20 64 69 6d ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      }
+    ]
+  },
+  "pulse": {
+    "port": "COM36",
+    "baud": 9600,
+    "break_ms": 500,
+    "settle_ms": 800,
+    "ok": true,
+    "break_condition_before": false,
+    "break_condition_after": false
+  },
+  "after": {
+    "port": "COM36",
+    "baud": 9600,
+    "timeout_ms": 2000,
+    "expected_model": "TJC8048X543_011C",
+    "summary": {
+      "connect_ok": false,
+      "model": null,
+      "model_ok": false,
+      "runtime_ok": false,
+      "public_upload_ready": false,
+      "healthy": false,
+      "diagnosis": "connect did not return comok; check COM port, baud rate, wiring, or power."
+    },
+    "commands": [
+      {
+        "name": "connect",
+        "command": "connect",
+        "required_kind": "connect",
+        "sent_hex": "63 6f 6e 6e 65 63 74 ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      },
+      {
+        "name": "sendme",
+        "command": "sendme",
+        "required_kind": "page_id",
+        "sent_hex": "73 65 6e 64 6d 65 ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      },
+      {
+        "name": "get_dim",
+        "command": "get dim",
+        "required_kind": "number",
+        "sent_hex": "67 65 74 20 64 69 6d ff ff ff",
+        "response": {
+          "kind": "none",
+          "hex": ""
+        },
+        "passed": false
+      }
+    ]
+  },
+  "conclusions": {
+    "serial_became_responsive_after_break_pulse": false,
+    "no_change_after_break_pulse": true
+  }
+}

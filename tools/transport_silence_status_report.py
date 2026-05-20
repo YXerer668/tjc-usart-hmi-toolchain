@@ -22,6 +22,7 @@ def main() -> int:
     whmi = _load("examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json")
     pulse = _load("examples/lifecycle_runtime_smoke/dtr_rts_pulse_probe_summary_2026-05-21.json")
     reenum = _load("examples/lifecycle_runtime_smoke/usb_uart_reenumeration_probe_summary_2026-05-21.json")
+    breakpulse = _load("examples/lifecycle_runtime_smoke/serial_break_pulse_probe_summary_2026-05-21.json")
     camera = _load("examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json")
     sd_pkg = _load("examples/lifecycle_runtime_smoke/sd_recovery_package_2026-05-21.json")
     sd_handoff = _load("examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json")
@@ -69,6 +70,10 @@ def main() -> int:
                 "artifact": "examples/lifecycle_runtime_smoke/dtr_rts_pulse_probe_summary_2026-05-21.json",
                 "no_change_after_pulse": pulse["conclusions"]["dtr_rts_pulse_showed_no_observable_change"],
             },
+            "serial_break_pulse_probe": {
+                "artifact": "examples/lifecycle_runtime_smoke/serial_break_pulse_probe_summary_2026-05-21.json",
+                "no_change_after_break": breakpulse["conclusions"]["serial_break_pulse_showed_no_observable_change"],
+            },
             "usb_uart_reenumeration_probe": {
                 "artifact": "examples/lifecycle_runtime_smoke/usb_uart_reenumeration_probe_summary_2026-05-21.json",
                 "disable_enable_ok": reenum["disable_ok"] and reenum["enable_ok"],
@@ -104,6 +109,7 @@ def main() -> int:
             "official_gui_start_failure_not_explained_by_disabled_button": button_state["conclusions"]["failure_is_not_explained_by_a_disabled_button"],
             "public_whmi_entry_is_also_silent": whmi["conclusions"]["public_whmi_entry_is_silent"],
             "dtr_rts_recovery_path_showed_no_change": pulse["conclusions"]["dtr_rts_pulse_showed_no_observable_change"],
+            "serial_break_recovery_path_showed_no_change": breakpulse["conclusions"]["serial_break_pulse_showed_no_observable_change"],
             "usb_uart_reenumeration_showed_no_change": reenum["conclusions"]["no_change_after_reenumeration"],
             "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": orchestrated["conclusions"]["seed_side_runtime_limiter_runner_blocked_by_transport"],
             "external_sd_recovery_bundle_is_ready": sd_pkg["conclusions"]["package_ready_for_external_use_if_panel_remains_transport_silent"],

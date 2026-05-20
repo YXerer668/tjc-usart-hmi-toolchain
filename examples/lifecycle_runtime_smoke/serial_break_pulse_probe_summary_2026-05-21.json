@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-summarized",
+  "break_ms": 500,
+  "before_connect_kind": "none",
+  "after_connect_kind": "none",
+  "before_sendme_kind": "none",
+  "after_sendme_kind": "none",
+  "conclusions": {
+    "serial_break_pulse_did_not_restore_serial_responsiveness": true,
+    "serial_break_pulse_showed_no_observable_change": true
+  }
+}

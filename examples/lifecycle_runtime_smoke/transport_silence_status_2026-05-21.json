@@ -40,6 +40,10 @@
       "artifact": "examples/lifecycle_runtime_smoke/dtr_rts_pulse_probe_summary_2026-05-21.json",
       "no_change_after_pulse": true
     },
+    "serial_break_pulse_probe": {
+      "artifact": "examples/lifecycle_runtime_smoke/serial_break_pulse_probe_summary_2026-05-21.json",
+      "no_change_after_break": true
+    },
     "usb_uart_reenumeration_probe": {
       "artifact": "examples/lifecycle_runtime_smoke/usb_uart_reenumeration_probe_summary_2026-05-21.json",
       "disable_enable_ok": true,
@@ -75,6 +79,7 @@
     "official_gui_start_failure_not_explained_by_disabled_button": true,
     "public_whmi_entry_is_also_silent": true,
     "dtr_rts_recovery_path_showed_no_change": true,
+    "serial_break_recovery_path_showed_no_change": true,
     "usb_uart_reenumeration_showed_no_change": true,
     "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": true,
     "external_sd_recovery_bundle_is_ready": true,
