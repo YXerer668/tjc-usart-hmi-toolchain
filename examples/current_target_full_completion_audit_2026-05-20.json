@@ -39,8 +39,8 @@
     }
   ],
   "highest_leverage_unsolved_subsystem": {
-    "id": "scheduler_lifecycle_general_equivalence",
-    "reason": "page1 runtime-page mapping is now corrected and the minimal local page1 load wrapper family is live-proven, but broader general lifecycle equivalence across richer page-level logic is still unresolved; that remains the highest-leverage blocker for trustworthy multi-page logic recovery",
+    "id": "page1_advanced_runtime_binding",
+    "reason": "the page1 file-browser lane is now split cleanly: the official clone invalid_reference path is an authoring/save gap, while the current local multi-page runtime lane keeps the A object alive with field binding but dead enumeration/display. compiled-data elimination reports now show the remaining gap is no longer locatable inside the currently recovered object-tail compiled data envelope, so the highest-leverage next step is a stronger seed-side runtime-limitation falsification rather than more page-local byte patching",
     "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
     "binding_matrix_summary": {
       "page0_advanced_positive_count": 5,
@@ -86,6 +86,8 @@
       "scope": "page1 file-browser direct-runtime enumeration/display gap, official authoring/save gap, plus remaining page1 advanced-event expansion",
       "why_unfinished": [
         "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
+        "fresh local multi-page rebuilds now also have live proof for page1 text-select and page1 file-stream on the current target, so the remaining direct-runtime gap is narrower than 'the local multi-page advanced builder is generally broken'",
+        "a new local isolation artifact now makes that boundary explicit: under the same local multi-page route, page1 text-select (type D) and page1 file-stream (type ?) are live-positive while page1 file-browser (type A) still has field binding alive but enumeration/display dead",
         "the local direct-TFT page1 file-browser probe now reads back dir/filter/txt on runtime page 0, but a new refresh probe shows qty stays 0 and the camera remains a white surface even after ref fbrowser0 and a page1->page0 cycle",
         "the official GUI page1 file-browser path still fails even earlier and does not preserve an A-type object into 1.pa, so the authoring/save lane is still blocked independently of the local direct-TFT lane",
         "two stricter direct-TFT narrowing probes also stayed negative: renaming the page1 companion objects away from page0 names did not change qty=0 white-surface behavior, and transplanting the exact known-good page0 file-browser cluster onto page1 still stayed qty=0 white-surface. this rules out cross-page companion naming and gross page0-vs-page1 geometry/style mismatch as the primary cause",
@@ -95,15 +97,22 @@
         "a new tail-prefix decode artifact now shows the deeper multi-page prefix/page-table layer diverges sharply between the working page1 load family and the failing page1 file-browser family, so the next target moves above single-object and one-tuple page-header patches",
         "an eighth probe shows the three +6 prefix-offset fields are necessary for even object binding: reverting just those fields turns page1 fbrowser0.dir/filter/qty/txt into invalid_reference, so the remaining suspect narrows further to the inserted 6-byte page row and deeper page-table semantics rather than the offset trio itself",
         "a ninth probe changes only the inserted page-row count field from 1 to 0 while keeping the offset trio and inserted 6-byte row intact; field binding stays alive but qty remains 0 and the white camera surface remains, so the count field itself is not sufficient either",
-        "a tenth and eleventh probe then change the inserted 6-byte row's last two bytes and middle four bytes independently; in both cases page1->sendme still reaches 1 while qty remains 0 and the white camera surface remains, so neither rowindex nor rowhash is sufficient on its own"
+        "a tenth and eleventh probe then change the inserted 6-byte row's last two bytes and middle four bytes independently; in both cases page1->sendme still reaches 1 while qty remains 0 and the white camera surface remains, so neither rowindex nor rowhash is sufficient on its own",
+        "new compiled-data elimination reports now go further and show the remaining page1 file-browser gap is not locatable anywhere inside the currently recovered compiled object-tail envelope: header/global fields expose no file-browser-specific runtime bit, attr/user headers are identical, pointer closure is valid, full page-local user records and primary records are identical, page event tables are byte-identical, prefix heads collapse back to single-page after generic multi-page normalization, and there is no post-mirror service tail with room for a hidden table",
+        "the next strongest runtime discriminator is now prepared as a seed-side multi-page falsification set with ranked control strength: text-select first, file-stream second, file-browser last. if text-select and file-stream both survive on runtime page 1 while file-browser still fails, that will be very strong evidence for an A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 failure"
       ],
       "blocks": [
         "page1 file-browser direct enumeration/display recovery",
         "page1 file-browser authoring/save recovery",
-        "page1 advanced event dispatch after corrected-page proof"
+        "page1 advanced event dispatch after corrected-page proof",
+        "seed-side runtime-limitation falsification after panel recovery"
       ],
       "evidence": [
         "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+        "examples/lifecycle_runtime_smoke/page1_filebrowser_clone_vs_local_report_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/page1_textselect_local_multipt_live_probe_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/page1_filestream_local_multipt_live_probe_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/page1_local_multipt_advanced_isolation_2026-05-21.json",
         "examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json",
         "examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json",
         "examples/lifecycle_runtime_smoke/page0_filebrowser_qty_semantics_probe_2026-05-20.json",
@@ -119,7 +128,10 @@
         "examples/lifecycle_runtime_smoke/page1_filebrowser_prefix_rowhash_live_probe_2026-05-21.json",
         "examples/lifecycle_runtime_smoke/page1_filebrowser_narrowing_experiments_2026-05-20.json",
         "examples/lifecycle_runtime_smoke/page1_filebrowser_load_wrapper_live_probe_2026-05-20.json",
-        "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json"
+        "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",
+        "examples/lifecycle_runtime_smoke/page1_filebrowser_compiled_data_elimination_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/seed_side_multipt_probe_fidelity_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/seed_side_multipt_runtime_limit_probes_2026-05-21.json"
       ]
     },
     {
