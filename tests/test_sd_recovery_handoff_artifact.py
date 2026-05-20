@@ -20,6 +20,8 @@ class SdRecoveryHandoffArtifactTests(unittest.TestCase):
             "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
         )
         self.assertTrue(payload["followup_command_file"].endswith("恢复后运行.txt"))
+        self.assertTrue(payload["followup_powershell_file"].endswith("恢复后运行.ps1"))
+        self.assertTrue(payload["followup_cmd_file"].endswith("恢复后运行.cmd"))
 
 
 if __name__ == "__main__":

@@ -49,6 +49,38 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    after_ps1 = out_dir / "恢复后运行.ps1"
+    after_ps1.write_text(
+        "\n".join(
+            [
+                '$ErrorActionPreference = "Stop"',
+                f'python "{ROOT / "tools" / "sd_recovery_state.py"}" mark-pending --note "sd recovery in progress"',
+                'Write-Host "现在请断电、拔出 SD 卡、重新上电。完成后按回车继续..."',
+                'Read-Host | Out-Null',
+                f'python "{ROOT / "tools" / "sd_recovery_state.py"}" clear --note "sd removed and clean boot confirmed"',
+                f'python "{ROOT / "tools" / "recover_then_run_seed_side_runtime_limit.py"}" --out-dir "{ROOT / "reverse_usarthmi" / "recover_then_seed_side_run_20260521"}" --capture',
+                'Write-Host "完成。按回车关闭..."',
+                'Read-Host | Out-Null',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    after_cmd = out_dir / "恢复后运行.cmd"
+    after_cmd.write_text(
+        "\r\n".join(
+            [
+                "@echo off",
+                'setlocal',
+                f'powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File "{after_ps1}"',
+                "pause",
+            ]
+        )
+        + "\r\n",
+        encoding="utf-8",
+    )
+
     manifest = {
         "schema_version": 1,
         "date": "2026-05-21",
@@ -63,6 +95,8 @@ def main() -> int:
             },
             "README_恢复说明.md": str(copied_readme),
             "恢复后运行.txt": str(after_commands),
+            "恢复后运行.ps1": str(after_ps1),
+            "恢复后运行.cmd": str(after_cmd),
         },
         "source_files": {
             "repo_tft": str(SOURCE_TFT),
@@ -88,6 +122,8 @@ def main() -> int:
         "repo_source_tft": str(SOURCE_TFT.relative_to(ROOT)),
         "repo_source_sha256": _sha256(SOURCE_TFT),
         "followup_command_file": str(after_commands),
+        "followup_powershell_file": str(after_ps1),
+        "followup_cmd_file": str(after_cmd),
     }
     report_out.parent.mkdir(parents=True, exist_ok=True)
     report_out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

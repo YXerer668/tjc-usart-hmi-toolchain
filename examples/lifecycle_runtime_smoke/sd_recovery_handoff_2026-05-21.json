@@ -7,5 +7,7 @@
   "manifest_path": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\package_manifest.json",
   "repo_source_tft": "reverse_usarthmi\\recovery_sd_card\\lcd_test.tft",
   "repo_source_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
-  "followup_command_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.txt"
+  "followup_command_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.txt",
+  "followup_powershell_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.ps1",
+  "followup_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.cmd"
 }
