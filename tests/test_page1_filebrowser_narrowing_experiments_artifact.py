@@ -17,9 +17,12 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertEqual(payload["experiments"]["v4_refresh"]["qty"], 0)
         self.assertEqual(payload["experiments"]["unique_names"]["qty"], 0)
         self.assertEqual(payload["experiments"]["exact_page0_cluster"]["qty"], 0)
+        self.assertEqual(payload["experiments"]["load_wrapper"]["load_marker_observed"], "23 02 46 42")
+        self.assertEqual(payload["experiments"]["load_wrapper"]["qty"], 0)
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
+        self.assertFalse(payload["conclusions"]["narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration"])
 
 
 if __name__ == "__main__":

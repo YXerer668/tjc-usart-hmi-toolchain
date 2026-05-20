@@ -34,13 +34,22 @@
                                                                             "b0":  "b1aux",
                                                                             "p0":  "p1aux"
                                                                         }
-                                                }
+                                                },
+                        "load_wrapper":  {
+                                             "probe":  "page1_filebrowser_load_wrapper_probe_20260520",
+                                             "load_marker_expected":  "23 02 46 42",
+                                             "load_marker_observed":  "23 02 46 42",
+                                             "qty":  0,
+                                             "txt":  "",
+                                             "camera":  "reverse_usarthmi/page1_filebrowser_load_wrapper_probe_20260520/camera_20260520_231915.jpg"
+                                         }
                     },
     "conclusions":  {
                         "field_binding_recovered":  true,
                         "enumeration_display_recovered":  false,
                         "cross_page_companion_name_collision_primary_cause":  false,
                         "page0_vs_page1_filebrowser_cluster_geometry_primary_cause":  false,
-                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after three increasingly strict probes: original v4 refresh, unique companion names, and an exact page0 file-browser cluster transplanted onto page1. this rules out cross-page companion naming and gross page0-vs-page1 cluster geometry/style mismatches as the primary cause. the remaining likely gap is deeper page-local A-type enumeration/runtime state for page1, such as user-record, mirror-record, or page-index-specific list population behavior."
+                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after four increasingly strict probes: original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, and that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper. this rules out cross-page companion naming, gross page0-vs-page1 cluster geometry/style mismatch, and the mere absence of the recovered narrow page1 load wrapper as the primary cause. the remaining likely gap is deeper page-local A-type enumeration/runtime state for page1, such as user-record, mirror-record, or page-index-specific list population behavior.",
+                        "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false
                     }
 }
