@@ -66,6 +66,7 @@ def main() -> int:
                 "bundle_zip": sd_handoff["bundle_zip"],
                 "verify_cmd": sd_handoff["ordered_verify_cmd"],
                 "followup_cmd": sd_handoff["ordered_followup_cmd"],
+                "manual_gui_cmd": sd_handoff["manual_gui_cmd"],
                 "status_summary_file": sd_handoff["status_summary_file"],
             },
         },
