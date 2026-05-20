@@ -62,7 +62,7 @@
       "why_unfinished": [
         "fresh live evidence now proves the official case52 page1 load oracle dispatches on corrected runtime page 0, so the screen runtime does support page1 load events",
         "the local generated page1 load probe still fails to emit its marker when switching back to corrected runtime page 0 even though p1title.txt is readable there",
-        "blind callback-slot writes remain negative, so the missing piece is still the recovered official page1 load wrapper or binding path rather than a trivial slot fill"
+        "the new parity report shows the official oracle uses an inline page-load phase wrapper while the local build still emits a normal page event table, so the missing piece is still the recovered official page1 load wrapper or binding path rather than a trivial slot fill"
       ],
       "blocks": [
         "local reproduction of official page1 load dispatch",
@@ -71,7 +71,8 @@
       ],
       "evidence": [
         "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
-        "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json"
+        "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
+        "examples/lifecycle_runtime_smoke/page1_load_dispatch_parity_report_2026-05-20.json"
       ]
     },
     {
@@ -183,6 +184,7 @@
     "lifecycle_runtime_equivalence": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
     "page1_runtime_mapping_reverified": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
     "page1_load_official_oracle_live_positive": "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
+    "page1_load_dispatch_parity_report": "examples/lifecycle_runtime_smoke/page1_load_dispatch_parity_report_2026-05-20.json",
     "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json"
   }
 }

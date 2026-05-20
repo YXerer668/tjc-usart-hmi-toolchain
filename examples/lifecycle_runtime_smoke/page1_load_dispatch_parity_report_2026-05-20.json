@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "mode": "page1_load_dispatch_parity_report",
+  "official_oracle": {
+    "source": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\examples\\case52_06_page1_load_printh_only_official_event_index.json",
+    "page_resource": "1.pa",
+    "compile_context": {
+      "available": true,
+      "error": null,
+      "variant": "page_local",
+      "slot_offset": 0,
+      "unsupported_type_codes": []
+    },
+    "page_summary": {
+      "source_event_slot_count": 1,
+      "compiled_event_table_match_count": 0,
+      "page_load_phase_match_count": 1,
+      "event_compile_error_count": 0
+    },
+    "event_tokens": [
+      "codesload-1",
+      "printh AA 52 10 01",
+      "codesloadend-0",
+      "codesdown-0",
+      "codesup-0",
+      "codesunload-0"
+    ],
+    "event_table_matches": [],
+    "page_load_phase_match": {
+      "offset_hex": "0x255",
+      "end_hex": "0x272",
+      "prefix_length": 29,
+      "first_executable_absolute_hex": "0x255",
+      "prefix_items": [
+        {
+          "index": 0,
+          "offset": 0,
+          "offset_hex": "0x0",
+          "length": 14,
+          "payload_hex": "09 0f 08 41 41 20 35 32 20 31 30 20 30 31",
+          "kind": "command",
+          "command": "printh",
+          "args": "AA 52 10 01"
+        },
+        {
+          "index": 1,
+          "offset": 18,
+          "offset_hex": "0x12",
+          "length": 3,
+          "payload_hex": "09 30 08",
+          "kind": "separator",
+          "command": "loadend"
+        },
+        {
+          "index": 2,
+          "offset": 25,
+          "offset_hex": "0x19",
+          "length": 0,
+          "payload_hex": "",
+          "kind": "empty"
+        }
+      ],
+      "prefix_end_references": [
+        {
+          "value": 6891,
+          "hex": "0x1AEB"
+        }
+      ]
+    },
+    "record_candidate": {
+      "relative_offset_hex": "0x1AD",
+      "header_hex": "79 00 00 37",
+      "slots": {
+        "slot_0x0c": {
+          "offset": 12,
+          "offset_hex": "0xC",
+          "value": 4294967295,
+          "value_hex": "0xFFFFFFFF",
+          "raw_hex": "ff ff ff ff",
+          "points_to_event_target": false,
+          "event_target_matches": []
+        },
+        "slot_0x10": {
+          "offset": 16,
+          "offset_hex": "0x10",
+          "value": 4294967295,
+          "value_hex": "0xFFFFFFFF",
+          "raw_hex": "ff ff ff ff",
+          "points_to_event_target": false,
+          "event_target_matches": []
+        },
+        "slot_0x14": {
+          "offset": 20,
+          "offset_hex": "0x14",
+          "value": 4294967295,
+          "value_hex": "0xFFFFFFFF",
+          "raw_hex": "ff ff ff ff",
+          "points_to_event_target": false,
+          "event_target_matches": []
+        },
+        "event_offset_0x34": {
+          "offset": 52,
+          "offset_hex": "0x34",
+          "value": 0,
+          "value_hex": "0x0",
+          "raw_hex": "00 00 00 00",
+          "points_to_event_target": false,
+          "event_target_matches": []
+        }
+      }
+    },
+    "runtime_conclusion": "official page1 load dispatch is live-positive on corrected runtime page 0"
+  },
+  "local_generated_probe": {
+    "source": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_load_printh_probe_20260520\\manifest.json",
+    "section_offsets": {
+      "hash": {
+        "value": 747,
+        "hex": "0x2EB"
+      },
+      "primary": {
+        "value": 775,
+        "hex": "0x307"
+      },
+      "attr": {
+        "value": 1130,
+        "hex": "0x46A"
+      },
+      "user": {
+        "value": 1166,
+        "hex": "0x48E"
+      },
+      "pic": {
+        "value": 6398,
+        "hex": "0x18FE"
+      },
+      "padding": {
+        "value": 7258,
+        "hex": "0x1C5A"
+      },
+      "prefix_delta": {
+        "value": 6,
+        "hex": "0x6"
+      },
+      "tail": {
+        "value": 7264,
+        "hex": "0x1C60"
+      }
+    },
+    "mirror_record_len_hex": "0x8A",
+    "event_tokens": [
+      "codesload-1",
+      "printh 23 02 50 4C",
+      "codesloadend-0",
+      "codesdown-0",
+      "codesup-0",
+      "codesunload-0"
+    ],
+    "event_table_length": 65,
+    "event_table_matches": [
+      {
+        "value": 331,
+        "hex": "0x14B"
+      }
+    ],
+    "mirror_event_offset_field": {
+      "value": 331,
+      "hex": "0x14B"
+    },
+    "callback_slots": {
+      "maybe_load_or_down_0x0c": {
+        "offset": 12,
+        "offset_hex": "0xC",
+        "value": 4294967295,
+        "value_hex": "0xFFFFFFFF",
+        "raw_hex": "ff ff ff ff"
+      },
+      "maybe_load_or_up_0x10": {
+        "offset": 16,
+        "offset_hex": "0x10",
+        "value": 4294967295,
+        "value_hex": "0xFFFFFFFF",
+        "raw_hex": "ff ff ff ff"
+      },
+      "maybe_timer_0x14": {
+        "offset": 20,
+        "offset_hex": "0x14",
+        "value": 4294967295,
+        "value_hex": "0xFFFFFFFF",
+        "raw_hex": "ff ff ff ff"
+      }
+    },
+    "runtime_conclusion": "local generated page1 load dispatch is still live-negative on corrected runtime page 0"
+  },
+  "comparison": {
+    "official_uses_inline_load_phase_wrapper": true,
+    "local_uses_normal_page_event_table": true,
+    "official_callback_slots_empty": true,
+    "local_callback_slots_empty": true,
+    "official_and_local_share_event_offset_style": true,
+    "likely_missing_layer": "local build still emits page1 load as a normal page event table with mirror event_offset_0x34 pointing at that table, while the official oracle uses an inline page-load phase wrapper without a normal page event-table match. The missing piece is likely the official page1 load wrapper/layout path rather than a simple callback-slot fill."
+  }
+}
