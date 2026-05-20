@@ -18,6 +18,7 @@
     "desktop_bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip",
     "desktop_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
     "desktop_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd",
+    "desktop_manual_gui_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\02_如需手动官方下载恢复.cmd",
     "desktop_status_summary": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md"
   },
   "post_recovery_runner": {

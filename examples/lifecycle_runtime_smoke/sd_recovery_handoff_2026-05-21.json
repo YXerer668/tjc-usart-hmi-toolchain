@@ -15,5 +15,6 @@
   "verify_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.cmd",
   "ordered_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
   "ordered_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd",
+  "manual_gui_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\02_如需手动官方下载恢复.cmd",
   "status_summary_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md"
 }

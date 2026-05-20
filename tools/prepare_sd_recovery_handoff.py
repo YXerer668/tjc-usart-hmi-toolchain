@@ -109,6 +109,20 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    manual_gui_cmd = out_dir / "02_如需手动官方下载恢复.cmd"
+    manual_gui_cmd.write_text(
+        "\r\n".join(
+            [
+                "@echo off",
+                "setlocal",
+                f'python "{ROOT / "tools" / "official_hmi_download_recovery.py"}" "{ROOT / "reverse_usarthmi" / "official_page1_textselect_minimal_oracle_20260519" / "lcd_test.HMI"}" --port COM36 --download-baud 921600 --keep-open',
+                "pause",
+            ]
+        )
+        + "\r\n",
+        encoding="utf-8",
+    )
+
     ordered_verify_cmd = out_dir / "00_先双击_校验恢复包.cmd"
     shutil.copy2(verify_cmd, ordered_verify_cmd)
     ordered_after_cmd = out_dir / "01_SD恢复完成后双击_继续验证.cmd"
@@ -162,6 +176,7 @@ def main() -> int:
             "校验恢复包.cmd": str(verify_cmd),
             "00_先双击_校验恢复包.cmd": str(ordered_verify_cmd),
             "01_SD恢复完成后双击_继续验证.cmd": str(ordered_after_cmd),
+            "02_如需手动官方下载恢复.cmd": str(manual_gui_cmd),
             "当前状态摘要.md": str(status_summary),
         },
         "source_files": {
@@ -196,6 +211,7 @@ def main() -> int:
         "verify_cmd_file": str(verify_cmd),
         "ordered_verify_cmd": str(ordered_verify_cmd),
         "ordered_followup_cmd": str(ordered_after_cmd),
+        "manual_gui_cmd": str(manual_gui_cmd),
         "status_summary_file": str(status_summary),
     }
     report_out.parent.mkdir(parents=True, exist_ok=True)
