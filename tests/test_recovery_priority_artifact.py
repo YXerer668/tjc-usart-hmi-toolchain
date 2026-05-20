@@ -14,7 +14,7 @@ class RecoveryPriorityArtifactTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "prepared")
         self.assertEqual(payload["top_priority_after_panel_recovery"]["id"], "desktop_sd_recovery_handoff")
-        self.assertIn("00_先双击_校验恢复包.cmd", payload["top_priority_after_panel_recovery"]["command"])
+        self.assertIn("00_总入口_先看我.cmd", payload["top_priority_after_panel_recovery"]["command"])
         self.assertEqual(payload["secondary_priority_after_panel_recovery"]["id"], "recover_then_seed_side_orchestrator")
         self.assertIn("01_SD恢复完成后双击_继续验证.cmd", payload["secondary_priority_after_panel_recovery"]["command"])
         self.assertEqual(payload["external_recovery_package"]["id"], "sd_recovery_case31_backup")

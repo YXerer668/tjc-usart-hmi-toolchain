@@ -14,7 +14,7 @@ class NextLiveCommandsArtifactTests(unittest.TestCase):
         commands = [item["command"] for item in payload["recommended_order"]]
 
         self.assertEqual(payload["status"], "prepared")
-        self.assertIn("00_先双击_校验恢复包.cmd", commands[0])
+        self.assertIn("00_总入口_先看我.cmd", commands[0])
         self.assertIn("01_SD恢复完成后双击_继续验证.cmd", commands[1])
         self.assertIn("seed_side_multipt_runtime_limit_summary.json", commands[2])
 

@@ -6,11 +6,11 @@
   "precondition": "panel has been hard power-cycled or otherwise externally recovered from the current connect/sendme silent state; the latest local orchestrated recovery attempt was still silent",
   "recommended_order": [
     {
-      "label": "If the panel is still transport-silent, first verify the prepared desktop SD recovery bundle",
-      "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd"
+      "label": "Start from the desktop handoff launcher",
+      "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_总入口_先看我.cmd"
     },
     {
-      "label": "Perform SD recovery, then use the prepared desktop follow-up entrypoint",
+      "label": "After reading the launcher summary, verify the bundle and perform SD recovery, then use the prepared desktop follow-up entrypoint",
       "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd"
     },
     {
