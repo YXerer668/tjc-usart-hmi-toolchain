@@ -19,7 +19,7 @@ class Page1RuntimeMappingReverifiedArtifactTests(unittest.TestCase):
         self.assertTrue(payload["conclusions"]["official_page1_sliding_text_binding_positive"])
         self.assertTrue(payload["conclusions"]["official_page1_data_record_binding_positive"])
         self.assertTrue(payload["conclusions"]["official_page1_file_stream_binding_positive"])
-        self.assertFalse(payload["conclusions"]["official_page1_file_browser_binding_positive"])
+        self.assertTrue(payload["conclusions"]["page1_file_browser_authoring_gap"])
         self.assertFalse(payload["conclusions"]["page1_load_scheduler_recovered"])
 
         local = payload["fresh_reverification"]["local_generated_page1_load_probe"]
@@ -49,10 +49,8 @@ class Page1RuntimeMappingReverifiedArtifactTests(unittest.TestCase):
         self.assertEqual(file_stream["runtime_page_0"]["get_fs0_val"]["value"], 0)
         self.assertEqual(file_stream["runtime_page_1"]["get_fs0_en"]["kind"], "invalid_reference")
 
-        file_browser = payload["fresh_reverification"]["official_gui_page1_file_browser"]
-        self.assertEqual(file_browser["runtime_page_0"]["get_fbrowser0_dir"]["kind"], "invalid_reference")
-        self.assertEqual(file_browser["runtime_page_0"]["get_fbrowser0_filter"]["kind"], "invalid_reference")
-        self.assertEqual(file_browser["runtime_page_0"]["get_fbrowser0_txt"]["kind"], "invalid_reference")
+        file_browser = payload["fresh_reverification"]["page1_filebrowser_authoring_gap"]
+        self.assertIn("surviving into 1.pa", file_browser["summary"])
 
 
 if __name__ == "__main__":

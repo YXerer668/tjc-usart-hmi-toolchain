@@ -18,13 +18,14 @@ class RuntimeBindingMatrixArtifactTests(unittest.TestCase):
         self.assertTrue(payload["summary"]["page1_runtime_page_mapping_confirmed"])
         self.assertEqual(payload["summary"]["page1_ordinary_binding_positive_count"], 1)
         self.assertEqual(payload["summary"]["page1_advanced_binding_positive_count"], 4)
-        self.assertEqual(payload["summary"]["page1_advanced_binding_negative_count"], 1)
+        self.assertEqual(payload["summary"]["page1_advanced_binding_negative_count"], 0)
+        self.assertEqual(payload["summary"]["page1_advanced_authoring_gap_count"], 1)
         self.assertEqual(payload["summary"]["page1_official_load_dispatch_positive_count"], 1)
         self.assertFalse(payload["summary"]["page1_load_marker_recovered"])
         self.assertEqual(payload["summary"]["page1_remaining_controls_requiring_correct_page_recheck_count"], 0)
         self.assertEqual(
             payload["summary"]["highest_leverage_gap"],
-            "local reproduction of official page1 load dispatch and page1 file-browser-specific runtime binding",
+            "local reproduction of official page1 load dispatch and page1 file-browser authoring/save recovery",
         )
         self.assertEqual(rows["page0_load_local_positive"]["scheduler_path"], "post_primary_page_event")
         self.assertEqual(rows["page1_local_text_positive_mapping_corrected"]["runtime_readback"]["p1title.txt"], "LOAD")
@@ -37,7 +38,7 @@ class RuntimeBindingMatrixArtifactTests(unittest.TestCase):
         )
         self.assertEqual(rows["page1_data_record_positive_mapping_corrected"]["runtime_readback"]["data0.maxval"], 1000)
         self.assertEqual(rows["page1_file_stream_positive_mapping_corrected"]["runtime_readback"]["fs0.en"], 0)
-        self.assertEqual(rows["page1_file_browser_runtime_negative"]["runtime_signal"], "invalid_reference")
+        self.assertEqual(rows["page1_file_browser_authoring_gap"]["runtime_signal"], "no_saved_page1_filebrowser_object")
 
 
 if __name__ == "__main__":

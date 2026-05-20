@@ -1,0 +1,943 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "page1-filebrowser-authoring-gap",
+  "summary": {
+    "scan_hmi_count": 70,
+    "scan_saved_page1_filebrowser_count": 0,
+    "clone_saved_page1_filebrowser": false,
+    "secondary_type_counts": {
+      "\u0002": 9,
+      "\u0003": 23,
+      "\u0004": 14,
+      "<": 3
+    }
+  },
+  "scan_rows": [
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y418\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y424\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y430\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y436\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y456\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y462\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_drag_scan_20260519\\y468\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y400\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y406\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y412\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y418\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y424\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y430\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y436\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end520_y456\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y400\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y406\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "gm0",
+          "\u0002"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y412\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y418\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y424\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y430\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y436\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end560_y456\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y400\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y406\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y412\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y418\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y424\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y430\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y436\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end600_y456\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "exp0",
+          "<"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y400\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y406\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y412\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "v0",
+          "\u0003"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y418\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y424\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y430\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y436\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "wav0",
+          "\u0004"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "exp0",
+          "<"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_dragdepth_scan_20260519\\end640_y456\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "exp0",
+          "<"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan_20260519\\y230\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan_20260519\\y240\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan_20260519\\y250\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan_20260519\\y260\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan_20260519\\y270\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan2_20260519\\y245\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan2_20260519\\y250\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan2_20260519\\y255\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan2_20260519\\y260\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_midband_scan2_20260519\\y265\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_narrow_scan_20260519\\y440\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_narrow_scan_20260519\\y443\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_narrow_scan_20260519\\y446\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_narrow_scan_20260519\\y450\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_narrow_scan_20260519\\y480\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y225\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y228\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y231\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y234\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y237\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    },
+    {
+      "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_tight_scan_20260519\\y240\\lcd_test.HMI",
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "has_page1_filebrowser": false
+    }
+  ],
+  "clone_case": {
+    "hmi": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_B4_page1_filebrowser_hmi_clone_oracle\\lcd_test.HMI",
+    "page1_blocks": [
+      [
+        "page1",
+        "y"
+      ]
+    ],
+    "official_compile_json": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_B4_page1_filebrowser_hmi_clone_oracle\\official_compile_probe_20260520\\lcd_test.official_compile.json",
+    "official_compile": {
+      "compiled_output_size": 11409248,
+      "page_lines": [
+        "总可用内存:524288",
+        "全局内存占用:16",
+        "图片总大小:3,266",
+        "字库总大小:10,804,308",
+        "页面:page1 占用内存:16+76=92",
+        "页面:page0 占用内存:16+340=356",
+        "File Check Finish",
+        "编译成功! 0个错误, 0个警告,文件大小:11,409,248"
+      ]
+    }
+  },
+  "conclusions": {
+    "page1_filebrowser_saved_by_official_or_clone_hmi": false,
+    "page1_filebrowser_runtime_negative_proof_exists": false,
+    "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
+  }
+}

@@ -32,6 +32,7 @@ def build_report() -> dict[str, Any]:
     lifecycle = _load_json("examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json")
     page1_mapping = _load_json("examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json")
     page1_load_oracle = _load_json("examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json")
+    page1_filebrowser_gap = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json")
     case80 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json")
     case85 = _load_json("examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json")
     case83 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_oracle_aligned_live_verified_2026-05-19.json")
@@ -195,15 +196,14 @@ def build_report() -> dict[str, Any]:
             "meaning": "the official GUI page1 file-stream minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
         },
         {
-            "id": "page1_file_browser_runtime_negative",
+            "id": "page1_file_browser_authoring_gap",
             "page": 1,
-            "class": "advanced_runtime_negative",
-            "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
-            "compiled_positive": True,
-            "runtime_positive": False,
-            "runtime_page": 0,
-            "runtime_signal": "invalid_reference",
-            "meaning": "the official GUI page1 file-browser clone still returns invalid_reference even on the corrected runtime page 0, so this remains a real page1 advanced runtime negative",
+            "class": "advanced_authoring_gap",
+            "source": "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",
+            "compiled_positive": False,
+            "runtime_positive": None,
+            "runtime_signal": "no_saved_page1_filebrowser_object",
+            "meaning": page1_filebrowser_gap["conclusions"]["narrowing"],
         },
     ]
 
@@ -223,12 +223,15 @@ def build_report() -> dict[str, Any]:
             "page1_advanced_binding_negative_count": sum(
                 1 for item in rows if item["page"] == 1 and item["class"] == "advanced_runtime_negative" and not item["runtime_positive"]
             ),
+            "page1_advanced_authoring_gap_count": sum(
+                1 for item in rows if item["page"] == 1 and item["class"] == "advanced_authoring_gap"
+            ),
             "page1_official_load_dispatch_positive_count": sum(
                 1 for item in rows if item["page"] == 1 and item["class"] == "lifecycle_runtime_positive" and item["runtime_positive"]
             ),
             "page1_load_marker_recovered": False,
             "page1_remaining_controls_requiring_correct_page_recheck_count": 0,
-            "highest_leverage_gap": "local reproduction of official page1 load dispatch and page1 file-browser-specific runtime binding",
+            "highest_leverage_gap": "local reproduction of official page1 load dispatch and page1 file-browser authoring/save recovery",
         },
         "rows": rows,
         "interpretation": {
@@ -238,9 +241,9 @@ def build_report() -> dict[str, Any]:
                 "fresh live re-verification now proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, not runtime page 1",
                 "the local ordinary page1 text probe and official GUI page1 text-select/sliding-text/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
                 "the official case52 page1 load oracle now proves runtime page-level dispatch exists on the panel, so the remaining lifecycle gap is local generation parity rather than a missing hardware capability",
-                "the remaining unrecovered gap is narrower: page1 object binding is broadly alive, page1 file-browser is the only advanced object still negative on the corrected runtime page, and the local multi-page generator still misses the official page1 load dispatch path",
+                "the remaining unrecovered gaps are narrower: page1 object binding is broadly alive for saved controls, page1 file-browser currently fails earlier at the authoring/save layer, and the local multi-page generator still misses the official page1 load dispatch path",
             ],
-            "recommended_next_step": "compare the official case52 page1 load oracle against the local page1 load build at the mirror-page and event-wrapper level, and in parallel narrow the page1 file-browser-specific runtime binding gap",
+            "recommended_next_step": "compare the official case52 page1 load oracle against the local page1 load build at the mirror-page and event-wrapper level, and in parallel recover a page1 file-browser HMI that actually preserves an A-type object into 1.pa",
         },
     }
 

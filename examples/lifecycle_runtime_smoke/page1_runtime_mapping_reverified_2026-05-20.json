@@ -128,23 +128,9 @@
         }
       }
     },
-    "official_gui_page1_file_browser": {
-      "tft": "C:/Users/SinYu/Desktop/case_for_codex/case_B4_page1_filebrowser_hmi_clone_oracle/official_compile_probe_20260520/output/lcd_test.tft",
-      "runtime_page_0": {
-        "sendme": 0,
-        "get_fbrowser0_dir": {
-          "kind": "invalid_reference",
-          "hex": "1a ff ff ff"
-        },
-        "get_fbrowser0_filter": {
-          "kind": "invalid_reference",
-          "hex": "1a ff ff ff"
-        },
-        "get_fbrowser0_txt": {
-          "kind": "invalid_reference",
-          "hex": "1a ff ff ff"
-        }
-      }
+    "page1_filebrowser_authoring_gap": {
+      "artifact": "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",
+      "summary": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime; drag scans save other controls or nothing, and the clone case saves only page1"
     }
   },
   "conclusions": {
@@ -154,7 +140,7 @@
     "official_page1_sliding_text_binding_positive": true,
     "official_page1_data_record_binding_positive": true,
     "official_page1_file_stream_binding_positive": true,
-    "official_page1_file_browser_binding_positive": false,
+    "page1_file_browser_authoring_gap": true,
     "page1_load_scheduler_recovered": false,
     "stale_negative_methodology": "probing page 1 / sendme 1 on case31-style two-page builds checks the seed page0 runtime page, not the generated or official page1 content"
   },
