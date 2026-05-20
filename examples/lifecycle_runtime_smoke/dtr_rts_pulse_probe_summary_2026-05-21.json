@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-summarized",
+  "steps": [
+    {
+      "dtr": false,
+      "rts": false,
+      "delay_ms": 300
+    },
+    {
+      "dtr": true,
+      "rts": false,
+      "delay_ms": 300
+    },
+    {
+      "dtr": false,
+      "rts": true,
+      "delay_ms": 300
+    },
+    {
+      "dtr": true,
+      "rts": true,
+      "delay_ms": 300
+    },
+    {
+      "dtr": false,
+      "rts": false,
+      "delay_ms": 800
+    }
+  ],
+  "before_connect_kind": "none",
+  "after_connect_kind": "none",
+  "before_sendme_kind": "none",
+  "after_sendme_kind": "none",
+  "conclusions": {
+    "dtr_rts_pulse_did_not_restore_serial_responsiveness": true,
+    "dtr_rts_pulse_showed_no_observable_change": true
+  }
+}
