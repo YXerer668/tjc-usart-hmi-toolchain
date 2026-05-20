@@ -19,6 +19,7 @@ class RecoveryPriorityArtifactTests(unittest.TestCase):
         self.assertIn("01_SD恢复完成后双击_继续验证.cmd", payload["secondary_priority_after_panel_recovery"]["command"])
         self.assertEqual(payload["external_recovery_package"]["id"], "sd_recovery_case31_backup")
         self.assertTrue(payload["external_recovery_package"]["tft"].endswith("recovery_sd_card/lcd_test.tft"))
+        self.assertIn("00_总入口_先看我.cmd", payload["external_recovery_package"]["desktop_launcher_cmd"])
 
 
 if __name__ == "__main__":

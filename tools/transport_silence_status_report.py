@@ -93,6 +93,7 @@ def main() -> int:
                 "artifact": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json",
                 "bundle_dir": sd_handoff["bundle_dir"],
                 "bundle_zip": sd_handoff["bundle_zip"],
+                "launcher_cmd": sd_handoff["launcher_cmd"],
                 "verify_cmd": sd_handoff["ordered_verify_cmd"],
                 "followup_cmd": sd_handoff["ordered_followup_cmd"],
                 "manual_gui_cmd": sd_handoff["manual_gui_cmd"],
