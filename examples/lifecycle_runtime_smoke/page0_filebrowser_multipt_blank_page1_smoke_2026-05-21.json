@@ -1,0 +1,34 @@
+{
+  "page_id": 1,
+  "select_page": 1,
+  "restore_page": 0,
+  "expectations": [
+    {
+      "target": "fbrowser0.dir",
+      "expected": "sd0/",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "fbrowser0.filter",
+      "expected": "*.*",
+      "expected_kind": "string",
+      "attempts": 3
+    },
+    {
+      "target": "fbrowser0.txt",
+      "expected": "",
+      "expected_kind": "string",
+      "attempts": 3
+    }
+  ],
+  "steps": [
+    {
+      "command": "get fbrowser0.qty",
+      "label": "fbrowser0.qty",
+      "expected_kind": "number",
+      "expected_min": 1,
+      "attempts": 3
+    }
+  ]
+}

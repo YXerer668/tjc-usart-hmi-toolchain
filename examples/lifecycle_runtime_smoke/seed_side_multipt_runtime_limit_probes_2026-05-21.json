@@ -7,6 +7,7 @@
     "page0_filebrowser_blank_page1": {
       "probe_dir": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521",
       "output_tft": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521\\output.tft",
+      "expect_json": "examples\\lifecycle_runtime_smoke\\page0_filebrowser_multipt_blank_page1_smoke_2026-05-21.json",
       "page0_blocks": [
         [
           "page0",
@@ -78,6 +79,7 @@
     "page0_filestream_blank_page1": {
       "probe_dir": "reverse_usarthmi\\page0_filestream_multipt_blank_page1_probe_20260521",
       "output_tft": "reverse_usarthmi\\page0_filestream_multipt_blank_page1_probe_20260521\\output.tft",
+      "expect_json": "examples\\lifecycle_runtime_smoke\\page0_filestream_multipt_blank_page1_smoke_2026-05-21.json",
       "page0_blocks": [
         [
           "page0",

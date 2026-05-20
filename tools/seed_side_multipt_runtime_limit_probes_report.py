@@ -14,6 +14,8 @@ from usarthmi.page_format import parse_page_data
 
 FB_PROBE_DIR = ROOT / "reverse_usarthmi" / "page0_filebrowser_multipt_blank_page1_probe_20260521"
 FS_PROBE_DIR = ROOT / "reverse_usarthmi" / "page0_filestream_multipt_blank_page1_probe_20260521"
+FB_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filebrowser_multipt_blank_page1_smoke_2026-05-21.json"
+FS_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filestream_multipt_blank_page1_smoke_2026-05-21.json"
 OUT_PATH = ROOT / "examples" / "lifecycle_runtime_smoke" / "seed_side_multipt_runtime_limit_probes_2026-05-21.json"
 
 
@@ -57,6 +59,7 @@ def _probe_entry(probe_dir: Path, advanced_name: str) -> dict[str, object]:
     return {
         "probe_dir": str(probe_dir.relative_to(ROOT)),
         "output_tft": str((probe_dir / "output.tft").relative_to(ROOT)),
+        "expect_json": str((FB_EXPECT if advanced_name == "fbrowser0" else FS_EXPECT).relative_to(ROOT)),
         "page0_blocks": [[block.objname, block.type_code] for block in page0.blocks],
         "page1_blocks": [[block.objname, block.type_code] for block in page1.blocks],
         "advanced_name": advanced_name,
