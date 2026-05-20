@@ -109,6 +109,39 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    ordered_verify_cmd = out_dir / "00_先双击_校验恢复包.cmd"
+    shutil.copy2(verify_cmd, ordered_verify_cmd)
+    ordered_after_cmd = out_dir / "01_SD恢复完成后双击_继续验证.cmd"
+    shutil.copy2(after_cmd, ordered_after_cmd)
+
+    status_summary = out_dir / "当前状态摘要.md"
+    status_summary.write_text(
+        "\n".join(
+            [
+                "# 当前状态摘要",
+                "",
+                "- 目标屏: `TJC8048X543_011C`",
+                "- 当前本地状态: `connect/sendme/get dim` 全静默",
+                "- 常见与高波特率扫描也都静默",
+                "- 官方 GUI 下载按钮多方法点击仍不切换到运行态",
+                "- public `whmi-wri` 入口初始 ACK 也没有出现",
+                "",
+                "## 推荐顺序",
+                "",
+                "1. 先双击 `00_先双击_校验恢复包.cmd`",
+                "2. 按 `README_恢复说明.md` 用 SD 卡恢复",
+                "3. 恢复完成后双击 `01_SD恢复完成后双击_继续验证.cmd`",
+                "",
+                "## 说明",
+                "",
+                "- 当前软件侧自动化已经基本见底。",
+                "- 恢复后脚本会继续跑串口检查和 seed-side runtime falsification。",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     manifest = {
         "schema_version": 1,
         "date": "2026-05-21",
@@ -127,6 +160,9 @@ def main() -> int:
             "恢复后运行.cmd": str(after_cmd),
             "校验恢复包.ps1": str(verify_ps1),
             "校验恢复包.cmd": str(verify_cmd),
+            "00_先双击_校验恢复包.cmd": str(ordered_verify_cmd),
+            "01_SD恢复完成后双击_继续验证.cmd": str(ordered_after_cmd),
+            "当前状态摘要.md": str(status_summary),
         },
         "source_files": {
             "repo_tft": str(SOURCE_TFT),
@@ -141,6 +177,7 @@ def main() -> int:
 
     manifest_path = out_dir / "package_manifest.json"
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    zip_path = Path(shutil.make_archive(str(out_dir), "zip", root_dir=out_dir))
 
     report = {
         "schema_version": 1,
@@ -148,6 +185,7 @@ def main() -> int:
         "target": "TJC8048X543_011C",
         "status": "handoff-prepared",
         "bundle_dir": str(out_dir),
+        "bundle_zip": str(zip_path),
         "manifest_path": str(manifest_path),
         "repo_source_tft": str(SOURCE_TFT.relative_to(ROOT)),
         "repo_source_sha256": _sha256(SOURCE_TFT),
@@ -156,6 +194,9 @@ def main() -> int:
         "followup_cmd_file": str(after_cmd),
         "verify_powershell_file": str(verify_ps1),
         "verify_cmd_file": str(verify_cmd),
+        "ordered_verify_cmd": str(ordered_verify_cmd),
+        "ordered_followup_cmd": str(ordered_after_cmd),
+        "status_summary_file": str(status_summary),
     }
     report_out.parent.mkdir(parents=True, exist_ok=True)
     report_out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

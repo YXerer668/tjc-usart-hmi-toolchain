@@ -4,6 +4,7 @@
   "target": "TJC8048X543_011C",
   "status": "handoff-prepared",
   "bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
+  "bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip",
   "manifest_path": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\package_manifest.json",
   "repo_source_tft": "reverse_usarthmi\\recovery_sd_card\\lcd_test.tft",
   "repo_source_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
@@ -11,5 +12,8 @@
   "followup_powershell_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.ps1",
   "followup_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.cmd",
   "verify_powershell_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.ps1",
-  "verify_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.cmd"
+  "verify_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.cmd",
+  "ordered_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
+  "ordered_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd",
+  "status_summary_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md"
 }
