@@ -170,16 +170,96 @@ def _configure_download_panel(panel, port: str, download_baud: str) -> None:
 
     port_combo = combos[0][1]
     baud_combo = combos[1][1]
-    _click_control(port_combo)
+    _select_combo_entry(port_combo, port)
+    time.sleep(0.4)
+    _select_combo_entry(baud_combo, download_baud)
+    time.sleep(0.4)
+
+
+def _select_combo_entry(combo, value: str) -> None:
+    try:
+        wrapper = combo.wrapper_object()
+    except Exception:
+        wrapper = None
+
+    try:
+        if wrapper is not None and hasattr(wrapper, "select"):
+            wrapper.select(value)
+            time.sleep(0.3)
+            selected = _combo_selected_text(combo)
+            if selected == value:
+                return
+    except Exception:
+        pass
+
+    _click_control(combo)
+    time.sleep(0.3)
+    try:
+        if wrapper is not None and hasattr(wrapper, "expand"):
+            wrapper.expand()
+            time.sleep(0.3)
+    except Exception:
+        pass
+
+    item = _find_global_list_item(value, anchor_rect=combo.rectangle())
+    if item is not None:
+        _click_control(item)
+        time.sleep(0.5)
+        selected = _combo_selected_text(combo)
+        if selected == value:
+            return
+
+    _click_control(combo)
     time.sleep(0.2)
     send_keys("^a{BACKSPACE}", pause=0.02)
-    send_keys(f"{port}{{ENTER}}", with_spaces=True, pause=0.02)
-    time.sleep(0.4)
-    _click_control(baud_combo)
-    time.sleep(0.2)
-    send_keys("^a{BACKSPACE}", pause=0.02)
-    send_keys(f"{download_baud}{{ENTER}}", with_spaces=True, pause=0.02)
-    time.sleep(0.4)
+    send_keys(f"{value}{{ENTER}}", with_spaces=True, pause=0.02)
+    time.sleep(0.5)
+    selected = _combo_selected_text(combo)
+    if selected == value:
+        return
+    raise RuntimeError(f"Unable to select combo entry {value!r}; current selection is {selected!r}")
+
+
+def _combo_selected_text(combo) -> str:
+    try:
+        wrapper = combo.wrapper_object()
+        if hasattr(wrapper, "selected_text"):
+            text = wrapper.selected_text() or ""
+            if text:
+                return text.strip()
+    except Exception:
+        pass
+    try:
+        legacy = combo.legacy_properties()
+        value = legacy.get("Value")
+        if isinstance(value, str):
+            return value.strip()
+    except Exception:
+        pass
+    try:
+        return (combo.window_text() or "").strip()
+    except Exception:
+        return ""
+
+
+def _find_global_list_item(text: str, *, anchor_rect) -> object | None:
+    candidates = []
+    for window in Desktop(backend="uia").windows():
+        for control in window.descendants():
+            try:
+                if control.element_info.control_type != "ListItem":
+                    continue
+                if (control.window_text() or "").strip() != text:
+                    continue
+                rect = control.rectangle()
+            except Exception:
+                continue
+            distance = abs(rect.left - anchor_rect.left) + abs(rect.top - anchor_rect.bottom)
+            candidates.append((distance, control))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: item[0])
+    return candidates[0][1]
 
 
 def _click_download_start(panel) -> None:
