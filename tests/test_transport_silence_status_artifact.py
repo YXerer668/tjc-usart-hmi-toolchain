@@ -22,6 +22,8 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertEqual(evidence["orchestrated_recovery"]["classification"], "still_silent_after_recovery")
         self.assertFalse(evidence["public_whmi_entry_probe"]["ack_received"])
         self.assertTrue(evidence["sd_recovery_package"]["package_ready"])
+        self.assertTrue(evidence["sd_recovery_handoff"]["verify_cmd"].endswith("00_先双击_校验恢复包.cmd"))
+        self.assertTrue(evidence["sd_recovery_handoff"]["followup_cmd"].endswith("01_SD恢复完成后双击_继续验证.cmd"))
         self.assertTrue(conclusions["runtime_silence_not_explained_by_baud_drift"])
         self.assertTrue(conclusions["panel_is_visibly_powered_not_black"])
         self.assertTrue(conclusions["official_gui_local_interaction_not_sufficient_to_start_download"])
