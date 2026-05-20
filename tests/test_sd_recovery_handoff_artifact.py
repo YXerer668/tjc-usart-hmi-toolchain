@@ -25,6 +25,7 @@ class SdRecoveryHandoffArtifactTests(unittest.TestCase):
         self.assertTrue(payload["followup_cmd_file"].endswith("恢复后运行.cmd"))
         self.assertTrue(payload["verify_powershell_file"].endswith("校验恢复包.ps1"))
         self.assertTrue(payload["verify_cmd_file"].endswith("校验恢复包.cmd"))
+        self.assertTrue(payload["launcher_cmd"].endswith("00_总入口_先看我.cmd"))
         self.assertTrue(payload["ordered_verify_cmd"].endswith("00_先双击_校验恢复包.cmd"))
         self.assertTrue(payload["ordered_followup_cmd"].endswith("01_SD恢复完成后双击_继续验证.cmd"))
         self.assertTrue(payload["manual_gui_cmd"].endswith("02_如需手动官方下载恢复.cmd"))

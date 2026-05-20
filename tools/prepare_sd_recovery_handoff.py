@@ -127,6 +127,31 @@ def main() -> int:
     shutil.copy2(verify_cmd, ordered_verify_cmd)
     ordered_after_cmd = out_dir / "01_SD恢复完成后双击_继续验证.cmd"
     shutil.copy2(after_cmd, ordered_after_cmd)
+    ordered_manual_gui_cmd = out_dir / "02_如需手动官方下载恢复.cmd"
+    ordered_manual_gui_cmd.write_text(
+        manual_gui_cmd.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+
+    launcher_cmd = out_dir / "00_总入口_先看我.cmd"
+    launcher_cmd.write_text(
+        "\r\n".join(
+            [
+                "@echo off",
+                "setlocal",
+                "echo 当前建议顺序：",
+                "echo 1. 先双击 00_先双击_校验恢复包.cmd",
+                "echo 2. 按 README_恢复说明.md 做 SD 恢复",
+                "echo 3. 恢复完成后双击 01_SD恢复完成后双击_继续验证.cmd",
+                "echo 4. 如果你想改走手动官方下载恢复，则双击 02_如需手动官方下载恢复.cmd",
+                "echo.",
+                "start \"\" notepad.exe \"当前状态摘要.md\"",
+                "pause",
+            ]
+        )
+        + "\r\n",
+        encoding="utf-8",
+    )
 
     status_summary = out_dir / "当前状态摘要.md"
     status_summary.write_text(
@@ -174,9 +199,10 @@ def main() -> int:
             "恢复后运行.cmd": str(after_cmd),
             "校验恢复包.ps1": str(verify_ps1),
             "校验恢复包.cmd": str(verify_cmd),
+            "00_总入口_先看我.cmd": str(launcher_cmd),
             "00_先双击_校验恢复包.cmd": str(ordered_verify_cmd),
             "01_SD恢复完成后双击_继续验证.cmd": str(ordered_after_cmd),
-            "02_如需手动官方下载恢复.cmd": str(manual_gui_cmd),
+            "02_如需手动官方下载恢复.cmd": str(ordered_manual_gui_cmd),
             "当前状态摘要.md": str(status_summary),
         },
         "source_files": {
@@ -209,9 +235,10 @@ def main() -> int:
         "followup_cmd_file": str(after_cmd),
         "verify_powershell_file": str(verify_ps1),
         "verify_cmd_file": str(verify_cmd),
+        "launcher_cmd": str(launcher_cmd),
         "ordered_verify_cmd": str(ordered_verify_cmd),
         "ordered_followup_cmd": str(ordered_after_cmd),
-        "manual_gui_cmd": str(manual_gui_cmd),
+        "manual_gui_cmd": str(ordered_manual_gui_cmd),
         "status_summary_file": str(status_summary),
     }
     report_out.parent.mkdir(parents=True, exist_ok=True)
