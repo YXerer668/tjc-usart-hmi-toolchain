@@ -31,6 +31,8 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertEqual(payload["experiments"]["prefix_rowcount_patch"]["qty_kind"], "number")
         self.assertEqual(payload["experiments"]["prefix_rowindex_patch"]["sendme_after_page1"], 1)
         self.assertEqual(payload["experiments"]["prefix_rowindex_patch"]["qty_after"], 0)
+        self.assertEqual(payload["experiments"]["prefix_rowhash_patch"]["sendme_after_page1"], 1)
+        self.assertEqual(payload["experiments"]["prefix_rowhash_patch"]["qty_after"], 0)
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
@@ -41,8 +43,9 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertFalse(payload["conclusions"]["page_header_patch_sufficient"])
         self.assertTrue(payload["conclusions"]["prefix_offset_trio_necessary_for_binding"])
         self.assertFalse(payload["conclusions"]["prefix_rowcount_sufficient"])
-        self.assertTrue(payload["conclusions"]["prefix_rowindex_controls_page_mapping"])
         self.assertFalse(payload["conclusions"]["prefix_rowindex_sufficient_for_enumeration"])
+        self.assertFalse(payload["conclusions"]["prefix_rowhash_sufficient_for_enumeration"])
+        self.assertTrue(payload["conclusions"]["prefix_rowhash_and_rowindex_leave_enumeration_dead"])
 
 
 if __name__ == "__main__":

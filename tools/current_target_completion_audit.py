@@ -79,6 +79,7 @@ def build_report() -> dict[str, Any]:
                 "a new tail-prefix decode artifact now shows the deeper multi-page prefix/page-table layer diverges sharply between the working page1 load family and the failing page1 file-browser family, so the next target moves above single-object and one-tuple page-header patches",
                 "an eighth probe shows the three +6 prefix-offset fields are necessary for even object binding: reverting just those fields turns page1 fbrowser0.dir/filter/qty/txt into invalid_reference, so the remaining suspect narrows further to the inserted 6-byte page row and deeper page-table semantics rather than the offset trio itself",
                 "a ninth probe changes only the inserted page-row count field from 1 to 0 while keeping the offset trio and inserted 6-byte row intact; field binding stays alive but qty remains 0 and the white camera surface remains, so the count field itself is not sufficient either",
+                "a tenth and eleventh probe then change the inserted 6-byte row's last two bytes and middle four bytes independently; in both cases page1->sendme still reaches 1 while qty remains 0 and the white camera surface remains, so neither rowindex nor rowhash is sufficient on its own",
             ],
             "blocks": [
                 "page1 file-browser direct enumeration/display recovery",
@@ -98,6 +99,8 @@ def build_report() -> dict[str, Any]:
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_tail_prefix_decode_2026-05-21.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_prefix_offset_live_probe_2026-05-21.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_prefix_rowcount_live_probe_2026-05-21.json",
+                "examples/lifecycle_runtime_smoke/page1_filebrowser_prefix_rowindex_live_probe_2026-05-21.json",
+                "examples/lifecycle_runtime_smoke/page1_filebrowser_prefix_rowhash_live_probe_2026-05-21.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_narrowing_experiments_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_load_wrapper_live_probe_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",

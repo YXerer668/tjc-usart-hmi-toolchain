@@ -124,14 +124,22 @@
                                                       "dir_after":  "sd0/",
                                                       "camera":  "reverse_usarthmi/page1_filebrowser_prefix_rowindex_probe_20260521/camera_20260521_010202.jpg",
                                                       "change":  "patched only the inserted 6-byte page row tail word from 0 to 1"
-                                                  }
+                                                  },
+                        "prefix_rowhash_patch":  {
+                                                     "probe":  "page1_filebrowser_prefix_rowhash_probe_20260521",
+                                                     "sendme_after_page1":  1,
+                                                     "qty_after":  0,
+                                                     "dir_after":  "sd0/",
+                                                     "camera":  "reverse_usarthmi/page1_filebrowser_prefix_rowhash_probe_20260521/camera_20260521_011257.jpg",
+                                                     "change":  "patched only 0xAE0042..0xAE0045 in the inserted 6-byte page row to the single-page working bytes; kept rowcount=1 and rowindex=0"
+                                                 }
                     },
     "conclusions":  {
                         "field_binding_recovered":  true,
                         "enumeration_display_recovered":  false,
                         "cross_page_companion_name_collision_primary_cause":  false,
                         "page0_vs_page1_filebrowser_cluster_geometry_primary_cause":  false,
-                        "narrowing":  "page1 file-browser local direct-TFT still stays unresolved after ten increasingly strict probes. original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1, a patch that changes only the actual on-disk second fbrowser0 record event_offset from 0x1E5 to the working single-page on-disk value 0x207, a patch that changes only the actual on-disk page1 mirror-page-header tuple to the single-page working header values, and a patch that changes only the prefix page-row count from 1 to 0 all still leave qty=0 and a white camera surface. page0 control evidence proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. a prefix-offset probe proves the three +6 prefix-offset fields are necessary for any page1 file-browser binding because reverting them causes invalid_reference. a rowindex probe then shows the last two bytes of the inserted 6-byte page row do control runtime page mapping, because page1-\u003esendme becomes 1, but even that change still leaves qty=0 and the white surface. the remaining structural gap is therefore pushed more specifically into the inserted 6-byte row hash/row semantics together with deeper multi-page prefix/page-table framing, not the offset trio, rowcount, or rowindex alone.",
+                        "narrowing":  "page1 file-browser local direct-TFT still stays unresolved after eleven increasingly strict probes. original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1, a patch that changes only the actual on-disk second fbrowser0 record event_offset from 0x1E5 to the working single-page on-disk value 0x207, a patch that changes only the actual on-disk page1 mirror-page-header tuple to the single-page working header values, and a patch that changes only the prefix page-row count from 1 to 0 all still leave qty=0 and a white camera surface. page0 control evidence proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. a prefix-offset probe proves the three +6 prefix-offset fields are necessary for any page1 file-browser binding because reverting them causes invalid_reference. a rowindex probe and a rowhash probe both still leave qty=0 and the white surface, even though page1-\u003esendme becomes 1 in both cases. the remaining structural gap is therefore pushed more specifically into the combined inserted 6-byte row semantics together with deeper multi-page prefix/page-table framing, not the offset trio, rowcount, rowindex, or rowhash in isolation.",
                         "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false,
                         "qty_semantics_confirmed":  true,
                         "fbrowser_runtime_index_patch_sufficient":  false,
@@ -140,7 +148,8 @@
                         "prefix_layer_is_next_target":  true,
                         "prefix_offset_trio_necessary_for_binding":  true,
                         "prefix_rowcount_sufficient":  false,
-                        "prefix_rowindex_controls_page_mapping":  true,
-                        "prefix_rowindex_sufficient_for_enumeration":  false
+                        "prefix_rowindex_sufficient_for_enumeration":  false,
+                        "prefix_rowhash_sufficient_for_enumeration":  false,
+                        "prefix_rowhash_and_rowindex_leave_enumeration_dead":  true
                     }
 }
