@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "target": "TJC8048X543_011C",
+  "status": "negative-live-proof",
+  "claim": "official GUI page1 file-stream minimal case compiles, but runtime object lookup still fails on the current panel",
+  "workspace_artifacts": {
+    "probe_dir": "reverse_usarthmi/page1_dragged_advanced_map_20260519/y480",
+    "probe_hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_dragged_advanced_map_20260519\\y480\\lcd_test.HMI",
+    "official_compile_json": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filestream_official_compile_20260519\\lcd_test.official_compile.json",
+    "official_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filestream_official_compile_20260519\\output\\lcd_test.tft",
+    "smoke_result": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filestream_official_compile_20260519\\smoke_20260519_upload\\smoke_result.json",
+    "camera": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filestream_official_compile_20260519\\smoke_20260519_upload\\camera_after_smoke.jpg"
+  },
+  "page1_hmi_confirmation": {
+    "page1_blocks": [
+      [
+        "page1",
+        "y",
+        0
+      ],
+      [
+        "fs0",
+        "?",
+        1
+      ]
+    ],
+    "page1_types": [
+      "y",
+      "?"
+    ],
+    "saved_by_official_gui": true
+  },
+  "official_compile": {
+    "compiled_success": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "compiled_output_size": 11410064,
+    "tft_checksum_hex": "0x041A2DBB",
+    "tft_sha256": "069a756fc2d7d1e526bb554fdcc1fed99387b0f3d25e5b8c7a8810681f354638",
+    "object_region_length": 6800,
+    "page_lines": [
+      "页面:page1 占用内存:16+10876=10892",
+      "页面:page0 占用内存:16+340=356"
+    ]
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "screen_black_or_bricked": false,
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "actual": 1,
+      "ok": true
+    },
+    "fs0_en": {
+      "command": "get fs0.en",
+      "response_kind": "invalid_reference",
+      "response_hex": "1a ff ff ff",
+      "expected_value": 0,
+      "ok": false
+    },
+    "camera_ok": true
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "supports_page1_advanced_controls": false,
+    "not_claimed": [
+      "page1 file-stream runtime binding on the current target",
+      "page1 advanced controls as a supported authoring/runtime path",
+      "page1 advanced object readback or event dispatch"
+    ]
+  }
+}

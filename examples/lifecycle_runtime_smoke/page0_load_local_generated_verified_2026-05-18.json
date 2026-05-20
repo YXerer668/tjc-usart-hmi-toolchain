@@ -1,0 +1,42 @@
+{
+  "date": "2026-05-18",
+  "target_panel": "TJC8048X543_011C",
+  "port": "COM36",
+  "scene": "C:/Users/SinYu/Desktop/case_for_codex/case_52_page_lifecycle_delta_oracle/01_page0_load_printh_only/scene.json",
+  "seed_hmi": "D:/MySTM32/H723ZGT6/Program/ISP_Test/lcd_test.HMI",
+  "baseline_tft": "C:/Users/SinYu/Desktop/case_for_codex/case_00_baseline/lcd_test.tft",
+  "generated_tft": "reverse_usarthmi/case52_page0_load_local_build_probe_20260518_v2/output.tft",
+  "generated_hmi": "reverse_usarthmi/case52_page0_load_local_build_probe_20260518_v2/output.hmi",
+  "event_index": "reverse_usarthmi/case52_page0_load_local_build_probe_20260518_v2/event_index.json",
+  "smoke_result": "reverse_usarthmi/case52_page0_load_local_v2_smoke_20260518/smoke_result.json",
+  "camera": "reverse_usarthmi/case52_page0_load_local_v2_smoke_20260518/camera_after_smoke.jpg",
+  "expectation": "local scene build emits page0.codesload printh AA 52 10 01 as a post-primary page-load phase",
+  "checksum": {
+    "file_size": 11405996,
+    "stored_hex": "0x293149B5",
+    "valid": true
+  },
+  "event_index_summary": {
+    "scheduler_path": "post_primary_page_event",
+    "post_primary_page_event_match_count": 1,
+    "page_load_phase_match_count": 1,
+    "page_load_phase_offset_hex": "0x253",
+    "prefix_length": 29
+  },
+  "upload": {
+    "uploaded": true,
+    "bytes_sent": 11405996,
+    "chunks_sent": 2785,
+    "chunk_size": 4096,
+    "elapsed_s": 262.625
+  },
+  "result": {
+    "status": "passed",
+    "sendme": 0,
+    "get_t0_txt": "INIT",
+    "trigger": "page 0",
+    "observed_hex": "AA 52 10 01",
+    "camera_ok": true
+  },
+  "meaning": "This proves the local scene-to-TFT path can emit a minimal page0 load post-primary lifecycle phase that dispatches on the current TJC8048X543_011C panel. It does not prove arbitrary page lifecycle scripts, page1 lifecycle dispatch, or full official scheduler equivalence."
+}

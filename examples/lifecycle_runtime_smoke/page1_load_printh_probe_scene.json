@@ -1,0 +1,74 @@
+{
+  "project": {
+    "name": "page1-load-printh-probe",
+    "default_page": "page0",
+    "experimental_multi_page_events": true,
+    "live_smoke": {
+      "version": 1,
+      "auto_expectations": false,
+      "auto_steps": false,
+      "page_id": 0,
+      "restore_page": 0,
+      "steps": [
+        {
+          "label": "page1.load.marker",
+          "command": "page 1",
+          "expected_kind": "unknown",
+          "expected_hex": "23 02 50 4C",
+          "attempts": 3
+        },
+        {
+          "label": "sendme.page1",
+          "command": "sendme",
+          "expected_kind": "page_id",
+          "expected_value": 1,
+          "attempts": 3
+        },
+        {
+          "label": "p1title.txt",
+          "command": "get p1title.txt",
+          "expected_kind": "string",
+          "expected": "LOAD",
+          "attempts": 3
+        }
+      ]
+    }
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": []
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "events": {
+        "load": [
+          "printh 23 02 50 4C"
+        ]
+      },
+      "widgets": [
+        {
+          "id": "p1title",
+          "type": "text",
+          "x": 72,
+          "y": 64,
+          "w": 320,
+          "h": 58,
+          "text": "LOAD"
+        }
+      ]
+    }
+  ]
+}

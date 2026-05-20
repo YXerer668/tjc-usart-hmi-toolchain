@@ -1,0 +1,646 @@
+{
+  "schema_version": 1,
+  "root": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\examples\\advanced_direct_tft_demo",
+  "summary": {
+    "scene_count": 45,
+    "scene_with_live_smoke": 11,
+    "scene_without_live_smoke": 34,
+    "scene_with_conventional_legacy_expect": 25,
+    "scene_with_matching_conventional_legacy": 25,
+    "scene_with_mismatching_conventional_legacy": 0,
+    "orphan_legacy_expect_count": 0
+  },
+  "scenes": [
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/data_record_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/data_record_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_b0_event_case85_oracle_aligned_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_b0_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_button_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/data_record_sliding_text_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 5,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_case85_current_code_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_case85_oracle_aligned_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_button_case83_current_code_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 5,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_button_case83_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/data_record_text_select_button_case83_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 5,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_button_case83_oracle_aligned_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 5,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_case80_current_code_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_case80_oracle_aligned_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/data_record_text_select_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_button_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_owned_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_owned_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 2
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_sliding_text_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_sliding_text_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_sliding_text_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_sliding_text_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_text_select_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_text_select_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_text_select_case56_oracle_aligned_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_text_select_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_browser_text_select_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_browser_text_select_select0_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 3,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_button_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_en_slot_batch_probe_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 12,
+      "step_count": 10
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_open_case72_current_code_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_open_case72_oracle_aligned_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 0,
+      "step_count": 8
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_open_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_open_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 0,
+      "step_count": 8
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_self_down_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_self_down_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_self_down_set_val_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 2,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_set_val_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_set_val_button_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 3
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_sliding_text_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_sliding_text_open_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 5,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_sliding_text_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_sliding_text_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_slot_batch_probe_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 8,
+      "step_count": 6
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_text_select_button_event_scene.json",
+      "has_live_smoke": true,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": false,
+        "auto_steps": false,
+        "explicit_live_smoke": true
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 4,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_text_select_open_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": null,
+      "conventional_legacy_match": null,
+      "expectation_count": 5,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/file_stream_text_select_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/file_stream_text_select_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/sliding_text_owned_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/sliding_text_owned_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/sliding_text_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/sliding_text_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 1,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/text_select_owned_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/text_select_owned_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/text_select_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/text_select_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 1,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/text_select_sliding_text_combo_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/text_select_sliding_text_combo_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 2,
+      "step_count": 0
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/text_select_sliding_text_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/text_select_sliding_text_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 1
+    },
+    {
+      "scene": "examples/advanced_direct_tft_demo/text_select_sliding_text_multi_event_scene.json",
+      "has_live_smoke": false,
+      "generated_available": true,
+      "generated_source": {
+        "auto_expectations": true,
+        "auto_steps": true,
+        "explicit_live_smoke": false
+      },
+      "conventional_legacy_expect": "examples/advanced_direct_tft_demo/text_select_sliding_text_multi_event_smoke.expect.json",
+      "conventional_legacy_match": true,
+      "expectation_count": 3,
+      "step_count": 3
+    }
+  ],
+  "orphan_legacy_expect_files": []
+}

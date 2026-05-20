@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "target": "TJC8048X543_011C",
+  "status": "live-verified",
+  "claim": "the exact data-record plus sliding-text case85-aligned scene now closes the loop end to end: scene build reproduces the official no-event data0+slt0 oracle byte-for-byte and the result still passes COM36 live smoke",
+  "scene": "examples/advanced_direct_tft_demo/data_record_sliding_text_case85_oracle_aligned_scene.json",
+  "artifacts": {
+    "build_dir": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519",
+    "output_hmi": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519/output.hmi",
+    "output_tft": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519/output.tft",
+    "manifest": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519/manifest.json",
+    "smoke_result": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519/smoke_20260519_upload/smoke_result.json",
+    "camera": "reverse_usarthmi/case85_datarecord_sltext_live_candidate_20260519/smoke_20260519_upload/camera_after_smoke.jpg",
+    "official_hmi": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_85_datarecord_sltext_official_positive_oracle\\lcd_test.HMI",
+    "official_tft": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_85_datarecord_sltext_official_positive_oracle\\official_work_output_after_gui_create_20260519\\output\\lcd_test.tft",
+    "official_compile_capture": "reverse_usarthmi/case57_plus_sltext_official_compile_20260519/lcd_test.official_compile.json",
+    "gui_probe_hmi": "reverse_usarthmi/case57_add_textselect_probe_20260519/lcd_test.HMI"
+  },
+  "build_summary": {
+    "file_size": 11415008,
+    "sha256": "fc65e5ceae7e1dbf2bf652653661249d4d7a1d9c6dcee89f08de15c4234ecfcb",
+    "checksum_hex": "0xAC2D81EA",
+    "checksum_valid": true,
+    "section_offsets": {
+      "attr": "0xC1E",
+      "user": "0xC42",
+      "pic": "0x281A",
+      "tail": "0x2DE0"
+    }
+  },
+  "parity": {
+    "byte_identical_to_official": true,
+    "local_sha256": "fc65e5ceae7e1dbf2bf652653661249d4d7a1d9c6dcee89f08de15c4234ecfcb",
+    "official_sha256": "fc65e5ceae7e1dbf2bf652653661249d4d7a1d9c6dcee89f08de15c4234ecfcb"
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "page": 0,
+    "sendme_ok": true,
+    "readback": {
+      "data0.maxval": 1000,
+      "data0.path": "sd0/1.data",
+      "slt0.txt": "000\r\n111\r\n222\r\n333\r\n444\r\n666\r\n777\r\n777\r\n888\r\n999"
+    },
+    "camera_ok": true
+  }
+}

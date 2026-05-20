@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "target": "TJC8048X543_011C",
+  "status": "negative-live-proof",
+  "claim": "official GUI page1 sliding-text minimal case compiles, but runtime object lookup still fails on the current panel",
+  "official_case": {
+    "case_dir": "C:/Users/SinYu/Desktop/case_for_codex/case_74_page1_sltext_minimal_official_oracle",
+    "request": "C:/Users/SinYu/Desktop/case_for_codex/case_74_page1_sltext_minimal_official_oracle/REQUEST.md",
+    "hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_74_page1_sltext_minimal_official_oracle/lcd_test.HMI",
+    "precompile_confirmation": "C:/Users/SinYu/Desktop/case_for_codex/case_74_page1_sltext_minimal_official_oracle/gui_verify_after_gui_create_20260519/precompile_confirmation.json"
+  },
+  "official_gui_creation": {
+    "saved_by_official_gui": true,
+    "page1_blocks": [
+      ["page1", "y", 0],
+      ["slt0", ">", 1]
+    ],
+    "toolbox_wheel": -1,
+    "tool_rel_y": 964
+  },
+  "official_compile": {
+    "compiled_success": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "compiled_output_size": 11411268,
+    "tft_checksum_hex": "0x7E9C25D8",
+    "tft_sha256": "fff7a318fe3012ea48302ee73fedae21588c02e976c014b944e2c5240467fbf5",
+    "object_region_length": 8004,
+    "pictures_delta": 7065,
+    "usercode_address": 1713,
+    "page_lines": [
+      "page1 occupied memory 16+716=732",
+      "page0 occupied memory 16+340=356"
+    ]
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "screen_black_or_bricked": false,
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "actual": 1,
+      "ok": true
+    },
+    "slt0_txt": {
+      "command": "get slt0.txt",
+      "response_kind": "invalid_reference",
+      "response_hex": "1a ff ff ff",
+      "expected_value": "000\\r\\n111\\r\\n222\\r\\n333\\r\\n444\\r\\n666\\r\\n777\\r\\n777\\r\\n888\\r\\n999",
+      "ok": false
+    },
+    "camera_ok": true
+  },
+  "diagnosis": {
+    "scope": "official GUI positive compile plus live runtime negative readback",
+    "reasoning": [
+      "This case is created and saved by the official GUI itself, so it is not limited by the local builder path.",
+      "The official compiler emits a full page1 memory line and a non-empty object region, so this is not an empty-shell compile artifact.",
+      "The live panel still returns invalid_reference for get slt0.txt after page 1 / sendme succeeds, so page1 sliding-text is not a readable bound runtime object on the current target."
+    ]
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "supports_page1_advanced_controls": false,
+    "not_claimed": [
+      "page1 sliding-text runtime binding on the current target",
+      "page1 advanced controls as a supported authoring/runtime path",
+      "page1 advanced object readback or event dispatch"
+    ]
+  }
+}

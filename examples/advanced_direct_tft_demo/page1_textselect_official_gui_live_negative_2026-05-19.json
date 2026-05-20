@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "target": "TJC8048X543_011C",
+  "status": "negative-live-proof",
+  "claim": "official GUI page1 text-select minimal case compiles, but runtime object lookup still fails on the current panel",
+  "official_case": {
+    "case_dir": "C:/Users/SinYu/Desktop/case_for_codex/case_73_page1_textselect_minimal_official_oracle",
+    "request": "C:/Users/SinYu/Desktop/case_for_codex/case_73_page1_textselect_minimal_official_oracle/REQUEST.md",
+    "hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_73_page1_textselect_minimal_official_oracle/lcd_test.HMI",
+    "precompile_confirmation": "C:/Users/SinYu/Desktop/case_for_codex/case_73_page1_textselect_minimal_official_oracle/gui_verify_after_gui_create_20260519/precompile_confirmation.json"
+  },
+  "workspace_artifacts": {
+    "probe_dir": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519",
+    "after_add_screenshot": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/after_add.png",
+    "official_compile_json": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/official_compile_probe_20260519/lcd_test.official_compile.json",
+    "official_tft": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/official_compile_probe_20260519/output/lcd_test.tft",
+    "smoke_result": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/official_compile_probe_20260519/smoke_20260519_upload/smoke_result.json",
+    "camera": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/official_compile_probe_20260519/smoke_20260519_upload/camera_after_smoke.jpg"
+  },
+  "page1_hmi_confirmation": {
+    "page1_blocks": [
+      ["page1", "y", 0],
+      ["select0", "D", 1]
+    ],
+    "page1_types": ["y", "D"],
+    "saved_by_official_gui": true
+  },
+  "official_compile": {
+    "compiled_success": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "compiled_output_size": 11411952,
+    "tft_checksum_hex": "0x4A288366",
+    "tft_sha256": "fab5202b93864614fef790e8c1d8fc398b3407b5bc745c55df38af321018a5a8",
+    "object_region_length": 8688,
+    "pictures_delta": 7749,
+    "usercode_address": 2469,
+    "page_lines": [
+      "page1 occupied memory 16+1472=1488",
+      "page0 occupied memory 16+340=356"
+    ]
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "screen_black_or_bricked": false,
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "actual": 1,
+      "ok": true
+    },
+    "select0_val": {
+      "command": "get select0.val",
+      "response_kind": "invalid_reference",
+      "response_hex": "1a ff ff ff",
+      "expected_value": 0,
+      "ok": false
+    },
+    "camera_ok": true
+  },
+  "diagnosis": {
+    "scope": "official GUI positive compile plus live runtime negative readback",
+    "reasoning": [
+      "This case is stronger than local scene/HMI probes because the page1 text-select object is created and saved by the official GUI itself.",
+      "The official compiler emits a full object region and page1 memory line, so this is not an empty-shell compile artifact.",
+      "The live panel still returns invalid_reference for get select0.val after page 1 / sendme succeeds, so the current target runtime does not expose this page1 advanced object as a readable bound object."
+    ]
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "supports_page1_advanced_controls": false,
+    "not_claimed": [
+      "page1 text-select runtime binding on the current target",
+      "page1 advanced controls as a supported authoring/runtime path",
+      "page1 advanced object readback or event dispatch"
+    ]
+  }
+}

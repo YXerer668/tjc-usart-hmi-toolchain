@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-19",
+  "target": "TJC8048X543_011C",
+  "status": "negative-live-proof",
+  "claim": "official GUI page1 data-record minimal case compiles, but runtime object lookup still fails on the current panel",
+  "workspace_artifacts": {
+    "probe_dir": "reverse_usarthmi/page1_dragged_advanced_map_20260519/y406",
+    "probe_hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_dragged_advanced_map_20260519\\y406\\lcd_test.HMI",
+    "official_compile_json": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_datarecord_official_compile_20260519\\lcd_test.official_compile.json",
+    "official_tft": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_datarecord_official_compile_20260519\\output\\lcd_test.tft",
+    "smoke_result": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_datarecord_official_compile_20260519\\smoke_20260519_upload\\smoke_result.json",
+    "camera": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_datarecord_official_compile_20260519\\smoke_20260519_upload\\camera_after_smoke.jpg"
+  },
+  "page1_hmi_confirmation": {
+    "page1_blocks": [
+      [
+        "page1",
+        "y",
+        0
+      ],
+      [
+        "data0",
+        "B",
+        1
+      ]
+    ],
+    "page1_types": [
+      "y",
+      "B"
+    ],
+    "saved_by_official_gui": true
+  },
+  "official_compile": {
+    "compiled_success": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "compiled_output_size": 11413064,
+    "tft_checksum_hex": "0xC9ED17A6",
+    "tft_sha256": "caa8e8953f7b3967b4203cbffa844d3ebe87a7bdbb99f045949322e7cb00e728",
+    "object_region_length": 9800,
+    "page_lines": [
+      "页面:page1 占用内存:12080+80=12160",
+      "页面:page0 占用内存:12080+340=12420"
+    ]
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "screen_black_or_bricked": false,
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "actual": 1,
+      "ok": true
+    },
+    "data0_maxval": {
+      "command": "get data0.maxval",
+      "response_kind": "invalid_reference",
+      "response_hex": "1a ff ff ff",
+      "expected_value": 1000,
+      "ok": false
+    },
+    "camera_ok": true
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "supports_page1_advanced_controls": false,
+    "not_claimed": [
+      "page1 data-record runtime binding on the current target",
+      "page1 advanced controls as a supported authoring/runtime path",
+      "page1 advanced object readback or event dispatch"
+    ]
+  }
+}

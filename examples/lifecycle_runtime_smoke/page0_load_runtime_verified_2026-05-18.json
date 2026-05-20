@@ -1,0 +1,17 @@
+{
+  "date": "2026-05-18",
+  "target_panel": "TJC8048X543_011C",
+  "port": "COM36",
+  "official_oracle": "C:/Users/SinYu/Desktop/case_for_codex/case_52_page_lifecycle_delta_oracle/01_page0_load_printh_only/official_work_output_source_events_20260518_1150/output/source_raw.tft",
+  "expectation": "page0.codesload printh AA 52 10 01",
+  "smoke_result": "reverse_usarthmi/case52_page0_load_runtime_smoke_20260518/smoke_result.json",
+  "camera": "reverse_usarthmi/case52_page0_load_runtime_smoke_20260518/camera_after_smoke.jpg",
+  "result": {
+    "status": "passed",
+    "uploaded": true,
+    "sendme": 0,
+    "trigger": "page 0",
+    "observed_hex": "AA 52 10 01"
+  },
+  "meaning": "This proves the official page0 load lifecycle callback dispatches at runtime for the minimal printh shape. It does not yet prove the local scene compiler can emit equivalent lifecycle scheduler records."
+}

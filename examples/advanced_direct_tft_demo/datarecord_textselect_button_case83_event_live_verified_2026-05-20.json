@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "live-verified",
+  "claim": "the exact case83-aligned page0 shape with b1.down -> printh 23 83 42 54 is now public and has fresh COM36 runtime proof",
+  "scene": "examples/advanced_direct_tft_demo/data_record_text_select_button_case83_event_scene.json",
+  "public_build": {
+    "manifest": "reverse_usarthmi/caseC4_live_reverify_20260520/manifest.json",
+    "output_tft": "reverse_usarthmi/caseC4_live_reverify_20260520/output.tft",
+    "checksum_hex": "0x14A81513",
+    "checksum_valid": true,
+    "oracle_reference": "reverse_usarthmi/case83_official_gui_event_oracle2_20260520/official_compile/output/source_raw.tft",
+    "oracle_byte_identical": true
+  },
+  "live_smoke": {
+    "upload_smoke_result": "reverse_usarthmi/caseC4_live_reverify_20260520/smoke_20260520_upload/smoke_result.json",
+    "recheck_smoke_result": "reverse_usarthmi/caseC4_live_reverify_20260520/smoke_20260520_recheck/smoke_result.json",
+    "runtime_observation": {
+      "data0.maxval": 1000,
+      "data0.path": "sd0/1.data",
+      "select0.val": 0,
+      "b1.txt": "newtxt",
+      "bar1.val": 60,
+      "click b1,1": "23 83 42 54"
+    }
+  },
+  "meaning": {
+    "supports_datarecord_textselect_button_b1_down_marker": true,
+    "scope": "this proof is limited to the exact case83-aligned page0 shape with one ordinary b1.down printh line"
+  }
+}

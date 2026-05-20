@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "mode": "lifecycle_runtime_equivalence_report",
+  "rows": [
+    {
+      "label": "local_generated_page0_load_positive",
+      "scheduler_path": "post_primary_page_event",
+      "safe_to_flash": true,
+      "phase_start_hex": "0x253",
+      "first_executable_hex": "0x253",
+      "phase_end_hex": null,
+      "slot_0x0c_hex": null,
+      "slot_0x10_hex": null,
+      "slot_0x14_hex": null,
+      "event_offset_0x34_hex": null,
+      "runtime_result": "observed AA 52 10 01 after page 0"
+    },
+    {
+      "label": "official_case51_page0_load",
+      "scheduler_path": "page_event_boundary_without_page_callback",
+      "safe_to_flash": false,
+      "phase_start_hex": "0x327",
+      "first_executable_hex": "0x327",
+      "phase_end_hex": "0x373",
+      "slot_0x0c_hex": null,
+      "slot_0x10_hex": null,
+      "slot_0x14_hex": null,
+      "event_offset_0x34_hex": "0x149",
+      "runtime_result": "compiler_oracle_only"
+    },
+    {
+      "label": "official_case51_page1_load",
+      "scheduler_path": "unbound_or_empty",
+      "safe_to_flash": false,
+      "phase_start_hex": "0x45A",
+      "first_executable_hex": "0x45A",
+      "phase_end_hex": "0x489",
+      "slot_0x0c_hex": null,
+      "slot_0x10_hex": null,
+      "slot_0x14_hex": null,
+      "event_offset_0x34_hex": "0x14F",
+      "runtime_result": "compiler_oracle_only"
+    },
+    {
+      "label": "official_case52_page0_load",
+      "scheduler_path": "page_event_boundary_without_page_callback",
+      "safe_to_flash": false,
+      "phase_start_hex": "0x2AB",
+      "first_executable_hex": "0x2AB",
+      "phase_end_hex": "0x2C8",
+      "slot_0x0c_hex": null,
+      "slot_0x10_hex": null,
+      "slot_0x14_hex": null,
+      "event_offset_0x34_hex": "0x141",
+      "runtime_result": "compiler_oracle_only"
+    },
+    {
+      "label": "official_case52_page1_load",
+      "scheduler_path": "object_callbacks_only",
+      "safe_to_flash": false,
+      "phase_start_hex": "0x255",
+      "first_executable_hex": "0x255",
+      "phase_end_hex": "0x272",
+      "slot_0x0c_hex": null,
+      "slot_0x10_hex": null,
+      "slot_0x14_hex": null,
+      "event_offset_0x34_hex": "0x14F",
+      "runtime_result": "compiler_oracle_only"
+    },
+    {
+      "label": "page1_slot_write_negative",
+      "scheduler_path": "blind_slot_write_negative",
+      "safe_to_flash": false,
+      "phase_start_hex": "0x14B",
+      "first_executable_hex": null,
+      "phase_end_hex": null,
+      "slot_0x0c_hex": "0x14B",
+      "slot_0x10_hex": "0x14B",
+      "slot_0x14_hex": "0x14B",
+      "event_offset_0x34_hex": "0x1DA7",
+      "runtime_result": "no_printh_seen_after_slot_write"
+    }
+  ],
+  "interpretation": {
+    "official_page_load_uses_callback_slots": false,
+    "local_page0_positive_is_general_scheduler_equivalence": false,
+    "page1_lifecycle_recovered": false,
+    "narrowing": [
+      "Official lifecycle oracles keep scheduler_path at page_event_boundary_without_page_callback and leave callback slots 0x0c/0x10/0x14 empty.",
+      "The local generated page0 positive proof is real, but it is a narrow post_primary_page_event path and does not prove general lifecycle equivalence.",
+      "Blindly writing page mirror callback slots 0x0c/0x10/0x14 to the page1 event table start fails cleanly and does not recover page1 lifecycle dispatch."
+    ],
+    "recommended_next_step": "Treat lifecycle scheduler recovery as research-only until a new official oracle or descriptor-level explanation narrows the runtime binding path further."
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "live-negative",
+  "claim": "a page1 file-browser cloned into the case31 multi-page HMI can compile through the official GUI, but it is still invalid_reference at runtime on the current target",
+  "scope": {
+    "source_hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_31_multi_page_navigation/lcd_test.HMI",
+    "cloned_widget_source": "C:/Users/SinYu/Desktop/case_for_codex/case_43_filebrowser/lcd_test.HMI",
+    "page": 1,
+    "object": "fbrowser0",
+    "type_code": "A",
+    "creation_method": "local HMI clone into page1, then official GUI compile"
+  },
+  "official_compile": {
+    "hmi": "C:/Users/SinYu/Desktop/case_for_codex/case_B4_page1_filebrowser_hmi_clone_oracle/lcd_test.HMI",
+    "compile_probe": "C:/Users/SinYu/Desktop/case_for_codex/case_B4_page1_filebrowser_hmi_clone_oracle/official_compile_probe_20260520/lcd_test.official_compile.json",
+    "compiled_success": true,
+    "compiled_output_size": 11409248,
+    "page_lines": [
+      "页面:page1 占用内存:16+76=92",
+      "页面:page0 占用内存:16+340=356"
+    ]
+  },
+  "live_smoke": {
+    "probe_result": "C:/Users/SinYu/Desktop/case_for_codex/case_B4_page1_filebrowser_hmi_clone_oracle/live_probe_20260520/probe_result.json",
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "command": "sendme",
+      "ok": true,
+      "page_id": 1
+    },
+    "readback": {
+      "fbrowser0.dir": {
+        "kind": "invalid_reference",
+        "hex": "1a ff ff ff"
+      },
+      "fbrowser0.filter": {
+        "kind": "invalid_reference",
+        "hex": "1a ff ff ff"
+      },
+      "fbrowser0.txt": {
+        "kind": "invalid_reference",
+        "hex": "1a ff ff ff"
+      }
+    }
+  },
+  "meaning": {
+    "compiled_positive_runtime_negative": true,
+    "supports_page1_filebrowser": false,
+    "decision": "page1 file-browser now joins text-select/sliding-text/data-record/file-stream on the current target's page1 runtime-negative list"
+  }
+}

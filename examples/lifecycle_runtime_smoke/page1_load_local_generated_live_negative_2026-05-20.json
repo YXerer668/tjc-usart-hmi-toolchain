@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "live-negative",
+  "claim": "a locally generated page1 ordinary load probe compiles and uploads, but page1 load does not emit the expected marker and the ordinary page1 text object still reads back as invalid_reference",
+  "scene": "examples/lifecycle_runtime_smoke/page1_load_printh_probe_scene.json",
+  "artifacts": {
+    "build_dir": "reverse_usarthmi/page1_load_printh_probe_20260520",
+    "output_hmi": "reverse_usarthmi/page1_load_printh_probe_20260520/output.hmi",
+    "output_tft": "reverse_usarthmi/page1_load_printh_probe_20260520/output.tft",
+    "manifest": "reverse_usarthmi/page1_load_printh_probe_20260520/manifest.json",
+    "smoke_result": "reverse_usarthmi/page1_load_printh_probe_20260520/smoke/smoke_result.json"
+  },
+  "build_summary": {
+    "checksum_hex": "0x578B72E6",
+    "checksum_valid": true,
+    "mode": "experimental_multi_page_tft_patch",
+    "page1_page_event_runtime_status": "compile_only_scheduler_unrecovered"
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "page0_sendme_ok": true,
+    "page1_sendme_ok": true,
+    "page1_load_marker_seen": false,
+    "page1_load_expected_hex": "23 02 50 4C",
+    "page1_title_runtime_kind": "invalid_reference",
+    "page1_title_expected": "LOAD"
+  },
+  "meaning": {
+    "page1_navigation_layer_alive": true,
+    "page1_general_runtime_registration_recovered": false,
+    "narrowing": "this weakens the idea that page1 failures are advanced-only; even a minimal locally generated ordinary page1 load/text probe still fails to bind at runtime"
+  }
+}

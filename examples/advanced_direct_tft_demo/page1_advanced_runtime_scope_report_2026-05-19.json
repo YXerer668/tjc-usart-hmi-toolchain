@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "page1-advanced-runtime-scoped-out",
+  "summary": {
+    "compile_positive_runtime_negative_controls": [
+      "text-select",
+      "sliding-text",
+      "data-record",
+      "file-stream",
+      "file-browser"
+    ],
+    "count": 5,
+    "filebrowser_mapping_resolved": false
+  },
+  "controls": {
+    "text-select": {
+      "artifact": "examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json",
+      "compiled_success": true,
+      "compiled_output_size": 11411952,
+      "object_region_length": 8688,
+      "page_lines": [
+        "page1 occupied memory 16+1472=1488",
+        "page0 occupied memory 16+340=356"
+      ],
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "runtime_status": "invalid_reference"
+    },
+    "sliding-text": {
+      "artifact": "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
+      "compiled_success": true,
+      "compiled_output_size": 11411268,
+      "object_region_length": 8004,
+      "page_lines": [
+        "page1 occupied memory 16+716=732",
+        "page0 occupied memory 16+340=356"
+      ],
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "runtime_status": "invalid_reference"
+    },
+    "data-record": {
+      "artifact": "examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json",
+      "compiled_success": true,
+      "compiled_output_size": 11413064,
+      "object_region_length": 9800,
+      "page_lines": [
+        "页面:page1 占用内存:12080+80=12160",
+        "页面:page0 占用内存:12080+340=12420"
+      ],
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "runtime_status": "invalid_reference"
+    },
+    "file-stream": {
+      "artifact": "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
+      "compiled_success": true,
+      "compiled_output_size": 11410064,
+      "object_region_length": 6800,
+      "page_lines": [
+        "页面:page1 占用内存:16+10876=10892",
+        "页面:page0 占用内存:16+340=356"
+      ],
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "runtime_status": "invalid_reference"
+    },
+    "file-browser": {
+      "artifact": "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json",
+      "compiled_success": true,
+      "compiled_output_size": 11409248,
+      "object_region_length": null,
+      "page_lines": [
+        "页面:page1 占用内存:16+76=92",
+        "页面:page0 占用内存:16+340=356"
+      ],
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "runtime_status": "invalid_reference"
+    }
+  },
+  "filebrowser_mapping": {
+    "tested_variants": 80,
+    "found_candidates": [],
+    "resolved": false
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "scope_out_reason": "page1 advanced runtime is still not closed on the current target; four official GUI-created controls compile to non-empty TFTs yet remain invalid_reference at runtime, and a separately cloned page1 file-browser HMI also compiles positive but remains invalid_reference on the live panel",
+    "next_requirement": "either recover target-runtime binding for page1 advanced controls or keep page1 advanced explicitly out of the independent workflow contract"
+  }
+}

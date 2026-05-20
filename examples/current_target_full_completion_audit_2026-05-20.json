@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "goal": "recover all controls, page transitions, and logic behavior on the current target screen",
+  "current_state": {
+    "independent_scene_tft_live_workflow_exists": true,
+    "native_scene_smoke_live_proven": true,
+    "migration_convergence": {
+      "scene_count": 45,
+      "scene_with_live_smoke": 11,
+      "scene_without_live_smoke": 34,
+      "scene_with_conventional_legacy_expect": 25,
+      "scene_with_matching_conventional_legacy": 25,
+      "scene_with_mismatching_conventional_legacy": 0,
+      "orphan_legacy_expect_count": 0
+    }
+  },
+  "proven_foundations": [
+    {
+      "id": "exact_case80_no_event",
+      "summary": "the exact data-record plus text-select case80-aligned scene now closes the loop end to end: scene build reproduces the official no-event data0+select0 oracle byte-for-byte and the result still passes COM36 live smoke",
+      "evidence": "examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json"
+    },
+    {
+      "id": "exact_case85_no_event",
+      "summary": "the exact data-record plus sliding-text case85-aligned scene now closes the loop end to end: scene build reproduces the official no-event data0+slt0 oracle byte-for-byte and the result still passes COM36 live smoke",
+      "evidence": "examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json"
+    },
+    {
+      "id": "exact_case83_no_event",
+      "summary": "the exact data-record plus text-select plus ordinary button case83-aligned scene now closes the loop end to end: scene build reproduces the official no-event data0+select0+b1 oracle byte-for-byte and the result still passes COM36 live smoke",
+      "evidence": "examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_oracle_aligned_live_verified_2026-05-19.json"
+    },
+    {
+      "id": "exact_case83_event",
+      "summary": "the exact case83-aligned page0 shape with b1.down -> printh 23 83 42 54 is now public and has fresh COM36 runtime proof",
+      "evidence": "examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_event_live_verified_2026-05-20.json"
+    }
+  ],
+  "highest_leverage_unsolved_subsystem": {
+    "id": "scheduler_lifecycle_general_equivalence",
+    "reason": "it is the common runtime explanation layer behind page transitions, load/unload, timers, page1 advanced binding, and logic control",
+    "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
+    "binding_matrix_summary": {
+      "page0_advanced_positive_count": 5,
+      "page1_advanced_compile_positive_runtime_negative_count": 6,
+      "page1_ordinary_lifecycle_negative_count": 1,
+      "page_navigation_layer_proven": true,
+      "page_local_advanced_registration_recovered": false,
+      "highest_leverage_gap": "general scheduler/lifecycle and page-local advanced runtime registration"
+    }
+  },
+  "unfinished": [
+    {
+      "id": "scheduler_lifecycle_general_equivalence",
+      "status": "unfinished",
+      "scope": "general page load/unload, timer, lifecycle callback binding, and scheduler equivalence",
+      "why_unfinished": [
+        "Official lifecycle oracles keep scheduler_path at page_event_boundary_without_page_callback and leave callback slots 0x0c/0x10/0x14 empty.",
+        "The local generated page0 positive proof is real, but it is a narrow post_primary_page_event path and does not prove general lifecycle equivalence.",
+        "Blindly writing page mirror callback slots 0x0c/0x10/0x14 to the page1 event table start fails cleanly and does not recover page1 lifecycle dispatch."
+      ],
+      "blocks": [
+        "general page-level logic recovery",
+        "multi-page runtime registration recovery",
+        "confident expansion beyond narrow object-callback proofs"
+      ],
+      "evidence": [
+        "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json"
+      ]
+    },
+    {
+      "id": "page1_advanced_runtime_binding",
+      "status": "unfinished",
+      "scope": "page1 advanced controls and page-local advanced object lookup/binding",
+      "why_unfinished": [
+        "a local ordinary page1 load/text probe uploads and page-switches, but page1 load emits no expected marker and get p1title.txt still returns invalid_reference",
+        "local multi-page advanced probe uploads and page switches succeed, but page1 advanced object get/click paths return invalid_reference or wrong markers",
+        "official GUI-created page1 text-select, sliding-text, data-record, file-stream, and cloned file-browser still compile positive yet remain invalid_reference on COM36"
+      ],
+      "blocks": [
+        "page1 ordinary load/text runtime registration",
+        "page1 advanced controls as supported authoring/runtime path",
+        "page-local advanced object readback",
+        "page1 advanced event dispatch"
+      ],
+      "evidence": [
+        "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_negative_2026-05-20.json",
+        "examples/advanced_direct_tft_demo/page1_advanced_runtime_binding_negative_2026-05-18.json",
+        "examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json",
+        "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
+        "examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json",
+        "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
+        "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json"
+      ]
+    },
+    {
+      "id": "advanced_control_general_synthesis",
+      "status": "unfinished",
+      "scope": "arbitrary property synthesis and wider advanced-control mixing beyond the narrow proven shapes",
+      "why_unfinished": [
+        "current support is still narrow and shape-specific for exact case80/case85/case83 families and selected local runtime-first mixes",
+        "broader advanced-control mixing and arbitrary field synthesis remain not claimed in the current target limitations"
+      ],
+      "blocks": [
+        "generic advanced-control layout synthesis",
+        "wider same-page advanced mixes",
+        "non-shape-specific property authoring"
+      ],
+      "evidence": [
+        "CURRENT_TARGET_LIMITATIONS.md",
+        "FEATURE_STATUS.md"
+      ]
+    },
+    {
+      "id": "data_record_owned_events_and_broader_datarecord_logic",
+      "status": "unfinished",
+      "scope": "data-record self-owned events and broader data-record logic combinations",
+      "why_unfinished": [
+        "only narrow ordinary-button event paths and exact no-event shapes are proven",
+        "data-record-owned event behavior remains fail-closed"
+      ],
+      "blocks": [
+        "data-record self events",
+        "generic data-record advanced event synthesis"
+      ],
+      "evidence": [
+        "CURRENT_TARGET_LIMITATIONS.md",
+        "FEATURE_STATUS.md"
+      ]
+    },
+    {
+      "id": "file_stream_self_events_and_general_file_system_logic",
+      "status": "unfinished",
+      "scope": "file-stream self events, page events, literal open args, and generalized file-system workflows",
+      "why_unfinished": [
+        "narrow button-wrapper paths are proven, but file-stream self-event and broader file workflows remain fail-closed/not claimed",
+        "negative evidence shows fs0.down self paths still do not dispatch correctly"
+      ],
+      "blocks": [
+        "file-stream self events",
+        "general file-stream methods",
+        "generalized file-system side effects"
+      ],
+      "evidence": [
+        "CURRENT_TARGET_LIMITATIONS.md",
+        "FEATURE_STATUS.md"
+      ]
+    },
+    {
+      "id": "full_hmi_replacement",
+      "status": "unfinished",
+      "scope": "full official USART HMI project decompiler/editor replacement",
+      "why_unfinished": [
+        "the current toolchain edits through a recovered scene model and seed project rather than replacing every official editor feature"
+      ],
+      "blocks": [
+        "full project-level official equivalence",
+        "complete .HMI decompile/rebuild"
+      ],
+      "evidence": [
+        "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\FEATURE_STATUS.md"
+      ]
+    },
+    {
+      "id": "cross_model_compiler",
+      "status": "unfinished",
+      "scope": "generic all-model TFT compiler",
+      "why_unfinished": [
+        "the current writer remains current-target specific to TJC8048X543_011C / 800x480"
+      ],
+      "blocks": [
+        "cross-model compilation",
+        "model-agnostic runtime layout recovery"
+      ],
+      "evidence": [
+        "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\FEATURE_STATUS.md"
+      ]
+    }
+  ],
+  "evidence_roots": {
+    "feature_status": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\FEATURE_STATUS.md",
+    "current_target_limitations": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\CURRENT_TARGET_LIMITATIONS.md",
+    "lifecycle_runtime_equivalence": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
+    "page1_advanced_negative": "examples/advanced_direct_tft_demo/page1_advanced_runtime_binding_negative_2026-05-18.json",
+    "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json"
+  }
+}

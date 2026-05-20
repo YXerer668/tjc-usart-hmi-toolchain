@@ -1,0 +1,25 @@
+{
+  "project": {
+    "name": "case52-page0-load-seed-delete",
+    "default_page": "page0",
+    "delete_seed_objects": ["b0", "p0"]
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 65535
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "events": {
+        "load": ["printh AA 52 10 01"]
+      },
+      "widgets": []
+    }
+  ]
+}

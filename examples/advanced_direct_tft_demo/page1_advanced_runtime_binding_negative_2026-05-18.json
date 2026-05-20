@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-18",
+  "target": "TJC8048X543_011C",
+  "status": "negative-live-proof",
+  "claim": "advanced controls on page1 remain unsupported because runtime object lookup/binding fails",
+  "artifacts": {
+    "build_dir": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518",
+    "scene": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/scene.normalized.json",
+    "target_page0": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/target_0.pa",
+    "target_page1": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/target_1.pa",
+    "output_hmi": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/output.hmi",
+    "output_tft": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/output.tft",
+    "event_index": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/event_index_scene_build_20260518.json",
+    "smoke_result": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/smoke_20260518_upload/smoke_result.json",
+    "camera": "reverse_usarthmi/advanced_direct_tft_multi_page_text_select_sliding_text_event_20260518/smoke_20260518_upload/camera_after_smoke.jpg"
+  },
+  "build_manifest": {
+    "mode": "experimental_multi_page_tft_patch",
+    "file_size": 11415288,
+    "checksum_hex": "0xAF33DB47",
+    "checksum_valid": true,
+    "page_count": 2,
+    "object_count": 8,
+    "experimental_events": true,
+    "page1_object_event_compiled": {
+      "objname": "event1",
+      "type_code": "b",
+      "event_prefix": "codesdown-",
+      "lines": ["printh 23 02 50 41"]
+    }
+  },
+  "hmi_page1_source_objects": [
+    {
+      "objname": "page1",
+      "type_code": "y",
+      "id": 0,
+      "event_tokens": ["codesload-0", "codesloadend-0", "codesdown-0", "codesup-0", "codesunload-0"]
+    },
+    {
+      "objname": "select1",
+      "type_code": "D",
+      "id": 1,
+      "geometry": {"x": 0, "y": 0, "w": 90, "h": 200},
+      "event_tokens": ["codesdown-0", "codesup-0"]
+    },
+    {
+      "objname": "slt1",
+      "type_code": ">",
+      "id": 2,
+      "geometry": {"x": 120, "y": 0, "w": 120, "h": 120},
+      "event_tokens": ["codesdown-0", "codesup-0"]
+    },
+    {
+      "objname": "event1",
+      "type_code": "b",
+      "id": 3,
+      "geometry": {"x": 280, "y": 24, "w": 160, "h": 64},
+      "event_tokens": ["codesdown-1", "printh 23 02 50 41", "codesup-0"]
+    }
+  ],
+  "event_index_summary": {
+    "page_count": 2,
+    "additional_page_count": 1,
+    "eventful_page_count": 1,
+    "source_event_slot_count": 1,
+    "compiled_event_table_match_count": 24,
+    "event_compile_error_count": 0,
+    "page1": {
+      "resource": "1.pa",
+      "source_event_slot_count": 1,
+      "compiled_event_table_match_count": 1,
+      "event_compile_error_count": 0
+    },
+    "top_level_scheduler_path": "unbound_or_empty",
+    "safe_to_flash": false
+  },
+  "compiled_page_layout": {
+    "hash_ids_match_source": true,
+    "hash_ids": {
+      "page1": 0,
+      "select1": 1,
+      "slt1": 2,
+      "event1": 3
+    },
+    "mirror_headers_match_source": true,
+    "mirror_headers": [
+      "79 00 00 37",
+      "44 01 00 37",
+      "3e 02 00 37",
+      "62 03 00 37"
+    ],
+    "expected_mirror_headers": [
+      "79 00 00 37",
+      "44 01 00 37",
+      "3e 02 00 37",
+      "62 03 00 37"
+    ],
+    "per_record_length": 156,
+    "mirror_value_count_guess": 50
+  },
+  "live_smoke": {
+    "uploaded": true,
+    "screen_black_or_bricked": false,
+    "page_switch": {
+      "command": "page 1",
+      "ok": true
+    },
+    "sendme": {
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    "failed_runtime_lookups": [
+      {
+        "command": "get select1.val",
+        "response_kind": "invalid_reference",
+        "response_hex": "1a ff ff ff",
+        "attempts": 3
+      },
+      {
+        "command": "get slt1.txt",
+        "response_kind": "invalid_reference",
+        "response_hex": "1a ff ff ff",
+        "attempts": 3
+      },
+      {
+        "command": "get event1.txt",
+        "response_kind": "invalid_reference",
+        "response_hex": "1a ff ff ff",
+        "attempts": 3
+      }
+    ],
+    "failed_event_probe": {
+      "command": "click event1,1",
+      "expected_hex": "23 02 50 41",
+      "actual_response_kind": "unknown",
+      "actual_hex": "02 ff ff ff",
+      "attempts": 3
+    },
+    "camera_ok": true
+  },
+  "diagnosis": {
+    "not_event_bytecode_failure": true,
+    "reasoning": [
+      "The HMI target_1.pa source page contains page1, select1, slt1, and event1 with the expected ids, geometry, and event tokens.",
+      "The event-index report sees one source event slot and one compiled event table match on page1 with zero compile errors.",
+      "The live panel accepts page 1 and sendme returns page id 1, so page navigation works.",
+      "Compiled page1 hash ids match the source object ids, so the failure is not simply missing page1 name hashes.",
+      "Compiled page1 mirror headers also match the source objects when the real multi-page record width is used, so the remaining fault is deeper page-local runtime binding beyond the name hash table and basic mirror record headers."
+    ],
+    "next_pc_side_work": [
+      "Compare page0 successful advanced object tail layout against this page1 output for advanced user slot order, mirror value payloads, and page-local offset rebasing.",
+      "Keep all advanced controls on page1 fail-closed until object lookup succeeds on COM36."
+    ]
+  },
+  "decision": {
+    "builder_policy": "fail-closed",
+    "public_builder_test": "tests/test_editor_tft_build.py::EditorTftBuildTests::test_page1_advanced_controls_remain_fail_closed_after_live_lookup_failure",
+    "not_claimed": [
+      "page1 text-select/sliding-text/data-record/file-browser/file-stream runtime binding",
+      "page1 advanced object events",
+      "page1 advanced object serial get/click support"
+    ]
+  }
+}

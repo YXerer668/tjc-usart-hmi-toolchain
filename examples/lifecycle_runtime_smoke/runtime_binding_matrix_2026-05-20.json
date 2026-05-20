@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "summary": {
+    "page0_advanced_positive_count": 5,
+    "page1_advanced_compile_positive_runtime_negative_count": 5,
+    "page1_ordinary_lifecycle_negative_count": 1,
+    "page_navigation_layer_proven": true,
+    "page_local_advanced_registration_recovered": false,
+    "highest_leverage_gap": "general scheduler/lifecycle and page-local advanced runtime registration"
+  },
+  "rows": [
+    {
+      "id": "page0_load_local_positive",
+      "page": 0,
+      "class": "lifecycle_page_event",
+      "source": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_signal": "observed AA 52 10 01 after page 0",
+      "scheduler_path": "post_primary_page_event",
+      "meaning": "local generated page0 load can dispatch through the narrow post_primary_page_event path"
+    },
+    {
+      "id": "page0_case80_exact",
+      "page": 0,
+      "class": "advanced_readback_positive",
+      "source": "examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_readback": {
+        "data0.maxval": 1000,
+        "data0.path": "sd0/1.data",
+        "select0.val": 0
+      },
+      "meaning": "page0 exact data-record plus text-select shape is alive at runtime"
+    },
+    {
+      "id": "page0_case85_exact",
+      "page": 0,
+      "class": "advanced_readback_positive",
+      "source": "examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_readback": {
+        "data0.maxval": 1000,
+        "data0.path": "sd0/1.data",
+        "slt0.txt": "000\r\n111\r\n222\r\n333\r\n444\r\n666\r\n777\r\n777\r\n888\r\n999"
+      },
+      "meaning": "page0 exact data-record plus sliding-text shape is alive at runtime"
+    },
+    {
+      "id": "page0_case83_exact",
+      "page": 0,
+      "class": "advanced_readback_positive",
+      "source": "examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_oracle_aligned_live_verified_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_readback": {
+        "data0.maxval": 1000,
+        "data0.path": "sd0/1.data",
+        "select0.val": 0,
+        "b1.txt": "newtxt",
+        "bar1.val": 60
+      },
+      "meaning": "page0 exact data-record plus text-select plus ordinary button shape is alive at runtime"
+    },
+    {
+      "id": "page0_case83_exact_event",
+      "page": 0,
+      "class": "advanced_event_positive",
+      "source": "examples/advanced_direct_tft_demo/datarecord_textselect_button_case83_event_live_verified_2026-05-20.json",
+      "compiled_positive": true,
+      "runtime_positive": true,
+      "runtime_observation": {
+        "data0.maxval": 1000,
+        "data0.path": "sd0/1.data",
+        "select0.val": 0,
+        "b1.txt": "newtxt",
+        "bar1.val": 60,
+        "click b1,1": "23 83 42 54"
+      },
+      "meaning": "page0 exact case83 event shape proves ordinary b1.down marker dispatch on top of the complex page"
+    },
+    {
+      "id": "page1_local_load_negative",
+      "page": 1,
+      "class": "ordinary_lifecycle_negative",
+      "source": "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_negative_2026-05-20.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "missing_load_marker_and_invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "this weakens the idea that page1 failures are advanced-only; even a minimal locally generated ordinary page1 load/text probe still fails to bind at runtime"
+    },
+    {
+      "id": "page1_text_select",
+      "page": 1,
+      "class": "advanced_runtime_negative",
+      "source": "examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "page1 text-select compiles and page-switches, but runtime object binding remains invalid_reference"
+    },
+    {
+      "id": "page1_sliding_text",
+      "page": 1,
+      "class": "advanced_runtime_negative",
+      "source": "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "page1 sliding-text compiles and page-switches, but runtime object binding remains invalid_reference"
+    },
+    {
+      "id": "page1_data_record",
+      "page": 1,
+      "class": "advanced_runtime_negative",
+      "source": "examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "page1 data-record compiles and page-switches, but runtime object binding remains invalid_reference"
+    },
+    {
+      "id": "page1_file_stream",
+      "page": 1,
+      "class": "advanced_runtime_negative",
+      "source": "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "page1 file-stream compiles and page-switches, but runtime object binding remains invalid_reference"
+    },
+    {
+      "id": "page1_file_browser",
+      "page": 1,
+      "class": "advanced_runtime_negative",
+      "source": "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json",
+      "compiled_positive": true,
+      "runtime_positive": false,
+      "runtime_signal": "invalid_reference",
+      "page_switch_ok": true,
+      "sendme_ok": true,
+      "meaning": "page1 file-browser compiles and page-switches, but runtime object binding remains invalid_reference"
+    }
+  ],
+  "interpretation": {
+    "page0_positive_does_not_imply_page1_binding": true,
+    "page1_failure_is_no_longer_advanced_only": true,
+    "likely_shared_breakpoint": [
+      "page1 advanced controls compile into non-empty TFT object regions and page switching works, so the remaining failure is deeper than GUI authoring or page navigation",
+      "the lifecycle equivalence report still does not explain a general page callback binding path, which lines up with both page1 advanced objects and a minimal page1 ordinary load/text probe failing after page switch"
+    ],
+    "recommended_next_step": "continue recovering general scheduler/lifecycle/page-event binding, and use page1 advanced invalid_reference as the strongest runtime registration acceptance test"
+  }
+}

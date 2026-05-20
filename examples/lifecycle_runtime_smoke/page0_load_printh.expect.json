@@ -1,0 +1,11 @@
+{
+  "page_id": 0,
+  "steps": [
+    {
+      "label": "page0 load printh marker",
+      "command": "page 0",
+      "expected_hex": "AA 52 10 01",
+      "attempts": 3
+    }
+  ]
+}
