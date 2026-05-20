@@ -14,6 +14,7 @@
     "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
   },
   "notes": [
+    "The latest real orchestrated run still ended in connect/sendme silence after an official GUI recovery attempt, so the next step now requires physical or otherwise external recovery before more local live automation can help.",
     "Do not continue large batches of page-local byte patching before the orchestrated recovery-plus-seed-side path has been exercised on recovered hardware.",
     "Within the seed-side runner, text-select is the strongest control sample, file-stream is second, and file-browser is the target falsification sample."
   ]

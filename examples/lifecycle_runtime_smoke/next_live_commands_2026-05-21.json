@@ -3,7 +3,7 @@
   "date": "2026-05-21",
   "target": "TJC8048X543_011C",
   "status": "prepared",
-  "precondition": "panel has been hard power-cycled or otherwise recovered from the current connect/sendme silent state",
+  "precondition": "panel has been hard power-cycled or otherwise externally recovered from the current connect/sendme silent state; the latest local orchestrated recovery attempt was still silent",
   "recommended_order": [
     {
       "label": "Top-level orchestrator: check serial health, retry official recovery when needed, then run the seed-side runtime limitation chain",
