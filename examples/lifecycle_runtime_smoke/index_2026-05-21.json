@@ -39,6 +39,7 @@
   },
   "top_status_files": [
     "examples/current_target_full_completion_audit_2026-05-20.json",
+    "examples/lifecycle_runtime_smoke/transport_silence_status_2026-05-21.json",
     "examples/lifecycle_runtime_smoke/recovery_priority_2026-05-21.json",
     "examples/lifecycle_runtime_smoke/next_live_commands_2026-05-21.json",
     "examples/lifecycle_runtime_smoke/page1_filebrowser_compiled_data_elimination_2026-05-21.json"
