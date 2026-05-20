@@ -13,6 +13,12 @@
     "reason": "use the direct runner only when the panel is already responsive or when you intentionally want to bypass the integrated recovery step.",
     "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
   },
+  "external_recovery_package": {
+    "id": "sd_recovery_case31_backup",
+    "tft": "reverse_usarthmi/recovery_sd_card/lcd_test.tft",
+    "sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
+    "reason": "the latest local orchestrated recovery, baud sweep, and public whmi-wri entry probe all stayed silent. this known-good case31 backup is the current concrete external recovery package already kept in the repo."
+  },
   "notes": [
     "The latest real orchestrated run still ended in connect/sendme silence after an official GUI recovery attempt, so the next step now requires physical or otherwise external recovery before more local live automation can help.",
     "Do not continue large batches of page-local byte patching before the orchestrated recovery-plus-seed-side path has been exercised on recovered hardware.",

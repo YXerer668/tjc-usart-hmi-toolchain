@@ -17,6 +17,8 @@ class RecoveryPriorityArtifactTests(unittest.TestCase):
         self.assertIn("recover_then_run_seed_side_runtime_limit.py", payload["top_priority_after_panel_recovery"]["command"])
         self.assertEqual(payload["secondary_priority_after_panel_recovery"]["id"], "seed_side_runtime_limitation_falsification")
         self.assertIn("run_seed_side_multipt_runtime_limit_smokes.py", payload["secondary_priority_after_panel_recovery"]["command"])
+        self.assertEqual(payload["external_recovery_package"]["id"], "sd_recovery_case31_backup")
+        self.assertTrue(payload["external_recovery_package"]["tft"].endswith("recovery_sd_card/lcd_test.tft"))
 
 
 if __name__ == "__main__":
