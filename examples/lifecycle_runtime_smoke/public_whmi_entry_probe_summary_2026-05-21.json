@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-summarized",
+  "input_artifact": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\examples\\lifecycle_runtime_smoke\\public_whmi_entry_probe_2026-05-21.json",
+  "command": "whmi-wri 0,921600,0",
+  "ack_received": false,
+  "elapsed_s": 3.75,
+  "diagnosis": "public whmi-wri initial ack did not appear; the panel is silent even at the public upload entrypoint",
+  "conclusions": {
+    "public_whmi_entry_is_silent": true,
+    "runtime_silence_has_now_escalated_to_upload_entry_silence": true,
+    "next_step_requires_physical_or_external_recovery": true
+  }
+}

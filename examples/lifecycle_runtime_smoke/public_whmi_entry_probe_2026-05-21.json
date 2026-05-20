@@ -1,0 +1,16 @@
+{
+  "port": "COM36",
+  "baud": 9600,
+  "download_baud": 921600,
+  "timeout_ms": 2000,
+  "prepare_delay_ms": 2500,
+  "prepare_wait_ms": 1500,
+  "payload_len": 0,
+  "res0": "0",
+  "ack_received": false,
+  "command": "whmi-wri 0,921600,0",
+  "error": "Timed out waiting for initial whmi-wri ack. If connect still returns comok but runtime commands such as sendme/get dim do not respond, the panel is probably in a wedged runtime state and public whmi-wri may not be accepted; power-cycle the panel, use the official downloader recovery path, or restore from SD-card TFT.",
+  "elapsed_s": 3.75,
+  "healthy": false,
+  "diagnosis": "public whmi-wri initial ack did not appear; the panel is silent even at the public upload entrypoint"
+}
