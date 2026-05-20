@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "live-recovery-attempted",
+  "source_summary": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\recover_then_seed_side_run_20260521\\recover_then_seed_side_summary.json",
+  "before_responsive": false,
+  "after_recovery_responsive": false,
+  "runner_started": false,
+  "classification": "still_silent_after_recovery",
+  "key_findings": {
+    "connect_kind_before": "none",
+    "sendme_kind_before": "none",
+    "official_recovery_selected_port": "COM36",
+    "official_recovery_selected_download_baud": "921600",
+    "official_recovery_start_transitioned": false,
+    "official_recovery_start_final_text": "联机并开始下载",
+    "connect_kind_after": "none",
+    "sendme_kind_after": "none"
+  },
+  "conclusions": {
+    "panel_still_silent_after_orchestrated_recovery": true,
+    "seed_side_runtime_limiter_runner_blocked_by_transport": true,
+    "next_live_step_requires_physical_or_external_recovery_not_more_local_runner_work": true
+  }
+}
