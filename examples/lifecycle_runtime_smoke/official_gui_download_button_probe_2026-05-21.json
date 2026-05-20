@@ -1,0 +1,460 @@
+﻿{
+  "hmi": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\official_page1_textselect_minimal_oracle_20260519\\lcd_test.HMI",
+  "official_exe": "C:\\Program Files (x86)\\USART HMI\\USART HMI.exe",
+  "reused_existing_window": false,
+  "work_run": "C:\\Users\\SinYu\\AppData\\Roaming\\USART HMI\\work\\a-202652154743281\\run.run",
+  "output_after": "总可用内存:524288\r全局内存占用:16\r图片总大小:3,266\r字库总大小:10,804,308\r页面:page1 占用内存:16+1472=1488\r页面:page0 占用内存:16+340=356\rFile Check Finish\r编译成功! 0个错误, 0个警告,文件大小:11,411,952\r\r\n点击属性显示相应注释",
+  "download_panel_controls": [
+    {
+      "type": "Button",
+      "text": "退出",
+      "rect": [
+        2238,
+        1212,
+        2348,
+        1260
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "联机并开始下载",
+      "rect": [
+        2033,
+        1212,
+        2230,
+        1260
+      ]
+    },
+    {
+      "type": "ComboBox",
+      "text": "",
+      "rect": [
+        2192,
+        896,
+        2348,
+        929
+      ]
+    },
+    {
+      "type": "Text",
+      "text": "",
+      "rect": [
+        5,
+        5,
+        127,
+        29
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "打开",
+      "rect": [
+        2324,
+        897,
+        2347,
+        927
+      ]
+    },
+    {
+      "type": "ComboBox",
+      "text": "",
+      "rect": [
+        1608,
+        896,
+        1938,
+        929
+      ]
+    },
+    {
+      "type": "Text",
+      "text": "",
+      "rect": [
+        5,
+        5,
+        301,
+        29
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "打开",
+      "rect": [
+        1914,
+        897,
+        1937,
+        927
+      ]
+    },
+    {
+      "type": "Edit",
+      "text": "下载使用的波特率:",
+      "rect": [
+        1497,
+        974,
+        2348,
+        1202
+      ]
+    },
+    {
+      "type": "ScrollBar",
+      "text": "垂直滚动条",
+      "rect": [
+        2322,
+        974,
+        2361,
+        1202
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "上一行",
+      "rect": [
+        2322,
+        974,
+        2361,
+        1000
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "下一行",
+      "rect": [
+        2322,
+        1176,
+        2361,
+        1202
+      ]
+    },
+    {
+      "type": "Text",
+      "text": "串口号:",
+      "rect": [
+        1505,
+        903,
+        1604,
+        921
+      ]
+    },
+    {
+      "type": "Text",
+      "text": "下载使用的波特率:",
+      "rect": [
+        1962,
+        903,
+        2186,
+        921
+      ]
+    },
+    {
+      "type": "Text",
+      "text": "文件大小:11411952 预计下载时间:199秒",
+      "rect": [
+        1500,
+        951,
+        1832,
+        969
+      ]
+    },
+    {
+      "type": "TitleBar",
+      "text": "",
+      "rect": [
+        1515,
+        822,
+        2357,
+        857
+      ]
+    },
+    {
+      "type": "MenuBar",
+      "text": "系统",
+      "rect": [
+        993,
+        553,
+        1015,
+        575
+      ]
+    },
+    {
+      "type": "MenuItem",
+      "text": "系统",
+      "rect": [
+        993,
+        553,
+        1015,
+        575
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "最小化",
+      "rect": [
+        2256,
+        821,
+        2292,
+        857
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "最大化",
+      "rect": [
+        2289,
+        821,
+        2325,
+        857
+      ]
+    },
+    {
+      "type": "Button",
+      "text": "关闭",
+      "rect": [
+        2322,
+        821,
+        2358,
+        857
+      ]
+    }
+  ],
+  "configured_port": "COM36",
+  "configured_download_baud": "921600",
+  "selected_port": "COM36",
+  "selected_download_baud": "921600",
+  "start_download_clicked": true,
+  "start_attempt": {
+    "transitioned": false,
+    "final_text": "联机并开始下载",
+    "attempts": [
+      {
+        "attempt": 1,
+        "method": "activate_control",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 1,
+        "method": "post_click_screen_center",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 1,
+        "method": "wrapper_click_input",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 1,
+        "method": "set_focus_space",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 1,
+        "method": "set_focus_enter",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 1,
+        "method": "bm_click",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": true
+      },
+      {
+        "attempt": 2,
+        "method": "activate_control",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 2,
+        "method": "post_click_screen_center",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 2,
+        "method": "wrapper_click_input",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 2,
+        "method": "set_focus_space",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 2,
+        "method": "set_focus_enter",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 2,
+        "method": "bm_click",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": true
+      },
+      {
+        "attempt": 3,
+        "method": "activate_control",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 3,
+        "method": "post_click_screen_center",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载"
+      },
+      {
+        "attempt": 3,
+        "method": "wrapper_click_input",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 3,
+        "method": "set_focus_space",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 3,
+        "method": "set_focus_enter",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": false
+      },
+      {
+        "attempt": 3,
+        "method": "bm_click",
+        "before_text": "联机并开始下载",
+        "after_text": "联机并开始下载",
+        "invoked": true
+      }
+    ]
+  },
+  "status_tail": [
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ],
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ],
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ],
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ],
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ],
+    [
+      "退出",
+      "联机并开始下载",
+      "打开",
+      "打开",
+      "下载使用的波特率:",
+      "垂直滚动条",
+      "上一行",
+      "下一行",
+      "串口号:",
+      "下载使用的波特率:",
+      "文件大小:11411952 预计下载时间:199秒",
+      "系统",
+      "系统",
+      "最小化",
+      "最大化",
+      "关闭"
+    ]
+  ]
+}

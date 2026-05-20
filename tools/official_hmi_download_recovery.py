@@ -8,6 +8,8 @@ from pathlib import Path
 
 from pywinauto import Desktop
 from pywinauto.keyboard import send_keys
+import win32con
+import win32gui
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -310,6 +312,102 @@ def _click_download_start(panel) -> dict[str, object]:
                 "method": "post_click_screen_center",
                 "before_text": before_text,
                 "after_text": after_text,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+        click_input_ok = False
+        try:
+            wrapper = button.wrapper_object()
+            if hasattr(wrapper, "click_input"):
+                wrapper.click_input()
+                click_input_ok = True
+        except Exception:
+            click_input_ok = False
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "wrapper_click_input",
+                "before_text": before_text,
+                "after_text": after_text,
+                "invoked": click_input_ok,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+        focus_ok = False
+        try:
+            wrapper = button.wrapper_object()
+            if hasattr(wrapper, "set_focus"):
+                wrapper.set_focus()
+                focus_ok = True
+        except Exception:
+            focus_ok = False
+        if focus_ok:
+            send_keys("{SPACE}", pause=0.02)
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "set_focus_space",
+                "before_text": before_text,
+                "after_text": after_text,
+                "invoked": focus_ok,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+        if focus_ok:
+            send_keys("{ENTER}", pause=0.02)
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "set_focus_enter",
+                "before_text": before_text,
+                "after_text": after_text,
+                "invoked": focus_ok,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+        bm_click_ok = False
+        try:
+            handle = button.handle
+            if handle:
+                win32gui.SendMessage(handle, win32con.BM_CLICK, 0, 0)
+                bm_click_ok = True
+        except Exception:
+            bm_click_ok = False
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "bm_click",
+                "before_text": before_text,
+                "after_text": after_text,
+                "invoked": bm_click_ok,
             }
         )
         if after_text == "停止":

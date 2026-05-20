@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "probe-summarized",
+  "input_artifact": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\examples\\lifecycle_runtime_smoke\\official_gui_download_button_probe_2026-05-21.json",
+  "configured_port": "COM36",
+  "configured_download_baud": "921600",
+  "start_transitioned": false,
+  "final_button_text": "联机并开始下载",
+  "attempt_method_count": 18,
+  "attempt_methods": [
+    "activate_control",
+    "post_click_screen_center",
+    "wrapper_click_input",
+    "set_focus_space",
+    "set_focus_enter",
+    "bm_click",
+    "activate_control",
+    "post_click_screen_center",
+    "wrapper_click_input",
+    "set_focus_space",
+    "set_focus_enter",
+    "bm_click",
+    "activate_control",
+    "post_click_screen_center",
+    "wrapper_click_input",
+    "set_focus_space",
+    "set_focus_enter",
+    "bm_click"
+  ],
+  "bm_click_invoked": true,
+  "conclusions": {
+    "all_local_button_interaction_methods_failed_to_enter_running_state": true,
+    "not_explained_by_simple_missed_click": true
+  }
+}
