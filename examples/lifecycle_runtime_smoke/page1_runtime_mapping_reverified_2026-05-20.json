@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "runtime-page-mapping-corrected",
+  "claim": "for the recovered case31-style two-page scaffold, generated or official page1 content is bound on runtime page 0 rather than runtime page 1; earlier runtime page 1 invalid_reference probes for ordinary page1 text, official page1 text-select, and official page1 data-record were wrong-page negatives",
+  "prior_context": {
+    "earlier_positive_artifacts": [
+      "reverse_usarthmi/page1_button_event_minimal/hardware_verified_2026-05-14.json",
+      "reverse_usarthmi/page1_button_printh_event_probe/hardware_verified_2026-05-15.json"
+    ],
+    "historical_wrong_page_negatives": [
+      "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_negative_2026-05-20.json",
+      "examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json",
+      "examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json"
+    ]
+  },
+  "fresh_reverification": {
+    "local_generated_page1_load_probe": {
+      "tft": "reverse_usarthmi/page1_load_printh_probe_20260520/output.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_p1title_txt": {
+          "kind": "string",
+          "value": "LOAD",
+          "hex": "70 4c 4f 41 44 ff ff ff"
+        }
+      },
+      "runtime_page_1": {
+        "sendme": 1,
+        "get_p1title_txt": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      },
+      "return_to_runtime_page_0": {
+        "sendme": 0,
+        "get_p1title_txt": {
+          "kind": "string",
+          "value": "LOAD",
+          "hex": "70 4c 4f 41 44 ff ff ff"
+        }
+      },
+      "page_load_marker_after_runtime_page_1_to_0_switch": {
+        "kind": "none",
+        "hex": ""
+      }
+    },
+    "official_gui_page1_text_select": {
+      "tft": "reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/official_compile_probe_20260519/output/lcd_test.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_select0_val": {
+          "kind": "number",
+          "value": 0,
+          "hex": "71 00 00 00 00 ff ff ff"
+        }
+      },
+      "runtime_page_1": {
+        "sendme": 1,
+        "get_select0_val": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      }
+    },
+    "official_gui_page1_data_record": {
+      "tft": "reverse_usarthmi/page1_datarecord_official_compile_20260519/output/lcd_test.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_data0_maxval": {
+          "kind": "number",
+          "value": 1000,
+          "hex": "71 e8 03 00 00 ff ff ff"
+        },
+        "get_data0_path": {
+          "kind": "string",
+          "value": "sd0/1.data",
+          "hex": "70 73 64 30 2f 31 2e 64 61 74 61 ff ff ff"
+        }
+      },
+      "runtime_page_1": {
+        "sendme": 1,
+        "get_data0_maxval": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      }
+    }
+  },
+  "conclusions": {
+    "runtime_page_0_is_generated_or_official_page1": true,
+    "local_page1_ordinary_text_binding_positive": true,
+    "official_page1_text_select_binding_positive": true,
+    "official_page1_data_record_binding_positive": true,
+    "page1_load_scheduler_recovered": false,
+    "stale_negative_methodology": "probing page 1 / sendme 1 on case31-style two-page builds checks the seed page0 runtime page, not the generated or official page1 content"
+  },
+  "next_revalidation_targets": [
+    "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
+    "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
+    "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json"
+  ]
+}

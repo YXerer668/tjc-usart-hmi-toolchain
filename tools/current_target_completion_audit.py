@@ -31,12 +31,7 @@ def main() -> int:
 def build_report() -> dict[str, Any]:
     migration = _load_json("examples/advanced_direct_tft_demo/live_smoke_migration_audit_2026-05-20.json")
     lifecycle = _load_json("examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json")
-    page1_negative = _load_json("examples/advanced_direct_tft_demo/page1_advanced_runtime_binding_negative_2026-05-18.json")
-    page1_textselect = _load_json("examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json")
-    page1_sltext = _load_json("examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json")
-    page1_datarecord = _load_json("examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json")
-    page1_filestream = _load_json("examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json")
-    page1_filebrowser = _load_json("examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json")
+    page1_mapping = _load_json("examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json")
     binding_matrix = _load_json("examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json")
     case80 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json")
     case85 = _load_json("examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json")
@@ -63,24 +58,22 @@ def build_report() -> dict[str, Any]:
         {
             "id": "page1_advanced_runtime_binding",
             "status": "unfinished",
-            "scope": "page1 advanced controls and page-local advanced object lookup/binding",
+            "scope": "page1 page-load scheduling plus corrected-page revalidation of the remaining advanced controls",
             "why_unfinished": [
-                "a local ordinary page1 load/text probe uploads and page-switches, but page1 load emits no expected marker and get p1title.txt still returns invalid_reference",
-                "local multi-page advanced probe uploads and page switches succeed, but page1 advanced object get/click paths return invalid_reference or wrong markers",
-                "official GUI-created page1 text-select, sliding-text, data-record, file-stream, and cloned file-browser still compile positive yet remain invalid_reference on COM36",
+                "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
+                "official GUI page1 text-select and official GUI page1 data-record now both read back correctly on runtime page 0, but sliding-text, file-stream, and file-browser still need corrected-page live revalidation",
+                "the local generated page1 load probe now reads p1title.txt correctly on runtime page 0, but the page-level load marker is still not observed when switching back to that runtime page",
             ],
             "blocks": [
-                "page1 ordinary load/text runtime registration",
-                "page1 advanced controls as supported authoring/runtime path",
-                "page-local advanced object readback",
-                "page1 advanced event dispatch",
+                "corrected-page live revalidation for page1 sliding-text",
+                "corrected-page live revalidation for page1 file-stream",
+                "corrected-page live revalidation for page1 file-browser",
+                "page1 advanced event dispatch after corrected-page proof",
+                "page1 page-load scheduler recovery",
             ],
             "evidence": [
-                "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_negative_2026-05-20.json",
-                "examples/advanced_direct_tft_demo/page1_advanced_runtime_binding_negative_2026-05-18.json",
-                "examples/advanced_direct_tft_demo/page1_textselect_official_gui_live_negative_2026-05-19.json",
+                "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
                 "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
-                "examples/advanced_direct_tft_demo/page1_datarecord_official_gui_live_negative_2026-05-19.json",
                 "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
                 "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json",
             ],
@@ -204,7 +197,7 @@ def build_report() -> dict[str, Any]:
         ],
         "highest_leverage_unsolved_subsystem": {
             "id": "scheduler_lifecycle_general_equivalence",
-            "reason": "it is the common runtime explanation layer behind page transitions, load/unload, timers, page1 advanced binding, and logic control",
+            "reason": "page1 runtime-page mapping is now corrected, but page-level lifecycle scheduling is still the common unresolved layer behind load events, timers, and trustworthy multi-page logic recovery",
             "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
             "binding_matrix_summary": binding_matrix["summary"],
         },
@@ -213,7 +206,7 @@ def build_report() -> dict[str, Any]:
             "feature_status": feature_status,
             "current_target_limitations": limitations,
             "lifecycle_runtime_equivalence": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
-            "page1_advanced_negative": "examples/advanced_direct_tft_demo/page1_advanced_runtime_binding_negative_2026-05-18.json",
+            "page1_runtime_mapping_reverified": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
             "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
         },
     }
