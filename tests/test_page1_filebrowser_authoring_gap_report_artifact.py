@@ -22,6 +22,8 @@ class Page1FilebrowserAuthoringGapReportArtifactTests(unittest.TestCase):
         self.assertIn("authoring/save gap", payload["conclusions"]["narrowing"])
         self.assertEqual(payload["official_minimal_case"]["confirmation_status"], "failed")
         self.assertEqual(payload["official_minimal_case"]["page1_blocks"], [["page1", "y"], ["v0", "\u0003"]])
+        self.assertGreater(payload["batch_session_scan"]["item_count"], 0)
+        self.assertEqual(payload["batch_session_scan"]["added_blocks"], [])
 
         clone_blocks = payload["clone_case"]["page1_blocks"]
         self.assertEqual(clone_blocks, [["page1", "y"]])

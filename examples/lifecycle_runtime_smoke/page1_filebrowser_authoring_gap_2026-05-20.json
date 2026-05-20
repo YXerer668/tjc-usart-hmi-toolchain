@@ -953,9 +953,29 @@
       "expected exactly one page1 block of type A, got []"
     ]
   },
+  "batch_session_scan": {
+    "report": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\reverse_usarthmi\\page1_filebrowser_session_scan_20260520\\session_scan_report.json",
+    "item_count": 45,
+    "save_prompt_seen": false,
+    "added_blocks": [],
+    "after_page_blocks": [
+      {
+        "objname": "page1",
+        "type_code": "y",
+        "id": 0,
+        "event_tokens": [
+          "codesload-0",
+          "codesloadend-0",
+          "codesdown-0",
+          "codesup-0",
+          "codesunload-0"
+        ]
+      }
+    ]
+  },
   "conclusions": {
     "page1_filebrowser_saved_by_official_or_clone_hmi": false,
     "page1_filebrowser_runtime_negative_proof_exists": false,
-    "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
+    "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, the new single-session batch scan over y430-480 with wheel -2..2 still adds nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
   }
 }

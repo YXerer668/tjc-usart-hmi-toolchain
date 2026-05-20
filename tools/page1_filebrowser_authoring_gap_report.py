@@ -28,6 +28,7 @@ OFFICIAL_MINIMAL_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_76_page
 OFFICIAL_MINIMAL_CONFIRMATION = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_76_page1_filebrowser_minimal_official_oracle\gui_verify_after_gui_create_20260519\precompile_confirmation.json")
 CLONE_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_B4_page1_filebrowser_hmi_clone_oracle\lcd_test.HMI")
 CLONE_COMPILE_JSON = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_B4_page1_filebrowser_hmi_clone_oracle\official_compile_probe_20260520\lcd_test.official_compile.json")
+SESSION_SCAN_REPORT = ROOT / "reverse_usarthmi" / "page1_filebrowser_session_scan_20260520" / "session_scan_report.json"
 DEFAULT_OUT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_authoring_gap_2026-05-20.json"
 
 
@@ -68,6 +69,7 @@ def build_report() -> dict[str, Any]:
         if OFFICIAL_MINIMAL_CONFIRMATION.exists()
         else {}
     )
+    session_scan = json.loads(SESSION_SCAN_REPORT.read_text(encoding="utf-8")) if SESSION_SCAN_REPORT.exists() else {}
 
     return {
         "schema_version": 1,
@@ -97,10 +99,17 @@ def build_report() -> dict[str, Any]:
             "confirmation_status": official_minimal_confirmation.get("status"),
             "confirmation_failures": official_minimal_confirmation.get("failures", []),
         },
+        "batch_session_scan": {
+            "report": str(SESSION_SCAN_REPORT),
+            "item_count": len(session_scan.get("items", [])),
+            "save_prompt_seen": session_scan.get("save_prompt_seen"),
+            "added_blocks": session_scan.get("added_blocks", []),
+            "after_page_blocks": session_scan.get("after_page_blocks", []),
+        },
         "conclusions": {
             "page1_filebrowser_saved_by_official_or_clone_hmi": False,
             "page1_filebrowser_runtime_negative_proof_exists": False,
-            "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
+            "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, the new single-session batch scan over y430-480 with wheel -2..2 still adds nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
         },
     }
 
