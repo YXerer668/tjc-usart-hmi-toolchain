@@ -15,6 +15,7 @@ def _load(relative_path: str) -> dict:
 def main() -> int:
     baud = _load("examples/lifecycle_runtime_smoke/serial_baud_sweep_2026-05-21.json")
     ports = _load("examples/lifecycle_runtime_smoke/serial_port_inventory_2026-05-21.json")
+    modem = _load("examples/lifecycle_runtime_smoke/serial_modem_status_2026-05-21.json")
     button = _load("examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json")
     button_state = _load("examples/lifecycle_runtime_smoke/official_gui_download_button_state_2026-05-21.json")
     orchestrated = _load("examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json")
@@ -37,6 +38,11 @@ def main() -> int:
             "serial_port_inventory": {
                 "artifact": "examples/lifecycle_runtime_smoke/serial_port_inventory_2026-05-21.json",
                 "only_plausible_live_uart_is_com36": ports["conclusions"]["only_plausible_live_uart_is_com36"],
+            },
+            "serial_modem_status": {
+                "artifact": "examples/lifecycle_runtime_smoke/serial_modem_status_2026-05-21.json",
+                "bridge_opens": modem["conclusions"]["serial_bridge_opens"],
+                "all_inbound_modem_lines_low": modem["conclusions"]["all_inbound_modem_lines_low"],
             },
             "official_gui_button_probe": {
                 "artifact": "examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json",
@@ -84,6 +90,7 @@ def main() -> int:
         "conclusions": {
             "runtime_silence_not_explained_by_baud_drift": baud["conclusions"]["not_explained_by_simple_command_baud_drift"],
             "runtime_silence_not_explained_by_port_enumeration_drift": ports["conclusions"]["not_explained_by_panel_having_moved_to_another_visible_usb_uart"],
+            "usb_uart_bridge_itself_still_opens": modem["conclusions"]["serial_bridge_opens"],
             "panel_is_visibly_powered_not_black": camera["conclusions"]["screen_not_black"],
             "official_gui_local_interaction_not_sufficient_to_start_download": button["conclusions"]["not_explained_by_simple_missed_click"],
             "official_gui_start_failure_not_explained_by_disabled_button": button_state["conclusions"]["failure_is_not_explained_by_a_disabled_button"],

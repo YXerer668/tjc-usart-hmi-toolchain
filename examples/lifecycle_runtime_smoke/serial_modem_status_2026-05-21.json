@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "port": "COM36",
+  "baud": 9600,
+  "status": "captured",
+  "modem_lines": {
+    "opened": true,
+    "cts": false,
+    "dsr": false,
+    "ri": false,
+    "cd": false,
+    "dtr": true,
+    "rts": true,
+    "in_waiting": 0,
+    "out_waiting": 0
+  },
+  "conclusions": {
+    "serial_bridge_opens": true,
+    "all_inbound_modem_lines_low": true,
+    "modem_lines_do_not_offer_an_obvious_recovery_signal": true
+  }
+}
