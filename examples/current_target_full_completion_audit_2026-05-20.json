@@ -99,7 +99,9 @@
         "a ninth probe changes only the inserted page-row count field from 1 to 0 while keeping the offset trio and inserted 6-byte row intact; field binding stays alive but qty remains 0 and the white camera surface remains, so the count field itself is not sufficient either",
         "a tenth and eleventh probe then change the inserted 6-byte row's last two bytes and middle four bytes independently; in both cases page1->sendme still reaches 1 while qty remains 0 and the white camera surface remains, so neither rowindex nor rowhash is sufficient on its own",
         "new compiled-data elimination reports now go further and show the remaining page1 file-browser gap is not locatable anywhere inside the currently recovered compiled object-tail envelope: header/global fields expose no file-browser-specific runtime bit, attr/user headers are identical, pointer closure is valid, full page-local user records and primary records are identical, page event tables are byte-identical, prefix heads collapse back to single-page after generic multi-page normalization, and there is no post-mirror service tail with room for a hidden table",
-        "the next strongest runtime discriminator is now prepared as a seed-side multi-page falsification set with ranked control strength: text-select first, file-stream second, file-browser last. if text-select and file-stream both survive on runtime page 1 while file-browser still fails, that will be very strong evidence for an A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 failure"
+        "the next strongest runtime discriminator is now prepared as a seed-side multi-page falsification set with ranked control strength: text-select first, file-stream second, file-browser last. if text-select and file-stream both survive on runtime page 1 while file-browser still fails, that will be very strong evidence for an A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 failure",
+        "the latest live transport probes now also show the blocker is no longer just runtime silence: the panel is visibly powered on camera, but common and high baud rates all stay silent, the official GUI download button never enters a running state across multiple interaction methods including BM_CLICK, even a zero-length public whmi-wri entry probe receives no initial ACK, and a DTR/RTS pulse attempt shows no change",
+        "a known-good SD recovery package and a desktop handoff bundle are now prepared, so the next practical dependency is external recovery rather than more local byte patching"
       ],
       "blocks": [
         "page1 file-browser direct enumeration/display recovery",
@@ -131,7 +133,10 @@
         "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",
         "examples/lifecycle_runtime_smoke/page1_filebrowser_compiled_data_elimination_2026-05-21.json",
         "examples/lifecycle_runtime_smoke/seed_side_multipt_probe_fidelity_2026-05-21.json",
-        "examples/lifecycle_runtime_smoke/seed_side_multipt_runtime_limit_probes_2026-05-21.json"
+        "examples/lifecycle_runtime_smoke/seed_side_multipt_runtime_limit_probes_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/transport_silence_status_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json",
+        "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json"
       ]
     },
     {

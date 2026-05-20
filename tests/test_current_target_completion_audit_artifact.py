@@ -17,7 +17,7 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
         self.assertTrue(payload["current_state"]["native_scene_smoke_live_proven"])
         self.assertEqual(payload["current_state"]["migration_convergence"]["scene_with_mismatching_conventional_legacy"], 0)
         self.assertEqual(payload["current_state"]["migration_convergence"]["orphan_legacy_expect_count"], 0)
-        self.assertEqual(payload["highest_leverage_unsolved_subsystem"]["id"], "scheduler_lifecycle_general_equivalence")
+        self.assertEqual(payload["highest_leverage_unsolved_subsystem"]["id"], "page1_advanced_runtime_binding")
         unfinished_ids = {item["id"] for item in payload["unfinished"]}
         self.assertIn("page1_advanced_runtime_binding", unfinished_ids)
         self.assertIn("full_hmi_replacement", unfinished_ids)
@@ -33,6 +33,7 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
         self.assertGreaterEqual(len(page1["evidence"]), 4)
         self.assertIn("page1 file-browser direct enumeration/display recovery", page1["blocks"])
         self.assertIn("page1 file-browser authoring/save recovery", page1["blocks"])
+        self.assertIn("seed-side runtime-limitation falsification after panel recovery", page1["blocks"])
         self.assertIn("broader page-level lifecycle generalization", scheduler["blocks"])
 
 

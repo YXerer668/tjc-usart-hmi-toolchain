@@ -5,7 +5,7 @@
   "status": "prepared",
   "top_priority_after_panel_recovery": {
     "id": "desktop_sd_recovery_handoff",
-    "reason": "the page1 file-browser compiled-data envelope is largely exhausted offline, and the latest real runs proved the panel is transport-silent even at the public whmi-wri entrypoint. the highest-value move is now the prepared desktop SD recovery handoff bundle, which already contains verification and follow-up scripts.",
+    "reason": "the page1 file-browser compiled-data envelope is largely exhausted offline, and the latest real runs proved the panel is transport-silent across runtime commands, public whmi-wri entry, and a DTR/RTS pulse attempt. the highest-value move is now the prepared desktop SD recovery handoff bundle, which already contains verification and follow-up scripts.",
     "command": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd"
   },
   "secondary_priority_after_panel_recovery": {
