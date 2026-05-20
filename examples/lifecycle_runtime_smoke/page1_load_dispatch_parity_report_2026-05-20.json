@@ -6,6 +6,7 @@
   "official_oracle": {
     "source": "C:\\Users\\SinYu\\Documents\\Codex\\2026-05-03\\files-mentioned-by-the-user-delay\\examples\\case52_06_page1_load_printh_only_official_event_index.json",
     "page_resource": "1.pa",
+    "page1_hash_offset_hex": "0x191",
     "compile_context": {
       "available": true,
       "error": null,
@@ -149,6 +150,7 @@
         "hex": "0x1C60"
       }
     },
+    "page1_hash_offset_hex": "0x2EB",
     "mirror_record_len_hex": "0x8A",
     "event_tokens": [
       "codesload-1",
@@ -199,7 +201,9 @@
     "local_uses_normal_page_event_table": true,
     "official_callback_slots_empty": true,
     "local_callback_slots_empty": true,
+    "official_wrapper_starts_after_hash": true,
+    "local_page_event_table_starts_before_hash": true,
     "official_and_local_share_event_offset_style": true,
-    "likely_missing_layer": "local build still emits page1 load as a normal page event table with mirror event_offset_0x34 pointing at that table, while the official oracle uses an inline page-load phase wrapper without a normal page event-table match. The missing piece is likely the official page1 load wrapper/layout path rather than a simple callback-slot fill."
+    "likely_missing_layer": "local build still emits page1 load as a normal page event table with mirror event_offset_0x34 pointing at that table before the page1 hash block, while the official oracle uses an inline page-load phase wrapper after the page1 hash block without a normal page event-table match. The missing piece is likely the official page1 load wrapper/layout path rather than a simple callback-slot fill."
   }
 }

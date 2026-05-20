@@ -18,14 +18,18 @@ class Page1LoadDispatchParityReportArtifactTests(unittest.TestCase):
         self.assertTrue(payload["comparison"]["local_uses_normal_page_event_table"])
         self.assertTrue(payload["comparison"]["official_callback_slots_empty"])
         self.assertTrue(payload["comparison"]["local_callback_slots_empty"])
+        self.assertTrue(payload["comparison"]["official_wrapper_starts_after_hash"])
+        self.assertTrue(payload["comparison"]["local_page_event_table_starts_before_hash"])
         self.assertIn("wrapper", payload["comparison"]["likely_missing_layer"])
 
         official = payload["official_oracle"]
+        self.assertEqual(official["page1_hash_offset_hex"], "0x191")
         self.assertEqual(official["page_load_phase_match"]["offset_hex"], "0x255")
         self.assertEqual(official["page_load_phase_match"]["first_executable_absolute_hex"], "0x255")
         self.assertEqual(official["page_load_phase_match"]["prefix_items"][0]["args"], "AA 52 10 01")
 
         local = payload["local_generated_probe"]
+        self.assertEqual(local["page1_hash_offset_hex"], "0x2EB")
         self.assertEqual(local["event_table_matches"], [{"value": 331, "hex": "0x14B"}])
         self.assertEqual(local["mirror_event_offset_field"], {"value": 331, "hex": "0x14B"})
 

@@ -12,6 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from tools.page_event_binding_probe import probe_manifest
+from usarthmi.tft_toolchain import inspect_tft
 
 
 DEFAULT_OFFICIAL = ROOT / "examples" / "case52_06_page1_load_printh_only_official_event_index.json"
@@ -22,12 +23,22 @@ DEFAULT_OUT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_load_dispat
 def build_report(*, official_event_index: Path, local_manifest: Path) -> dict[str, Any]:
     official = json.loads(official_event_index.read_text(encoding="utf-8"))
     local = probe_manifest(local_manifest)
+    official_tft_path = Path(official["tft"])
+    official_tft = inspect_tft(official_tft_path)
+    official_h2 = official_tft["parsed"]["Header2"]
+    official_object_start = int(official_h2["unknown_objects_address"], 16)
+    official_pictures_address = int(official_h2["pictures_address"], 16)
+    official_tail = official_tft_path.read_bytes()[official_object_start:]
+    official_mirror_start = official_pictures_address - official_object_start
+    official_page1_dir = official_tail[official_mirror_start : official_mirror_start + 16]
+    official_page1_hash_offset = int.from_bytes(official_page1_dir[4:8], "little")
 
     official_page = next(page for page in official["additional_pages"] if page["page_name"] == "page1")
     official_block = next(block for block in official_page["blocks"] if block["objname"] == "page1")
     official_phase = official_block["page_load_phase_matches"][0]
     official_record = official_block["record_candidates"][0]
     local_block = local["page1"]["blocks"][0]
+    local_page1_hash_offset = local["section_offsets"]["hash"]["value"]
 
     return {
         "schema_version": 1,
@@ -37,6 +48,7 @@ def build_report(*, official_event_index: Path, local_manifest: Path) -> dict[st
         "official_oracle": {
             "source": str(official_event_index),
             "page_resource": official_page["resource"],
+            "page1_hash_offset_hex": f"0x{official_page1_hash_offset:X}",
             "compile_context": official_page["compile_context"],
             "page_summary": official_page["summary"],
             "event_tokens": official_block["event_tokens"],
@@ -59,6 +71,7 @@ def build_report(*, official_event_index: Path, local_manifest: Path) -> dict[st
         "local_generated_probe": {
             "source": str(local_manifest),
             "section_offsets": local["section_offsets"],
+            "page1_hash_offset_hex": f"0x{local_page1_hash_offset:X}",
             "mirror_record_len_hex": local["mirror_record_len_hex"],
             "event_tokens": local_block["event_tokens"],
             "event_table_length": local_block["event_table_length"],
@@ -79,13 +92,16 @@ def build_report(*, official_event_index: Path, local_manifest: Path) -> dict[st
                 slot["value_hex"] == "0xFFFFFFFF"
                 for slot in local_block["callback_slots"].values()
             ),
+            "official_wrapper_starts_after_hash": official_phase["offset"] > official_page1_hash_offset,
+            "local_page_event_table_starts_before_hash": local_block["event_table_matches"][0]["value"] < local_page1_hash_offset,
             "official_and_local_share_event_offset_style": (
                 official_record["slots"]["event_offset_0x34"]["value_hex"] == "0x0"
                 and local_block["mirror_event_offset_field"]["hex"] == "0x14B"
             ),
             "likely_missing_layer": (
                 "local build still emits page1 load as a normal page event table with mirror event_offset_0x34 "
-                "pointing at that table, while the official oracle uses an inline page-load phase wrapper "
+                "pointing at that table before the page1 hash block, while the official oracle uses an inline page-load phase wrapper "
+                "after the page1 hash block "
                 "without a normal page event-table match. The missing piece is likely the official page1 load "
                 "wrapper/layout path rather than a simple callback-slot fill."
             ),
