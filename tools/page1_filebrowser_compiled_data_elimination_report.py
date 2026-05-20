@@ -10,6 +10,7 @@ OUT_PATH = ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_co
 INPUTS = {
     "clone_vs_local": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_clone_vs_local_report_2026-05-21.json",
     "pointer_closure": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_pointer_closure_report_2026-05-21.json",
+    "attr_header_equivalence": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_attr_header_equivalence_2026-05-21.json",
     "object_local_equivalence": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_object_local_equivalence_2026-05-21.json",
     "full_page_local_equivalence": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_full_page_local_equivalence_2026-05-21.json",
     "primary_record_equivalence": ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_primary_record_equivalence_2026-05-21.json",
@@ -29,6 +30,7 @@ def main() -> int:
         "evidence": {
             "authoring_gap_separated": reports["clone_vs_local"]["conclusions"]["official_clone_is_authoring_gap_not_runtime_a_type_enumeration_gap"],
             "pointer_closure_valid": reports["pointer_closure"]["conclusions"]["all_target_rows_keep_basic_pointer_closure"],
+            "attr_user_header_identical": reports["attr_header_equivalence"]["conclusions"]["all_four_attr_user_headers_identical"],
             "object_local_user_and_mirror_identical": (
                 reports["object_local_equivalence"]["conclusions"]["all_60_actual_user_records_identical"]
                 and reports["object_local_equivalence"]["conclusions"]["all_60_actual_mirror_abs_slot_values_identical"]
@@ -44,6 +46,7 @@ def main() -> int:
                 [
                     reports["clone_vs_local"]["conclusions"]["official_clone_is_authoring_gap_not_runtime_a_type_enumeration_gap"],
                     reports["pointer_closure"]["conclusions"]["all_target_rows_keep_basic_pointer_closure"],
+                    reports["attr_header_equivalence"]["conclusions"]["all_four_attr_user_headers_identical"],
                     reports["object_local_equivalence"]["conclusions"]["all_60_actual_user_records_identical"],
                     reports["object_local_equivalence"]["conclusions"]["all_60_actual_mirror_abs_slot_values_identical"],
                     reports["full_page_local_equivalence"]["conclusions"]["all_204_page_local_user_records_identical"],

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "attr-header-equivalent",
+  "cases": {
+    "single_page_filebrowser_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\output.tft",
+      "attr_offset": 1754,
+      "user_offset": 1790,
+      "attr_user_header_hex": "fb ba 73 d0 08 00 00 00 09 00 00 00 95 81 f1 d9 00 00 00 00 09 00 00 00 22 9c 30 dd 04 00 00 00 09 00 00 00"
+    },
+    "single_page_filestream_working": {
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\output.tft",
+      "attr_offset": 939,
+      "user_offset": 975,
+      "attr_user_header_hex": "fb ba 73 d0 08 00 00 00 09 00 00 00 95 81 f1 d9 00 00 00 00 09 00 00 00 22 9c 30 dd 04 00 00 00 09 00 00 00"
+    },
+    "page1_filebrowser_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
+      "attr_offset": 2253,
+      "user_offset": 2289,
+      "attr_user_header_hex": "fb ba 73 d0 08 00 00 00 09 00 00 00 95 81 f1 d9 00 00 00 00 09 00 00 00 22 9c 30 dd 04 00 00 00 09 00 00 00"
+    },
+    "page1_filestream_local_multipt": {
+      "tft": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\output.tft",
+      "attr_offset": 1427,
+      "user_offset": 1463,
+      "attr_user_header_hex": "fb ba 73 d0 08 00 00 00 09 00 00 00 95 81 f1 d9 00 00 00 00 09 00 00 00 22 9c 30 dd 04 00 00 00 09 00 00 00"
+    }
+  },
+  "conclusions": {
+    "all_four_attr_user_headers_identical": true,
+    "attr_user_header_not_the_missing_filebrowser_registration_layer": true
+  }
+}

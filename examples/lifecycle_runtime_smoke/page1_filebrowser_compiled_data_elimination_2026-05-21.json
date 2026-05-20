@@ -6,6 +6,7 @@
   "evidence": {
     "authoring_gap_separated": true,
     "pointer_closure_valid": true,
+    "attr_user_header_identical": true,
     "object_local_user_and_mirror_identical": true,
     "full_page_local_user_identical": true,
     "primary_records_identical": true,
