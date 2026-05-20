@@ -19,9 +19,11 @@ FB_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filebrowser_m
 FS_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filestream_multipt_blank_page1_smoke_2026-05-21.json"
 TS_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_textselect_multipt_blank_page1_smoke_2026-05-21.json"
 OUT_PATH = ROOT / "examples" / "lifecycle_runtime_smoke" / "seed_side_multipt_runtime_limit_probes_2026-05-21.json"
+FIDELITY = ROOT / "examples" / "lifecycle_runtime_smoke" / "seed_side_multipt_probe_fidelity_2026-05-21.json"
 
 
 def main() -> int:
+    fidelity = json.loads(FIDELITY.read_text(encoding="utf-8")) if FIDELITY.exists() else {}
     payload = {
         "schema_version": 1,
         "date": "2026-05-21",
@@ -40,9 +42,9 @@ def main() -> int:
             "recommended_order": [
                 "optionally upload page0_textselect_blank_page1 as a D-type seed-side control",
                 "verify sendme -> page 1 and get select0.val",
-                "upload page0_filestream_blank_page1 control probe first",
+                "upload page0_filestream_blank_page1 control probe second",
                 "verify sendme -> page 1 and get fs0.en/fs0.val",
-                "upload page0_filebrowser_blank_page1 falsification probe",
+                "upload page0_filebrowser_blank_page1 falsification probe last",
                 "verify sendme -> page 1 and get fbrowser0.dir/filter/qty/txt",
             ],
             "interpretation": {
@@ -51,6 +53,7 @@ def main() -> int:
                 "both_positive": "extra-page/page1 placement is the primary limiter, not multi-page in general",
                 "both_negative": "seed-side runtime page 1 itself may still be the limiter, or multi-page advanced runtime is more broadly constrained",
             },
+            "fidelity_notes": fidelity.get("conclusions", {}),
         },
     }
     OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

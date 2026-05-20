@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "seed-side-fidelity-compared",
+  "cases": {
+    "filebrowser": {
+      "baseline_tft": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\output.tft",
+      "probe_tft": "reverse_usarthmi\\page0_filebrowser_multipt_blank_page1_probe_20260521\\output.tft",
+      "user_records_match_after_runtime_index_normalization": true,
+      "primary_records_identical": true,
+      "page_event_table_identical": true,
+      "mirror_event_offset_deltas": [
+        147,
+        147,
+        147,
+        147,
+        147
+      ],
+      "compiled_fidelity_ok": true
+    },
+    "filestream": {
+      "baseline_tft": "reverse_usarthmi\\advanced_direct_tft_file_stream_20260518\\output.tft",
+      "probe_tft": "reverse_usarthmi\\page0_filestream_multipt_blank_page1_probe_20260521\\output.tft",
+      "user_records_match_after_runtime_index_normalization": true,
+      "primary_records_identical": true,
+      "page_event_table_identical": false,
+      "mirror_event_offset_deltas": [
+        147,
+        136,
+        136,
+        136,
+        136
+      ],
+      "compiled_fidelity_ok": true
+    },
+    "textselect": {
+      "baseline_tft": "reverse_usarthmi\\advanced_direct_tft_text_select_20260518\\output.tft",
+      "probe_tft": "reverse_usarthmi\\page0_textselect_multipt_blank_page1_probe_20260521\\output.tft",
+      "user_records_match_after_runtime_index_normalization": true,
+      "primary_records_identical": true,
+      "page_event_table_identical": true,
+      "mirror_event_offset_deltas": [
+        147,
+        147,
+        147,
+        147,
+        147
+      ],
+      "compiled_fidelity_ok": true
+    }
+  },
+  "conclusions": {
+    "filebrowser_seed_side_probe_is_compiled_faithful_modulo_runtime_index_and_event_shift": true,
+    "textselect_seed_side_probe_is_compiled_faithful_modulo_runtime_index_and_event_shift": true,
+    "filestream_seed_side_probe_has_a_small_page_event_delta": true,
+    "seed_side_runtime_limiter_runner_should_treat_textselect_as_the_strongest_control": true
+  }
+}

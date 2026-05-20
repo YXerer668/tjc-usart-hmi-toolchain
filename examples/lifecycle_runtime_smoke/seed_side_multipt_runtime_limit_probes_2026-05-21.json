@@ -229,9 +229,9 @@
     "recommended_order": [
       "optionally upload page0_textselect_blank_page1 as a D-type seed-side control",
       "verify sendme -> page 1 and get select0.val",
-      "upload page0_filestream_blank_page1 control probe first",
+      "upload page0_filestream_blank_page1 control probe second",
       "verify sendme -> page 1 and get fs0.en/fs0.val",
-      "upload page0_filebrowser_blank_page1 falsification probe",
+      "upload page0_filebrowser_blank_page1 falsification probe last",
       "verify sendme -> page 1 and get fbrowser0.dir/filter/qty/txt"
     ],
     "interpretation": {
@@ -239,6 +239,12 @@
       "textselect_positive_filestream_positive_filebrowser_negative": "very strong evidence for A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 problem",
       "both_positive": "extra-page/page1 placement is the primary limiter, not multi-page in general",
       "both_negative": "seed-side runtime page 1 itself may still be the limiter, or multi-page advanced runtime is more broadly constrained"
+    },
+    "fidelity_notes": {
+      "filebrowser_seed_side_probe_is_compiled_faithful_modulo_runtime_index_and_event_shift": true,
+      "textselect_seed_side_probe_is_compiled_faithful_modulo_runtime_index_and_event_shift": true,
+      "filestream_seed_side_probe_has_a_small_page_event_delta": true,
+      "seed_side_runtime_limiter_runner_should_treat_textselect_as_the_strongest_control": true
     }
   }
 }
