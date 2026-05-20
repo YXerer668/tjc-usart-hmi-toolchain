@@ -1,0 +1,66 @@
+{
+    "schema_version":  1,
+    "date":  "2026-05-20",
+    "target":  "TJC8048X543_011C",
+    "status":  "live-positive",
+    "claim":  "the local direct-TFT page1 file-browser probe now reads back the key file-browser fields on corrected runtime page 0, proving field binding but not yet full enumeration/display recovery",
+    "artifacts":  {
+                      "output_tft":  "reverse_usarthmi/page1_filebrowser_direct_tft_probe_20260520_v4/output.tft",
+                      "target_page1":  "reverse_usarthmi/page1_filebrowser_direct_tft_probe_20260520_v4/target_1.pa"
+                  },
+    "build_summary":  {
+                          "checksum_hex":  "0xC02BE515",
+                          "checksum_valid":  true,
+                          "page1_blocks":  [
+                                               [
+                                                   "page1",
+                                                   "y"
+                                               ],
+                                               [
+                                                   "t0",
+                                                   "t"
+                                               ],
+                                               [
+                                                   "b0",
+                                                   "b"
+                                               ],
+                                               [
+                                                   "p0",
+                                                   "p"
+                                               ],
+                                               [
+                                                   "fbrowser0",
+                                                   "A"
+                                               ]
+                                           ],
+                          "prefix_delta_hex":  "0x52"
+                      },
+    "live_readback":  {
+                          "sendme":  {
+                                         "kind":  "page_id",
+                                         "value":  0,
+                                         "hex":  "66 00 ff ff ff"
+                                     },
+                          "fbrowser0.dir":  {
+                                                "kind":  "string",
+                                                "value":  "sd0/",
+                                                "hex":  "70 73 64 30 2f ff ff ff"
+                                            },
+                          "fbrowser0.filter":  {
+                                                   "kind":  "string",
+                                                   "value":  "*.*",
+                                                   "hex":  "70 2a 2e 2a ff ff ff"
+                                               },
+                          "fbrowser0.txt":  {
+                                                "kind":  "string",
+                                                "value":  "",
+                                                "hex":  "70 ff ff ff"
+                                            }
+                      },
+    "conclusions":  {
+                        "page1_filebrowser_direct_tft_field_binding_recovered":  true,
+                        "page1_filebrowser_direct_tft_full_enumeration_recovered":  false,
+                        "page1_filebrowser_official_authoring_recovered":  false,
+                        "narrowing":  "page1 file-browser now has local direct-TFT field binding on corrected runtime page 0: dir/filter/txt read back correctly. newer refresh-plus-camera evidence still shows qty=0 and a white list surface, so enumeration/display is not yet recovered. the official/authoring/save path remains a separate gap because it still fails to preserve an A-type object into 1.pa."
+                    }
+}

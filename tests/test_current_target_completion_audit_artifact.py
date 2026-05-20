@@ -30,9 +30,9 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
         scheduler = unfinished["scheduler_lifecycle_general_equivalence"]
 
         self.assertEqual(page1["status"], "unfinished")
-        self.assertGreaterEqual(len(page1["evidence"]), 2)
+        self.assertGreaterEqual(len(page1["evidence"]), 4)
+        self.assertIn("page1 file-browser direct enumeration/display recovery", page1["blocks"])
         self.assertIn("page1 file-browser authoring/save recovery", page1["blocks"])
-        self.assertIn("page1 file-browser runtime proof after authoring recovery", page1["blocks"])
         self.assertIn("broader page-level lifecycle generalization", scheduler["blocks"])
 
 

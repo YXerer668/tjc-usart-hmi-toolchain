@@ -33,6 +33,12 @@ def build_report() -> dict[str, Any]:
     page1_mapping = _load_json("examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json")
     page1_load_oracle = _load_json("examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json")
     page1_load_local = _load_json("examples/lifecycle_runtime_smoke/page1_load_local_generated_live_verified_2026-05-20.json")
+    page1_loadend_local = _load_json("examples/lifecycle_runtime_smoke/page1_loadend_local_generated_live_verified_2026-05-20.json")
+    page1_load_and_loadend_local = _load_json(
+        "examples/lifecycle_runtime_smoke/page1_load_and_loadend_local_generated_live_verified_2026-05-20.json"
+    )
+    page1_filebrowser_direct = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json")
+    page1_filebrowser_refresh = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json")
     page1_filebrowser_gap = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json")
     case80 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json")
     case85 = _load_json("examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json")
@@ -129,6 +135,28 @@ def build_report() -> dict[str, Any]:
             "meaning": "the official case52 page1 load oracle emits its marker when switching to runtime page 0, proving that the panel runtime does support page1 load dispatch",
         },
         {
+            "id": "page1_local_loadend_dispatch_positive",
+            "page": 1,
+            "class": "lifecycle_runtime_positive",
+            "source": "examples/lifecycle_runtime_smoke/page1_loadend_local_generated_live_verified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": True,
+            "runtime_page": 0,
+            "runtime_signal": page1_loadend_local["live_sequence"][0]["hex"],
+            "meaning": "the rebuilt local page1 loadend probe now emits its marker when switching to runtime page 0, extending the recovered narrow page1 phase-printh family beyond plain load",
+        },
+        {
+            "id": "page1_local_load_and_loadend_dispatch_positive",
+            "page": 1,
+            "class": "lifecycle_runtime_positive",
+            "source": "examples/lifecycle_runtime_smoke/page1_load_and_loadend_local_generated_live_verified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": True,
+            "runtime_page": 0,
+            "runtime_signal": page1_load_and_loadend_local["live_sequence"][0]["hex"],
+            "meaning": "the rebuilt local page1 load+loadend probe now emits both markers when switching to runtime page 0, proving the fixed 4-byte family extends to the minimal combined case as well",
+        },
+        {
             "id": "page1_text_select_positive_mapping_corrected",
             "page": 1,
             "class": "advanced_readback_positive",
@@ -195,6 +223,35 @@ def build_report() -> dict[str, Any]:
             "meaning": "the official GUI page1 file-stream minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
         },
         {
+            "id": "page1_file_browser_direct_binding_positive",
+            "page": 1,
+            "class": "advanced_readback_positive",
+            "source": "examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": True,
+            "runtime_page": 0,
+            "runtime_readback": {
+                "fbrowser0.dir": page1_filebrowser_direct["live_readback"]["fbrowser0.dir"]["value"],
+                "fbrowser0.filter": page1_filebrowser_direct["live_readback"]["fbrowser0.filter"]["value"],
+                "fbrowser0.txt": page1_filebrowser_direct["live_readback"]["fbrowser0.txt"]["value"],
+            },
+            "meaning": "the local direct-TFT page1 file-browser probe now reads back dir/filter/txt on runtime page 0, proving field binding for page1 file-browser on the local path",
+        },
+        {
+            "id": "page1_file_browser_direct_enumeration_negative",
+            "page": 1,
+            "class": "advanced_runtime_negative",
+            "source": "examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": False,
+            "runtime_page": 0,
+            "runtime_signal": {
+                "qty": page1_filebrowser_refresh["steps"]["after_page_cycle"]["qty"]["response"]["value"],
+                "txt": page1_filebrowser_refresh["steps"]["after_page_cycle"]["txt"]["response"]["value"],
+            },
+            "meaning": "after ref fbrowser0 and a page1->page0 cycle, page1 direct-TFT file-browser still keeps qty=0 and the camera stays white, so enumeration/display is not yet recovered even though field binding is alive",
+        },
+        {
             "id": "page1_file_browser_authoring_gap",
             "page": 1,
             "class": "advanced_authoring_gap",
@@ -236,7 +293,11 @@ def build_report() -> dict[str, Any]:
                 1
                 for item in rows
                 if item["page"] == 1
-                and item["id"] == "page1_local_load_dispatch_positive"
+                and item["id"] in {
+                    "page1_local_load_dispatch_positive",
+                    "page1_local_loadend_dispatch_positive",
+                    "page1_local_load_and_loadend_dispatch_positive",
+                }
                 and item["runtime_positive"]
             ),
             "page1_load_marker_recovered": True,
@@ -250,10 +311,10 @@ def build_report() -> dict[str, Any]:
             "likely_shared_breakpoint": [
                 "fresh live re-verification now proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, not runtime page 1",
                 "the local ordinary page1 text probe and official GUI page1 text-select/sliding-text/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
-                "the official case52 page1 load oracle and the rebuilt local page1 load probe now both dispatch on corrected runtime page 0 for the minimal fixed 4-byte printh family",
-                "the remaining unrecovered gaps are narrower: page1 object binding is broadly alive for saved controls, page1 file-browser currently fails earlier at the authoring/save layer, and broader page-level lifecycle behavior still needs generalization beyond this narrow fixed-load family",
+                "the official case52 page1 load oracle and the rebuilt local page1 load/loadend probes now dispatch on corrected runtime page 0 for the minimal fixed 4-byte page-level printh family, including the minimal combined load+loadend case",
+                "the remaining unrecovered gaps are narrower: page1 object binding is now alive for five tested advanced controls on the local runtime path, but page1 file-browser still has two separate gaps: direct-TFT enumeration/display stays negative with qty=0 plus a white camera surface, and the official authoring/save layer still fails to preserve an A-type object into 1.pa",
             ],
-            "recommended_next_step": "generalize the recovered page1 load wrapper path beyond the fixed 4-byte printh family, and in parallel recover a page1 file-browser HMI that actually preserves an A-type object into 1.pa",
+            "recommended_next_step": "generalize the recovered page1 load wrapper path beyond the fixed 4-byte load/loadend printh family, and in parallel split page1 file-browser into two recovery lanes: fix local direct-TFT enumeration/display beyond qty=0 white-surface behavior, and separately recover a page1 file-browser HMI that actually preserves an A-type object into 1.pa",
         },
     }
 

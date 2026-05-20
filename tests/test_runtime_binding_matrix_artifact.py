@@ -17,11 +17,11 @@ class RuntimeBindingMatrixArtifactTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["page0_advanced_positive_count"], 5)
         self.assertTrue(payload["summary"]["page1_runtime_page_mapping_confirmed"])
         self.assertEqual(payload["summary"]["page1_ordinary_binding_positive_count"], 1)
-        self.assertEqual(payload["summary"]["page1_advanced_binding_positive_count"], 4)
-        self.assertEqual(payload["summary"]["page1_advanced_binding_negative_count"], 0)
+        self.assertEqual(payload["summary"]["page1_advanced_binding_positive_count"], 5)
+        self.assertEqual(payload["summary"]["page1_advanced_binding_negative_count"], 1)
         self.assertEqual(payload["summary"]["page1_advanced_authoring_gap_count"], 1)
         self.assertEqual(payload["summary"]["page1_official_load_dispatch_positive_count"], 1)
-        self.assertEqual(payload["summary"]["page1_local_load_dispatch_positive_count"], 1)
+        self.assertEqual(payload["summary"]["page1_local_load_dispatch_positive_count"], 3)
         self.assertTrue(payload["summary"]["page1_load_marker_recovered"])
         self.assertEqual(payload["summary"]["page1_remaining_controls_requiring_correct_page_recheck_count"], 0)
         self.assertEqual(
@@ -32,6 +32,8 @@ class RuntimeBindingMatrixArtifactTests(unittest.TestCase):
         self.assertEqual(rows["page1_local_text_positive_mapping_corrected"]["runtime_readback"]["p1title.txt"], "LOAD")
         self.assertEqual(rows["page1_local_load_dispatch_positive"]["runtime_signal"], "23 02 50 4c")
         self.assertEqual(rows["page1_official_load_dispatch_positive"]["runtime_signal"], "aa 52 10 01")
+        self.assertEqual(rows["page1_local_loadend_dispatch_positive"]["runtime_signal"], "23 02 50 45")
+        self.assertEqual(rows["page1_local_load_and_loadend_dispatch_positive"]["runtime_signal"], "23 02 50 4c 23 02 50 45")
         self.assertEqual(rows["page1_text_select_positive_mapping_corrected"]["runtime_readback"]["select0.val"], 0)
         self.assertEqual(
             rows["page1_sliding_text_positive_mapping_corrected"]["runtime_readback"]["slt0.txt"],
@@ -39,6 +41,8 @@ class RuntimeBindingMatrixArtifactTests(unittest.TestCase):
         )
         self.assertEqual(rows["page1_data_record_positive_mapping_corrected"]["runtime_readback"]["data0.maxval"], 1000)
         self.assertEqual(rows["page1_file_stream_positive_mapping_corrected"]["runtime_readback"]["fs0.en"], 0)
+        self.assertEqual(rows["page1_file_browser_direct_binding_positive"]["runtime_readback"]["fbrowser0.dir"], "sd0/")
+        self.assertEqual(rows["page1_file_browser_direct_enumeration_negative"]["runtime_signal"]["qty"], 0)
         self.assertEqual(rows["page1_file_browser_authoring_gap"]["runtime_signal"], "no_saved_page1_filebrowser_object")
 
 
