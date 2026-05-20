@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "compiled-data-eliminated",
+  "evidence": {
+    "authoring_gap_separated": true,
+    "pointer_closure_valid": true,
+    "object_local_user_and_mirror_identical": true,
+    "full_page_local_user_identical": true,
+    "primary_records_identical": true,
+    "prefix_head_equivalent_after_generic_multipt_normalization": true,
+    "page_event_table_byte_identical": true,
+    "no_post_mirror_service_tail": true
+  },
+  "conclusions": {
+    "compiled_data_envelope_exhausted": true,
+    "remaining_gap_is_not_locatable_in_current_object_tail_compiled_data": true,
+    "best_current_hypotheses": [
+      "page-global runtime registration outside the currently recovered object-tail model",
+      "target runtime limitation for page1 A-type enumeration/display despite compiled data parity"
+    ],
+    "next_priority": "prefer stronger runtime-limitation evidence or a targeted live falsification probe over more page-local byte patching"
+  }
+}
