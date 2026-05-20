@@ -25,6 +25,8 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertTrue(payload["experiments"]["record_diff"]["mirror_value_tail_identical"])
         self.assertEqual(payload["experiments"]["mirror_event_offset_patch"]["qty"], 0)
         self.assertEqual(payload["experiments"]["page_header_patch"]["qty"], 0)
+        self.assertEqual(payload["experiments"]["prefix_offset_patch"]["dir_kind"], "invalid_reference")
+        self.assertEqual(payload["experiments"]["prefix_offset_patch"]["qty_kind"], "invalid_reference")
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
@@ -33,6 +35,7 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertFalse(payload["conclusions"]["fbrowser_runtime_index_patch_sufficient"])
         self.assertFalse(payload["conclusions"]["mirror_event_offset_patch_sufficient"])
         self.assertFalse(payload["conclusions"]["page_header_patch_sufficient"])
+        self.assertTrue(payload["conclusions"]["prefix_offset_trio_necessary_for_binding"])
 
 
 if __name__ == "__main__":
