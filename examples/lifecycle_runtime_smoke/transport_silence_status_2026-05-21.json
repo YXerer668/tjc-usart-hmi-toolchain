@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "transport-silence-summarized",
+  "evidence": {
+    "serial_baud_sweep": {
+      "artifact": "examples/lifecycle_runtime_smoke/serial_baud_sweep_2026-05-21.json",
+      "all_bauds_silent": true
+    },
+    "official_gui_button_probe": {
+      "artifact": "examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json",
+      "all_local_methods_failed": true,
+      "bm_click_invoked": true
+    },
+    "orchestrated_recovery": {
+      "artifact": "examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json",
+      "classification": "still_silent_after_recovery",
+      "runner_started": false
+    },
+    "public_whmi_entry_probe": {
+      "artifact": "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json",
+      "ack_received": false
+    },
+    "camera_status": {
+      "artifact": "examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json",
+      "screen_not_black": true,
+      "mean_luma": 141.3127281358507
+    },
+    "sd_recovery_package": {
+      "artifact": "examples/lifecycle_runtime_smoke/sd_recovery_package_2026-05-21.json",
+      "package_ready": true,
+      "repo_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8"
+    },
+    "sd_recovery_handoff": {
+      "artifact": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json",
+      "bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
+      "bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip"
+    }
+  },
+  "conclusions": {
+    "runtime_silence_not_explained_by_baud_drift": true,
+    "panel_is_visibly_powered_not_black": true,
+    "official_gui_local_interaction_not_sufficient_to_start_download": true,
+    "public_whmi_entry_is_also_silent": true,
+    "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": true,
+    "external_sd_recovery_bundle_is_ready": true,
+    "best_current_repo_side_state": "local software automation is prepared; the panel is visibly powered but transport-silent all the way up through the public upload entrypoint, so further progress now depends on external recovery restoring at least one responsive command path"
+  }
+}

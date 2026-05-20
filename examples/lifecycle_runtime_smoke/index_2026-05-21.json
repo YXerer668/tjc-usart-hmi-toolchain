@@ -4,11 +4,12 @@
   "target": "TJC8048X543_011C",
   "status": "prepared",
   "current_blocker": {
-    "summary": "panel is silent not only for runtime commands but also at the public whmi-wri upload entrypoint; further progress depends on external recovery before the prepared seed-side live falsification can run",
+    "summary": "panel is visibly powered but silent not only for runtime commands but also at the public whmi-wri upload entrypoint; further progress depends on external recovery before the prepared seed-side live falsification can run",
     "artifacts": [
       "examples/lifecycle_runtime_smoke/transport_silence_status_2026-05-21.json",
       "examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json",
-      "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json"
+      "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json"
     ]
   },
   "external_recovery": {
