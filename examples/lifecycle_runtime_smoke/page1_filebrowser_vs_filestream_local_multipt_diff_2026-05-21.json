@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "actual-local-multipt-compared",
+  "cases": {
+    "filebrowser": {
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "fbrowser0",
+          "A"
+        ]
+      ],
+      "prefix_head_len": 407,
+      "event_offsets": [
+        407,
+        447,
+        473,
+        499,
+        525
+      ],
+      "hash_offset": 551,
+      "primary_offset": 585,
+      "primary_pre_string_len": 472,
+      "slot_count": 204,
+      "actual_second_record_hit_hex": "0xae2c71",
+      "actual_second_record_event_offset": 525,
+      "actual_page_header_hit_hex": "0xae29a1",
+      "actual_page_header_words": [
+        262145,
+        1870,
+        7185,
+        308
+      ],
+      "actual_prefix_row8": "01 00 c3 79 01 fa 00 00",
+      "prefix_head_first_96": "34 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 0c 00 00 00 44 00 00 00 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 01 00 c3 79 01 fa 00 00 dd 9f c0 00 24 2d b8 01 df c7 dc 02 93 30 79 05 7e c6 15 0a c7 b1 eb 0d"
+    },
+    "filestream": {
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "fs0",
+          "?"
+        ]
+      ],
+      "prefix_head_len": 367,
+      "event_offsets": [
+        367,
+        407,
+        433,
+        459,
+        485
+      ],
+      "hash_offset": 489,
+      "primary_offset": 523,
+      "primary_pre_string_len": 356,
+      "slot_count": 163,
+      "actual_second_record_hit_hex": "0xae250f",
+      "actual_second_record_event_offset": 485,
+      "actual_page_header_hit_hex": "0xae228f",
+      "actual_page_header_words": [
+        262145,
+        1044,
+        5375,
+        308
+      ],
+      "actual_prefix_row8": "01 00 c3 79 01 fa 00 00",
+      "prefix_head_first_96": "0c 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 0c 00 00 00 44 00 00 00 c8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 01 00 c3 79 01 fa 00 00 24 2d b8 01 93 30 79 05 7e c6 15 0a 46 fa 8a 11 86 02 5f 16 f4 5c 48 18"
+    }
+  }
+}
