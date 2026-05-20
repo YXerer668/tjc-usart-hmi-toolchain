@@ -147,6 +147,78 @@
           }
         }
       }
+    },
+    "page0_textselect_blank_page1": {
+      "probe_dir": "reverse_usarthmi\\page0_textselect_multipt_blank_page1_probe_20260521",
+      "output_tft": "reverse_usarthmi\\page0_textselect_multipt_blank_page1_probe_20260521\\output.tft",
+      "expect_json": "examples\\lifecycle_runtime_smoke\\page0_textselect_multipt_blank_page1_smoke_2026-05-21.json",
+      "page0_blocks": [
+        [
+          "page0",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "select0",
+          "D"
+        ]
+      ],
+      "page1_blocks": [
+        [
+          "page1",
+          "y"
+        ]
+      ],
+      "advanced_name": "select0",
+      "build_summary": {
+        "file_size": 11411944,
+        "object_count": 6,
+        "section_offsets": {
+          "hash": {
+            "value": 640,
+            "hex": "0x280"
+          },
+          "primary": {
+            "value": 674,
+            "hex": "0x2A2"
+          },
+          "attr": {
+            "value": 2425,
+            "hex": "0x979"
+          },
+          "user": {
+            "value": 2461,
+            "hex": "0x99D"
+          },
+          "pic": {
+            "value": 7741,
+            "hex": "0x1E3D"
+          },
+          "padding": {
+            "value": 8673,
+            "hex": "0x21E1"
+          },
+          "prefix_delta": {
+            "value": 6,
+            "hex": "0x6"
+          },
+          "tail": {
+            "value": 8680,
+            "hex": "0x21E8"
+          }
+        }
+      }
     }
   },
   "live_plan": {
@@ -155,6 +227,8 @@
       "page 1": "seed-side page0 carrying the advanced control"
     },
     "recommended_order": [
+      "optionally upload page0_textselect_blank_page1 as a D-type seed-side control",
+      "verify sendme -> page 1 and get select0.val",
       "upload page0_filestream_blank_page1 control probe first",
       "verify sendme -> page 1 and get fs0.en/fs0.val",
       "upload page0_filebrowser_blank_page1 falsification probe",
@@ -162,6 +236,7 @@
     ],
     "interpretation": {
       "filestream_positive_and_filebrowser_negative": "strong evidence for A-type-specific multi-page runtime limitation",
+      "textselect_positive_filestream_positive_filebrowser_negative": "very strong evidence for A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 problem",
       "both_positive": "extra-page/page1 placement is the primary limiter, not multi-page in general",
       "both_negative": "seed-side runtime page 1 itself may still be the limiter, or multi-page advanced runtime is more broadly constrained"
     }

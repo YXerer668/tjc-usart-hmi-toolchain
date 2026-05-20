@@ -13,14 +13,18 @@ class SeedSideMultiPageRuntimeLimitProbesArtifactTests(unittest.TestCase):
         payload = json.loads(ARTIFACT.read_text(encoding="utf-8"))
         fb = payload["probes"]["page0_filebrowser_blank_page1"]
         fs = payload["probes"]["page0_filestream_blank_page1"]
+        ts = payload["probes"]["page0_textselect_blank_page1"]
 
         self.assertEqual(payload["status"], "seed-side-probes-prepared")
         self.assertEqual(fb["page0_blocks"][-1], ["fbrowser0", "A"])
         self.assertEqual(fs["page0_blocks"][-1], ["fs0", "?"])
+        self.assertEqual(ts["page0_blocks"][-1], ["select0", "D"])
         self.assertEqual(fb["page1_blocks"], [["page1", "y"]])
         self.assertEqual(fs["page1_blocks"], [["page1", "y"]])
+        self.assertEqual(ts["page1_blocks"], [["page1", "y"]])
         self.assertTrue(fb["expect_json"].endswith("page0_filebrowser_multipt_blank_page1_smoke_2026-05-21.json"))
         self.assertTrue(fs["expect_json"].endswith("page0_filestream_multipt_blank_page1_smoke_2026-05-21.json"))
+        self.assertTrue(ts["expect_json"].endswith("page0_textselect_multipt_blank_page1_smoke_2026-05-21.json"))
         self.assertEqual(payload["live_plan"]["expected_runtime_mapping"]["page 1"], "seed-side page0 carrying the advanced control")
 
 

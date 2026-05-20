@@ -15,6 +15,8 @@ FS_TFT = ROOT / "reverse_usarthmi" / "page0_filestream_multipt_blank_page1_probe
 FS_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filestream_multipt_blank_page1_smoke_2026-05-21.json"
 FB_TFT = ROOT / "reverse_usarthmi" / "page0_filebrowser_multipt_blank_page1_probe_20260521" / "output.tft"
 FB_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_filebrowser_multipt_blank_page1_smoke_2026-05-21.json"
+TS_TFT = ROOT / "reverse_usarthmi" / "page0_textselect_multipt_blank_page1_probe_20260521" / "output.tft"
+TS_EXPECT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page0_textselect_multipt_blank_page1_smoke_2026-05-21.json"
 
 
 @dataclass(frozen=True)
@@ -68,14 +70,53 @@ def build_smoke_command(
 
 
 def classify_results(results: dict[str, dict[str, Any]]) -> dict[str, str]:
+    ts_ok = None
+    if "page0_textselect_blank_page1" in results:
+        ts_ok = bool(results["page0_textselect_blank_page1"]["summary"]["ok"])
     fs_ok = bool(results["page0_filestream_blank_page1"]["summary"]["ok"])
     fb_ok = bool(results["page0_filebrowser_blank_page1"]["summary"]["ok"])
-    if fs_ok and fb_ok:
+    if ts_ok and fs_ok and not fb_ok:
+        label = "textselect_positive_filestream_positive_filebrowser_negative"
+        meaning = "very strong evidence for A-type-specific multi-page runtime limitation rather than a generic seed-side/runtime1 problem"
+    elif ts_ok and fs_ok and fb_ok:
+        label = "all_three_positive"
+        meaning = "seed-side runtime page 1 can host D/?/A advanced controls; extra-page/page1 placement is the primary limiter"
+    elif ts_ok is False and not fs_ok and not fb_ok:
+        label = "all_three_negative"
+        meaning = "seed-side runtime page 1 itself may be broadly constrained for advanced controls or the transport/runtime lane is still unhealthy"
+    elif ts_ok is False and fs_ok and not fb_ok:
+        label = "textselect_negative_filestream_positive_filebrowser_negative"
+        meaning = "A-type remains specially bad, but the seed-side runtime lane is not a simple advanced-control allow/deny split"
+    elif ts_ok is False and fb_ok and not fs_ok:
+        label = "textselect_negative_filestream_negative_filebrowser_positive"
+        meaning = "unexpected control split; re-check smoke expectations and runtime mapping before concluding"
+    elif ts_ok is True and not fs_ok and not fb_ok:
+        label = "textselect_positive_filestream_negative_filebrowser_negative"
+        meaning = "seed-side runtime page 1 can host some advanced controls, but ? and A remain constrained"
+    elif ts_ok is True and not fs_ok and fb_ok:
+        label = "textselect_positive_filestream_negative_filebrowser_positive"
+        meaning = "unexpected control split; re-check smoke expectations and runtime mapping before concluding"
+    elif ts_ok is True and fs_ok and fb_ok:
+        label = "all_three_positive"
+        meaning = "seed-side runtime page 1 can host D/?/A advanced controls; extra-page/page1 placement is the primary limiter"
+    elif ts_ok is None and fs_ok and fb_ok:
         label = "both_positive"
         meaning = "extra-page/page1 placement is the primary limiter, not multi-page in general"
+    elif ts_ok is None and fs_ok and not fb_ok:
+        label = "filestream_positive_and_filebrowser_negative"
+        meaning = "strong evidence for A-type-specific multi-page runtime limitation"
+    elif ts_ok is None and not fs_ok and not fb_ok:
+        label = "both_negative"
+        meaning = "seed-side runtime page 1 itself may still be the limiter, or multi-page advanced runtime is more broadly constrained"
+    elif ts_ok is None:
+        label = "filebrowser_positive_filestream_negative"
+        meaning = "unexpected control result; verify transport and smoke expectations before drawing runtime conclusions"
     elif fs_ok and not fb_ok:
         label = "filestream_positive_and_filebrowser_negative"
         meaning = "strong evidence for A-type-specific multi-page runtime limitation"
+    elif fs_ok and fb_ok:
+        label = "both_positive"
+        meaning = "extra-page/page1 placement is the primary limiter, not multi-page in general"
     elif not fs_ok and not fb_ok:
         label = "both_negative"
         meaning = "seed-side runtime page 1 itself may still be the limiter, or multi-page advanced runtime is more broadly constrained"
@@ -105,10 +146,15 @@ def main() -> int:
     parser.add_argument("--post-upload-wait-s", type=float, default=2.0)
     parser.add_argument("--capture", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--with-textselect-control", action="store_true")
     args = parser.parse_args()
 
     out_root = Path(args.out_dir).resolve()
     out_root.mkdir(parents=True, exist_ok=True)
+
+    probe_list = list(PROBES)
+    if args.with_textselect_control:
+        probe_list.insert(0, ProbeSpec("page0_textselect_blank_page1", TS_TFT, TS_EXPECT))
 
     commands = {
         probe.name: build_smoke_command(
@@ -121,7 +167,7 @@ def main() -> int:
             post_upload_wait_s=args.post_upload_wait_s,
             capture=args.capture,
         )
-        for probe in PROBES
+        for probe in probe_list
     }
 
     summary: dict[str, Any] = {

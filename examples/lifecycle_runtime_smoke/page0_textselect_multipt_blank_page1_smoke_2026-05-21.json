@@ -1,0 +1,13 @@
+{
+  "page_id": 1,
+  "select_page": 1,
+  "restore_page": 0,
+  "expectations": [
+    {
+      "target": "select0.val",
+      "expected": 0,
+      "expected_kind": "number",
+      "attempts": 3
+    }
+  ]
+}
