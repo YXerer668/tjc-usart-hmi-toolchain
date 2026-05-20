@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "partial-runtime",
+  "claim": "a local direct-TFT page1 file-browser probe gets farther than the official/authoring path: the object is not fully healthy, but it is no longer a pure 'nothing saved' state",
+  "artifacts": {
+    "output_tft": "reverse_usarthmi/page1_filebrowser_direct_tft_probe_20260520/output.tft",
+    "target_page1": "reverse_usarthmi/page1_filebrowser_direct_tft_probe_20260520/target_1.pa"
+  },
+  "build_summary": {
+    "checksum_hex": "0xA7508EB5",
+    "checksum_valid": true,
+    "page1_blocks": [
+      ["page1", "y"],
+      ["t0", "t"],
+      ["b0", "b"],
+      ["p0", "p"],
+      ["fbrowser0", "A"]
+    ]
+  },
+  "live_readback": {
+    "sendme": {
+      "kind": "page_id",
+      "value": 0,
+      "hex": "66 00 ff ff ff"
+    },
+    "fbrowser0.dir": {
+      "kind": "invalid_reference",
+      "hex": "1a ff ff ff"
+    },
+    "fbrowser0.filter": {
+      "kind": "invalid_reference",
+      "hex": "1a ff ff ff"
+    },
+    "fbrowser0.txt": {
+      "kind": "string",
+      "value": "",
+      "hex": "70 ff ff ff"
+    }
+  },
+  "conclusions": {
+    "page1_filebrowser_runtime_fully_recovered": false,
+    "page1_filebrowser_runtime_completely_absent": false,
+    "narrowing": "the local direct-TFT route can materialize a partially alive page1 file-browser object: txt is a readable empty string, while dir/filter still fail as invalid_reference. this is narrower than the pure authoring/save gap and points to remaining page-local field layout or user-slot binding problems for A-type objects on page1."
+  }
+}
