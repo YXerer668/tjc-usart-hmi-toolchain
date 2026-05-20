@@ -35,6 +35,8 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertEqual(payload["experiments"]["prefix_rowhash_patch"]["qty_after"], 0)
         self.assertEqual(payload["experiments"]["prefix_row_full_patch"]["sendme_after_page1"], 1)
         self.assertEqual(payload["experiments"]["prefix_row_full_patch"]["qty_after"], 0)
+        self.assertEqual(payload["experiments"]["page_header_fs_like_patch"]["sendme_after_page1_kind"], "none")
+        self.assertEqual(payload["experiments"]["page_header_fs_like_patch"]["after_sendme_kind"], "none")
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
@@ -49,6 +51,7 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertFalse(payload["conclusions"]["prefix_rowhash_sufficient_for_enumeration"])
         self.assertTrue(payload["conclusions"]["prefix_rowhash_and_rowindex_leave_enumeration_dead"])
         self.assertFalse(payload["conclusions"]["prefix_full_row_sufficient"])
+        self.assertFalse(payload["conclusions"]["page_header_fs_like_patch_sufficient"])
 
 
 if __name__ == "__main__":

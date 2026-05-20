@@ -140,14 +140,21 @@
                                                       "dir_after":  "sd0/",
                                                       "camera":  "reverse_usarthmi/page1_filebrowser_prefix_row_full_probe_20260521/camera_20260521_012930.jpg",
                                                       "change":  "patched the full 8-byte prefix row block 0xAE0040..0xAE0047 to the official case31 multi-page values"
-                                                  }
+                                                  },
+                        "page_header_fs_like_patch":  {
+                                                          "probe":  "page1_filebrowser_page_header_fs_like_probe_20260521",
+                                                          "sendme_after_page1_kind":  "none",
+                                                          "after_sendme_kind":  "none",
+                                                          "after_dir_kind":  "none",
+                                                          "change":  "patched current local page1 filebrowser actual page-header dword1/dword2 to current local page1 filestream positive values; kept dword0/dword3 unchanged"
+                                                      }
                     },
     "conclusions":  {
                         "field_binding_recovered":  true,
                         "enumeration_display_recovered":  false,
                         "cross_page_companion_name_collision_primary_cause":  false,
                         "page0_vs_page1_filebrowser_cluster_geometry_primary_cause":  false,
-                        "narrowing":  "page1 file-browser local direct-TFT still stays unresolved after twelve increasingly strict probes. original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1, a patch that changes only the actual on-disk second fbrowser0 record event_offset from 0x1E5 to the working single-page on-disk value 0x207, a patch that changes only the actual on-disk page1 mirror-page-header tuple to the single-page working header values, a patch that changes only the prefix page-row count from 1 to 0, a patch that changes only the inserted 6-byte row tail word from 0 to 1, a patch that changes only the row middle four bytes to the single-page working bytes, and finally a patch that replaces the full 8-byte row block with the official case31 multi-page values all still leave qty=0 and a white camera surface. page0 control evidence proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. the three +6 prefix-offset fields are necessary for any page1 file-browser binding because reverting them causes invalid_reference. rowcount, rowindex, rowhash, and even the entire 8-byte row block are all individually insufficient. the remaining structural gap is therefore pushed beyond isolated row bytes into deeper multi-page prefix/page-table framing semantics.",
+                        "narrowing":  "page1 file-browser local direct-TFT still stays unresolved after thirteen increasingly strict probes. beyond the earlier row and mirror experiments, a new fs-like page-header probe now shows that simply borrowing the current local page1 file-stream positive page-header dword1/dword2 values for page1 file-browser is too blunt: it makes runtime commands stop responding after page switches instead of recovering enumeration. together with the earlier positive local page1 text-select and file-stream proofs, the remaining gap is now strongly isolated to A-type file-browser-specific multi-page prefix/page-table/runtime-state semantics rather than a general local page1 advanced-builder failure.",
                         "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false,
                         "qty_semantics_confirmed":  true,
                         "fbrowser_runtime_index_patch_sufficient":  false,
@@ -159,6 +166,7 @@
                         "prefix_rowindex_sufficient_for_enumeration":  false,
                         "prefix_rowhash_sufficient_for_enumeration":  false,
                         "prefix_rowhash_and_rowindex_leave_enumeration_dead":  true,
-                        "prefix_full_row_sufficient":  false
+                        "prefix_full_row_sufficient":  false,
+                        "page_header_fs_like_patch_sufficient":  false
                     }
 }
