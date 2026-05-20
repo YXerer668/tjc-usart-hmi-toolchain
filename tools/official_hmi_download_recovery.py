@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from tools.official_hmi_compile_capture import (
     DEFAULT_EXE,
     DEFAULT_WORK_ROOT,
+    _activate_control,
     _click_compile,
     _click_control,
     _click_download,
@@ -82,12 +83,13 @@ def main() -> int:
 
     panel = _find_download_panel(window)
     controls = _download_panel_controls(panel)
-    _configure_download_panel(panel, args.port, args.download_baud)
+    configured = _configure_download_panel(panel, args.port, args.download_baud)
 
     started = False
+    start_attempt: dict[str, object] | None = None
     status_samples: list[list[str]] = []
     if args.start_download:
-        _click_download_start(panel)
+        start_attempt = _click_download_start(panel)
         started = True
         status_samples = _wait_after_start(panel, wait_s=args.download_wait_s)
 
@@ -100,7 +102,10 @@ def main() -> int:
         "download_panel_controls": controls,
         "configured_port": args.port,
         "configured_download_baud": args.download_baud,
+        "selected_port": configured["selected_port"],
+        "selected_download_baud": configured["selected_download_baud"],
         "start_download_clicked": started,
+        "start_attempt": start_attempt,
         "status_tail": status_samples[-10:],
     }
 
@@ -152,7 +157,7 @@ def _download_panel_controls(panel) -> list[dict[str, object]]:
     return controls
 
 
-def _configure_download_panel(panel, port: str, download_baud: str) -> None:
+def _configure_download_panel(panel, port: str, download_baud: str) -> dict[str, str]:
     combos = []
     for control in panel.descendants():
         try:
@@ -174,6 +179,10 @@ def _configure_download_panel(panel, port: str, download_baud: str) -> None:
     time.sleep(0.4)
     _select_combo_entry(baud_combo, download_baud)
     time.sleep(0.4)
+    return {
+        "selected_port": _combo_selected_text(port_combo),
+        "selected_download_baud": _combo_selected_text(baud_combo),
+    }
 
 
 def _select_combo_entry(combo, value: str) -> None:
@@ -262,32 +271,104 @@ def _find_global_list_item(text: str, *, anchor_rect) -> object | None:
     return candidates[0][1]
 
 
-def _click_download_start(panel) -> None:
+def _click_download_start(panel) -> dict[str, object]:
+    attempts: list[dict[str, object]] = []
+    for attempt_index in range(1, 4):
+        button, before_text = _find_download_button(panel)
+        if button is None:
+            break
+        if before_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": before_text,
+                "attempts": attempts,
+            }
+
+        _activate_control(button)
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "activate_control",
+                "before_text": before_text,
+                "after_text": after_text,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+        rect = button.rectangle()
+        _post_click_screen((rect.left + rect.right) // 2, (rect.top + rect.bottom) // 2)
+        after_text = _wait_download_button_text(panel, timeout_s=2.0)
+        attempts.append(
+            {
+                "attempt": attempt_index,
+                "method": "post_click_screen_center",
+                "before_text": before_text,
+                "after_text": after_text,
+            }
+        )
+        if after_text == "停止":
+            return {
+                "transitioned": True,
+                "final_text": after_text,
+                "attempts": attempts,
+            }
+
+    final_text = _wait_download_button_text(panel, timeout_s=0.5)
+    return {
+        "transitioned": final_text == "停止",
+        "final_text": final_text,
+        "attempts": attempts,
+    }
+
+
+def _find_download_button(panel):
     for control in panel.descendants():
         try:
-            if control.element_info.control_type == "Button" and control.window_text() == "联机并开始下载":
-                _click_control(control)
-                time.sleep(0.5)
-                return
+            if control.element_info.control_type != "Button":
+                continue
+            text = (control.window_text() or "").strip()
+            if text in {"联机并开始下载", "停止"}:
+                return control, text
         except Exception:
             continue
-    rect = panel.rectangle()
-    _post_click_screen(rect.left + 555, rect.top + 418)
-    time.sleep(0.5)
+    return None, None
+
+
+def _wait_download_button_text(panel, *, timeout_s: float) -> str | None:
+    deadline = time.time() + timeout_s
+    latest: str | None = None
+    while time.time() < deadline:
+        _button, text = _find_download_button(panel)
+        latest = text
+        if text == "停止":
+            return text
+        time.sleep(0.1)
+    return latest
+
+
+def _visible_texts(panel) -> list[str]:
+    texts: list[str] = []
+    for control in panel.descendants():
+        try:
+            text = (control.window_text() or "").strip()
+        except Exception:
+            continue
+        if text:
+            texts.append(text)
+    return texts
 
 
 def _wait_after_start(panel, *, wait_s: float) -> list[list[str]]:
     samples: list[list[str]] = []
     start = time.time()
     while time.time() - start < wait_s:
-        texts: list[str] = []
-        for control in panel.descendants():
-            try:
-                text = (control.window_text() or "").strip()
-            except Exception:
-                continue
-            if text:
-                texts.append(text)
+        texts = _visible_texts(panel)
         if texts:
             samples.append(texts)
         time.sleep(1.0)
