@@ -16,6 +16,7 @@ def main() -> int:
     baud = _load("examples/lifecycle_runtime_smoke/serial_baud_sweep_2026-05-21.json")
     ports = _load("examples/lifecycle_runtime_smoke/serial_port_inventory_2026-05-21.json")
     button = _load("examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json")
+    button_state = _load("examples/lifecycle_runtime_smoke/official_gui_download_button_state_2026-05-21.json")
     orchestrated = _load("examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json")
     whmi = _load("examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json")
     camera = _load("examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json")
@@ -40,6 +41,11 @@ def main() -> int:
                 "artifact": "examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json",
                 "all_local_methods_failed": button["conclusions"]["all_local_button_interaction_methods_failed_to_enter_running_state"],
                 "bm_click_invoked": button["bm_click_invoked"],
+            },
+            "official_gui_button_state": {
+                "artifact": "examples/lifecycle_runtime_smoke/official_gui_download_button_state_2026-05-21.json",
+                "is_enabled": button_state["button"]["is_enabled"],
+                "is_visible": button_state["button"]["is_visible"],
             },
             "orchestrated_recovery": {
                 "artifact": "examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json",
@@ -75,6 +81,7 @@ def main() -> int:
             "runtime_silence_not_explained_by_port_enumeration_drift": ports["conclusions"]["not_explained_by_panel_having_moved_to_another_visible_usb_uart"],
             "panel_is_visibly_powered_not_black": camera["conclusions"]["screen_not_black"],
             "official_gui_local_interaction_not_sufficient_to_start_download": button["conclusions"]["not_explained_by_simple_missed_click"],
+            "official_gui_start_failure_not_explained_by_disabled_button": button_state["conclusions"]["failure_is_not_explained_by_a_disabled_button"],
             "public_whmi_entry_is_also_silent": whmi["conclusions"]["public_whmi_entry_is_silent"],
             "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": orchestrated["conclusions"]["seed_side_runtime_limiter_runner_blocked_by_transport"],
             "external_sd_recovery_bundle_is_ready": sd_pkg["conclusions"]["package_ready_for_external_use_if_panel_remains_transport_silent"],
