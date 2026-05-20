@@ -237,7 +237,7 @@ def build_report() -> dict[str, Any]:
         ],
         "highest_leverage_unsolved_subsystem": {
             "id": "page1_advanced_runtime_binding",
-            "reason": "the page1 file-browser lane is now split cleanly: the official clone invalid_reference path is an authoring/save gap, while the current local multi-page runtime lane keeps the A object alive with field binding but dead enumeration/display. compiled-data elimination reports now show the remaining gap is no longer locatable inside the currently recovered object-tail compiled data envelope, so the highest-leverage next step is a stronger seed-side runtime-limitation falsification rather than more page-local byte patching",
+            "reason": "the page1 file-browser lane is now split cleanly: the official clone invalid_reference path is an authoring/save gap, while the current local multi-page runtime lane keeps the A object alive with field binding but dead enumeration/display. compiled-data elimination reports now show the remaining gap is no longer locatable inside the currently recovered object-tail compiled data envelope, and the latest live transport probes show the panel is silent even at the public whmi-wri entrypoint, so the highest-leverage next step is physical/external recovery followed by the prepared seed-side runtime-limitation falsification rather than more page-local byte patching",
             "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
             "binding_matrix_summary": binding_matrix["summary"],
         },
@@ -253,6 +253,8 @@ def build_report() -> dict[str, Any]:
             "page1_load_and_loadend_local_generated_live_verified": "examples/lifecycle_runtime_smoke/page1_load_and_loadend_local_generated_live_verified_2026-05-20.json",
             "page1_load_dispatch_parity_report": "examples/lifecycle_runtime_smoke/page1_load_dispatch_parity_report_2026-05-20.json",
             "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
+            "transport_silence_status": "examples/lifecycle_runtime_smoke/transport_silence_status_2026-05-21.json",
+            "sd_recovery_handoff": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json",
         },
     }
 
