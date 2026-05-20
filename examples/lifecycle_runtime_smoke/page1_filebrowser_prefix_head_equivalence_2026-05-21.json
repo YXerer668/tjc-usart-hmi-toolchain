@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "prefix-head-equivalent",
+  "single_page_working": {
+    "prefix_head_len": 401,
+    "event_table_len": 144,
+    "prefix_head_first_96": "2e 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 06 00 00 00 3e 00 00 00 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 00 00 dd 9f c0 00 24 2d b8 01 df c7 dc 02 93 30 79 05 7e c6 15 0a c7 b1 eb 0d 46 fa 8a 11 86 02",
+    "event_table_hex": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00"
+  },
+  "current_local_multi_page": {
+    "prefix_head_len": 407,
+    "event_table_len": 144,
+    "prefix_head_first_96": "34 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 0c 00 00 00 44 00 00 00 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 01 00 c3 79 01 fa 00 00 dd 9f c0 00 24 2d b8 01 df c7 dc 02 93 30 79 05 7e c6 15 0a c7 b1 eb 0d",
+    "event_table_hex": "00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 06 00 00 00 75 6e 6c 6f 61 64 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00 00 00 00 00 04 00 00 00 64 6f 77 6e 00 00 00 00 02 00 00 00 75 70 00 00 00 00",
+    "normalized_prefix_head_len": 401,
+    "normalized_prefix_head_first_96": "2e 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 06 00 00 00 3e 00 00 00 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 00 00 dd 9f c0 00 24 2d b8 01 df c7 dc 02 93 30 79 05 7e c6 15 0a c7 b1 eb 0d 46 fa 8a 11 86 02"
+  },
+  "conclusions": {
+    "page_event_table_is_byte_identical": true,
+    "prefix_head_collapses_to_single_page_after_generic_multipt_normalization": true,
+    "only_generic_multipt_head_transforms_remain": true,
+    "no_filebrowser_specific_prefix_head_delta_survives_after_normalization": true
+  }
+}
