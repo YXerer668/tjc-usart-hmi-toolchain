@@ -42,14 +42,35 @@
                                              "qty":  0,
                                              "txt":  "",
                                              "camera":  "reverse_usarthmi/page1_filebrowser_load_wrapper_probe_20260520/camera_20260520_231915.jpg"
-                                         }
+                                         },
+                        "page0_qty_semantics":  {
+                                                    "probe":  "page0_filebrowser_qty_semantics",
+                                                    "qty":  14,
+                                                    "txt":  "",
+                                                    "camera":  "reverse_usarthmi/advanced_direct_tft_file_browser_20260518/camera_qty_probe_20260520_232610.jpg"
+                                                },
+                        "fbrowser_runtime_index_patch":  {
+                                                             "probe":  "page1_filebrowser_fbrowser_runtime_index_probe_20260520",
+                                                             "qty":  0,
+                                                             "txt":  "",
+                                                             "camera":  "reverse_usarthmi/page1_filebrowser_fbrowser_runtime_index_probe_20260520/camera_20260520_233749.jpg",
+                                                             "change":  "patched only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1"
+                                                         },
+                        "record_diff":  {
+                                            "source":  "examples/lifecycle_runtime_smoke/page1_filebrowser_record_diff_2026-05-20.json",
+                                            "user_slot_body_identical":  true,
+                                            "mirror_value_tail_identical":  true,
+                                            "fixed_header_diff_focus":  "mirror header differs mainly at the final 4-byte event-offset field: single-page working record uses 0x76 while multi-page page1 record uses 0x4e"
+                                        }
                     },
     "conclusions":  {
                         "field_binding_recovered":  true,
                         "enumeration_display_recovered":  false,
                         "cross_page_companion_name_collision_primary_cause":  false,
                         "page0_vs_page1_filebrowser_cluster_geometry_primary_cause":  false,
-                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after four increasingly strict probes: original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, and that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper. this rules out cross-page companion naming, gross page0-vs-page1 cluster geometry/style mismatch, and the mere absence of the recovered narrow page1 load wrapper as the primary cause. the remaining likely gap is deeper page-local A-type enumeration/runtime state for page1, such as user-record, mirror-record, or page-index-specific list population behavior.",
-                        "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false
+                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after five increasingly strict probes: original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, and finally a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1. page0 control evidence now proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail; the remaining structural delta is pushed into the surrounding multi-page machinery, especially the page/mirror header side and deeper page-local A-type enumeration runtime state.",
+                        "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false,
+                        "qty_semantics_confirmed":  true,
+                        "fbrowser_runtime_index_patch_sufficient":  false
                     }
 }

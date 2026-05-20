@@ -19,10 +19,16 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertEqual(payload["experiments"]["exact_page0_cluster"]["qty"], 0)
         self.assertEqual(payload["experiments"]["load_wrapper"]["load_marker_observed"], "23 02 46 42")
         self.assertEqual(payload["experiments"]["load_wrapper"]["qty"], 0)
+        self.assertEqual(payload["experiments"]["page0_qty_semantics"]["qty"], 14)
+        self.assertEqual(payload["experiments"]["fbrowser_runtime_index_patch"]["qty"], 0)
+        self.assertTrue(payload["experiments"]["record_diff"]["user_slot_body_identical"])
+        self.assertTrue(payload["experiments"]["record_diff"]["mirror_value_tail_identical"])
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
         self.assertFalse(payload["conclusions"]["narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration"])
+        self.assertTrue(payload["conclusions"]["qty_semantics_confirmed"])
+        self.assertFalse(payload["conclusions"]["fbrowser_runtime_index_patch_sufficient"])
 
 
 if __name__ == "__main__":
