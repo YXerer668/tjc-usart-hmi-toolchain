@@ -10,18 +10,24 @@
       "examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json",
       "examples/lifecycle_runtime_smoke/public_whmi_entry_probe_summary_2026-05-21.json",
       "examples/lifecycle_runtime_smoke/dtr_rts_pulse_probe_summary_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/serial_break_pulse_probe_summary_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/usb_uart_reenumeration_probe_summary_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/serial_port_inventory_2026-05-21.json",
+      "examples/lifecycle_runtime_smoke/official_gui_download_button_state_2026-05-21.json",
       "examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json"
     ]
   },
   "external_recovery": {
     "bundle_report": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json",
+    "zip_verify_report": "examples/lifecycle_runtime_smoke/sd_recovery_handoff_zip_verify_2026-05-21.json",
     "desktop_bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
     "desktop_bundle_zip": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT.zip",
     "desktop_launcher_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_总入口_先看我.cmd",
     "desktop_verify_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\00_先双击_校验恢复包.cmd",
     "desktop_followup_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\01_SD恢复完成后双击_继续验证.cmd",
     "desktop_manual_gui_cmd": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\02_如需手动官方下载恢复.cmd",
-    "desktop_status_summary": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md"
+    "desktop_status_summary": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\当前状态摘要.md",
+    "desktop_zip_verified": true
   },
   "post_recovery_runner": {
     "orchestrator": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture",
