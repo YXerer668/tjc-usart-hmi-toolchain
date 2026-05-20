@@ -16,6 +16,7 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "transport-silence-summarized")
         self.assertTrue(evidence["serial_baud_sweep"]["all_bauds_silent"])
+        self.assertTrue(evidence["serial_port_inventory"]["only_plausible_live_uart_is_com36"])
         self.assertTrue(evidence["camera_status"]["screen_not_black"])
         self.assertTrue(evidence["official_gui_button_probe"]["all_local_methods_failed"])
         self.assertTrue(evidence["official_gui_button_probe"]["bm_click_invoked"])
@@ -25,6 +26,7 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertTrue(evidence["sd_recovery_handoff"]["verify_cmd"].endswith("00_先双击_校验恢复包.cmd"))
         self.assertTrue(evidence["sd_recovery_handoff"]["followup_cmd"].endswith("01_SD恢复完成后双击_继续验证.cmd"))
         self.assertTrue(conclusions["runtime_silence_not_explained_by_baud_drift"])
+        self.assertTrue(conclusions["runtime_silence_not_explained_by_port_enumeration_drift"])
         self.assertTrue(conclusions["panel_is_visibly_powered_not_black"])
         self.assertTrue(conclusions["official_gui_local_interaction_not_sufficient_to_start_download"])
         self.assertTrue(conclusions["public_whmi_entry_is_also_silent"])

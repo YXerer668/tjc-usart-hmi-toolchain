@@ -8,6 +8,10 @@
       "artifact": "examples/lifecycle_runtime_smoke/serial_baud_sweep_2026-05-21.json",
       "all_bauds_silent": true
     },
+    "serial_port_inventory": {
+      "artifact": "examples/lifecycle_runtime_smoke/serial_port_inventory_2026-05-21.json",
+      "only_plausible_live_uart_is_com36": true
+    },
     "official_gui_button_probe": {
       "artifact": "examples/lifecycle_runtime_smoke/official_gui_download_button_probe_summary_2026-05-21.json",
       "all_local_methods_failed": true,
@@ -43,6 +47,7 @@
   },
   "conclusions": {
     "runtime_silence_not_explained_by_baud_drift": true,
+    "runtime_silence_not_explained_by_port_enumeration_drift": true,
     "panel_is_visibly_powered_not_black": true,
     "official_gui_local_interaction_not_sufficient_to_start_download": true,
     "public_whmi_entry_is_also_silent": true,

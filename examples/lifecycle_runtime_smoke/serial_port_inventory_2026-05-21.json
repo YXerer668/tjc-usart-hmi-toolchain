@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "captured",
+  "ports": [
+    {
+      "device": "COM11",
+      "description": "蓝牙链接上的标准串行 (COM11)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&000105D6_PID&000A\\9&17EFF626&0&AB816EEBB1AB_C00000000",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    },
+    {
+      "device": "COM12",
+      "description": "蓝牙链接上的标准串行 (COM12)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\9&17EFF626&0&000000000000_00000003",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    },
+    {
+      "device": "COM20",
+      "description": "蓝牙链接上的标准串行 (COM20)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\9&17EFF626&0&000000000000_00000001",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    },
+    {
+      "device": "COM21",
+      "description": "蓝牙链接上的标准串行 (COM21)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0046\\9&17EFF626&0&84AC60FC3112_C00000000",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    },
+    {
+      "device": "COM36",
+      "description": "Silicon Labs CP210x USB to UART Bridge (COM36)",
+      "hwid": "USB VID:PID=10C4:EA60 SER=0001 LOCATION=1-1.2.3",
+      "manufacturer": "Silicon Labs",
+      "product": null,
+      "vid": 4292,
+      "pid": 60000
+    },
+    {
+      "device": "COM41",
+      "description": "蓝牙链接上的标准串行 (COM41)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_VID&0001027D_PID&4103\\9&17EFF626&0&F8AF0596A5AB_C00000000",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    },
+    {
+      "device": "COM42",
+      "description": "蓝牙链接上的标准串行 (COM42)",
+      "hwid": "BTHENUM\\{00001101-0000-1000-8000-00805F9B34FB}_LOCALMFG&0000\\9&17EFF626&0&000000000000_00000004",
+      "manufacturer": "Microsoft",
+      "product": null,
+      "vid": null,
+      "pid": null
+    }
+  ],
+  "conclusions": {
+    "likely_usb_uart_count": 1,
+    "likely_usb_uart_devices": [
+      "COM36"
+    ],
+    "only_plausible_live_uart_is_com36": true,
+    "not_explained_by_panel_having_moved_to_another_visible_usb_uart": true
+  }
+}
