@@ -6,20 +6,20 @@
   "precondition": "panel has been hard power-cycled or otherwise recovered from the current connect/sendme silent state",
   "recommended_order": [
     {
-      "label": "Seed-side runtime limitation runner with D/?/A control chain",
-      "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
+      "label": "Top-level orchestrator: check serial health, retry official recovery when needed, then run the seed-side runtime limitation chain",
+      "command": "python tools/recover_then_run_seed_side_runtime_limit.py --out-dir reverse_usarthmi/recover_then_seed_side_run_20260521 --capture"
     },
     {
-      "label": "If the runner shows textselect+filestream positive but filebrowser negative, treat that as very strong evidence for A-type-specific multi-page runtime limitation",
-      "command": "open reverse_usarthmi/seed_side_runtime_limit_run_20260521/seed_side_multipt_runtime_limit_summary.json"
+      "label": "If the orchestrator reaches the seed-side runner, inspect the runner summary for the D/?/A classification",
+      "command": "open reverse_usarthmi/recover_then_seed_side_run_20260521/seed_side_runner/seed_side_multipt_runtime_limit_summary.json"
     },
     {
-      "label": "If the runner is blocked by transport or panel state, retry the official recovery lane",
-      "command": "python tools/official_hmi_download_recovery.py reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/lcd_test.HMI --port COM36 --download-baud 921600 --start-download --download-wait-s 260"
+      "label": "If the orchestrator still ends in transport silence, inspect the captured recovery summary instead of re-running ad hoc byte patching",
+      "command": "open examples/lifecycle_runtime_smoke/recover_then_seed_side_run_2026-05-21.json"
     }
   ],
   "notes": [
-    "The seed-side runner is now the highest-value next live discriminator because the compiled-data envelope for page1 file-browser has been largely exhausted offline.",
+    "The top-level orchestrator is now the highest-value next live entrypoint because it preserves COM36 serialization and records whether transport recovered before attempting the seed-side runner.",
     "The text-select control is the strongest seed-side control sample, file-stream is second, and file-browser is the target falsification sample."
   ]
 }

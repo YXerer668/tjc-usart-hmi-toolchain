@@ -14,9 +14,9 @@ class NextLiveCommandsArtifactTests(unittest.TestCase):
         commands = [item["command"] for item in payload["recommended_order"]]
 
         self.assertEqual(payload["status"], "prepared")
-        self.assertIn("run_seed_side_multipt_runtime_limit_smokes.py", commands[0])
-        self.assertIn("--with-textselect-control", commands[0])
-        self.assertIn("official_hmi_download_recovery.py", commands[2])
+        self.assertIn("recover_then_run_seed_side_runtime_limit.py", commands[0])
+        self.assertIn("seed_side_multipt_runtime_limit_summary.json", commands[1])
+        self.assertIn("recover_then_seed_side_run_2026-05-21.json", commands[2])
 
 
 if __name__ == "__main__":
