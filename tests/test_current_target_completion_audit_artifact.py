@@ -29,7 +29,7 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
         page1 = unfinished["page1_advanced_runtime_binding"]
 
         self.assertEqual(page1["status"], "unfinished")
-        self.assertGreaterEqual(len(page1["evidence"]), 4)
+        self.assertGreaterEqual(len(page1["evidence"]), 3)
         self.assertIn("page1 page-load scheduler recovery", page1["blocks"])
         self.assertIn("corrected-page live revalidation for page1 sliding-text", page1["blocks"])
 

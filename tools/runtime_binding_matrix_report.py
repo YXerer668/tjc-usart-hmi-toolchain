@@ -150,10 +150,28 @@ def build_report() -> dict[str, Any]:
             },
             "meaning": "the official GUI page1 data-record minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
         },
+        {
+            "id": "page1_file_stream_positive_mapping_corrected",
+            "page": 1,
+            "class": "advanced_readback_positive",
+            "source": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+            "compiled_positive": True,
+            "runtime_positive": True,
+            "runtime_page": 0,
+            "runtime_readback": {
+                "fs0.en": page1_mapping["fresh_reverification"]["official_gui_page1_file_stream"]["runtime_page_0"][
+                    "get_fs0_en"
+                ]["value"],
+                "fs0.val": page1_mapping["fresh_reverification"]["official_gui_page1_file_stream"]["runtime_page_0"][
+                    "get_fs0_val"
+                ]["value"],
+            },
+            "meaning": "the official GUI page1 file-stream minimal case is readable on runtime page 0; the earlier runtime page 1 invalid_reference result was a wrong-page probe",
+        },
     ]
 
     for control_name, item in page1_scope["controls"].items():
-        if control_name in {"text-select", "data-record"}:
+        if control_name in {"text-select", "data-record", "file-stream"}:
             continue
         rows.append(
             {
@@ -195,7 +213,7 @@ def build_report() -> dict[str, Any]:
             "runtime_page_0_maps_to_generated_page1": True,
             "likely_shared_breakpoint": [
                 "fresh live re-verification now proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, not runtime page 1",
-                "the local ordinary page1 text probe and official GUI page1 text-select/data-record probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
+                "the local ordinary page1 text probe and official GUI page1 text-select/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
                 "the remaining unrecovered gap is narrower: page1 object binding is not generally absent, but page-level load scheduling is still missing and the remaining advanced controls need corrected-page revalidation",
             ],
             "recommended_next_step": "keep lifecycle recovery focused on page-load scheduling, and re-run the remaining page1 advanced controls on runtime page 0 before treating any of them as real negatives",

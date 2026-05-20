@@ -86,6 +86,29 @@
           "hex": "1a ff ff ff"
         }
       }
+    },
+    "official_gui_page1_file_stream": {
+      "tft": "reverse_usarthmi/page1_filestream_official_compile_20260519/output/lcd_test.tft",
+      "runtime_page_0": {
+        "sendme": 0,
+        "get_fs0_en": {
+          "kind": "number",
+          "value": 0,
+          "hex": "71 00 00 00 00 ff ff ff"
+        },
+        "get_fs0_val": {
+          "kind": "number",
+          "value": 0,
+          "hex": "71 00 00 00 00 ff ff ff"
+        }
+      },
+      "runtime_page_1": {
+        "sendme": 1,
+        "get_fs0_en": {
+          "kind": "invalid_reference",
+          "hex": "1a ff ff ff"
+        }
+      }
     }
   },
   "conclusions": {
@@ -93,12 +116,12 @@
     "local_page1_ordinary_text_binding_positive": true,
     "official_page1_text_select_binding_positive": true,
     "official_page1_data_record_binding_positive": true,
+    "official_page1_file_stream_binding_positive": true,
     "page1_load_scheduler_recovered": false,
     "stale_negative_methodology": "probing page 1 / sendme 1 on case31-style two-page builds checks the seed page0 runtime page, not the generated or official page1 content"
   },
   "next_revalidation_targets": [
     "examples/advanced_direct_tft_demo/page1_sltext_official_gui_live_negative_2026-05-19.json",
-    "examples/advanced_direct_tft_demo/page1_filestream_official_gui_live_negative_2026-05-19.json",
     "examples/advanced_direct_tft_demo/page1_filebrowser_official_clone_live_negative_2026-05-20.json"
   ]
 }

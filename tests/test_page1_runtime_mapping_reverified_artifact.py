@@ -17,6 +17,7 @@ class Page1RuntimeMappingReverifiedArtifactTests(unittest.TestCase):
         self.assertTrue(payload["conclusions"]["local_page1_ordinary_text_binding_positive"])
         self.assertTrue(payload["conclusions"]["official_page1_text_select_binding_positive"])
         self.assertTrue(payload["conclusions"]["official_page1_data_record_binding_positive"])
+        self.assertTrue(payload["conclusions"]["official_page1_file_stream_binding_positive"])
         self.assertFalse(payload["conclusions"]["page1_load_scheduler_recovered"])
 
         local = payload["fresh_reverification"]["local_generated_page1_load_probe"]
@@ -33,6 +34,11 @@ class Page1RuntimeMappingReverifiedArtifactTests(unittest.TestCase):
         self.assertEqual(data_record["runtime_page_0"]["get_data0_maxval"]["value"], 1000)
         self.assertEqual(data_record["runtime_page_0"]["get_data0_path"]["value"], "sd0/1.data")
         self.assertEqual(data_record["runtime_page_1"]["get_data0_maxval"]["kind"], "invalid_reference")
+
+        file_stream = payload["fresh_reverification"]["official_gui_page1_file_stream"]
+        self.assertEqual(file_stream["runtime_page_0"]["get_fs0_en"]["value"], 0)
+        self.assertEqual(file_stream["runtime_page_0"]["get_fs0_val"]["value"], 0)
+        self.assertEqual(file_stream["runtime_page_1"]["get_fs0_en"]["kind"], "invalid_reference")
 
 
 if __name__ == "__main__":
