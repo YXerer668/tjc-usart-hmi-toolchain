@@ -1,0 +1,633 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "page-pointer-closure-compared",
+  "cases": {
+    "single_page_filebrowser_working": {
+      "kind": "single-page-working",
+      "tft": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\output.tft",
+      "target_page": "reverse_usarthmi\\advanced_direct_tft_file_browser_20260518\\target_0.pa",
+      "page_blocks": [
+        [
+          "page0",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "fbrowser0",
+          "A"
+        ]
+      ],
+      "object_start_hex": "0xae0000",
+      "section_layout": {
+        "picture_offset": 6686,
+        "attr_header_offset": 1754,
+        "user_header_offset": 1790,
+        "target_hash_offset": 545,
+        "target_hash_size": 30,
+        "target_primary_size_field_offset": 579,
+        "target_primary_offset": 583,
+        "target_primary_size": 1152,
+        "target_event_region_start": 401,
+        "target_event_region_end": 545
+      },
+      "mirror_page_header_rows": [
+        {
+          "record_offset": 6686,
+          "record_offset_hex": "0x1a1e",
+          "count_field": 327680,
+          "count_field_hex": "0x50000",
+          "block_count": 5,
+          "runtime_index": 0,
+          "hash_offset": 545,
+          "hash_offset_hex": "0x221",
+          "user_offset": 1790,
+          "user_offset_hex": "0x6fe",
+          "primary_pre_string_len": 472,
+          "primary_pre_string_len_hex": "0x1d8"
+        }
+      ],
+      "target_page_row": {
+        "record_offset": 6686,
+        "record_offset_hex": "0x1a1e",
+        "count_field": 327680,
+        "count_field_hex": "0x50000",
+        "block_count": 5,
+        "runtime_index": 0,
+        "hash_offset": 545,
+        "hash_offset_hex": "0x221",
+        "user_offset": 1790,
+        "user_offset_hex": "0x6fe",
+        "primary_pre_string_len": 472,
+        "primary_pre_string_len_hex": "0x1d8",
+        "block_count_matches_target_page": true,
+        "hash_offset_matches_target_hash_block": true,
+        "user_offset_points_to_nonzero_user_record": true,
+        "primary_pre_string_len_within_primary_size": true,
+        "slot_count": 204,
+        "first_user_record_first_24_hex": "24 00 00 00 24 00 00 00 ff 00 00 00 00 00 00 00 00 00 ff 00 21 01 00 00"
+      },
+      "target_mirror_records": [
+        {
+          "objname": "page0",
+          "type_code": "y",
+          "record_offset_hex": "0xae1a2e",
+          "event_offset": 401,
+          "event_offset_hex": "0x191",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset_hex": "0xae1ade",
+          "event_offset": 441,
+          "event_offset_hex": "0x1b9",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset_hex": "0xae1b8e",
+          "event_offset": 467,
+          "event_offset_hex": "0x1d3",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset_hex": "0xae1c3e",
+          "event_offset": 493,
+          "event_offset_hex": "0x1ed",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "fbrowser0",
+          "type_code": "A",
+          "record_offset_hex": "0xae1cee",
+          "event_offset": 519,
+          "event_offset_hex": "0x207",
+          "event_offset_before_hash_block": true
+        }
+      ],
+      "target_event_offsets": [
+        401,
+        441,
+        467,
+        493,
+        519
+      ],
+      "target_event_offset_deltas": [
+        40,
+        26,
+        26,
+        26
+      ],
+      "target_object_event_offset": 519,
+      "target_object_event_offset_matches_last_event_start": true
+    },
+    "page1_filebrowser_local_multipt": {
+      "kind": "multi-page-failing",
+      "tft": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\output.tft",
+      "target_page": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\target_1.pa",
+      "page_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "fbrowser0",
+          "A"
+        ]
+      ],
+      "object_start_hex": "0xae0000",
+      "section_layout": {
+        "picture_offset": 10641,
+        "attr_header_offset": 2253,
+        "user_header_offset": 2289,
+        "target_hash_offset": 551,
+        "target_hash_size": 30,
+        "target_primary_size_field_offset": 585,
+        "target_primary_offset": 589,
+        "target_primary_size": 1152,
+        "target_event_region_start": 407,
+        "target_event_region_end": 551
+      },
+      "mirror_page_header_rows": [
+        {
+          "record_offset": 10641,
+          "record_offset_hex": "0x2991",
+          "count_field": 327680,
+          "count_field_hex": "0x50000",
+          "block_count": 5,
+          "runtime_index": 0,
+          "hash_offset": 551,
+          "hash_offset_hex": "0x227",
+          "user_offset": 2289,
+          "user_offset_hex": "0x8f1",
+          "primary_pre_string_len": 472,
+          "primary_pre_string_len_hex": "0x1d8"
+        },
+        {
+          "record_offset": 10657,
+          "record_offset_hex": "0x29a1",
+          "count_field": 262145,
+          "count_field_hex": "0x40001",
+          "block_count": 4,
+          "runtime_index": 1,
+          "hash_offset": 1870,
+          "hash_offset_hex": "0x74e",
+          "user_offset": 7185,
+          "user_offset_hex": "0x1c11",
+          "primary_pre_string_len": 308,
+          "primary_pre_string_len_hex": "0x134"
+        }
+      ],
+      "target_page_row": {
+        "record_offset": 10641,
+        "record_offset_hex": "0x2991",
+        "count_field": 327680,
+        "count_field_hex": "0x50000",
+        "block_count": 5,
+        "runtime_index": 0,
+        "hash_offset": 551,
+        "hash_offset_hex": "0x227",
+        "user_offset": 2289,
+        "user_offset_hex": "0x8f1",
+        "primary_pre_string_len": 472,
+        "primary_pre_string_len_hex": "0x1d8",
+        "block_count_matches_target_page": true,
+        "hash_offset_matches_target_hash_block": true,
+        "user_offset_points_to_nonzero_user_record": true,
+        "primary_pre_string_len_within_primary_size": true,
+        "slot_count": 204,
+        "first_user_record_first_24_hex": "24 00 00 00 24 00 00 00 ff 00 00 00 00 00 00 00 00 00 ff 00 21 01 00 00"
+      },
+      "target_mirror_records": [
+        {
+          "objname": "page1",
+          "type_code": "y",
+          "record_offset_hex": "0xae29b1",
+          "event_offset": 407,
+          "event_offset_hex": "0x197",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset_hex": "0xae2a61",
+          "event_offset": 447,
+          "event_offset_hex": "0x1bf",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset_hex": "0xae2b11",
+          "event_offset": 473,
+          "event_offset_hex": "0x1d9",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset_hex": "0xae2bc1",
+          "event_offset": 499,
+          "event_offset_hex": "0x1f3",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "fbrowser0",
+          "type_code": "A",
+          "record_offset_hex": "0xae2c71",
+          "event_offset": 525,
+          "event_offset_hex": "0x20d",
+          "event_offset_before_hash_block": true
+        }
+      ],
+      "target_event_offsets": [
+        407,
+        447,
+        473,
+        499,
+        525
+      ],
+      "target_event_offset_deltas": [
+        40,
+        26,
+        26,
+        26
+      ],
+      "target_object_event_offset": 525,
+      "target_object_event_offset_matches_last_event_start": true,
+      "page0_page": "reverse_usarthmi\\page1_filebrowser_local_multipt_probe_20260521\\target_0.pa",
+      "page0_row": {
+        "record_offset": 10657,
+        "record_offset_hex": "0x29a1",
+        "count_field": 262145,
+        "count_field_hex": "0x40001",
+        "block_count": 4,
+        "runtime_index": 1,
+        "hash_offset": 1870,
+        "hash_offset_hex": "0x74e",
+        "user_offset": 7185,
+        "user_offset_hex": "0x1c11",
+        "primary_pre_string_len": 308,
+        "primary_pre_string_len_hex": "0x134",
+        "hash_offset_matches_page0_hash_block": true,
+        "page0_user_offset_matches_target_slot_span": true,
+        "page0_hash_size": 24
+      }
+    },
+    "page1_filestream_local_multipt": {
+      "kind": "multi-page-working",
+      "tft": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\output.tft",
+      "target_page": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\target_1.pa",
+      "page_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "t0",
+          "t"
+        ],
+        [
+          "b0",
+          "b"
+        ],
+        [
+          "p0",
+          "p"
+        ],
+        [
+          "fs0",
+          "?"
+        ]
+      ],
+      "object_start_hex": "0xae0000",
+      "section_layout": {
+        "picture_offset": 8831,
+        "attr_header_offset": 1427,
+        "user_header_offset": 1463,
+        "target_hash_offset": 489,
+        "target_hash_size": 30,
+        "target_primary_size_field_offset": 523,
+        "target_primary_offset": 527,
+        "target_primary_size": 388,
+        "target_event_region_start": 367,
+        "target_event_region_end": 489
+      },
+      "mirror_page_header_rows": [
+        {
+          "record_offset": 8831,
+          "record_offset_hex": "0x227f",
+          "count_field": 327680,
+          "count_field_hex": "0x50000",
+          "block_count": 5,
+          "runtime_index": 0,
+          "hash_offset": 489,
+          "hash_offset_hex": "0x1e9",
+          "user_offset": 1463,
+          "user_offset_hex": "0x5b7",
+          "primary_pre_string_len": 356,
+          "primary_pre_string_len_hex": "0x164"
+        },
+        {
+          "record_offset": 8847,
+          "record_offset_hex": "0x228f",
+          "count_field": 262145,
+          "count_field_hex": "0x40001",
+          "block_count": 4,
+          "runtime_index": 1,
+          "hash_offset": 1044,
+          "hash_offset_hex": "0x414",
+          "user_offset": 5375,
+          "user_offset_hex": "0x14ff",
+          "primary_pre_string_len": 308,
+          "primary_pre_string_len_hex": "0x134"
+        }
+      ],
+      "target_page_row": {
+        "record_offset": 8831,
+        "record_offset_hex": "0x227f",
+        "count_field": 327680,
+        "count_field_hex": "0x50000",
+        "block_count": 5,
+        "runtime_index": 0,
+        "hash_offset": 489,
+        "hash_offset_hex": "0x1e9",
+        "user_offset": 1463,
+        "user_offset_hex": "0x5b7",
+        "primary_pre_string_len": 356,
+        "primary_pre_string_len_hex": "0x164",
+        "block_count_matches_target_page": true,
+        "hash_offset_matches_target_hash_block": true,
+        "user_offset_points_to_nonzero_user_record": true,
+        "primary_pre_string_len_within_primary_size": true,
+        "slot_count": 163,
+        "first_user_record_first_24_hex": "24 00 00 00 24 00 00 00 ff 00 00 00 00 00 00 00 00 00 ff 00 21 01 00 00"
+      },
+      "target_mirror_records": [
+        {
+          "objname": "page1",
+          "type_code": "y",
+          "record_offset_hex": "0xae229f",
+          "event_offset": 367,
+          "event_offset_hex": "0x16f",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "t0",
+          "type_code": "t",
+          "record_offset_hex": "0xae233b",
+          "event_offset": 407,
+          "event_offset_hex": "0x197",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "b0",
+          "type_code": "b",
+          "record_offset_hex": "0xae23d7",
+          "event_offset": 433,
+          "event_offset_hex": "0x1b1",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "p0",
+          "type_code": "p",
+          "record_offset_hex": "0xae2473",
+          "event_offset": 459,
+          "event_offset_hex": "0x1cb",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "fs0",
+          "type_code": "?",
+          "record_offset_hex": "0xae250f",
+          "event_offset": 485,
+          "event_offset_hex": "0x1e5",
+          "event_offset_before_hash_block": true
+        }
+      ],
+      "target_event_offsets": [
+        367,
+        407,
+        433,
+        459,
+        485
+      ],
+      "target_event_offset_deltas": [
+        40,
+        26,
+        26,
+        26
+      ],
+      "target_object_event_offset": 485,
+      "target_object_event_offset_matches_last_event_start": true,
+      "page0_page": "reverse_usarthmi\\page1_filestream_local_multipt_probe_20260521\\target_0.pa",
+      "page0_row": {
+        "record_offset": 8847,
+        "record_offset_hex": "0x228f",
+        "count_field": 262145,
+        "count_field_hex": "0x40001",
+        "block_count": 4,
+        "runtime_index": 1,
+        "hash_offset": 1044,
+        "hash_offset_hex": "0x414",
+        "user_offset": 5375,
+        "user_offset_hex": "0x14ff",
+        "primary_pre_string_len": 308,
+        "primary_pre_string_len_hex": "0x134",
+        "hash_offset_matches_page0_hash_block": true,
+        "page0_user_offset_matches_target_slot_span": true,
+        "page0_hash_size": 24
+      }
+    },
+    "page1_textselect_local_multipt": {
+      "kind": "multi-page-working",
+      "tft": "reverse_usarthmi\\page1_textselect_local_multipt_probe_20260521\\output.tft",
+      "target_page": "reverse_usarthmi\\page1_textselect_local_multipt_probe_20260521\\target_1.pa",
+      "page_blocks": [
+        [
+          "page1",
+          "y"
+        ],
+        [
+          "select0",
+          "D"
+        ]
+      ],
+      "object_start_hex": "0xae0000",
+      "section_layout": {
+        "picture_offset": 7765,
+        "attr_header_offset": 2449,
+        "user_header_offset": 2485,
+        "target_hash_offset": 421,
+        "target_hash_size": 12,
+        "target_primary_size_field_offset": 437,
+        "target_primary_offset": 441,
+        "target_primary_size": 1496,
+        "target_event_region_start": 355,
+        "target_event_region_end": 421
+      },
+      "mirror_page_header_rows": [
+        {
+          "record_offset": 7765,
+          "record_offset_hex": "0x1e55",
+          "count_field": 131072,
+          "count_field_hex": "0x20000",
+          "block_count": 2,
+          "runtime_index": 0,
+          "hash_offset": 421,
+          "hash_offset_hex": "0x1a5",
+          "user_offset": 2485,
+          "user_offset_hex": "0x9b5",
+          "primary_pre_string_len": 460,
+          "primary_pre_string_len_hex": "0x1cc"
+        },
+        {
+          "record_offset": 7781,
+          "record_offset_hex": "0x1e65",
+          "count_field": 262145,
+          "count_field_hex": "0x40001",
+          "block_count": 4,
+          "runtime_index": 1,
+          "hash_offset": 2066,
+          "hash_offset_hex": "0x812",
+          "user_offset": 4309,
+          "user_offset_hex": "0x10d5",
+          "primary_pre_string_len": 308,
+          "primary_pre_string_len_hex": "0x134"
+        }
+      ],
+      "target_page_row": {
+        "record_offset": 7765,
+        "record_offset_hex": "0x1e55",
+        "count_field": 131072,
+        "count_field_hex": "0x20000",
+        "block_count": 2,
+        "runtime_index": 0,
+        "hash_offset": 421,
+        "hash_offset_hex": "0x1a5",
+        "user_offset": 2485,
+        "user_offset_hex": "0x9b5",
+        "primary_pre_string_len": 460,
+        "primary_pre_string_len_hex": "0x1cc",
+        "block_count_matches_target_page": true,
+        "hash_offset_matches_target_hash_block": true,
+        "user_offset_points_to_nonzero_user_record": true,
+        "primary_pre_string_len_within_primary_size": true,
+        "slot_count": 76,
+        "first_user_record_first_24_hex": "18 00 00 00 18 00 00 00 ff 00 00 00 00 00 00 00 00 00 ff 00 21 01 00 00"
+      },
+      "target_mirror_records": [
+        {
+          "objname": "page1",
+          "type_code": "y",
+          "record_offset_hex": "0xae1e75",
+          "event_offset": 355,
+          "event_offset_hex": "0x163",
+          "event_offset_before_hash_block": true
+        },
+        {
+          "objname": "select0",
+          "type_code": "D",
+          "record_offset_hex": "0xae1f0b",
+          "event_offset": 395,
+          "event_offset_hex": "0x18b",
+          "event_offset_before_hash_block": true
+        }
+      ],
+      "target_event_offsets": [
+        355,
+        395
+      ],
+      "target_event_offset_deltas": [
+        40
+      ],
+      "target_object_event_offset": 395,
+      "target_object_event_offset_matches_last_event_start": true,
+      "page0_page": "reverse_usarthmi\\page1_textselect_local_multipt_probe_20260521\\target_0.pa",
+      "page0_row": {
+        "record_offset": 7781,
+        "record_offset_hex": "0x1e65",
+        "count_field": 262145,
+        "count_field_hex": "0x40001",
+        "block_count": 4,
+        "runtime_index": 1,
+        "hash_offset": 2066,
+        "hash_offset_hex": "0x812",
+        "user_offset": 4309,
+        "user_offset_hex": "0x10d5",
+        "primary_pre_string_len": 308,
+        "primary_pre_string_len_hex": "0x134",
+        "hash_offset_matches_page0_hash_block": true,
+        "page0_user_offset_matches_target_slot_span": true,
+        "page0_hash_size": 24
+      }
+    }
+  },
+  "comparisons": {
+    "single_page_filebrowser_vs_page1_filebrowser": {
+      "block_count_equal": true,
+      "primary_pre_string_len_equal": true,
+      "slot_count_equal": true,
+      "hash_offset_delta": 6,
+      "target_event_offset_deltas": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "page1_filebrowser_vs_page1_filestream": {
+      "target_rows_both_hash_valid": true,
+      "target_rows_both_user_valid": true,
+      "target_object_event_offsets_both_valid": true,
+      "page0_rows_both_hash_valid": true,
+      "page0_rows_both_user_span_valid": true
+    },
+    "page1_filebrowser_vs_page1_textselect": {
+      "target_rows_both_hash_valid": true,
+      "target_rows_both_user_valid": true,
+      "target_object_event_offsets_both_valid": true,
+      "page0_rows_both_hash_valid": true,
+      "page0_rows_both_user_span_valid": true
+    }
+  },
+  "conclusions": {
+    "page1_filebrowser_target_row_hash_offset_valid": true,
+    "page1_filebrowser_target_row_user_offset_valid": true,
+    "page1_filebrowser_target_object_event_offset_valid": true,
+    "multi_page_page0_rows_remain_structurally_valid_even_in_filebrowser_case": true,
+    "single_page_filebrowser_and_page1_filebrowser_share_same_page_level_shape_except_expected_shift": true,
+    "all_target_rows_keep_basic_pointer_closure": true,
+    "remaining_gap_more_likely_a_type_runtime_registration_or_descriptor_semantics": true,
+    "page0_row_deltas_alone_are_not_a_sufficient_explanation_for_page1_filebrowser_failure": true
+  }
+}
