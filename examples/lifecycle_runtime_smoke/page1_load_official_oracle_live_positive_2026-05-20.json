@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "official-runtime-positive-local-generation-negative",
+  "claim": "official case52 page1 load dispatch is real on the current screen when the corrected runtime page mapping is used, but the local generated page1 load probe still fails to reproduce that dispatch",
+  "official_oracle": {
+    "hmi_event_index": "examples/case52_06_page1_load_printh_only_official_event_index.json",
+    "tft": "C:/Users/SinYu/Desktop/case_for_codex/case_52_page_lifecycle_delta_oracle/06_page1_load_printh_only/official_work_output_source_events_clean_20260518_1213/output/source_raw.tft",
+    "expected_marker_hex": "AA 52 10 01",
+    "runtime_sequence": [
+      {
+        "command": "sendme",
+        "result_kind": "page_id",
+        "value": 0,
+        "hex": "66 00 ff ff ff"
+      },
+      {
+        "command": "page 1",
+        "result_kind": "none",
+        "hex": ""
+      },
+      {
+        "command": "sendme",
+        "result_kind": "page_id",
+        "value": 1,
+        "hex": "66 01 ff ff ff"
+      },
+      {
+        "command": "page 0",
+        "result_kind": "unknown",
+        "hex": "aa 52 10 01"
+      },
+      {
+        "command": "sendme",
+        "result_kind": "page_id",
+        "value": 0,
+        "hex": "66 00 ff ff ff"
+      }
+    ]
+  },
+  "local_generated_probe": {
+    "artifact": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+    "scene": "examples/lifecycle_runtime_smoke/page1_load_printh_probe_scene.json",
+    "tft": "reverse_usarthmi/page1_load_printh_probe_20260520/output.tft",
+    "expected_marker_hex": "23 02 50 4C",
+    "runtime_page_0_readback": {
+      "p1title.txt": "LOAD"
+    },
+    "switch_back_to_runtime_page_0_marker": {
+      "result_kind": "none",
+      "hex": ""
+    }
+  },
+  "conclusions": {
+    "runtime_supports_page1_load_dispatch": true,
+    "correct_runtime_page_for_generated_or_official_page1": 0,
+    "local_generator_reproduces_page1_load_dispatch": false,
+    "narrowing": "the remaining lifecycle gap is not that the panel lacks page1 load dispatch; it is that the local multi-page generator still does not reproduce the official page1 load scheduling or wrapper path"
+  }
+}

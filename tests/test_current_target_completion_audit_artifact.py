@@ -27,11 +27,13 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
         payload = json.loads(ARTIFACT.read_text(encoding="utf-8"))
         unfinished = {item["id"]: item for item in payload["unfinished"]}
         page1 = unfinished["page1_advanced_runtime_binding"]
+        scheduler = unfinished["scheduler_lifecycle_general_equivalence"]
 
         self.assertEqual(page1["status"], "unfinished")
         self.assertGreaterEqual(len(page1["evidence"]), 2)
         self.assertIn("page1 page-load scheduler recovery", page1["blocks"])
         self.assertIn("page1 file-browser-specific runtime binding recovery", page1["blocks"])
+        self.assertIn("local reproduction of official page1 load dispatch", scheduler["blocks"])
 
 
 if __name__ == "__main__":

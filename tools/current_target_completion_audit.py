@@ -45,14 +45,19 @@ def build_report() -> dict[str, Any]:
             "id": "scheduler_lifecycle_general_equivalence",
             "status": "unfinished",
             "scope": "general page load/unload, timer, lifecycle callback binding, and scheduler equivalence",
-            "why_unfinished": lifecycle["interpretation"]["narrowing"],
+            "why_unfinished": [
+                "fresh live evidence now proves the official case52 page1 load oracle dispatches on corrected runtime page 0, so the screen runtime does support page1 load events",
+                "the local generated page1 load probe still fails to emit its marker when switching back to corrected runtime page 0 even though p1title.txt is readable there",
+                "blind callback-slot writes remain negative, so the missing piece is still the recovered official page1 load wrapper or binding path rather than a trivial slot fill"
+            ],
             "blocks": [
-                "general page-level logic recovery",
-                "multi-page runtime registration recovery",
+                "local reproduction of official page1 load dispatch",
+                "multi-page lifecycle wrapper recovery",
                 "confident expansion beyond narrow object-callback proofs",
             ],
             "evidence": [
                 "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
+                "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
             ],
         },
         {
@@ -193,7 +198,7 @@ def build_report() -> dict[str, Any]:
         ],
         "highest_leverage_unsolved_subsystem": {
             "id": "scheduler_lifecycle_general_equivalence",
-            "reason": "page1 runtime-page mapping is now corrected, but page-level lifecycle scheduling is still the common unresolved layer behind load events, timers, and trustworthy multi-page logic recovery",
+            "reason": "page1 runtime-page mapping is now corrected and official page1 load dispatch is proven, but the local generator still does not reproduce that official page-level lifecycle path; that remains the highest-leverage blocker for trustworthy multi-page logic recovery",
             "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
             "binding_matrix_summary": binding_matrix["summary"],
         },
@@ -203,6 +208,7 @@ def build_report() -> dict[str, Any]:
             "current_target_limitations": limitations,
             "lifecycle_runtime_equivalence": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
             "page1_runtime_mapping_reverified": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
+            "page1_load_official_oracle_live_positive": "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
             "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
         },
     }
