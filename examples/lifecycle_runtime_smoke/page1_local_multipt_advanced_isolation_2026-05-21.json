@@ -25,13 +25,14 @@
                                    },
                    "file_browser":  {
                                         "object_type":  "A",
-                                        "probe":  "page1_filebrowser_direct_tft_probe_20260520_v4",
-                                        "representative_after_page0_readback":  {
-                                                                                    "fbrowser0.dir":  "sd0/",
-                                                                                    "fbrowser0.filter":  "*.*",
-                                                                                    "fbrowser0.qty":  0,
-                                                                                    "fbrowser0.txt":  ""
-                                                                                },
+                                        "probe":  "page1_filebrowser_local_multipt_probe_20260521",
+                                        "sendme_after_page1":  1,
+                                        "after_page0_readback":  {
+                                                                     "fbrowser0.dir":  "sd0/",
+                                                                     "fbrowser0.filter":  "*.*",
+                                                                     "fbrowser0.qty":  0,
+                                                                     "fbrowser0.txt":  ""
+                                                                 },
                                         "runtime_positive":  false,
                                         "failure_surface":  "field binding alive, enumeration/display dead"
                                     }
@@ -41,6 +42,6 @@
                         "local_multi_page_builder_page1_text_select_positive":  true,
                         "local_multi_page_builder_page1_file_stream_positive":  true,
                         "local_multi_page_builder_page1_file_browser_still_negative":  true,
-                        "narrowing":  "current evidence no longer supports the broad claim that the local page1 advanced multi-page builder is generally broken. under the same local multi-page route, text-select (type D) and file-stream (type ?) are now live-positive, while file-browser (type A) remains negative with field binding alive but enumeration/display dead. this isolates the remaining runtime gap much more specifically to A-type file-browser semantics inside the multi-page path."
+                        "narrowing":  "current evidence no longer supports the broad claim that the local page1 advanced multi-page builder is generally broken. under the same current local multi-page route, text-select (type D) and file-stream (type ?) are live-positive, while file-browser (type A) remains negative with field binding alive but enumeration/display dead. this isolates the remaining runtime gap much more specifically to A-type file-browser semantics inside the multi-page path."
                     }
 }

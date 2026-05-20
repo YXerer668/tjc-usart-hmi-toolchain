@@ -19,7 +19,7 @@ class Page1LocalMultiPageAdvancedIsolationArtifactTests(unittest.TestCase):
         self.assertTrue(payload["probes"]["file_stream"]["runtime_positive"])
         self.assertEqual(payload["probes"]["file_stream"]["after_page0_readback"]["fs0.en"], 0)
         self.assertFalse(payload["probes"]["file_browser"]["runtime_positive"])
-        self.assertEqual(payload["probes"]["file_browser"]["representative_after_page0_readback"]["fbrowser0.qty"], 0)
+        self.assertEqual(payload["probes"]["file_browser"]["after_page0_readback"]["fbrowser0.qty"], 0)
         self.assertFalse(payload["conclusions"]["local_multi_page_builder_general_advanced_path_broken"])
         self.assertTrue(payload["conclusions"]["local_multi_page_builder_page1_file_browser_still_negative"])
 
