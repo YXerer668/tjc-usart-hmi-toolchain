@@ -31,6 +31,7 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertTrue(evidence["sd_recovery_handoff"]["verify_cmd"].endswith("00_先双击_校验恢复包.cmd"))
         self.assertTrue(evidence["sd_recovery_handoff"]["followup_cmd"].endswith("01_SD恢复完成后双击_继续验证.cmd"))
         self.assertTrue(evidence["sd_recovery_handoff"]["manual_gui_cmd"].endswith("02_如需手动官方下载恢复.cmd"))
+        self.assertTrue(evidence["sd_recovery_handoff"]["zip_verified"])
         self.assertTrue(conclusions["runtime_silence_not_explained_by_baud_drift"])
         self.assertTrue(conclusions["runtime_silence_not_explained_by_port_enumeration_drift"])
         self.assertTrue(conclusions["usb_uart_bridge_itself_still_opens"])
@@ -41,6 +42,7 @@ class TransportSilenceStatusArtifactTests(unittest.TestCase):
         self.assertTrue(conclusions["usb_uart_reenumeration_showed_no_change"])
         self.assertTrue(conclusions["seed_side_runtime_limiter_runner_is_currently_blocked_by_transport"])
         self.assertTrue(conclusions["external_sd_recovery_bundle_is_ready"])
+        self.assertTrue(conclusions["external_sd_recovery_zip_is_ready"])
 
 
 if __name__ == "__main__":

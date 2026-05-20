@@ -25,6 +25,7 @@ def main() -> int:
     camera = _load("examples/lifecycle_runtime_smoke/transport_silence_camera_status_2026-05-21.json")
     sd_pkg = _load("examples/lifecycle_runtime_smoke/sd_recovery_package_2026-05-21.json")
     sd_handoff = _load("examples/lifecycle_runtime_smoke/sd_recovery_handoff_2026-05-21.json")
+    sd_zip = _load("examples/lifecycle_runtime_smoke/sd_recovery_handoff_zip_verify_2026-05-21.json")
 
     payload = {
         "schema_version": 1,
@@ -91,6 +92,7 @@ def main() -> int:
                 "followup_cmd": sd_handoff["ordered_followup_cmd"],
                 "manual_gui_cmd": sd_handoff["manual_gui_cmd"],
                 "status_summary_file": sd_handoff["status_summary_file"],
+                "zip_verified": sd_zip["conclusions"]["zip_bundle_ready_for_external_use"],
             },
         },
         "conclusions": {
@@ -105,6 +107,7 @@ def main() -> int:
             "usb_uart_reenumeration_showed_no_change": reenum["conclusions"]["no_change_after_reenumeration"],
             "seed_side_runtime_limiter_runner_is_currently_blocked_by_transport": orchestrated["conclusions"]["seed_side_runtime_limiter_runner_blocked_by_transport"],
             "external_sd_recovery_bundle_is_ready": sd_pkg["conclusions"]["package_ready_for_external_use_if_panel_remains_transport_silent"],
+            "external_sd_recovery_zip_is_ready": sd_zip["conclusions"]["zip_bundle_ready_for_external_use"],
             "best_current_repo_side_state": "local software automation is prepared; the panel is visibly powered but transport-silent all the way up through the public upload entrypoint, so further progress now depends on external recovery restoring at least one responsive command path",
         },
     }
