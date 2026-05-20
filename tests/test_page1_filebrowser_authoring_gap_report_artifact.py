@@ -20,6 +20,8 @@ class Page1FilebrowserAuthoringGapReportArtifactTests(unittest.TestCase):
         self.assertFalse(payload["conclusions"]["page1_filebrowser_saved_by_official_or_clone_hmi"])
         self.assertFalse(payload["conclusions"]["page1_filebrowser_runtime_negative_proof_exists"])
         self.assertIn("authoring/save gap", payload["conclusions"]["narrowing"])
+        self.assertEqual(payload["official_minimal_case"]["confirmation_status"], "failed")
+        self.assertEqual(payload["official_minimal_case"]["page1_blocks"], [["page1", "y"], ["v0", "\u0003"]])
 
         clone_blocks = payload["clone_case"]["page1_blocks"]
         self.assertEqual(clone_blocks, [["page1", "y"]])

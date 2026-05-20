@@ -935,9 +935,27 @@
       ]
     }
   },
+  "official_minimal_case": {
+    "hmi": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_76_page1_filebrowser_minimal_official_oracle\\lcd_test.HMI",
+    "page1_blocks": [
+      [
+        "page1",
+        "y"
+      ],
+      [
+        "v0",
+        "\u0003"
+      ]
+    ],
+    "precompile_confirmation": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_76_page1_filebrowser_minimal_official_oracle\\gui_verify_after_gui_create_20260519\\precompile_confirmation.json",
+    "confirmation_status": "failed",
+    "confirmation_failures": [
+      "expected exactly one page1 block of type A, got []"
+    ]
+  },
   "conclusions": {
     "page1_filebrowser_saved_by_official_or_clone_hmi": false,
     "page1_filebrowser_runtime_negative_proof_exists": false,
-    "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
+    "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
   }
 }

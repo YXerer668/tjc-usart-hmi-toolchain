@@ -24,6 +24,8 @@ SCAN_DIRS = [
     ROOT / "reverse_usarthmi" / "page1_filebrowser_narrow_scan_20260519",
     ROOT / "reverse_usarthmi" / "page1_filebrowser_tight_scan_20260519",
 ]
+OFFICIAL_MINIMAL_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_76_page1_filebrowser_minimal_official_oracle\lcd_test.HMI")
+OFFICIAL_MINIMAL_CONFIRMATION = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_76_page1_filebrowser_minimal_official_oracle\gui_verify_after_gui_create_20260519\precompile_confirmation.json")
 CLONE_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_B4_page1_filebrowser_hmi_clone_oracle\lcd_test.HMI")
 CLONE_COMPILE_JSON = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_B4_page1_filebrowser_hmi_clone_oracle\official_compile_probe_20260520\lcd_test.official_compile.json")
 DEFAULT_OUT = ROOT / "examples" / "lifecycle_runtime_smoke" / "page1_filebrowser_authoring_gap_2026-05-20.json"
@@ -60,6 +62,12 @@ def build_report() -> dict[str, Any]:
 
     clone_blocks = _page1_blocks(CLONE_HMI) if CLONE_HMI.exists() else []
     clone_compile = json.loads(CLONE_COMPILE_JSON.read_text(encoding="utf-8")) if CLONE_COMPILE_JSON.exists() else {}
+    official_minimal_blocks = _page1_blocks(OFFICIAL_MINIMAL_HMI) if OFFICIAL_MINIMAL_HMI.exists() else []
+    official_minimal_confirmation = (
+        json.loads(OFFICIAL_MINIMAL_CONFIRMATION.read_text(encoding="utf-8"))
+        if OFFICIAL_MINIMAL_CONFIRMATION.exists()
+        else {}
+    )
 
     return {
         "schema_version": 1,
@@ -82,10 +90,17 @@ def build_report() -> dict[str, Any]:
                 "page_lines": clone_compile.get("output_after", "").splitlines(),
             },
         },
+        "official_minimal_case": {
+            "hmi": str(OFFICIAL_MINIMAL_HMI),
+            "page1_blocks": official_minimal_blocks,
+            "precompile_confirmation": str(OFFICIAL_MINIMAL_CONFIRMATION),
+            "confirmation_status": official_minimal_confirmation.get("status"),
+            "confirmation_failures": official_minimal_confirmation.get("failures", []),
+        },
         "conclusions": {
             "page1_filebrowser_saved_by_official_or_clone_hmi": False,
             "page1_filebrowser_runtime_negative_proof_exists": False,
-            "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
+            "narrowing": "current evidence does not show a real page1 file-browser object surviving into 1.pa for official compile/runtime. the official page1 minimal case mis-saves as v0(type 0x03), drag scans save other controls or nothing, and the clone case saves only page1. this is an authoring/save gap before it is a runtime-binding gap."
         },
     }
 
