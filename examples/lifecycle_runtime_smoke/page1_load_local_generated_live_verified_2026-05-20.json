@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-20",
+  "target": "TJC8048X543_011C",
+  "status": "live-positive",
+  "claim": "the rebuilt local page1 load probe now reproduces page1 load dispatch on corrected runtime page 0",
+  "artifacts": {
+    "manifest": "reverse_usarthmi/page1_load_printh_probe_rebuild_20260520/manifest.json",
+    "output_tft": "reverse_usarthmi/page1_load_printh_probe_rebuild_20260520/output.tft"
+  },
+  "build_summary": {
+    "mode": "experimental_multi_page_tft_patch",
+    "checksum_hex": "0x32330BFC",
+    "checksum_valid": true,
+    "page1_page_event_runtime_status_before_live_update": "compile_only_scheduler_unrecovered",
+    "structure_change": "local page1 load now compiles as a page_load_phase_match after the page1 hash block with mirror event_offset_0x34 = 0 and no normal page event-table match"
+  },
+  "live_sequence": [
+    {
+      "command": "page 1",
+      "result_kind": "none",
+      "hex": ""
+    },
+    {
+      "command": "page 0",
+      "result_kind": "unknown",
+      "hex": "23 02 50 4c"
+    },
+    {
+      "command": "sendme",
+      "result_kind": "page_id",
+      "value": 0,
+      "hex": "66 00 ff ff ff"
+    },
+    {
+      "command": "get p1title.txt",
+      "result_kind": "string",
+      "value": "LOAD",
+      "hex": "70 4c 4f 41 44 ff ff ff"
+    }
+  ],
+  "conclusions": {
+    "correct_runtime_page_for_generated_page1": 0,
+    "local_generator_reproduces_minimal_page1_load_dispatch": true,
+    "narrowing": "the local generator now reproduces the minimal fixed 4-byte page1 load printh family. the remaining lifecycle gap is broader generalization beyond this narrow wrapper shape, not the existence of page1 load dispatch itself."
+  }
+}

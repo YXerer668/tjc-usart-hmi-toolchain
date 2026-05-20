@@ -40,18 +40,20 @@
   ],
   "highest_leverage_unsolved_subsystem": {
     "id": "scheduler_lifecycle_general_equivalence",
-    "reason": "page1 runtime-page mapping is now corrected and official page1 load dispatch is proven, but the local generator still does not reproduce that official page-level lifecycle path; that remains the highest-leverage blocker for trustworthy multi-page logic recovery",
+    "reason": "page1 runtime-page mapping is now corrected and the minimal local page1 load wrapper family is live-proven, but broader general lifecycle equivalence across richer page-level logic is still unresolved; that remains the highest-leverage blocker for trustworthy multi-page logic recovery",
     "supporting_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json",
     "binding_matrix_summary": {
       "page0_advanced_positive_count": 5,
       "page1_runtime_page_mapping_confirmed": true,
       "page1_ordinary_binding_positive_count": 1,
       "page1_advanced_binding_positive_count": 4,
-      "page1_advanced_binding_negative_count": 1,
+      "page1_advanced_binding_negative_count": 0,
+      "page1_advanced_authoring_gap_count": 1,
       "page1_official_load_dispatch_positive_count": 1,
-      "page1_load_marker_recovered": false,
+      "page1_local_load_dispatch_positive_count": 1,
+      "page1_load_marker_recovered": true,
       "page1_remaining_controls_requiring_correct_page_recheck_count": 0,
-      "highest_leverage_gap": "local reproduction of official page1 load dispatch and page1 file-browser-specific runtime binding"
+      "highest_leverage_gap": "broader page-level lifecycle generalization and page1 file-browser authoring/save recovery"
     }
   },
   "unfinished": [
@@ -60,34 +62,35 @@
       "status": "unfinished",
       "scope": "general page load/unload, timer, lifecycle callback binding, and scheduler equivalence",
       "why_unfinished": [
-        "fresh live evidence now proves the official case52 page1 load oracle dispatches on corrected runtime page 0, so the screen runtime does support page1 load events",
-        "the local generated page1 load probe still fails to emit its marker when switching back to corrected runtime page 0 even though p1title.txt is readable there",
-        "the new parity report shows the official oracle uses an inline page-load phase wrapper while the local build still emits a normal page event table, so the missing piece is still the recovered official page1 load wrapper or binding path rather than a trivial slot fill"
+        "fresh live evidence now proves both the official case52 page1 load oracle and the rebuilt local page1 load probe dispatch on corrected runtime page 0 for the minimal fixed 4-byte printh family",
+        "the new parity report shows why that recovery was needed: the official oracle uses an inline page-load phase wrapper while the older local build emitted a normal page event table",
+        "broader general lifecycle equivalence is still unfinished: richer load bodies, loadend combinations, timers, and non-probe page-level logic are not yet established as a general recovered family"
       ],
       "blocks": [
-        "local reproduction of official page1 load dispatch",
-        "multi-page lifecycle wrapper recovery",
+        "broader page-level lifecycle generalization",
+        "multi-page lifecycle wrapper expansion beyond the fixed 4-byte load-printh family",
         "confident expansion beyond narrow object-callback proofs"
       ],
       "evidence": [
         "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
         "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
+        "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_verified_2026-05-20.json",
         "examples/lifecycle_runtime_smoke/page1_load_dispatch_parity_report_2026-05-20.json"
       ]
     },
     {
       "id": "page1_advanced_runtime_binding",
       "status": "unfinished",
-      "scope": "page1 page-load scheduling plus the remaining page1 file-browser authoring/save gap",
+      "scope": "page1 file-browser authoring/save gap plus remaining page1 advanced-event expansion",
       "why_unfinished": [
         "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
         "official GUI page1 text-select, sliding-text, data-record, and file-stream now all read back correctly on runtime page 0, but current page1 file-browser attempts do not even preserve an A-type object into 1.pa",
-        "the local generated page1 load probe now reads p1title.txt correctly on runtime page 0, but the page-level load marker is still not observed when switching back to that runtime page"
+        "without a saved page1 file-browser object, there is still no valid runtime or event-dispatch proof path for page1 file-browser itself"
       ],
       "blocks": [
         "page1 file-browser authoring/save recovery",
-        "page1 advanced event dispatch after corrected-page proof",
-        "page1 page-load scheduler recovery"
+        "page1 file-browser runtime proof after authoring recovery",
+        "page1 advanced event dispatch after corrected-page proof"
       ],
       "evidence": [
         "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
@@ -184,6 +187,7 @@
     "lifecycle_runtime_equivalence": "examples/lifecycle_runtime_smoke/lifecycle_runtime_equivalence_report_2026-05-19.json",
     "page1_runtime_mapping_reverified": "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
     "page1_load_official_oracle_live_positive": "examples/lifecycle_runtime_smoke/page1_load_official_oracle_live_positive_2026-05-20.json",
+    "page1_load_local_generated_live_verified": "examples/lifecycle_runtime_smoke/page1_load_local_generated_live_verified_2026-05-20.json",
     "page1_load_dispatch_parity_report": "examples/lifecycle_runtime_smoke/page1_load_dispatch_parity_report_2026-05-20.json",
     "runtime_binding_matrix": "examples/lifecycle_runtime_smoke/runtime_binding_matrix_2026-05-20.json"
   }

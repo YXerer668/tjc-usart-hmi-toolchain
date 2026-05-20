@@ -31,9 +31,9 @@ class CurrentTargetCompletionAuditArtifactTests(unittest.TestCase):
 
         self.assertEqual(page1["status"], "unfinished")
         self.assertGreaterEqual(len(page1["evidence"]), 2)
-        self.assertIn("page1 page-load scheduler recovery", page1["blocks"])
         self.assertIn("page1 file-browser authoring/save recovery", page1["blocks"])
-        self.assertIn("local reproduction of official page1 load dispatch", scheduler["blocks"])
+        self.assertIn("page1 file-browser runtime proof after authoring recovery", page1["blocks"])
+        self.assertIn("broader page-level lifecycle generalization", scheduler["blocks"])
 
 
 if __name__ == "__main__":
