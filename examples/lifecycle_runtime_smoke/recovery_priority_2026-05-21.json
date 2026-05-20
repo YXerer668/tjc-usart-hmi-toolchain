@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "prepared",
+  "top_priority_after_panel_recovery": {
+    "id": "seed_side_runtime_limitation_falsification",
+    "reason": "the page1 file-browser compiled-data envelope is largely exhausted offline, so the next highest-value move is a live discriminator that can separate A-type-specific runtime limitation from generic seed-side/runtime1 failure.",
+    "command": "python tools/run_seed_side_multipt_runtime_limit_smokes.py --out-dir reverse_usarthmi/seed_side_runtime_limit_run_20260521 --with-textselect-control"
+  },
+  "secondary_priority_after_panel_recovery": {
+    "id": "official_gui_recovery_retry",
+    "reason": "use only if connect/sendme are still silent and the panel has been power-cycled but the seed-side runner cannot start.",
+    "command": "python tools/official_hmi_download_recovery.py reverse_usarthmi/official_page1_textselect_minimal_oracle_20260519/lcd_test.HMI --port COM36 --download-baud 921600 --start-download --download-wait-s 260"
+  },
+  "notes": [
+    "Do not continue large batches of page-local byte patching before the seed-side runtime limiter runner has been exercised on recovered hardware.",
+    "Within the seed-side runner, text-select is the strongest control sample, file-stream is second, and file-browser is the target falsification sample."
+  ]
+}
