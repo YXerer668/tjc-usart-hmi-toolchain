@@ -72,6 +72,7 @@ def build_report() -> dict[str, Any]:
                 "fresh live re-verification proves the recovered case31-style two-page scaffold binds generated or official page1 content on runtime page 0, so earlier runtime page 1 invalid_reference probes were contaminated by a wrong-page assumption",
                 "the local direct-TFT page1 file-browser probe now reads back dir/filter/txt on runtime page 0, but a new refresh probe shows qty stays 0 and the camera remains a white surface even after ref fbrowser0 and a page1->page0 cycle",
                 "the official GUI page1 file-browser path still fails even earlier and does not preserve an A-type object into 1.pa, so the authoring/save lane is still blocked independently of the local direct-TFT lane",
+                "two stricter direct-TFT narrowing probes also stayed negative: renaming the page1 companion objects away from page0 names did not change qty=0 white-surface behavior, and transplanting the exact known-good page0 file-browser cluster onto page1 still stayed qty=0 white-surface. this rules out cross-page companion naming and gross page0-vs-page1 geometry/style mismatch as the primary cause",
             ],
             "blocks": [
                 "page1 file-browser direct enumeration/display recovery",
@@ -82,6 +83,7 @@ def build_report() -> dict[str, Any]:
                 "examples/lifecycle_runtime_smoke/page1_runtime_mapping_reverified_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json",
+                "examples/lifecycle_runtime_smoke/page1_filebrowser_narrowing_experiments_2026-05-20.json",
                 "examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json",
             ],
         },

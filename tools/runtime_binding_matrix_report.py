@@ -39,6 +39,7 @@ def build_report() -> dict[str, Any]:
     )
     page1_filebrowser_direct = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_direct_tft_live_verified_2026-05-20.json")
     page1_filebrowser_refresh = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_refresh_probe_2026-05-20.json")
+    page1_filebrowser_narrowing = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_narrowing_experiments_2026-05-20.json")
     page1_filebrowser_gap = _load_json("examples/lifecycle_runtime_smoke/page1_filebrowser_authoring_gap_2026-05-20.json")
     case80 = _load_json("examples/advanced_direct_tft_demo/datarecord_textselect_case80_oracle_aligned_live_verified_2026-05-19.json")
     case85 = _load_json("examples/advanced_direct_tft_demo/datarecord_sltext_case85_oracle_aligned_live_verified_2026-05-19.json")
@@ -313,8 +314,9 @@ def build_report() -> dict[str, Any]:
                 "the local ordinary page1 text probe and official GUI page1 text-select/sliding-text/data-record/file-stream probes all become positive on runtime page 0, so the older runtime page 1 invalid_reference results were wrong-page negatives",
                 "the official case52 page1 load oracle and the rebuilt local page1 load/loadend probes now dispatch on corrected runtime page 0 for the minimal fixed 4-byte page-level printh family, including the minimal combined load+loadend case",
                 "the remaining unrecovered gaps are narrower: page1 object binding is now alive for five tested advanced controls on the local runtime path, but page1 file-browser still has two separate gaps: direct-TFT enumeration/display stays negative with qty=0 plus a white camera surface, and the official authoring/save layer still fails to preserve an A-type object into 1.pa",
+                page1_filebrowser_narrowing["conclusions"]["narrowing"],
             ],
-            "recommended_next_step": "generalize the recovered page1 load wrapper path beyond the fixed 4-byte load/loadend printh family, and in parallel split page1 file-browser into two recovery lanes: fix local direct-TFT enumeration/display beyond qty=0 white-surface behavior, and separately recover a page1 file-browser HMI that actually preserves an A-type object into 1.pa",
+            "recommended_next_step": "generalize the recovered page1 load wrapper path beyond the fixed 4-byte load/loadend printh family, and in parallel split page1 file-browser into two recovery lanes: fix deeper page-local A-type enumeration/runtime state beyond the now-ruled-out name/geometry hypotheses, and separately recover a page1 file-browser HMI that actually preserves an A-type object into 1.pa",
         },
     }
 
