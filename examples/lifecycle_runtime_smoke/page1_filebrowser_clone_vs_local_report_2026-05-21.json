@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "clone-vs-local-compared",
+  "official_clone_case": {
+    "hmi": "C:\\Users\\SinYu\\Desktop\\case_for_codex\\case_B4_page1_filebrowser_hmi_clone_oracle\\lcd_test.HMI",
+    "saved_page1_blocks": [
+      [
+        "page1",
+        "y"
+      ]
+    ],
+    "compiled_success": true,
+    "compiled_output_size": 11409248,
+    "live_sendme_page_id": 1,
+    "readback_kinds": {
+      "fbrowser0.dir": "invalid_reference",
+      "fbrowser0.filter": "invalid_reference",
+      "fbrowser0.txt": "invalid_reference"
+    }
+  },
+  "local_current_code_case": {
+    "artifact": "examples\\lifecycle_runtime_smoke\\page1_filebrowser_local_multipt_live_probe_2026-05-21.json",
+    "saved_page1_blocks": [
+      [
+        "page1",
+        "y"
+      ],
+      [
+        "t0",
+        "t"
+      ],
+      [
+        "b0",
+        "b"
+      ],
+      [
+        "p0",
+        "p"
+      ],
+      [
+        "fbrowser0",
+        "A"
+      ]
+    ],
+    "after_page0_readback": {
+      "dir_kind": "string",
+      "dir_value": "sd0/",
+      "filter_kind": "string",
+      "filter_value": "*.*",
+      "qty_kind": "number",
+      "qty_value": 0,
+      "txt_kind": "string",
+      "txt_value": ""
+    },
+    "pointer_closure": {
+      "target_row_hash_valid": true,
+      "target_row_user_valid": true,
+      "target_object_event_offset_valid": true
+    }
+  },
+  "conclusions": {
+    "official_clone_is_authoring_gap_not_runtime_a_type_enumeration_gap": true,
+    "local_current_code_recovers_object_survival_and_field_binding": true,
+    "remaining_local_gap_is_enumeration_display_not_object_survival": true,
+    "recommended_oracle_boundary": "do not treat the official clone invalid_reference case as the same class as the current local multi-page file-browser failure; the clone currently proves an authoring/save gap, while the local current-code case is a deeper A-type enumeration/display gap."
+  }
+}
