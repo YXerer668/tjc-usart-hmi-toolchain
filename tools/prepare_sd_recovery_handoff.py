@@ -81,6 +81,34 @@ def main() -> int:
         encoding="utf-8",
     )
 
+    verify_ps1 = out_dir / "校验恢复包.ps1"
+    verify_ps1.write_text(
+        "\n".join(
+            [
+                '$ErrorActionPreference = "Stop"',
+                f'python "{ROOT / "tools" / "verify_sd_recovery_handoff.py"}" --bundle-dir "{out_dir}"',
+                'Write-Host "校验完成。按回车关闭..."',
+                'Read-Host | Out-Null',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    verify_cmd = out_dir / "校验恢复包.cmd"
+    verify_cmd.write_text(
+        "\r\n".join(
+            [
+                "@echo off",
+                "setlocal",
+                f'powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File "{verify_ps1}"',
+                "pause",
+            ]
+        )
+        + "\r\n",
+        encoding="utf-8",
+    )
+
     manifest = {
         "schema_version": 1,
         "date": "2026-05-21",
@@ -97,6 +125,8 @@ def main() -> int:
             "恢复后运行.txt": str(after_commands),
             "恢复后运行.ps1": str(after_ps1),
             "恢复后运行.cmd": str(after_cmd),
+            "校验恢复包.ps1": str(verify_ps1),
+            "校验恢复包.cmd": str(verify_cmd),
         },
         "source_files": {
             "repo_tft": str(SOURCE_TFT),
@@ -124,6 +154,8 @@ def main() -> int:
         "followup_command_file": str(after_commands),
         "followup_powershell_file": str(after_ps1),
         "followup_cmd_file": str(after_cmd),
+        "verify_powershell_file": str(verify_ps1),
+        "verify_cmd_file": str(verify_cmd),
     }
     report_out.parent.mkdir(parents=True, exist_ok=True)
     report_out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

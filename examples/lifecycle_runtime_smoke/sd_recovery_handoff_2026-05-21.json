@@ -9,5 +9,7 @@
   "repo_source_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
   "followup_command_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.txt",
   "followup_powershell_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.ps1",
-  "followup_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.cmd"
+  "followup_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\恢复后运行.cmd",
+  "verify_powershell_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.ps1",
+  "verify_cmd_file": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\校验恢复包.cmd"
 }

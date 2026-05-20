@@ -1,0 +1,12 @@
+{
+  "bundle_dir": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT",
+  "manifest_path": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\package_manifest.json",
+  "tft_path": "C:\\Users\\SinYu\\Desktop\\TJC_SD_RECOVERY_CURRENT\\lcd_test.tft",
+  "expected_size": 11409248,
+  "actual_size": 11409248,
+  "expected_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
+  "actual_sha256": "8a0bcbec7092056822bb044cb49bba985921b40c4ef72a3c05fe5443e52a65e8",
+  "size_ok": true,
+  "sha256_ok": true,
+  "ok": true
+}
