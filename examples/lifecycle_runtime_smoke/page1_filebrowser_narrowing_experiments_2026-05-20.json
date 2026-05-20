@@ -90,18 +90,28 @@
                                                   "txt":  "",
                                                   "camera":  "reverse_usarthmi/page1_filebrowser_page_header_probe_20260521/camera_20260521_001402.jpg",
                                                   "change":  "patched only the actual on-disk page1 mirror-page-header tuple to the single-page working header values"
-                                              }
+                                              },
+                        "tail_prefix_decode":  {
+                                                   "source":  "examples/lifecycle_runtime_smoke/page1_filebrowser_tail_prefix_decode_2026-05-21.json",
+                                                   "working_prefix_head_len":  331,
+                                                   "failing_prefix_head_len":  407,
+                                                   "working_hash_offset":  357,
+                                                   "failing_hash_offset":  511,
+                                                   "working_primary_pre_string_len":  156,
+                                                   "failing_primary_pre_string_len":  472
+                                               }
                     },
     "conclusions":  {
                         "field_binding_recovered":  true,
                         "enumeration_display_recovered":  false,
                         "cross_page_companion_name_collision_primary_cause":  false,
                         "page0_vs_page1_filebrowser_cluster_geometry_primary_cause":  false,
-                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after seven increasingly strict probes: original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1, a patch that changes only the actual on-disk second fbrowser0 record event_offset from 0x1E5 to the working single-page on-disk value 0x207, and finally a patch that changes only the actual on-disk page1 mirror-page-header tuple to the single-page working header values. page0 control evidence proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. the remaining structural delta is now pushed past single-object fields and the one-page header tuple into deeper multi-page prefix/page-table or mirror-page-record framing semantics.",
+                        "narrowing":  "page1 file-browser local direct-TFT still stays at qty=0 with a white camera surface after seven increasingly strict probes: original v4 refresh, unique companion names, an exact page0 file-browser cluster transplanted onto page1, that same exact cluster plus a live-proven fixed 4-byte page1 load wrapper, a patch that changes only the page1 fbrowser0 user-record runtime-index bytes from 0 to 1, a patch that changes only the actual on-disk second fbrowser0 record event_offset from 0x1E5 to the working single-page on-disk value 0x207, and finally a patch that changes only the actual on-disk page1 mirror-page-header tuple to the single-page working header values. page0 control evidence proves qty is a meaningful enumeration signal because the visible working page0 file-browser returns qty=14. the page1 failing probe also does not differ from the working single-page file-browser in its A-type user-slot body or mirror-value tail. a new tail-prefix decode artifact now shows the deeper multi-page prefix/page table layer diverges substantially between the working page1 load family and the failing page1 file-browser family. the remaining structural delta is therefore pushed past single-object fields and the one-page header tuple into deeper multi-page prefix/page-table or mirror-page-record framing semantics.",
                         "narrow_fixed_load_wrapper_sufficient_for_filebrowser_enumeration":  false,
                         "qty_semantics_confirmed":  true,
                         "fbrowser_runtime_index_patch_sufficient":  false,
                         "mirror_event_offset_patch_sufficient":  false,
-                        "page_header_patch_sufficient":  false
+                        "page_header_patch_sufficient":  false,
+                        "prefix_layer_is_next_target":  true
                     }
 }

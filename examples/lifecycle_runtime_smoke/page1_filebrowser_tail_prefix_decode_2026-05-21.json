@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "date": "2026-05-21",
+  "target": "TJC8048X543_011C",
+  "status": "tail-prefix-decoded",
+  "cases": [
+    {
+      "label": "working_load",
+      "descriptor_ready_prefix_len": 325,
+      "prefix_head_len": 331,
+      "page1_event_offsets": [
+        0,
+        331
+      ],
+      "page1_hash_offset": 357,
+      "page1_primary_offset": 373,
+      "page1_primary_pre_string_len": 156,
+      "page1_slot_count": 74,
+      "page1_objnames": [
+        "page1",
+        "p1title"
+      ],
+      "page1_types": [
+        "y",
+        "t"
+      ],
+      "prefix_head_first_96": "e8 00 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 0c 00 00 00 44 00 00 00 a4 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 01 00 c3 79 01 fa 00 00 24 2d b8 01 93 30 79 05 7e c6 15 0a 46 fa 8a 11 86 02 5f 16 48 56 dd 18"
+    },
+    {
+      "label": "failing_filebrowser",
+      "descriptor_ready_prefix_len": 401,
+      "prefix_head_len": 407,
+      "page1_event_offsets": [
+        0,
+        407,
+        433,
+        459,
+        485
+      ],
+      "page1_hash_offset": 511,
+      "page1_primary_offset": 545,
+      "page1_primary_pre_string_len": 472,
+      "page1_slot_count": 204,
+      "page1_objnames": [
+        "page1",
+        "t1aux",
+        "b1aux",
+        "p1aux",
+        "fbrowser0"
+      ],
+      "page1_types": [
+        "y",
+        "t",
+        "b",
+        "p",
+        "A"
+      ],
+      "prefix_head_first_96": "34 01 00 00 04 00 00 00 24 00 00 00 04 00 00 00 28 00 00 00 10 00 00 00 38 00 00 00 0c 00 00 00 44 00 00 00 f0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 26 79 96 ac 01 00 c3 79 01 fa 00 00 dd 9f c0 00 24 2d b8 01 df c7 dc 02 93 30 79 05 7e c6 15 0a c7 b1 eb 0d"
+    }
+  ]
+}
