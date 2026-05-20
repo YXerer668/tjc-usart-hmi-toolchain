@@ -24,6 +24,7 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertTrue(payload["experiments"]["record_diff"]["user_slot_body_identical"])
         self.assertTrue(payload["experiments"]["record_diff"]["mirror_value_tail_identical"])
         self.assertEqual(payload["experiments"]["mirror_event_offset_patch"]["qty"], 0)
+        self.assertEqual(payload["experiments"]["page_header_patch"]["qty"], 0)
         self.assertFalse(payload["conclusions"]["enumeration_display_recovered"])
         self.assertFalse(payload["conclusions"]["cross_page_companion_name_collision_primary_cause"])
         self.assertFalse(payload["conclusions"]["page0_vs_page1_filebrowser_cluster_geometry_primary_cause"])
@@ -31,6 +32,7 @@ class Page1FilebrowserNarrowingExperimentsArtifactTests(unittest.TestCase):
         self.assertTrue(payload["conclusions"]["qty_semantics_confirmed"])
         self.assertFalse(payload["conclusions"]["fbrowser_runtime_index_patch_sufficient"])
         self.assertFalse(payload["conclusions"]["mirror_event_offset_patch_sufficient"])
+        self.assertFalse(payload["conclusions"]["page_header_patch_sufficient"])
 
 
 if __name__ == "__main__":
