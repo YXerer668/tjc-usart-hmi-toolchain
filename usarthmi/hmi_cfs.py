@@ -4,11 +4,14 @@ from dataclasses import dataclass
 import struct
 from typing import Any
 
+from .tft_hmisafe import CRC_INIT, crc_type11_update
+
 
 NATIVE_CFS_PRIMARY_TABLE_OFFSET = 0x80000
 NATIVE_CFS_SECONDARY_TABLE_OFFSET = 0x380000
 NATIVE_CFS_RECORD_SIZE = 0x1C
 NATIVE_CFS_MAX_REASONABLE_COUNT = 100000
+NATIVE_CFS_CRC_TRAILER = b"ADEC"
 
 
 @dataclass(frozen=True, slots=True)
@@ -89,3 +92,54 @@ def find_native_cfs_record(table: NativeCfsTable, name: str) -> NativeCfsRecord 
         if record.name == name:
             return record
     return None
+
+
+def compute_native_cfs_crc(
+    raw: bytes | bytearray,
+    *,
+    offset: int = NATIVE_CFS_PRIMARY_TABLE_OFFSET,
+) -> int:
+    data = bytes(raw)
+    table = parse_native_cfs_table(data, offset)
+    count_bytes = data[offset : offset + 4]
+    records_bytes = data[offset + 4 : offset + 4 + table.count * NATIVE_CFS_RECORD_SIZE]
+    crc = crc_type11_update(CRC_INIT, count_bytes)
+    crc = crc_type11_update(crc, records_bytes)
+    crc = crc_type11_update(crc, NATIVE_CFS_CRC_TRAILER)
+    return crc
+
+
+def refresh_native_cfs_crc(
+    raw: bytes | bytearray,
+    *,
+    offset: int = NATIVE_CFS_PRIMARY_TABLE_OFFSET,
+) -> bytes:
+    data = bytearray(raw)
+    table = parse_native_cfs_table(data, offset)
+    crc = compute_native_cfs_crc(data, offset=offset)
+    trailer_offset = offset + 4 + table.count * NATIVE_CFS_RECORD_SIZE
+    struct.pack_into("<I", data, trailer_offset, crc)
+    return bytes(data)
+
+
+def rewrite_native_cfs_record(
+    raw: bytes | bytearray,
+    *,
+    record_index: int,
+    data_offset: int | None = None,
+    length: int | None = None,
+    flags: int | None = None,
+    offset: int = NATIVE_CFS_PRIMARY_TABLE_OFFSET,
+) -> bytes:
+    data = bytearray(raw)
+    table = parse_native_cfs_table(data, offset)
+    if record_index < 0 or record_index >= table.count:
+        raise IndexError(f"native CFS record index {record_index} outside table count {table.count}")
+    base = offset + 4 + record_index * NATIVE_CFS_RECORD_SIZE
+    if data_offset is not None:
+        struct.pack_into("<I", data, base + 16, int(data_offset))
+    if length is not None:
+        struct.pack_into("<I", data, base + 20, int(length))
+    if flags is not None:
+        struct.pack_into("<I", data, base + 24, int(flags))
+    return bytes(data)

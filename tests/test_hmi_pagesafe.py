@@ -8,19 +8,19 @@ from usarthmi.hmi_pagesafe import inspect_page_safe_status, refresh_page_safe_he
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BASELINE_FIXTURE = (
+BASELINE_DONOR = (
     REPO_ROOT
     / "reverse_usarthmi"
     / "hmi_donor_lowlevel_probe_20260522"
     / "fixture_corpus"
     / "fixtures"
     / "page0_basic_delete"
-    / "generated.HMI"
+    / "input_donor.HMI"
 )
 
 
 def _baseline_named_page_bytes() -> bytes:
-    raw = BASELINE_FIXTURE.read_bytes()
+    raw = BASELINE_DONOR.read_bytes()
     table = parse_native_cfs_table(raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
     page = find_native_cfs_record(table, "0.pa")
     assert page is not None

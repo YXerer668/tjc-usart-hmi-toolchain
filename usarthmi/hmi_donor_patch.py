@@ -11,7 +11,13 @@ from pathlib import Path
 from typing import Any
 
 from .editor import _rebuild_hmi_container
-from .hmi_cfs import NATIVE_CFS_PRIMARY_TABLE_OFFSET, find_native_cfs_record, parse_native_cfs_table
+from .hmi_cfs import (
+    NATIVE_CFS_PRIMARY_TABLE_OFFSET,
+    find_native_cfs_record,
+    parse_native_cfs_table,
+    refresh_native_cfs_crc,
+    rewrite_native_cfs_record,
+)
 from .hmi_inspect import inspect_hmi
 from .hmi_pagesafe import inspect_page_safe_status, refresh_page_safe_header
 from .page_format import parse_page_data
@@ -22,6 +28,7 @@ RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES = "preserve_non_page_entries"
 DEFAULT_DONOR_CORPUS_ROOT = Path(__file__).resolve().parents[1] / "reverse_usarthmi" / "hmi_donor_lowlevel_probe_20260522"
 SHADOW_SYNC_MODE_OFF = "off"
 SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI = "case83-delete-b1-gui"
+SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE = "native-page-promote"
 CASE83_DELETE_B1_SHADOW_SYNC = {
     "family_id": "case83_page0_basic_delete_v1",
     "page_name": "page0",
@@ -102,7 +109,7 @@ def build_donor_patch_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--shadow-sync-mode",
-        choices=[SHADOW_SYNC_MODE_OFF, SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI],
+        choices=[SHADOW_SYNC_MODE_OFF, SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI, SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE],
         default=SHADOW_SYNC_MODE_OFF,
         help="Experimental donor-family shadow sync mode. Default keeps the stable low-level-first path.",
     )
@@ -117,6 +124,14 @@ def main(argv: list[str] | None = None) -> int:
     if args.spec_json is None and args.donor_hmi is None:
         parser.error("donor_hmi is required unless --spec-json is provided")
     spec = load_patch_spec_json(args.spec_json) if args.spec_json is not None else None
+    if spec is not None:
+        spec = dict(spec)
+        if args.probe_lowlevel:
+            spec["probe_lowlevel"] = True
+        if args.probe_reopen:
+            spec["probe_reopen"] = True
+        if args.shadow_sync_mode != SHADOW_SYNC_MODE_OFF:
+            spec["shadow_sync_mode"] = args.shadow_sync_mode
     report = patch_hmi_donor(
         donor_hmi=None if args.donor_hmi is None else args.donor_hmi.resolve(),
         out_dir=args.out_dir.resolve(),
@@ -596,6 +611,15 @@ def _maybe_apply_experimental_shadow_sync(
     if shadow_sync_mode == SHADOW_SYNC_MODE_OFF:
         report["reason"] = "shadow_sync_mode_off"
         return report
+    if shadow_sync_mode == SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE:
+        return _maybe_promote_active_named_page(
+            generated_hmi=generated_hmi,
+            generated_raw=generated_raw,
+            generated_inspection=generated_inspection,
+            generated_candidates_before=generated_candidates_before,
+            normalized_spec=normalized_spec,
+            report=report,
+        )
     if shadow_sync_mode != SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI:
         report["reason"] = f"unsupported_shadow_sync_mode:{shadow_sync_mode}"
         return report
@@ -899,6 +923,138 @@ def _rewrite_native_named_page_delete(page_bytes: bytes, delete_index: int) -> b
         dst = table_offset + index * PAGE_DATAINFO_RECORD_SIZE
         page[dst : dst + PAGE_DATAINFO_RECORD_SIZE] = page[src : src + PAGE_DATAINFO_RECORD_SIZE]
     return refresh_page_safe_header(page, datainformation_qyt=object_count - 1)
+
+
+def _maybe_promote_active_named_page(
+    *,
+    generated_hmi: Path,
+    generated_raw: bytes,
+    generated_inspection,
+    generated_candidates_before: list[dict[str, Any]],
+    normalized_spec: dict[str, Any],
+    report: dict[str, Any],
+) -> dict[str, Any]:
+    if not normalized_spec.get("exact_donor", False):
+        report["reason"] = "non_exact_donor"
+        return report
+
+    active_entry = next((entry for entry in generated_inspection.entries if entry.name == "0.pa"), None)
+    if active_entry is None:
+        report["reason"] = "generated_active_entry_missing"
+        return report
+    active_candidate = next((item for item in generated_candidates_before if item["entry_name"] == "0.pa"), None)
+    if active_candidate is None or not active_candidate["parse_ok"]:
+        report["reason"] = "generated_active_page_missing"
+        return report
+
+    expected_objects = normalized_spec["expectations"]["objects"] or report["actual_objects"]
+    if active_candidate["objects"] != expected_objects:
+        report["reason"] = "generated_active_object_graph_mismatch"
+        return report
+
+    native_table = parse_native_cfs_table(generated_raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+    native_page = find_native_cfs_record(native_table, "0.pa")
+    if native_page is None:
+        report["reason"] = "native_named_0pa_missing"
+        return report
+
+    native_page_before = generated_raw[native_page.data_offset : native_page.data_offset + native_page.length]
+    report["native_named_0pa_before"] = {
+        **native_page.to_dict(),
+        "sha256": sha256(native_page_before).hexdigest(),
+        "page_safe": inspect_page_safe_status(native_page_before).to_dict(),
+    }
+    if active_entry.data_offset == native_page.data_offset and active_entry.length == native_page.length:
+        report["reason"] = "native_named_0pa_already_points_to_active_page"
+        return report
+
+    active_page_before = _entry_data(generated_raw, active_entry)
+    active_page_after = refresh_page_safe_header(active_page_before, datasize=active_entry.length)
+    active_page_status = inspect_page_safe_status(active_page_after)
+    if active_page_status.safe_ok is not True:
+        report["reason"] = "active_named_page_not_pagesafe_after_refresh"
+        report["active_named_0pa"] = {
+            "entry_index": int(active_entry.index),
+            "data_offset": int(active_entry.data_offset),
+            "length": int(active_entry.length),
+            "page_safe": active_page_status.to_dict(),
+        }
+        return report
+
+    patched_raw = bytearray(generated_raw)
+    patched_raw[active_entry.data_offset : active_entry.data_offset + active_entry.length] = active_page_after
+    patched_raw = bytearray(
+        rewrite_native_cfs_record(
+            patched_raw,
+            offset=NATIVE_CFS_PRIMARY_TABLE_OFFSET,
+            record_index=native_page.index,
+            data_offset=active_entry.data_offset,
+            length=active_entry.length,
+        )
+    )
+    patched_raw = bytearray(refresh_native_cfs_crc(patched_raw, offset=NATIVE_CFS_PRIMARY_TABLE_OFFSET))
+
+    try:
+        generated_hmi.write_bytes(patched_raw)
+        after_inspection = inspect_hmi(generated_hmi)
+        after_raw = generated_hmi.read_bytes()
+    except Exception as exc:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = f"rewrite_failed:{type(exc).__name__}"
+        report["error"] = str(exc)
+        return report
+
+    changed_payload_indices = _diff_payload_entry_indices(
+        generated_raw,
+        generated_inspection.entries,
+        after_raw,
+        after_inspection.entries,
+    )
+    if set(changed_payload_indices) != {int(active_entry.index)}:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = (
+            f"payload_change_invariant_failed:expected={[int(active_entry.index)]} actual={changed_payload_indices}"
+        )
+        return report
+
+    native_table_after = parse_native_cfs_table(after_raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+    native_page_after = find_native_cfs_record(native_table_after, "0.pa")
+    if native_page_after is None:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_native_named_0pa_missing"
+        return report
+    native_page_after_bytes = after_raw[native_page_after.data_offset : native_page_after.data_offset + native_page_after.length]
+    native_page_after_status = inspect_page_safe_status(native_page_after_bytes)
+    report["native_named_0pa_after"] = {
+        **native_page_after.to_dict(),
+        "sha256": sha256(native_page_after_bytes).hexdigest(),
+        "page_safe": native_page_after_status.to_dict(),
+    }
+    if native_page_after.data_offset != active_entry.data_offset or native_page_after.length != active_entry.length:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_native_named_0pa_not_retargeted"
+        return report
+    if native_page_after_status.safe_ok is not True:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_native_named_0pa_not_pagesafe"
+        return report
+
+    generated_candidates_after = _summarize_pa_like_entries(after_raw, after_inspection.entries)
+    after_active = next((item for item in generated_candidates_after if item["entry_name"] == "0.pa"), None)
+    if after_active is None or after_active["objects"] != expected_objects:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_active_page_mismatch"
+        report["generated_candidates_after"] = generated_candidates_after
+        return report
+
+    report["applied"] = True
+    report["family_id"] = "native_named_page_promote_v1"
+    report["active_entry_index"] = int(active_entry.index)
+    report["authoritative_shadow_index"] = int(native_page.index)
+    report["reason"] = "applied_native_named_page_promote"
+    report["generated_candidates_after"] = generated_candidates_after
+    report["payload_changed_entry_indices"] = changed_payload_indices
+    return report
 
 
 def load_patch_spec_json(path: Path) -> dict[str, Any]:

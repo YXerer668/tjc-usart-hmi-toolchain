@@ -9,6 +9,7 @@ import sys
 
 from usarthmi.hmi_donor_patch import (
     SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+    SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE,
     _parse_graft_spec,
     _parse_field_spec,
     _parse_move_spec,
@@ -28,6 +29,7 @@ CASE_83_HMI = Path(r"C:\Users\SinYu\Desktop\case_for_codex\case_83_datarecord_te
 CORPUS_ROOT = Path(r"C:\Users\SinYu\Documents\Codex\2026-05-03\files-mentioned-by-the-user-delay\reverse_usarthmi\hmi_donor_lowlevel_probe_20260522")
 PAGE0_BASIC_DELETE_FIXTURE_DIR = CORPUS_ROOT / "fixture_corpus" / "fixtures" / "page0_basic_delete"
 PAGE0_BASIC_DELETE_DONOR = PAGE0_BASIC_DELETE_FIXTURE_DIR / "input_donor.HMI"
+FILEBROWSER_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_filebrowser_add_or_preserve.json"
 
 
 class HMIDonorPatchTests(unittest.TestCase):
@@ -304,6 +306,28 @@ class HMIDonorPatchTests(unittest.TestCase):
                 shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
             )
             self.assertTrue(report["experimental_shadow_sync_applied"])
+            self.assertTrue(report["open_lowlevel_ok"])
+            self.assertTrue(report["compile_lowlevel_ok"])
+            self.assertTrue(report["official_gui_reopen_ok"])
+
+    def test_filebrowser_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        if not FILEBROWSER_ADD_SPEC.exists():
+            self.skipTest(f"repo-local spec missing: {FILEBROWSER_ADD_SPEC}")
+        spec = json.loads(FILEBROWSER_ADD_SPEC.read_text(encoding="utf-8"))
+        if not Path(spec["donor_path"]).exists() or not Path(spec["operations"][0]["source_hmi"]).exists():
+            self.skipTest("local donor/source HMI paths for filebrowser add are not available")
+        spec["shadow_sync_mode"] = SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE
+        spec["probe_reopen"] = True
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=None,
+                out_dir=Path(temp_dir),
+                spec=spec,
+                probe_lowlevel=True,
+                probe_reopen=True,
+            )
+            self.assertTrue(report["experimental_shadow_sync_applied"])
+            self.assertEqual(report["experimental_shadow_sync_reason"], "applied_native_named_page_promote")
             self.assertTrue(report["open_lowlevel_ok"])
             self.assertTrue(report["compile_lowlevel_ok"])
             self.assertTrue(report["official_gui_reopen_ok"])
