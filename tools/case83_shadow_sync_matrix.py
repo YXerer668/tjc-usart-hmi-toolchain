@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 import json
 import shutil
 import subprocess
@@ -131,6 +132,7 @@ def _rewrite_variant(source_hmi: Path, out_path: Path, *, overrides: dict[int, d
 def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[str, object]:
     inspection = inspect_hmi(generated_hmi)
     raw = generated_hmi.read_bytes()
+    pre_sha256 = sha256(raw).hexdigest()
     pre_candidates = _summarize_pa_like_entries(raw, inspection.entries)
 
     lowlevel_input = variant_dir / "lowlevel_input.HMI"
@@ -142,6 +144,17 @@ def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[st
             str(lowlevel_input),
             "--out-dir",
             str(variant_dir / "official_lowlevel_probe"),
+        ]
+    )
+    lowlevel_post_raw = lowlevel_input.read_bytes()
+    lowlevel_post_candidates = _summarize_pa_like_entries(lowlevel_post_raw, inspect_hmi(lowlevel_input).entries)
+    second_lowlevel = _run_json_tool(
+        [
+            sys.executable,
+            str(REPO_ROOT / "tools" / "official_hmi_lowlevel_probe.py"),
+            str(lowlevel_input),
+            "--out-dir",
+            str(variant_dir / "second_lowlevel_probe"),
         ]
     )
 
@@ -160,6 +173,8 @@ def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[st
             "120",
         ]
     )
+    reopen_post_raw = reopen_input.read_bytes()
+    reopen_post_candidates = _summarize_pa_like_entries(reopen_post_raw, inspect_hmi(reopen_input).entries)
 
     before_objects = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["before_blocks"]]
     after_objects = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["after_blocks"]]
@@ -169,13 +184,21 @@ def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[st
     return {
         "name": name,
         "generated_hmi": str(generated_hmi),
+        "pre_probe_hmi_sha256": pre_sha256,
         "pre_probe_pa_candidates": pre_candidates,
         "open_lowlevel_ok": bool(lowlevel["accepted_by_open_lowlevel"]),
         "compile_lowlevel_ok": bool(lowlevel["accepted_by_compile_lowlevel"]),
         "compiled_output_size": compile_info.get("compiled_output_size"),
         "empty_shell_class": bool(compile_info.get("empty_shell_class")),
+        "lowlevel_input_mutated": sha256(lowlevel_post_raw).hexdigest() != pre_sha256,
+        "post_lowlevel_hmi_sha256": sha256(lowlevel_post_raw).hexdigest(),
+        "post_lowlevel_pa_candidates": lowlevel_post_candidates,
+        "second_compile_lowlevel_ok": bool(second_lowlevel["accepted_by_compile_lowlevel"]),
+        "second_empty_shell_class": bool(second_lowlevel["compile_lowlevel"].get("empty_shell_class")),
         "gui_reopen_ok": bool(gui_reopen_ok),
         "gui_reopen_changed": bool(reopen["changed"]),
+        "post_reopen_hmi_sha256": sha256(reopen_post_raw).hexdigest(),
+        "post_reopen_pa_candidates": reopen_post_candidates,
         "gui_reopen_before_objects": before_objects,
         "gui_reopen_after_objects": after_objects,
         "lowlevel_probe_json": str(variant_dir / "official_lowlevel_probe"),
@@ -201,15 +224,14 @@ def _render_summary_md(summary: dict[str, object]) -> str:
     lines = [
         "# Case83 Shadow Sync Matrix",
         "",
-        "| variant | open-lowlevel | compile-lowlevel | gui-reopen | empty-shell | before objects | after objects |",
-        "|---|---|---|---|---|---|---|",
+        "| variant | open-lowlevel | compile-lowlevel | second-compile | gui-reopen | empty-shell | second-empty-shell | lowlevel-mutated |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for row in variants:
-        before_objects = ", ".join(f"{item['name']}:{item['type']}" for item in row["gui_reopen_before_objects"])
-        after_objects = ", ".join(f"{item['name']}:{item['type']}" for item in row["gui_reopen_after_objects"])
         lines.append(
             f"| {row['name']} | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | "
-            f"{yesno(row['gui_reopen_ok'])} | {yesno(row['empty_shell_class'])} | {before_objects} | {after_objects} |"
+            f"{yesno(row['second_compile_lowlevel_ok'])} | {yesno(row['gui_reopen_ok'])} | "
+            f"{yesno(row['empty_shell_class'])} | {yesno(row['second_empty_shell_class'])} | {yesno(row['lowlevel_input_mutated'])} |"
         )
     return "\n".join(lines) + "\n"
 
