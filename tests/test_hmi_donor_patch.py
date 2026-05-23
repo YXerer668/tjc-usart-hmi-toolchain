@@ -10,6 +10,7 @@ import sys
 from usarthmi.hmi_donor_patch import (
     SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
     SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE,
+    SHADOW_SYNC_MODE_OFF,
     _parse_graft_spec,
     _parse_field_spec,
     _parse_move_spec,
@@ -30,9 +31,44 @@ CORPUS_ROOT = Path(r"C:\Users\SinYu\Documents\Codex\2026-05-03\files-mentioned-b
 PAGE0_BASIC_DELETE_FIXTURE_DIR = CORPUS_ROOT / "fixture_corpus" / "fixtures" / "page0_basic_delete"
 PAGE0_BASIC_DELETE_DONOR = PAGE0_BASIC_DELETE_FIXTURE_DIR / "input_donor.HMI"
 FILEBROWSER_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_filebrowser_add_or_preserve.json"
+BASIC_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_basic_add_text_or_button.json"
+TEXTSELECT_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_textselect_add_or_preserve.json"
+DATARECORD_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_datarecord_add_or_preserve.json"
+FILESTREAM_ADD_SPEC = CORPUS_ROOT / "fixture_corpus" / "specs" / "page0_filestream_add_or_preserve.json"
 
 
 class HMIDonorPatchTests(unittest.TestCase):
+    def _load_promote_spec(self, spec_path: Path) -> dict[str, object] | None:
+        if not spec_path.exists():
+            self.skipTest(f"repo-local spec missing: {spec_path}")
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+        donor_path = Path(spec["donor_path"])
+        source_path = Path(spec["operations"][0]["source_hmi"])
+        if not donor_path.exists() or not source_path.exists():
+            self.skipTest(f"local donor/source HMI paths for {spec_path.name} are not available")
+        spec["probe_reopen"] = True
+        return spec
+
+    def _assert_promote_spec_passes(self, spec_path: Path, *, force_mode: str | None = SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE) -> None:
+        spec = self._load_promote_spec(spec_path)
+        if force_mode is None:
+            spec.pop("shadow_sync_mode", None)
+        else:
+            spec["shadow_sync_mode"] = force_mode
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=None,
+                out_dir=Path(temp_dir),
+                spec=spec,
+                probe_lowlevel=True,
+                probe_reopen=True,
+            )
+            self.assertTrue(report["experimental_shadow_sync_applied"])
+            self.assertEqual(report["experimental_shadow_sync_reason"], "applied_native_named_page_promote")
+            self.assertTrue(report["open_lowlevel_ok"])
+            self.assertTrue(report["compile_lowlevel_ok"])
+            self.assertTrue(report["official_gui_reopen_ok"])
+
     def test_parse_move_spec(self) -> None:
         self.assertEqual(_parse_move_spec("b1:10:20:30:40"), ("b1", 10, 20, 30, 40))
 
@@ -248,7 +284,7 @@ class HMIDonorPatchTests(unittest.TestCase):
             self.assertTrue(native_status.safe_ok)
             self.assertEqual(native_status.datainformation_qyt, 7)
 
-    def test_shadow_sync_is_off_by_default(self) -> None:
+    def test_shadow_sync_auto_applies_by_default_for_case83_delete(self) -> None:
         if not PAGE0_BASIC_DELETE_DONOR.exists():
             self.skipTest(f"repo-local donor copy missing: {PAGE0_BASIC_DELETE_DONOR}")
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -258,6 +294,24 @@ class HMIDonorPatchTests(unittest.TestCase):
                 delete_objects=["b1"],
                 probe_lowlevel=False,
                 probe_reopen=False,
+            )
+            self.assertTrue(report["experimental_shadow_sync_applied"])
+            self.assertEqual(
+                report["experimental_shadow_sync_reason"],
+                "applied_case83_delete_b1_native_named_page_tombstone",
+            )
+
+    def test_shadow_sync_can_be_forced_off(self) -> None:
+        if not PAGE0_BASIC_DELETE_DONOR.exists():
+            self.skipTest(f"repo-local donor copy missing: {PAGE0_BASIC_DELETE_DONOR}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=PAGE0_BASIC_DELETE_DONOR,
+                out_dir=Path(temp_dir),
+                delete_objects=["b1"],
+                probe_lowlevel=False,
+                probe_reopen=False,
+                shadow_sync_mode=SHADOW_SYNC_MODE_OFF,
             )
             self.assertFalse(report["experimental_shadow_sync_applied"])
             self.assertEqual(report["experimental_shadow_sync_reason"], "shadow_sync_mode_off")
@@ -276,6 +330,20 @@ class HMIDonorPatchTests(unittest.TestCase):
             )
             self.assertFalse(report["experimental_shadow_sync_applied"])
             self.assertEqual(report["experimental_shadow_sync_reason"], "operation_not_calibrated")
+
+    def test_move_does_not_apply_auto_shadow_sync_by_default(self) -> None:
+        if not PAGE0_BASIC_DELETE_DONOR.exists():
+            self.skipTest(f"repo-local donor copy missing: {PAGE0_BASIC_DELETE_DONOR}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=PAGE0_BASIC_DELETE_DONOR,
+                out_dir=Path(temp_dir),
+                move_specs=["b1:10:20:30:40"],
+                probe_lowlevel=False,
+                probe_reopen=False,
+            )
+            self.assertFalse(report["experimental_shadow_sync_applied"])
+            self.assertEqual(report["experimental_shadow_sync_reason"], "auto_skipped_non_structural_operation")
 
     def test_delete_b1_mode_can_pass_lowlevel_and_gui_reopen(self) -> None:
         if not PAGE0_BASIC_DELETE_DONOR.exists():
@@ -311,23 +379,19 @@ class HMIDonorPatchTests(unittest.TestCase):
             self.assertTrue(report["official_gui_reopen_ok"])
 
     def test_filebrowser_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
-        if not FILEBROWSER_ADD_SPEC.exists():
-            self.skipTest(f"repo-local spec missing: {FILEBROWSER_ADD_SPEC}")
-        spec = json.loads(FILEBROWSER_ADD_SPEC.read_text(encoding="utf-8"))
-        if not Path(spec["donor_path"]).exists() or not Path(spec["operations"][0]["source_hmi"]).exists():
-            self.skipTest("local donor/source HMI paths for filebrowser add are not available")
-        spec["shadow_sync_mode"] = SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE
-        spec["probe_reopen"] = True
-        with tempfile.TemporaryDirectory() as temp_dir:
-            report = patch_hmi_donor(
-                donor_hmi=None,
-                out_dir=Path(temp_dir),
-                spec=spec,
-                probe_lowlevel=True,
-                probe_reopen=True,
-            )
-            self.assertTrue(report["experimental_shadow_sync_applied"])
-            self.assertEqual(report["experimental_shadow_sync_reason"], "applied_native_named_page_promote")
-            self.assertTrue(report["open_lowlevel_ok"])
-            self.assertTrue(report["compile_lowlevel_ok"])
-            self.assertTrue(report["official_gui_reopen_ok"])
+        self._assert_promote_spec_passes(FILEBROWSER_ADD_SPEC)
+
+    def test_basic_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        self._assert_promote_spec_passes(BASIC_ADD_SPEC)
+
+    def test_basic_add_auto_mode_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        self._assert_promote_spec_passes(BASIC_ADD_SPEC, force_mode=None)
+
+    def test_textselect_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        self._assert_promote_spec_passes(TEXTSELECT_ADD_SPEC)
+
+    def test_datarecord_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        self._assert_promote_spec_passes(DATARECORD_ADD_SPEC)
+
+    def test_filestream_add_native_page_promote_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        self._assert_promote_spec_passes(FILESTREAM_ADD_SPEC)

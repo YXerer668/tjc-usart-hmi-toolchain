@@ -26,6 +26,7 @@ from .page_format import parse_page_data
 PATCH_SPEC_SCHEMA_VERSION = 1
 RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES = "preserve_non_page_entries"
 DEFAULT_DONOR_CORPUS_ROOT = Path(__file__).resolve().parents[1] / "reverse_usarthmi" / "hmi_donor_lowlevel_probe_20260522"
+SHADOW_SYNC_MODE_AUTO = "auto"
 SHADOW_SYNC_MODE_OFF = "off"
 SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI = "case83-delete-b1-gui"
 SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE = "native-page-promote"
@@ -109,9 +110,14 @@ def build_donor_patch_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--shadow-sync-mode",
-        choices=[SHADOW_SYNC_MODE_OFF, SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI, SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE],
-        default=SHADOW_SYNC_MODE_OFF,
-        help="Experimental donor-family shadow sync mode. Default keeps the stable low-level-first path.",
+        choices=[
+            SHADOW_SYNC_MODE_AUTO,
+            SHADOW_SYNC_MODE_OFF,
+            SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+            SHADOW_SYNC_MODE_NATIVE_PAGE_PROMOTE,
+        ],
+        default=None,
+        help="Experimental donor-family shadow sync mode. Omit to use the default auto fail-closed path.",
     )
     return parser
 
@@ -130,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
             spec["probe_lowlevel"] = True
         if args.probe_reopen:
             spec["probe_reopen"] = True
-        if args.shadow_sync_mode != SHADOW_SYNC_MODE_OFF:
+        if args.shadow_sync_mode is not None:
             spec["shadow_sync_mode"] = args.shadow_sync_mode
     report = patch_hmi_donor(
         donor_hmi=None if args.donor_hmi is None else args.donor_hmi.resolve(),
@@ -199,7 +205,7 @@ def patch_hmi_donor(
     str_specs: list[str] | None = None,
     probe_lowlevel: bool = False,
     probe_reopen: bool = False,
-    shadow_sync_mode: str = SHADOW_SYNC_MODE_OFF,
+    shadow_sync_mode: str = SHADOW_SYNC_MODE_AUTO,
     spec: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -567,7 +573,7 @@ def build_patch_spec(
         "page": page_entry,
         "probe_lowlevel": probe_lowlevel,
         "probe_reopen": probe_reopen,
-        "shadow_sync_mode": str(shadow_sync_mode or SHADOW_SYNC_MODE_OFF),
+        "shadow_sync_mode": str(shadow_sync_mode or SHADOW_SYNC_MODE_AUTO),
         "exact_donor": True,
         "donor_kind": "exact",
         "operations": operations,
@@ -608,6 +614,7 @@ def _maybe_apply_experimental_shadow_sync(
         "native_named_0pa_after": None,
     }
     shadow_sync_mode = str(normalized_spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF)
+    operation_kinds = {str(item.get("kind")) for item in normalized_spec.get("operations", [])}
     if shadow_sync_mode == SHADOW_SYNC_MODE_OFF:
         report["reason"] = "shadow_sync_mode_off"
         return report
@@ -620,14 +627,39 @@ def _maybe_apply_experimental_shadow_sync(
             normalized_spec=normalized_spec,
             report=report,
         )
-    if shadow_sync_mode != SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI:
+    if shadow_sync_mode == SHADOW_SYNC_MODE_AUTO:
+        if not (operation_kinds & {"delete", "graft"}):
+            report["reason"] = "auto_skipped_non_structural_operation"
+            return report
+        auto_match = _match_case83_delete_shadow_sync(
+            normalized_spec=normalized_spec,
+            donor_candidates=donor_candidates,
+            generated_candidates=generated_candidates_before,
+        )
+        if auto_match["eligible"]:
+            match = auto_match
+        else:
+            auto_report = _maybe_promote_active_named_page(
+                generated_hmi=generated_hmi,
+                generated_raw=generated_raw,
+                generated_inspection=generated_inspection,
+                generated_candidates_before=generated_candidates_before,
+                normalized_spec=normalized_spec,
+                report=report,
+            )
+            if auto_report.get("applied"):
+                return auto_report
+            report["reason"] = f"auto_no_matching_strategy:{auto_report.get('reason')}"
+            return report
+    elif shadow_sync_mode != SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI:
         report["reason"] = f"unsupported_shadow_sync_mode:{shadow_sync_mode}"
         return report
-    match = _match_case83_delete_shadow_sync(
-        normalized_spec=normalized_spec,
-        donor_candidates=donor_candidates,
-        generated_candidates=generated_candidates_before,
-    )
+    else:
+        match = _match_case83_delete_shadow_sync(
+            normalized_spec=normalized_spec,
+            donor_candidates=donor_candidates,
+            generated_candidates=generated_candidates_before,
+        )
     if not match["eligible"]:
         report["reason"] = match["reason"]
         return report
@@ -1146,7 +1178,7 @@ def normalize_patch_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "page": str(spec.get("page") or spec.get("page_entry") or "0.pa"),
         "probe_lowlevel": bool(spec.get("probe_lowlevel", False)),
         "probe_reopen": bool(spec.get("probe_reopen", False)),
-        "shadow_sync_mode": str(spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF),
+        "shadow_sync_mode": str(spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_AUTO),
         "exact_donor": bool(spec.get("exact_donor", False)),
         "donor_kind": str(spec.get("donor_kind") or ("exact" if spec.get("exact_donor", False) else "derived")),
         "control_type": spec.get("control_type"),

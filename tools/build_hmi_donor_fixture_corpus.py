@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -14,10 +15,12 @@ from tools.official_hmi_lowlevel_probe import probe_official_lowlevel_hmi  # noq
 from usarthmi.hmi_donor_patch import (  # noqa: E402
     PATCH_SPEC_SCHEMA_VERSION,
     RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+    _block_int,
     patch_hmi_donor,
 )
 from usarthmi.hmi_inspect import inspect_hmi  # noqa: E402
 from usarthmi.page_format import parse_page_data  # noqa: E402
+from usarthmi.widgets import WidgetWriter, iter_widget_type_infos  # noqa: E402
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -30,14 +33,15 @@ def main() -> int:
         description="Build the donor HMI fixture corpus, low-level summaries, and capability matrix."
     )
     parser.add_argument("--out-root", type=Path, default=DEFAULT_OUT_ROOT, help="Corpus output root")
+    parser.add_argument("--probe-reopen", action="store_true", help="Also run official GUI reopen/save probes on donor and generated HMI copies")
     args = parser.parse_args()
 
-    report = build_hmi_donor_fixture_corpus(args.out_root.resolve())
+    report = build_hmi_donor_fixture_corpus(args.out_root.resolve(), probe_reopen=args.probe_reopen)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
 
-def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
+def build_hmi_donor_fixture_corpus(out_root: Path, *, probe_reopen: bool = False) -> dict[str, Any]:
     out_root.mkdir(parents=True, exist_ok=True)
     specs_dir = out_root / "fixture_corpus" / "specs"
     fixtures_dir = out_root / "fixture_corpus" / "fixtures"
@@ -51,6 +55,8 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
 
     donor_specs = _donor_probe_specs()
     fixture_specs = _fixture_specs()
+    donor_specs.extend(_auto_exact_donor_specs(existing_case_ids={spec["case_id"] for spec in donor_specs}))
+    fixture_specs.extend(_auto_modified_fixture_specs(existing_case_ids={spec["case_id"] for spec in fixture_specs}))
 
     donor_records = []
     for spec in donor_specs:
@@ -63,6 +69,9 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
             run_compile=True,
         )
         record = _summarize_donor_probe(spec, result)
+        if probe_reopen:
+            record.update(_safe_reopen_record_fields(Path(spec["donor_path"]), probe_dir / "official_reopen_probe"))
+            _reconcile_reopen_status(record)
         capability_result = probe_dir / "capability_result.json"
         capability_result.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         manifest = probe_dir / "manifest.json"
@@ -101,6 +110,9 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
             probe_lowlevel=bool(spec.get("probe_lowlevel", True)),
         )
         record = _summarize_patch_fixture(spec, report)
+        if probe_reopen:
+            record.update(_safe_reopen_record_fields(Path(report["output_hmi"]), fixture_dir / "official_reopen_probe"))
+            _reconcile_reopen_status(record)
         capability_result = fixture_dir / "capability_result.json"
         capability_result.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         manifest_path = fixture_dir / "manifest.json"
@@ -124,6 +136,12 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
     }
     summary_path.write_text(json.dumps(summary_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    reopen_safe_map_path = out_root / "reopen_safe_control_map.json"
+    reopen_safe_map_path.write_text(
+        json.dumps(_build_reopen_safe_control_map(summary_payload), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
     matrix_path = out_root / "donor_patch_capability_matrix.md"
     matrix_path.write_text(_render_matrix(summary_payload), encoding="utf-8")
 
@@ -135,11 +153,13 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
                 "schema_path": str(schema_path),
                 "summary_json": str(summary_path),
                 "matrix_md": str(matrix_path),
+                "reopen_safe_control_map_json": str(reopen_safe_map_path),
                 "specs_dir": str(specs_dir),
                 "fixtures_dir": str(fixtures_dir),
                 "donor_probes_dir": str(donors_dir),
                 "fixture_case_ids": [spec["case_id"] for spec in fixture_specs],
                 "donor_probe_case_ids": [spec["case_id"] for spec in donor_specs],
+                "probe_reopen": probe_reopen,
             },
             ensure_ascii=False,
             indent=2,
@@ -152,10 +172,38 @@ def build_hmi_donor_fixture_corpus(out_root: Path) -> dict[str, Any]:
         "schema_path": str(schema_path),
         "summary_json": str(summary_path),
         "matrix_md": str(matrix_path),
+        "reopen_safe_control_map_json": str(reopen_safe_map_path),
         "corpus_manifest_json": str(corpus_manifest_path),
         "fixture_case_ids": [spec["case_id"] for spec in fixture_specs],
         "donor_probe_case_ids": [spec["case_id"] for spec in donor_specs],
+        "probe_reopen": probe_reopen,
     }
+
+
+def _build_reopen_safe_control_map(summary: dict[str, Any]) -> dict[str, Any]:
+    records = summary["records"]
+    mapping: dict[str, Any] = {"schema_version": 1, "controls": {}}
+    for record in records:
+        if record["kind"] != "generated_fixture":
+            continue
+        if not (
+            record.get("open_lowlevel_ok")
+            and record.get("compile_lowlevel_ok")
+            and record.get("official_gui_reopen_ok") is True
+        ):
+            continue
+        control_type = record["control_type"]
+        mapping["controls"].setdefault(
+            control_type,
+            {
+                "case_id": record["case_id"],
+                "generated_path": record["generated_path"],
+                "operation": record["operation"],
+                "control_name": record["control_name"],
+                "confidence": record["confidence"],
+            },
+        )
+    return mapping
 
 
 def _patch_spec_schema() -> dict[str, Any]:
@@ -212,6 +260,10 @@ def _patch_spec_schema() -> dict[str, Any]:
 
 
 def _fixture_specs() -> list[dict[str, Any]]:
+    case12 = str((CASE_ROOT / "case_12_text_yellow_font0" / "lcd_test.HMI").resolve())
+    case13 = str((CASE_ROOT / "case_13_image_button_only" / "lcd_test.HMI").resolve())
+    case16 = str((CASE_ROOT / "case_16_number_basic" / "lcd_test.HMI").resolve())
+    case19 = str((CASE_ROOT / "case_19_timer" / "lcd_test.HMI").resolve())
     case42 = str((CASE_ROOT / "case_42_datarecord" / "lcd_test.HMI").resolve())
     case43 = str((CASE_ROOT / "case_43_filebrowser" / "lcd_test.HMI").resolve())
     case44 = str((CASE_ROOT / "case_44_filestream" / "lcd_test.HMI").resolve())
@@ -220,10 +272,118 @@ def _fixture_specs() -> list[dict[str, Any]]:
     return [
         {
             "schema_version": PATCH_SPEC_SCHEMA_VERSION,
+            "case_id": "page0_text_set_str",
+            "donor_path": case12,
+            "page": "0.pa",
+            "probe_lowlevel": True,
+            "control_type": "text",
+            "control_name": "fontmsg",
+            "exact_donor": True,
+            "donor_kind": "exact",
+            "notes": "Confirmed built-in text set-str on a text donor page.",
+            "operations": [{"kind": "set-str", "object": "fontmsg", "field": "txt", "value": "demo"}],
+            "expectations": {
+                "page_name": "page0",
+                "objects": _objects(
+                    ("page0", "y"),
+                    ("t0", "t"),
+                    ("b0", "b"),
+                    ("p0", "p"),
+                    ("fontmsg", "t"),
+                ),
+                "strings": [{"object": "fontmsg", "field": "txt", "value": "demo"}],
+                "ints": [],
+                "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+            },
+        },
+        {
+            "schema_version": PATCH_SPEC_SCHEMA_VERSION,
+            "case_id": "page0_image_move",
+            "donor_path": case13,
+            "page": "0.pa",
+            "probe_lowlevel": True,
+            "control_type": "image",
+            "control_name": "p0",
+            "exact_donor": True,
+            "donor_kind": "exact",
+            "notes": "Confirmed built-in image move using the baseline p0 picture block.",
+            "operations": [{"kind": "move", "object": "p0", "x": 581, "y": 224, "w": 92, "h": 92}],
+            "expectations": {
+                "page_name": "page0",
+                "objects": _objects(
+                    ("page0", "y"),
+                    ("t0", "t"),
+                    ("b0", "b"),
+                    ("p0", "p"),
+                    ("playbtn", "b"),
+                ),
+                "strings": [],
+                "ints": [],
+                "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+            },
+        },
+        {
+            "schema_version": PATCH_SPEC_SCHEMA_VERSION,
+            "case_id": "page0_number_set_int",
+            "donor_path": case16,
+            "page": "0.pa",
+            "probe_lowlevel": True,
+            "control_type": "number",
+            "control_name": "numval",
+            "exact_donor": True,
+            "donor_kind": "exact",
+            "notes": "Confirmed built-in number set-int(val).",
+            "operations": [{"kind": "set-int", "object": "numval", "field": "val", "value": 124}],
+            "expectations": {
+                "page_name": "page0",
+                "objects": _objects(
+                    ("page0", "y"),
+                    ("t0", "t"),
+                    ("b0", "b"),
+                    ("p0", "p"),
+                    ("numval", "6"),
+                ),
+                "strings": [],
+                "ints": [{"object": "numval", "field": "val", "value": 124}],
+                "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+            },
+        },
+        {
+            "schema_version": PATCH_SPEC_SCHEMA_VERSION,
+            "case_id": "page0_timer_set_int",
+            "donor_path": case19,
+            "page": "0.pa",
+            "probe_lowlevel": True,
+            "control_type": "timer",
+            "control_name": "tm0",
+            "exact_donor": True,
+            "donor_kind": "exact",
+            "notes": "Confirmed built-in timer set-int(tim/en).",
+            "operations": [
+                {"kind": "set-int", "object": "tm0", "field": "tim", "value": 500},
+                {"kind": "set-int", "object": "tm0", "field": "en", "value": 1},
+            ],
+            "expectations": {
+                "page_name": "page0",
+                "objects": _objects(
+                    ("page0", "y"),
+                    ("t0", "t"),
+                    ("b0", "b"),
+                    ("p0", "p"),
+                    ("tm0", "3"),
+                ),
+                "strings": [],
+                "ints": [{"object": "tm0", "field": "tim", "value": 500}, {"object": "tm0", "field": "en", "value": 1}],
+                "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+            },
+        },
+        {
+            "schema_version": PATCH_SPEC_SCHEMA_VERSION,
             "case_id": "page0_basic_add_text_or_button",
             "donor_path": case85,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "native-page-promote",
             "control_type": "button",
             "control_name": "b1",
             "exact_donor": True,
@@ -265,6 +425,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case83,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "case83-delete-b1-gui",
             "control_type": "button",
             "control_name": "b1",
             "exact_donor": True,
@@ -351,6 +512,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case42,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "native-page-promote",
             "control_type": "file-browser",
             "control_name": "fbrowser0",
             "exact_donor": True,
@@ -390,6 +552,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case85,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "native-page-promote",
             "control_type": "text-select",
             "control_name": "select0",
             "exact_donor": True,
@@ -431,6 +594,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case43,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "native-page-promote",
             "control_type": "data-record",
             "control_name": "data0",
             "exact_donor": True,
@@ -470,6 +634,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case42,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "native-page-promote",
             "control_type": "file-stream",
             "control_name": "fs0",
             "exact_donor": True,
@@ -509,6 +674,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case83,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "case83-delete-b1-gui",
             "control_type": "button",
             "control_name": "b1",
             "exact_donor": True,
@@ -635,6 +801,7 @@ def _fixture_specs() -> list[dict[str, Any]]:
             "donor_path": case83,
             "page": "0.pa",
             "probe_lowlevel": True,
+            "shadow_sync_mode": "case83-delete-b1-gui",
             "control_type": "text-select",
             "control_name": "select0",
             "exact_donor": True,
@@ -694,6 +861,34 @@ def _fixture_specs() -> list[dict[str, Any]]:
 def _donor_probe_specs() -> list[dict[str, Any]]:
     return [
         _donor_probe_spec(
+            "donor_text_exact",
+            CASE_ROOT / "case_12_text_yellow_font0" / "lcd_test.HMI",
+            "text",
+            "fontmsg",
+            "Exact built-in text donor probe from case12 text page.",
+        ),
+        _donor_probe_spec(
+            "donor_image_exact",
+            CASE_ROOT / "case_13_image_button_only" / "lcd_test.HMI",
+            "image",
+            "p0",
+            "Exact built-in image donor probe using the baseline p0 picture block.",
+        ),
+        _donor_probe_spec(
+            "donor_number_exact",
+            CASE_ROOT / "case_16_number_basic" / "lcd_test.HMI",
+            "number",
+            "numval",
+            "Exact built-in number donor probe from case16.",
+        ),
+        _donor_probe_spec(
+            "donor_timer_exact",
+            CASE_ROOT / "case_19_timer" / "lcd_test.HMI",
+            "timer",
+            "tm0",
+            "Exact built-in timer donor probe from case19.",
+        ),
+        _donor_probe_spec(
             "donor_case42_exact",
             CASE_ROOT / "case_42_datarecord" / "lcd_test.HMI",
             "data-record",
@@ -749,6 +944,155 @@ def _donor_probe_spec(case_id: str, path: Path, control_type: str, control_name:
     }
 
 
+def _auto_exact_donor_specs(*, existing_case_ids: set[str]) -> list[dict[str, Any]]:
+    specs: list[dict[str, Any]] = []
+    manual_types = {"data-record", "file-browser", "file-stream"}
+    for info in iter_widget_type_infos():
+        if info.writer != WidgetWriter.FIXTURE or not info.fixture_case or info.type_code is None:
+            continue
+        if info.type in manual_types:
+            continue
+        donor_path = _resolve_fixture_hmi_path(info.fixture_case)
+        if donor_path is None:
+            continue
+        primary = _load_primary_fixture_block(donor_path, info.type_code)
+        if primary is None:
+            continue
+        case_id = f"donor_{info.type.replace('-', '_')}_exact"
+        if case_id in existing_case_ids:
+            continue
+        specs.append(
+            _donor_probe_spec(
+                case_id,
+                donor_path,
+                info.type,
+                primary["objname"],
+                f"Exact {info.type} donor ({info.fixture_case}) is low-level acceptance probe from the canonical fixture case.",
+            )
+        )
+    return specs
+
+
+def _auto_modified_fixture_specs(*, existing_case_ids: set[str]) -> list[dict[str, Any]]:
+    specs: list[dict[str, Any]] = []
+    manual_types = {"button", "data-record", "file-browser", "file-stream", "sliding-text", "text-select"}
+    for info in iter_widget_type_infos():
+        if info.writer != WidgetWriter.FIXTURE or not info.fixture_case or info.type_code is None:
+            continue
+        if info.type in manual_types:
+            continue
+        donor_path = _resolve_fixture_hmi_path(info.fixture_case)
+        if donor_path is None:
+            continue
+        primary = _load_primary_fixture_block(donor_path, info.type_code)
+        if primary is None:
+            continue
+        case_id = f"page0_{info.type.replace('-', '_')}_auto_modify"
+        if case_id in existing_case_ids:
+            continue
+        spec = _auto_modified_fixture_spec(info.type, donor_path, primary)
+        if spec is not None:
+            specs.append(spec)
+    return specs
+
+
+def _resolve_fixture_hmi_path(case_name: str) -> Path | None:
+    direct = CASE_ROOT / case_name / "lcd_test.HMI"
+    if direct.exists():
+        return direct
+    official = CASE_ROOT / case_name / "official_wiki" / "source_raw.HMI"
+    if official.exists():
+        return official
+    return None
+
+
+def _load_primary_fixture_block(donor_path: Path, type_code: str) -> dict[str, Any] | None:
+    inspection = inspect_hmi(donor_path)
+    raw = donor_path.read_bytes()
+    entry = next((item for item in inspection.entries if item.name == "0.pa"), None)
+    if entry is None:
+        return None
+    page = parse_page_data(raw[entry.data_offset : entry.data_offset + entry.length])
+    matches = [block for block in page.blocks if block.type_code == type_code]
+    if not matches:
+        return None
+    block = matches[0]
+    return {
+        "objname": str(block.objname or ""),
+        "can_move": all(block.get_field(name) is not None for name in ("x", "y", "w", "h", "endx", "endy")),
+        "int_fields": [
+            name
+            for name in ("val", "en", "maxval", "tim", "dis", "vid", "wid", "ch", "font", "bco", "pco", "pic", "picc")
+            if block.get_field(name) is not None
+        ],
+        "str_fields": [
+            name
+            for name in ("txt", "filter", "path", "dir")
+            if block.get_field(name) is not None
+        ],
+        "x": _block_int(block, "x"),
+        "y": _block_int(block, "y"),
+        "w": _block_int(block, "w"),
+        "h": _block_int(block, "h"),
+    }
+
+
+def _auto_modified_fixture_spec(control_type: str, donor_path: Path, primary: dict[str, Any]) -> dict[str, Any] | None:
+    objname = primary["objname"]
+    operations: list[dict[str, Any]] = []
+    expected_strings: list[dict[str, Any]] = []
+    expected_ints: list[dict[str, Any]] = []
+    note = ""
+
+    if primary["can_move"] and primary["w"] > 0 and primary["h"] > 0:
+        operations.append(
+            {
+                "kind": "move",
+                "object": objname,
+                "x": int(primary["x"]) + 1,
+                "y": int(primary["y"]) + 1,
+                "w": int(primary["w"]),
+                "h": int(primary["h"]),
+            }
+        )
+        note = "Auto-generated minimal mutation uses geometry move on the primary donor block."
+    elif primary["int_fields"]:
+        field = primary["int_fields"][0]
+        value = 1
+        operations.append({"kind": "set-int", "object": objname, "field": field, "value": value})
+        expected_ints.append({"object": objname, "field": field, "value": value})
+        note = f"Auto-generated minimal mutation uses integer field {field} on the primary donor block."
+    elif primary["str_fields"]:
+        field = primary["str_fields"][0]
+        value = "demo"
+        operations.append({"kind": "set-str", "object": objname, "field": field, "value": value})
+        expected_strings.append({"object": objname, "field": field, "value": value})
+        note = f"Auto-generated minimal mutation uses string field {field} on the primary donor block."
+    else:
+        return None
+
+    return {
+        "schema_version": PATCH_SPEC_SCHEMA_VERSION,
+        "case_id": f"page0_{control_type.replace('-', '_')}_auto_modify",
+        "donor_path": str(donor_path.resolve()),
+        "page": "0.pa",
+        "probe_lowlevel": True,
+        "control_type": control_type,
+        "control_name": objname,
+        "exact_donor": True,
+        "donor_kind": "exact",
+        "notes": note,
+        "operations": operations,
+        "expectations": {
+            "page_name": "page0",
+            "objects": [],
+            "strings": expected_strings,
+            "ints": expected_ints,
+            "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
+        },
+    }
+
+
 def _summarize_donor_probe(spec: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
     actual_objects = _inspect_page_objects(Path(spec["donor_path"]))
     open_ok = result["accepted_by_open_lowlevel"]
@@ -787,6 +1131,11 @@ def _summarize_donor_probe(spec: dict[str, Any], result: dict[str, Any]) -> dict
         "manifest_json": str((Path(result["open_lowlevel"]["result_json"]).parent / "manifest.json").resolve()),
         "dynamic_snapshot_goal_a_ready": bool(open_ok and compile_ok),
         "failed_reason": None if open_ok and compile_ok else "open-lowlevel rejected exact donor",
+        "official_gui_reopen_ok": None,
+        "official_gui_reopen_changed": None,
+        "official_gui_reopen_before_objects": None,
+        "official_gui_reopen_after_objects": None,
+        "official_gui_reopen_json": None,
     }
 
 
@@ -829,7 +1178,79 @@ def _summarize_patch_fixture(spec: dict[str, Any], report: dict[str, Any]) -> di
             and report.get("resources_match_expected")
         ),
         "failed_reason": None if report.get("confidence") != "failed" else "generated fixture rejected by low-level gate",
+        "official_gui_reopen_ok": None,
+        "official_gui_reopen_changed": None,
+        "official_gui_reopen_before_objects": None,
+        "official_gui_reopen_after_objects": None,
+        "official_gui_reopen_json": None,
     }
+
+
+def _run_reopen_probe(hmi_path: Path, out_dir: Path) -> dict[str, Any]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    reopen_input = out_dir / "reopen_input.HMI"
+    shutil.copy2(hmi_path, reopen_input)
+    command = [
+        sys.executable,
+        str(REPO_ROOT / "tools" / "official_hmi_reopen_probe.py"),
+        str(reopen_input),
+        "--out-dir",
+        str(out_dir),
+        "--page-index",
+        "0",
+        "--timeout-s",
+        "120",
+    ]
+    proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if proc.returncode:
+        raise RuntimeError(
+            "official_hmi_reopen_probe.py failed with "
+            f"exit code {proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+        )
+    return json.loads(proc.stdout)
+
+
+def _reopen_record_fields(reopen: dict[str, Any]) -> dict[str, Any]:
+    before_blocks = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["before_blocks"]]
+    after_blocks = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["after_blocks"]]
+    reopen_ok = not reopen["changed"] and before_blocks == after_blocks
+    return {
+        "official_gui_reopen_ok": reopen_ok,
+        "official_gui_reopen_changed": bool(reopen["changed"]),
+        "official_gui_reopen_before_objects": before_blocks,
+        "official_gui_reopen_after_objects": after_blocks,
+        "official_gui_reopen_json": str(Path(reopen["screenshot"]).parent / "reopen_probe.json"),
+        "official_gui_reopen_error": None,
+    }
+
+
+def _safe_reopen_record_fields(hmi_path: Path, out_dir: Path) -> dict[str, Any]:
+    try:
+        return _reopen_record_fields(_run_reopen_probe(hmi_path, out_dir))
+    except Exception as exc:
+        return {
+            "official_gui_reopen_ok": None,
+            "official_gui_reopen_changed": None,
+            "official_gui_reopen_before_objects": None,
+            "official_gui_reopen_after_objects": None,
+            "official_gui_reopen_json": None,
+            "official_gui_reopen_error": f"{type(exc).__name__}: {exc}",
+        }
+
+
+def _reconcile_reopen_status(record: dict[str, Any]) -> None:
+    reopen_ok = record.get("official_gui_reopen_ok")
+    if reopen_ok is True:
+        return
+    if reopen_ok is False:
+        record["confidence"] = "failed"
+        record["failed_reason"] = "official GUI reopen/save changed the object list"
+        record["dynamic_snapshot_goal_a_ready"] = False
+        return
+    if record.get("official_gui_reopen_error"):
+        record["confidence"] = "blocked"
+        record["failed_reason"] = record["official_gui_reopen_error"]
+        record["dynamic_snapshot_goal_a_ready"] = False
 
 
 def _render_matrix(summary: dict[str, Any]) -> str:
@@ -859,12 +1280,12 @@ def _render_matrix(summary: dict[str, Any]) -> str:
         "",
         "## Exact Donors",
         "",
-        "| case_id | donor_kind | generated_kind | generated_path | control | open-lowlevel | compile-lowlevel | object list | page ok | objects ok | strings ok | resources ok | failed reason | confidence | notes |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| case_id | donor_kind | generated_kind | generated_path | control | open-lowlevel | compile-lowlevel | gui-reopen | object list | page ok | objects ok | strings ok | resources ok | failed reason | confidence | notes |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for row in donor_rows:
         lines.append(
-            f"| {row['case_id']} | {row['donor_kind']} | {row['generated_kind']} | `{_display_path(row['generated_path'])}` | {row['control_type']} | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | {object_summary(row)} | {yesno(row['page_expectation_ok'])} | {yesno(row['object_expectation_ok'])} | {yesno(row['string_expectation_ok'])} | {yesno(row['resource_expectation_ok'])} | {row['failed_reason'] or ''} | {row['confidence']} | {row['notes']} |"
+            f"| {row['case_id']} | {row['donor_kind']} | {row['generated_kind']} | `{_display_path(row['generated_path'])}` | {row['control_type']} | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | {yesno(row.get('official_gui_reopen_ok'))} | {object_summary(row)} | {yesno(row['page_expectation_ok'])} | {yesno(row['object_expectation_ok'])} | {yesno(row['string_expectation_ok'])} | {yesno(row['resource_expectation_ok'])} | {row['failed_reason'] or ''} | {row['confidence']} | {row['notes']} |"
         )
 
     lines.extend(
@@ -872,13 +1293,13 @@ def _render_matrix(summary: dict[str, Any]) -> str:
             "",
             "## Generated Fixtures",
             "",
-            "| case_id | donor_kind | generated_kind | operation | control | generated_path | open-lowlevel | compile-lowlevel | object list | page ok | objects ok | strings ok | resources ok | failed reason | confidence |",
-            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+            "| case_id | donor_kind | generated_kind | operation | control | generated_path | open-lowlevel | compile-lowlevel | gui-reopen | object list | page ok | objects ok | strings ok | resources ok | failed reason | confidence |",
+            "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in fixture_rows:
         lines.append(
-            f"| {row['case_id']} | {row['donor_kind']} | {row['generated_kind']} | {row['operation']} | {row['control_type']}:{row['control_name']} | `{_display_path(row['generated_path'])}` | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | {object_summary(row)} | {yesno(row['page_expectation_ok'])} | {yesno(row['object_expectation_ok'])} | {yesno(row['string_expectation_ok'])} | {yesno(row['resource_expectation_ok'])} | {row['failed_reason'] or ''} | {row['confidence']} |"
+            f"| {row['case_id']} | {row['donor_kind']} | {row['generated_kind']} | {row['operation']} | {row['control_type']}:{row['control_name']} | `{_display_path(row['generated_path'])}` | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | {yesno(row.get('official_gui_reopen_ok'))} | {object_summary(row)} | {yesno(row['page_expectation_ok'])} | {yesno(row['object_expectation_ok'])} | {yesno(row['string_expectation_ok'])} | {yesno(row['resource_expectation_ok'])} | {row['failed_reason'] or ''} | {row['confidence']} |"
         )
 
     lines.extend(
