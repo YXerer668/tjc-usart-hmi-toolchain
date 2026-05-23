@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from hashlib import sha256
 import json
 import shutil
 import subprocess
@@ -15,6 +16,36 @@ from .page_format import parse_page_data
 
 PATCH_SPEC_SCHEMA_VERSION = 1
 RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES = "preserve_non_page_entries"
+DEFAULT_DONOR_CORPUS_ROOT = Path(__file__).resolve().parents[1] / "reverse_usarthmi" / "hmi_donor_lowlevel_probe_20260522"
+SHADOW_SYNC_MODE_OFF = "off"
+SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI = "case83-delete-b1-gui"
+CASE83_DELETE_B1_SHADOW_SYNC = {
+    "family_id": "case83_page0_basic_delete_v1",
+    "page_name": "page0",
+    "donor_active_sha256": "6329aec77b4570588b176ccb98129bd9796d3aeb88ee59ef9a16c2cf8970c56b",
+    "minimal_shadow_sha256": "580c14e04d25916e01d6c4478e70659d6b4cae8af2ad77d8e1658eb26e46540b",
+    "supporting_shadow_sha256": "be53559ece1f94d35824c75810550db07e05733959a1ee93cab2ca4eb6600c24",
+    "authoritative_shadow_length": 7476,
+    "expected_donor_objects": [
+        {"name": "page0", "type": "y"},
+        {"name": "t0", "type": "t"},
+        {"name": "b0", "type": "b"},
+        {"name": "p0", "type": "p"},
+        {"name": "bar1", "type": "j"},
+        {"name": "data0", "type": "B"},
+        {"name": "select0", "type": "D"},
+        {"name": "b1", "type": "b"},
+    ],
+    "expected_patched_objects": [
+        {"name": "page0", "type": "y"},
+        {"name": "t0", "type": "t"},
+        {"name": "b0", "type": "b"},
+        {"name": "p0", "type": "p"},
+        {"name": "bar1", "type": "j"},
+        {"name": "data0", "type": "B"},
+        {"name": "select0", "type": "D"},
+    ],
+}
 
 
 def build_donor_patch_parser() -> argparse.ArgumentParser:
@@ -58,6 +89,17 @@ def build_donor_patch_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Run tools/official_hmi_lowlevel_probe.py on the patched output",
     )
+    parser.add_argument(
+        "--probe-reopen",
+        action="store_true",
+        help="Run tools/official_hmi_reopen_probe.py on a copy of the generated output",
+    )
+    parser.add_argument(
+        "--shadow-sync-mode",
+        choices=[SHADOW_SYNC_MODE_OFF, SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI],
+        default=SHADOW_SYNC_MODE_OFF,
+        help="Experimental donor-family shadow sync mode. Default keeps the stable low-level-first path.",
+    )
     return parser
 
 
@@ -79,10 +121,49 @@ def main(argv: list[str] | None = None) -> int:
         int_specs=list(args.set_int),
         str_specs=list(args.set_str),
         probe_lowlevel=args.probe_lowlevel,
+        probe_reopen=args.probe_reopen,
+        shadow_sync_mode=args.shadow_sync_mode,
         spec=spec,
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
+
+
+def generate_reopen_safe_fixture(
+    control_type: str,
+    out_dir: str | Path,
+    *,
+    corpus_root: str | Path = DEFAULT_DONOR_CORPUS_ROOT,
+) -> dict[str, Any]:
+    corpus = Path(corpus_root).resolve()
+    control_map_path = corpus / "reopen_safe_control_map.json"
+    if not control_map_path.exists():
+        raise FileNotFoundError(f"reopen-safe control map does not exist: {control_map_path}")
+    payload = json.loads(control_map_path.read_text(encoding="utf-8"))
+    controls = payload.get("controls") or {}
+    entry = controls.get(control_type)
+    if entry is None:
+        known = ", ".join(sorted(controls))
+        raise ValueError(f"reopen-safe control {control_type!r} is not available; known: {known}")
+    case_id = str(entry["case_id"])
+    spec_path = corpus / "fixture_corpus" / "specs" / f"{case_id}.json"
+    if not spec_path.exists():
+        raise FileNotFoundError(f"reopen-safe patch spec does not exist: {spec_path}")
+    spec = load_patch_spec_json(spec_path)
+    spec = dict(spec)
+    spec["probe_lowlevel"] = True
+    spec["probe_reopen"] = True
+    report = patch_hmi_donor(
+        donor_hmi=None,
+        out_dir=Path(out_dir).resolve(),
+        spec=spec,
+        probe_lowlevel=True,
+        probe_reopen=True,
+    )
+    report["reopen_safe_control_type"] = control_type
+    report["reopen_safe_source_case_id"] = case_id
+    report["reopen_safe_control_map_json"] = str(control_map_path)
+    return report
 
 
 def patch_hmi_donor(
@@ -96,6 +177,8 @@ def patch_hmi_donor(
     int_specs: list[str] | None = None,
     str_specs: list[str] | None = None,
     probe_lowlevel: bool = False,
+    probe_reopen: bool = False,
+    shadow_sync_mode: str = SHADOW_SYNC_MODE_OFF,
     spec: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -111,12 +194,15 @@ def patch_hmi_donor(
             int_specs=int_specs or [],
             str_specs=str_specs or [],
             probe_lowlevel=probe_lowlevel,
+            probe_reopen=probe_reopen,
+            shadow_sync_mode=shadow_sync_mode,
         )
     )
 
     donor_hmi = Path(normalized_spec["donor_path"]).resolve()
     page_entry = str(normalized_spec["page"])
     probe_lowlevel = bool(normalized_spec.get("probe_lowlevel", False))
+    probe_reopen = bool(normalized_spec.get("probe_reopen", False))
 
     inspection = inspect_hmi(donor_hmi)
     raw = donor_hmi.read_bytes()
@@ -241,6 +327,14 @@ def patch_hmi_donor(
         additions=[],
     )
     generated_hmi.write_bytes(rebuilt)
+    shadow_sync = _maybe_apply_experimental_shadow_sync(
+        donor_raw=raw,
+        donor_entries=inspection.entries,
+        generated_hmi=generated_hmi,
+        normalized_spec=normalized_spec,
+    )
+    shadow_report_path = out_dir / "shadow_sync_report.json"
+    shadow_report_path.write_text(json.dumps(shadow_sync, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     input_donor_copy = out_dir / "input_donor.HMI"
     if donor_hmi.resolve() != input_donor_copy.resolve():
@@ -295,9 +389,20 @@ def patch_hmi_donor(
         "int_results": int_results,
         "ints_match_expected": all(item["matches"] for item in int_results),
         "resource_policy": normalized_spec["expectations"]["resource_policy"],
+        "shadow_sync_mode": str(normalized_spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF),
         "donor_resources": donor_resources,
         "generated_resources": generated_resources,
         "resources_match_expected": donor_resources == generated_resources,
+        "experimental_shadow_sync_applied": bool(shadow_sync.get("applied", False)),
+        "experimental_shadow_sync_family_id": shadow_sync.get("family_id"),
+        "experimental_shadow_sync_reason": shadow_sync.get("reason"),
+        "shadow_sync_report_json": str(shadow_report_path),
+        "official_gui_reopen_ok": None,
+        "official_gui_reopen_changed": None,
+        "official_gui_reopen_before_objects": None,
+        "official_gui_reopen_after_objects": None,
+        "official_gui_reopen_json": None,
+        "official_gui_reopen_error": None,
     }
 
     manifest = {
@@ -310,6 +415,7 @@ def patch_hmi_donor(
         "generated_hmi": str(generated_hmi),
         "page_entry": page_entry,
         "operations": operations,
+        "shadow_sync_report_json": str(shadow_report_path),
         "capability_result_json": str(out_dir / "capability_result.json"),
         "patch_report_json": str(out_dir / "patch_report.json"),
     }
@@ -355,6 +461,15 @@ def patch_hmi_donor(
         report["open_lowlevel_ok"] = None
         report["compile_lowlevel_ok"] = None
 
+    if probe_reopen:
+        reopen = _safe_reopen_probe(generated_hmi, out_dir / "official_reopen_probe")
+        report.update(reopen)
+        if report["official_gui_reopen_ok"] is False:
+            report["failed_reason"] = "official GUI reopen/save changed the object list"
+        elif report["official_gui_reopen_ok"] is None and report["official_gui_reopen_error"]:
+            report["failed_reason"] = report["official_gui_reopen_error"]
+        manifest["official_gui_reopen_json"] = report["official_gui_reopen_json"]
+
     report["confidence"] = _derive_confidence(report)
 
     capability_result_path = out_dir / "capability_result.json"
@@ -379,6 +494,8 @@ def build_patch_spec(
     int_specs: list[str],
     str_specs: list[str],
     probe_lowlevel: bool,
+    probe_reopen: bool,
+    shadow_sync_mode: str,
 ) -> dict[str, Any]:
     if donor_hmi is None:
         raise ValueError("donor_hmi is required when a patch spec JSON is not provided")
@@ -428,6 +545,8 @@ def build_patch_spec(
         "donor_path": str(Path(donor_hmi).resolve()),
         "page": page_entry,
         "probe_lowlevel": probe_lowlevel,
+        "probe_reopen": probe_reopen,
+        "shadow_sync_mode": str(shadow_sync_mode or SHADOW_SYNC_MODE_OFF),
         "exact_donor": True,
         "donor_kind": "exact",
         "operations": operations,
@@ -439,6 +558,271 @@ def build_patch_spec(
             "resource_policy": RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES,
         },
     }
+
+
+def _maybe_apply_experimental_shadow_sync(
+    *,
+    donor_raw: bytes,
+    donor_entries,
+    generated_hmi: Path,
+    normalized_spec: dict[str, Any],
+) -> dict[str, Any]:
+    generated_inspection = inspect_hmi(generated_hmi)
+    generated_raw = generated_hmi.read_bytes()
+    donor_candidates = _summarize_pa_like_entries(donor_raw, donor_entries)
+    generated_candidates_before = _summarize_pa_like_entries(generated_raw, generated_inspection.entries)
+    report: dict[str, Any] = {
+        "schema_version": 1,
+        "mode": "experimental_shadow_sync",
+        "family_id": None,
+        "applied": False,
+        "reason": "not_applicable",
+        "donor_candidates": donor_candidates,
+        "generated_candidates_before": generated_candidates_before,
+        "generated_candidates_after": None,
+        "active_entry_index": None,
+        "authoritative_shadow_index": None,
+        "payload_changed_entry_indices": [],
+    }
+    shadow_sync_mode = str(normalized_spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF)
+    if shadow_sync_mode == SHADOW_SYNC_MODE_OFF:
+        report["reason"] = "shadow_sync_mode_off"
+        return report
+    if shadow_sync_mode != SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI:
+        report["reason"] = f"unsupported_shadow_sync_mode:{shadow_sync_mode}"
+        return report
+    match = _match_case83_delete_shadow_sync(
+        normalized_spec=normalized_spec,
+        donor_candidates=donor_candidates,
+        generated_candidates=generated_candidates_before,
+    )
+    if not match["eligible"]:
+        report["reason"] = match["reason"]
+        return report
+
+    active_entry = next((entry for entry in generated_inspection.entries if entry.name == "0.pa"), None)
+    if active_entry is None:
+        report["family_id"] = CASE83_DELETE_B1_SHADOW_SYNC["family_id"]
+        report["reason"] = "generated_active_entry_missing"
+        return report
+
+    report["family_id"] = CASE83_DELETE_B1_SHADOW_SYNC["family_id"]
+    report["active_entry_index"] = int(active_entry.index)
+    report["authoritative_shadow_index"] = int(match["authoritative_shadow_index"])
+
+    rewritten = _rebuild_hmi_container_with_index_overrides(
+        generated_raw,
+        generated_inspection.entries,
+        overrides={
+            int(match["authoritative_shadow_index"]): {
+                "data": _entry_data(generated_raw, active_entry),
+            }
+        },
+    )
+    try:
+        generated_hmi.write_bytes(rewritten)
+        after_inspection = inspect_hmi(generated_hmi)
+        after_raw = generated_hmi.read_bytes()
+    except Exception as exc:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = f"rewrite_failed:{type(exc).__name__}"
+        report["error"] = str(exc)
+        return report
+
+    changed_payload_indices = _diff_payload_entry_indices(
+        generated_raw,
+        generated_inspection.entries,
+        after_raw,
+        after_inspection.entries,
+    )
+    expected_changed = {int(match["authoritative_shadow_index"])}
+    if set(changed_payload_indices) != expected_changed:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = (
+            f"payload_change_invariant_failed:expected={sorted(expected_changed)} "
+            f"actual={changed_payload_indices}"
+        )
+        return report
+
+    generated_candidates_after = _summarize_pa_like_entries(after_raw, after_inspection.entries)
+    after_active = next((item for item in generated_candidates_after if item["entry_name"] == "0.pa"), None)
+    after_shadow = next(
+        (item for item in generated_candidates_after if item["index"] == int(match["authoritative_shadow_index"])),
+        None,
+    )
+    if after_active is None or after_shadow is None:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_candidates_missing"
+        return report
+    if after_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_patched_objects"]:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_active_page_mismatch"
+        report["generated_candidates_after"] = generated_candidates_after
+        return report
+    if after_shadow["objects"] != after_active["objects"]:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_shadow_still_conflicts_with_active"
+        report["generated_candidates_after"] = generated_candidates_after
+        return report
+
+    report["applied"] = True
+    report["reason"] = "applied_case83_delete_b1_authoritative_shadow_rewrite"
+    report["generated_candidates_after"] = generated_candidates_after
+    report["payload_changed_entry_indices"] = changed_payload_indices
+    return report
+
+
+def _match_case83_delete_shadow_sync(
+    *,
+    normalized_spec: dict[str, Any],
+    donor_candidates: list[dict[str, Any]],
+    generated_candidates: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not normalized_spec.get("exact_donor", False):
+        return {"eligible": False, "reason": "non_exact_donor"}
+    operations = normalized_spec["operations"]
+    if operations != [{"kind": "delete", "object": "b1"}]:
+        return {"eligible": False, "reason": "operation_not_calibrated"}
+
+    donor_active = next((item for item in donor_candidates if item["entry_name"] == "0.pa"), None)
+    if donor_active is None or not donor_active["parse_ok"]:
+        return {"eligible": False, "reason": "donor_active_page_missing"}
+    if donor_active["sha256"] != CASE83_DELETE_B1_SHADOW_SYNC["donor_active_sha256"]:
+        return {"eligible": False, "reason": "donor_active_hash_mismatch"}
+    if donor_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]:
+        return {"eligible": False, "reason": "donor_active_object_graph_mismatch"}
+    donor_hashes = {item["sha256"] for item in donor_candidates if item["parse_ok"]}
+    if CASE83_DELETE_B1_SHADOW_SYNC["minimal_shadow_sha256"] not in donor_hashes:
+        return {"eligible": False, "reason": "donor_minimal_shadow_missing"}
+    if CASE83_DELETE_B1_SHADOW_SYNC["supporting_shadow_sha256"] not in donor_hashes:
+        return {"eligible": False, "reason": "donor_supporting_shadow_missing"}
+
+    generated_active = next((item for item in generated_candidates if item["entry_name"] == "0.pa"), None)
+    if generated_active is None or not generated_active["parse_ok"]:
+        return {"eligible": False, "reason": "generated_active_page_missing"}
+    if generated_active["page_name"] != CASE83_DELETE_B1_SHADOW_SYNC["page_name"]:
+        return {"eligible": False, "reason": "generated_page_name_mismatch"}
+    if generated_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_patched_objects"]:
+        return {"eligible": False, "reason": "generated_active_object_graph_not_delete_b1"}
+
+    authoritative = [
+        item
+        for item in generated_candidates
+        if item["anonymous_pa"]
+        and item["parse_ok"]
+        and item["page_name"] == CASE83_DELETE_B1_SHADOW_SYNC["page_name"]
+        and item["length"] == CASE83_DELETE_B1_SHADOW_SYNC["authoritative_shadow_length"]
+        and item["sha256"] == CASE83_DELETE_B1_SHADOW_SYNC["donor_active_sha256"]
+    ]
+    if len(authoritative) != 1:
+        return {"eligible": False, "reason": "authoritative_shadow_not_unique"}
+    if authoritative[0]["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]:
+        return {"eligible": False, "reason": "authoritative_shadow_object_graph_mismatch"}
+    return {
+        "eligible": True,
+        "reason": "matched_case83_delete_b1_manifest",
+        "authoritative_shadow_index": int(authoritative[0]["index"]),
+        "active_entry_index": int(generated_active["index"]),
+    }
+
+
+def _summarize_pa_like_entries(raw: bytes, entries) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for entry in entries:
+        name_bytes = _entry_name_bytes(raw, entry)
+        if not _is_pa_like_entry(entry, name_bytes):
+            continue
+        data = _entry_data(raw, entry)
+        row: dict[str, Any] = {
+            "index": int(entry.index),
+            "entry_name": entry.name,
+            "name_hex": name_bytes.hex(" "),
+            "length": int(entry.length),
+            "field3_hex": f"0x{int(entry.field3):X}",
+            "anonymous_pa": bool(not entry.name and name_bytes[1:4] == b".pa"),
+            "sha256": sha256(data).hexdigest(),
+        }
+        try:
+            page = parse_page_data(data)
+            objects = _block_listing(page.blocks)
+            row.update(
+                {
+                    "parse_ok": True,
+                    "parse_error": None,
+                    "page_name": page.page_name,
+                    "objects": objects,
+                    "object_names": [item["name"] for item in objects],
+                }
+            )
+        except Exception as exc:
+            row.update(
+                {
+                    "parse_ok": False,
+                    "parse_error": f"{type(exc).__name__}: {exc}",
+                    "page_name": None,
+                    "objects": [],
+                    "object_names": [],
+                }
+            )
+        rows.append(row)
+    return rows
+
+
+def _rebuild_hmi_container_with_index_overrides(
+    seed_bytes: bytes,
+    entries,
+    *,
+    overrides: dict[int, dict[str, Any]],
+) -> bytes:
+    original_data_start = min(entry.data_offset for entry in entries if entry.in_file)
+    directory_end = 4 + len(entries) * 28
+    data_start = max(original_data_start, directory_end)
+    result = bytearray(seed_bytes[:original_data_start])
+    if len(result) < data_start:
+        result.extend(b"\x00" * (data_start - len(result)))
+    result[0:4] = len(entries).to_bytes(4, "little")
+    result[4:directory_end] = b"\x00" * (directory_end - 4)
+
+    cursor = data_start
+    for entry in entries:
+        override = overrides.get(int(entry.index), {})
+        name_bytes = bytes(override.get("name_bytes", _entry_name_bytes(seed_bytes, entry)))
+        field3 = int(override.get("field3", entry.field3))
+        data = bytes(override.get("data", _entry_data(seed_bytes, entry)))
+        base = 4 + int(entry.index) * 28
+        result[base : base + 16] = name_bytes.ljust(16, b"\x00")[:16]
+        result[base + 16 : base + 20] = cursor.to_bytes(4, "little")
+        result[base + 20 : base + 24] = len(data).to_bytes(4, "little")
+        result[base + 24 : base + 28] = field3.to_bytes(4, "little")
+        if len(result) != cursor:
+            raise RuntimeError("Internal HMI rebuild cursor drifted during shadow sync")
+        result.extend(data)
+        cursor += len(data)
+    return bytes(result)
+
+
+def _diff_payload_entry_indices(before_raw: bytes, before_entries, after_raw: bytes, after_entries) -> list[int]:
+    if len(before_entries) != len(after_entries):
+        raise RuntimeError("Entry count changed during shadow sync rewrite")
+    changed: list[int] = []
+    for before_entry, after_entry in zip(before_entries, after_entries):
+        if before_entry.index != after_entry.index:
+            raise RuntimeError("Entry ordering changed during shadow sync rewrite")
+        if _entry_data(before_raw, before_entry) != _entry_data(after_raw, after_entry):
+            changed.append(int(before_entry.index))
+    return changed
+
+
+def _is_pa_like_entry(entry, name_bytes: bytes) -> bool:
+    return entry.name.endswith(".pa") or name_bytes[1:4] == b".pa"
+
+
+def _entry_name_bytes(raw: bytes, entry) -> bytes:
+    return raw[entry.dir_offset : entry.dir_offset + 16]
+
+
+def _entry_data(raw: bytes, entry) -> bytes:
+    return raw[entry.data_offset : entry.data_offset + entry.length]
 
 
 def load_patch_spec_json(path: Path) -> dict[str, Any]:
@@ -529,6 +913,8 @@ def normalize_patch_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "donor_path": str(Path(str(donor_path)).resolve()),
         "page": str(spec.get("page") or spec.get("page_entry") or "0.pa"),
         "probe_lowlevel": bool(spec.get("probe_lowlevel", False)),
+        "probe_reopen": bool(spec.get("probe_reopen", False)),
+        "shadow_sync_mode": str(spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF),
         "exact_donor": bool(spec.get("exact_donor", False)),
         "donor_kind": str(spec.get("donor_kind") or ("exact" if spec.get("exact_donor", False) else "derived")),
         "control_type": spec.get("control_type"),
@@ -652,6 +1038,10 @@ def _non_page_entry_fingerprint(inspection) -> list[dict[str, Any]]:
 
 
 def _derive_confidence(report: dict[str, Any]) -> str:
+    if report.get("official_gui_reopen_ok") is False:
+        return "failed"
+    if report.get("official_gui_reopen_ok") is None and report.get("official_gui_reopen_error"):
+        return "blocked"
     if report.get("open_lowlevel_ok") is False or report.get("compile_lowlevel_ok") is False:
         return "failed"
     if (
@@ -663,10 +1053,58 @@ def _derive_confidence(report: dict[str, Any]) -> str:
         and report.get("open_lowlevel_ok") is True
         and report.get("compile_lowlevel_ok") is True
     ):
-        return "confirmed"
+            return "confirmed"
     if report.get("open_lowlevel_ok") is True and report.get("compile_lowlevel_ok") is True:
         return "likely"
     return "blocked"
+
+
+def _safe_reopen_probe(hmi_path: Path, out_dir: Path) -> dict[str, Any]:
+    try:
+        return _run_reopen_probe(hmi_path, out_dir)
+    except Exception as exc:
+        return {
+            "official_gui_reopen_ok": None,
+            "official_gui_reopen_changed": None,
+            "official_gui_reopen_before_objects": None,
+            "official_gui_reopen_after_objects": None,
+            "official_gui_reopen_json": None,
+            "official_gui_reopen_error": f"{type(exc).__name__}: {exc}",
+        }
+
+
+def _run_reopen_probe(hmi_path: Path, out_dir: Path) -> dict[str, Any]:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    reopen_input = out_dir / "reopen_input.HMI"
+    shutil.copy2(hmi_path, reopen_input)
+    command = [
+        sys.executable,
+        str(Path(__file__).resolve().parents[1] / "tools" / "official_hmi_reopen_probe.py"),
+        str(reopen_input),
+        "--out-dir",
+        str(out_dir),
+        "--page-index",
+        "0",
+        "--timeout-s",
+        "120",
+    ]
+    proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if proc.returncode:
+        raise RuntimeError(
+            "official_hmi_reopen_probe.py failed with "
+            f"exit code {proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+        )
+    reopen = json.loads(proc.stdout)
+    before_blocks = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["before_blocks"]]
+    after_blocks = [{"name": item["objname"], "type": item["type_code"]} for item in reopen["after_blocks"]]
+    return {
+        "official_gui_reopen_ok": (not reopen["changed"] and before_blocks == after_blocks),
+        "official_gui_reopen_changed": bool(reopen["changed"]),
+        "official_gui_reopen_before_objects": before_blocks,
+        "official_gui_reopen_after_objects": after_blocks,
+        "official_gui_reopen_json": str(out_dir / "reopen_probe.json"),
+        "official_gui_reopen_error": None,
+    }
 
 
 def _require_block(blocks_by_name, objname: str):
@@ -730,6 +1168,8 @@ def _block_int(block, field_name: str) -> int:
     if field is None or not field.value:
         return 0
     return int.from_bytes(field.value, "little")
+
+
 
 
 if __name__ == "__main__":
