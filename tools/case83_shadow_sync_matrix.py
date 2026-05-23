@@ -20,6 +20,7 @@ from usarthmi.hmi_donor_patch import (  # noqa: E402
     _summarize_pa_like_entries,
     patch_hmi_donor,
 )
+from usarthmi.hmi_cfs import NATIVE_CFS_PRIMARY_TABLE_OFFSET, find_native_cfs_record, parse_native_cfs_table  # noqa: E402
 from usarthmi.hmi_inspect import inspect_hmi  # noqa: E402
 
 
@@ -134,6 +135,8 @@ def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[st
     raw = generated_hmi.read_bytes()
     pre_sha256 = sha256(raw).hexdigest()
     pre_candidates = _summarize_pa_like_entries(raw, inspection.entries)
+    native_table = parse_native_cfs_table(raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+    native_0pa = find_native_cfs_record(native_table, "0.pa")
 
     lowlevel_input = variant_dir / "lowlevel_input.HMI"
     shutil.copy2(generated_hmi, lowlevel_input)
@@ -186,6 +189,13 @@ def _probe_variant(name: str, generated_hmi: Path, variant_dir: Path) -> dict[st
         "generated_hmi": str(generated_hmi),
         "pre_probe_hmi_sha256": pre_sha256,
         "pre_probe_pa_candidates": pre_candidates,
+        "native_cfs_table": native_table.to_dict(),
+        "native_cfs_named_0pa": None if native_0pa is None else native_0pa.to_dict(),
+        "native_cfs_named_0pa_sha256": (
+            None
+            if native_0pa is None
+            else sha256(raw[native_0pa.data_offset : native_0pa.data_offset + native_0pa.length]).hexdigest()
+        ),
         "open_lowlevel_ok": bool(lowlevel["accepted_by_open_lowlevel"]),
         "compile_lowlevel_ok": bool(lowlevel["accepted_by_compile_lowlevel"]),
         "compiled_output_size": compile_info.get("compiled_output_size"),
@@ -232,6 +242,24 @@ def _render_summary_md(summary: dict[str, object]) -> str:
             f"| {row['name']} | {yesno(row['open_lowlevel_ok'])} | {yesno(row['compile_lowlevel_ok'])} | "
             f"{yesno(row['second_compile_lowlevel_ok'])} | {yesno(row['gui_reopen_ok'])} | "
             f"{yesno(row['empty_shell_class'])} | {yesno(row['second_empty_shell_class'])} | {yesno(row['lowlevel_input_mutated'])} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Native CFS Named `0.pa`",
+            "",
+            "| variant | table offset | record index | data offset | length | flags | sha256 |",
+            "|---|---|---|---|---|---|---|",
+        ]
+    )
+    for row in variants:
+        record = row["native_cfs_named_0pa"]
+        if record is None:
+            lines.append(f"| {row['name']} | - | - | - | - | - | - |")
+            continue
+        lines.append(
+            f"| {row['name']} | {row['native_cfs_table']['offset_hex']} | {record['index']} | "
+            f"{record['data_offset_hex']} | {record['length']} | {record['flags_hex']} | {row['native_cfs_named_0pa_sha256']} |"
         )
     return "\n".join(lines) + "\n"
 
