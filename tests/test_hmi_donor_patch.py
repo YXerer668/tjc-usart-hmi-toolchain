@@ -18,7 +18,9 @@ from usarthmi.hmi_donor_patch import (
     normalize_patch_spec,
     patch_hmi_donor,
 )
+from usarthmi.hmi_cfs import NATIVE_CFS_PRIMARY_TABLE_OFFSET, find_native_cfs_record, parse_native_cfs_table
 from usarthmi.hmi_inspect import inspect_hmi
+from usarthmi.hmi_pagesafe import inspect_page_safe_status
 from usarthmi.page_format import BlockField, PageBlock, parse_page_data
 
 
@@ -208,6 +210,11 @@ class HMIDonorPatchTests(unittest.TestCase):
             shadow_report = json.loads(Path(report["shadow_sync_report_json"]).read_text(encoding="utf-8"))
             self.assertTrue(shadow_report["applied"])
             self.assertEqual(shadow_report["authoritative_shadow_index"], 11)
+            self.assertEqual(
+                shadow_report["reason"],
+                "applied_case83_delete_b1_native_named_page_tombstone",
+            )
+            self.assertTrue(shadow_report["native_named_0pa_after"]["page_safe"]["safe_ok"])
 
             output_hmi = Path(report["output_hmi"])
             inspection = inspect_hmi(output_hmi)
@@ -225,10 +232,19 @@ class HMIDonorPatchTests(unittest.TestCase):
                     "objects": [(block.objname, block.type_code) for block in page.blocks if block.objname],
                 }
 
-            self.assertEqual(pa_rows[11]["length"], 6509)
+            self.assertEqual(pa_rows[11]["length"], 7476)
             self.assertEqual(pa_rows[14]["length"], 6509)
             self.assertEqual(pa_rows[11]["objects"], pa_rows[14]["objects"])
             self.assertNotIn(("b1", "b"), pa_rows[11]["objects"])
+
+            native_table = parse_native_cfs_table(raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+            native_page = find_native_cfs_record(native_table, "0.pa")
+            self.assertIsNotNone(native_page)
+            native_status = inspect_page_safe_status(
+                raw[native_page.data_offset : native_page.data_offset + native_page.length]
+            )
+            self.assertTrue(native_status.safe_ok)
+            self.assertEqual(native_status.datainformation_qyt, 7)
 
     def test_shadow_sync_is_off_by_default(self) -> None:
         if not PAGE0_BASIC_DELETE_DONOR.exists():
@@ -258,3 +274,36 @@ class HMIDonorPatchTests(unittest.TestCase):
             )
             self.assertFalse(report["experimental_shadow_sync_applied"])
             self.assertEqual(report["experimental_shadow_sync_reason"], "operation_not_calibrated")
+
+    def test_delete_b1_mode_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        if not PAGE0_BASIC_DELETE_DONOR.exists():
+            self.skipTest(f"repo-local donor copy missing: {PAGE0_BASIC_DELETE_DONOR}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=PAGE0_BASIC_DELETE_DONOR,
+                out_dir=Path(temp_dir),
+                delete_objects=["b1"],
+                probe_lowlevel=True,
+                probe_reopen=True,
+                shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+            )
+            self.assertTrue(report["open_lowlevel_ok"])
+            self.assertTrue(report["compile_lowlevel_ok"])
+            self.assertTrue(report["official_gui_reopen_ok"])
+
+    def test_delete_select0_mode_can_pass_lowlevel_and_gui_reopen(self) -> None:
+        if not PAGE0_BASIC_DELETE_DONOR.exists():
+            self.skipTest(f"repo-local donor copy missing: {PAGE0_BASIC_DELETE_DONOR}")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            report = patch_hmi_donor(
+                donor_hmi=PAGE0_BASIC_DELETE_DONOR,
+                out_dir=Path(temp_dir),
+                delete_objects=["select0"],
+                probe_lowlevel=True,
+                probe_reopen=True,
+                shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+            )
+            self.assertTrue(report["experimental_shadow_sync_applied"])
+            self.assertTrue(report["open_lowlevel_ok"])
+            self.assertTrue(report["compile_lowlevel_ok"])
+            self.assertTrue(report["official_gui_reopen_ok"])

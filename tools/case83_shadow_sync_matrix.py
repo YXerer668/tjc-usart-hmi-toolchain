@@ -47,6 +47,8 @@ def build_case83_shadow_sync_matrix(out_dir: Path) -> dict[str, object]:
     out_dir.mkdir(parents=True, exist_ok=True)
     variants: list[tuple[str, Callable[[Path], Path]]] = [
         ("baseline_compile_ok_gui_fail", _build_baseline_variant),
+        ("patcher_case83_delete_b1_native_safe33", _build_patcher_case83_delete_b1_variant),
+        ("patcher_case83_delete_select0_native_safe33", _build_patcher_case83_delete_select0_variant),
         ("gui_shadow_sync_shrink", _build_gui_shadow_sync_variant),
         ("gui_shadow_sync_dualshadow", _build_dualshadow_variant),
         ("gui_shadow_sync_idx11_named", _build_idx11_named_variant),
@@ -84,6 +86,30 @@ def _build_gui_shadow_sync_variant(out_dir: Path) -> Path:
         donor_hmi=DONOR_HMI,
         out_dir=out_dir,
         delete_objects=["b1"],
+        probe_lowlevel=False,
+        probe_reopen=False,
+        shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+    )
+    return Path(report["output_hmi"])
+
+
+def _build_patcher_case83_delete_b1_variant(out_dir: Path) -> Path:
+    report = patch_hmi_donor(
+        donor_hmi=DONOR_HMI,
+        out_dir=out_dir,
+        delete_objects=["b1"],
+        probe_lowlevel=False,
+        probe_reopen=False,
+        shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,
+    )
+    return Path(report["output_hmi"])
+
+
+def _build_patcher_case83_delete_select0_variant(out_dir: Path) -> Path:
+    report = patch_hmi_donor(
+        donor_hmi=DONOR_HMI,
+        out_dir=out_dir,
+        delete_objects=["select0"],
         probe_lowlevel=False,
         probe_reopen=False,
         shadow_sync_mode=SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI,

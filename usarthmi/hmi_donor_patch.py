@@ -4,13 +4,16 @@ import argparse
 from hashlib import sha256
 import json
 import shutil
+import struct
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
 from .editor import _rebuild_hmi_container
+from .hmi_cfs import NATIVE_CFS_PRIMARY_TABLE_OFFSET, find_native_cfs_record, parse_native_cfs_table
 from .hmi_inspect import inspect_hmi
+from .hmi_pagesafe import inspect_page_safe_status, refresh_page_safe_header
 from .page_format import parse_page_data
 
 
@@ -46,6 +49,9 @@ CASE83_DELETE_B1_SHADOW_SYNC = {
         {"name": "select0", "type": "D"},
     ],
 }
+PAGE_DATAINFO_ADDR_OFFSET = 0x08
+PAGE_DATAINFO_QTY_OFFSET = 0x0C
+PAGE_DATAINFO_RECORD_SIZE = 12
 
 
 def build_donor_patch_parser() -> argparse.ArgumentParser:
@@ -583,6 +589,8 @@ def _maybe_apply_experimental_shadow_sync(
         "active_entry_index": None,
         "authoritative_shadow_index": None,
         "payload_changed_entry_indices": [],
+        "native_named_0pa_before": None,
+        "native_named_0pa_after": None,
     }
     shadow_sync_mode = str(normalized_spec.get("shadow_sync_mode") or SHADOW_SYNC_MODE_OFF)
     if shadow_sync_mode == SHADOW_SYNC_MODE_OFF:
@@ -609,18 +617,39 @@ def _maybe_apply_experimental_shadow_sync(
     report["family_id"] = CASE83_DELETE_B1_SHADOW_SYNC["family_id"]
     report["active_entry_index"] = int(active_entry.index)
     report["authoritative_shadow_index"] = int(match["authoritative_shadow_index"])
-
-    rewritten = _rebuild_hmi_container_with_index_overrides(
-        generated_raw,
-        generated_inspection.entries,
-        overrides={
-            int(match["authoritative_shadow_index"]): {
-                "data": _entry_data(generated_raw, active_entry),
-            }
-        },
-    )
+    expected_after_delete = list(match["expected_objects_after_delete"])
+    native_table = parse_native_cfs_table(generated_raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+    native_page = find_native_cfs_record(native_table, "0.pa")
+    if native_page is None:
+        report["reason"] = "native_named_0pa_missing"
+        return report
+    native_page_before = generated_raw[native_page.data_offset : native_page.data_offset + native_page.length]
+    report["native_named_0pa_before"] = {
+        **native_page.to_dict(),
+        "sha256": sha256(native_page_before).hexdigest(),
+        "page_safe": inspect_page_safe_status(native_page_before).to_dict(),
+    }
     try:
-        generated_hmi.write_bytes(rewritten)
+        native_page_data = parse_page_data(native_page_before)
+    except Exception as exc:
+        report["reason"] = f"native_named_0pa_parse_failed:{type(exc).__name__}"
+        report["error"] = str(exc)
+        return report
+    native_page_objects = _block_listing(native_page_data.blocks)
+    if native_page.length != CASE83_DELETE_B1_SHADOW_SYNC["authoritative_shadow_length"]:
+        report["reason"] = "native_named_0pa_length_mismatch"
+        return report
+    if native_page_objects != CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]:
+        report["reason"] = "native_named_0pa_object_graph_mismatch"
+        report["native_named_0pa_before"]["objects"] = native_page_objects
+        return report
+
+    delete_index = int(match["delete_object_index"])
+    rewritten_page = _rewrite_native_named_page_delete(native_page_before, delete_index)
+    patched_raw = bytearray(generated_raw)
+    patched_raw[native_page.data_offset : native_page.data_offset + native_page.length] = rewritten_page
+    try:
+        generated_hmi.write_bytes(patched_raw)
         after_inspection = inspect_hmi(generated_hmi)
         after_raw = generated_hmi.read_bytes()
     except Exception as exc:
@@ -654,9 +683,14 @@ def _maybe_apply_experimental_shadow_sync(
         generated_hmi.write_bytes(generated_raw)
         report["reason"] = "post_rewrite_candidates_missing"
         return report
-    if after_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_patched_objects"]:
+    if after_active["objects"] != expected_after_delete:
         generated_hmi.write_bytes(generated_raw)
         report["reason"] = "post_rewrite_active_page_mismatch"
+        report["generated_candidates_after"] = generated_candidates_after
+        return report
+    if after_shadow["length"] != CASE83_DELETE_B1_SHADOW_SYNC["authoritative_shadow_length"]:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_named_page_length_changed"
         report["generated_candidates_after"] = generated_candidates_after
         return report
     if after_shadow["objects"] != after_active["objects"]:
@@ -664,9 +698,25 @@ def _maybe_apply_experimental_shadow_sync(
         report["reason"] = "post_rewrite_shadow_still_conflicts_with_active"
         report["generated_candidates_after"] = generated_candidates_after
         return report
+    native_table_after = parse_native_cfs_table(after_raw, NATIVE_CFS_PRIMARY_TABLE_OFFSET)
+    native_page_after = find_native_cfs_record(native_table_after, "0.pa")
+    if native_page_after is None:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_native_named_0pa_missing"
+        return report
+    native_page_after_bytes = after_raw[native_page_after.data_offset : native_page_after.data_offset + native_page_after.length]
+    report["native_named_0pa_after"] = {
+        **native_page_after.to_dict(),
+        "sha256": sha256(native_page_after_bytes).hexdigest(),
+        "page_safe": inspect_page_safe_status(native_page_after_bytes).to_dict(),
+    }
+    if report["native_named_0pa_after"]["page_safe"]["safe_ok"] is not True:
+        generated_hmi.write_bytes(generated_raw)
+        report["reason"] = "post_rewrite_native_named_0pa_not_pagesafe"
+        return report
 
     report["applied"] = True
-    report["reason"] = "applied_case83_delete_b1_authoritative_shadow_rewrite"
+    report["reason"] = "applied_case83_delete_b1_native_named_page_tombstone"
     report["generated_candidates_after"] = generated_candidates_after
     report["payload_changed_entry_indices"] = changed_payload_indices
     return report
@@ -681,15 +731,22 @@ def _match_case83_delete_shadow_sync(
     if not normalized_spec.get("exact_donor", False):
         return {"eligible": False, "reason": "non_exact_donor"}
     operations = normalized_spec["operations"]
-    if operations != [{"kind": "delete", "object": "b1"}]:
+    if len(operations) != 1 or operations[0].get("kind") != "delete":
         return {"eligible": False, "reason": "operation_not_calibrated"}
+    delete_object = str(operations[0]["object"])
+    donor_expected = CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]
+    if delete_object == donor_expected[0]["name"]:
+        return {"eligible": False, "reason": "delete_root_not_allowed"}
+    expected_after_delete = [item for item in donor_expected if item["name"] != delete_object]
+    if len(expected_after_delete) != len(donor_expected) - 1:
+        return {"eligible": False, "reason": "delete_target_not_in_case83_family"}
 
     donor_active = next((item for item in donor_candidates if item["entry_name"] == "0.pa"), None)
     if donor_active is None or not donor_active["parse_ok"]:
         return {"eligible": False, "reason": "donor_active_page_missing"}
     if donor_active["sha256"] != CASE83_DELETE_B1_SHADOW_SYNC["donor_active_sha256"]:
         return {"eligible": False, "reason": "donor_active_hash_mismatch"}
-    if donor_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]:
+    if donor_active["objects"] != donor_expected:
         return {"eligible": False, "reason": "donor_active_object_graph_mismatch"}
     donor_hashes = {item["sha256"] for item in donor_candidates if item["parse_ok"]}
     if CASE83_DELETE_B1_SHADOW_SYNC["minimal_shadow_sha256"] not in donor_hashes:
@@ -702,8 +759,8 @@ def _match_case83_delete_shadow_sync(
         return {"eligible": False, "reason": "generated_active_page_missing"}
     if generated_active["page_name"] != CASE83_DELETE_B1_SHADOW_SYNC["page_name"]:
         return {"eligible": False, "reason": "generated_page_name_mismatch"}
-    if generated_active["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_patched_objects"]:
-        return {"eligible": False, "reason": "generated_active_object_graph_not_delete_b1"}
+    if generated_active["objects"] != expected_after_delete:
+        return {"eligible": False, "reason": "generated_active_object_graph_not_matching_requested_delete"}
 
     authoritative = [
         item
@@ -716,13 +773,19 @@ def _match_case83_delete_shadow_sync(
     ]
     if len(authoritative) != 1:
         return {"eligible": False, "reason": "authoritative_shadow_not_unique"}
-    if authoritative[0]["objects"] != CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]:
+    if authoritative[0]["objects"] != donor_expected:
         return {"eligible": False, "reason": "authoritative_shadow_object_graph_mismatch"}
+    delete_index = next((i for i, item in enumerate(donor_expected) if item["name"] == delete_object), -1)
+    if delete_index < 0:
+        return {"eligible": False, "reason": "delete_target_index_not_found"}
     return {
         "eligible": True,
-        "reason": "matched_case83_delete_b1_manifest",
+        "reason": "matched_case83_native_page_delete_manifest",
         "authoritative_shadow_index": int(authoritative[0]["index"]),
         "active_entry_index": int(generated_active["index"]),
+        "delete_object": delete_object,
+        "delete_object_index": delete_index,
+        "expected_objects_after_delete": expected_after_delete,
     }
 
 
@@ -823,6 +886,19 @@ def _entry_name_bytes(raw: bytes, entry) -> bytes:
 
 def _entry_data(raw: bytes, entry) -> bytes:
     return raw[entry.data_offset : entry.data_offset + entry.length]
+
+
+def _rewrite_native_named_page_delete(page_bytes: bytes, delete_index: int) -> bytes:
+    page = bytearray(page_bytes)
+    object_count = struct.unpack_from("<I", page, PAGE_DATAINFO_QTY_OFFSET)[0]
+    if object_count <= delete_index:
+        raise ValueError(f"delete_index {delete_index} outside page datainformation count {object_count}")
+    table_offset = struct.unpack_from("<I", page, PAGE_DATAINFO_ADDR_OFFSET)[0]
+    for index in range(delete_index, object_count - 1):
+        src = table_offset + (index + 1) * PAGE_DATAINFO_RECORD_SIZE
+        dst = table_offset + index * PAGE_DATAINFO_RECORD_SIZE
+        page[dst : dst + PAGE_DATAINFO_RECORD_SIZE] = page[src : src + PAGE_DATAINFO_RECORD_SIZE]
+    return refresh_page_safe_header(page, datainformation_qyt=object_count - 1)
 
 
 def load_patch_spec_json(path: Path) -> dict[str, Any]:
