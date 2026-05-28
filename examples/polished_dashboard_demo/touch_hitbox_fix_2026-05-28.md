@@ -71,3 +71,6 @@ Verification summary:
 Any future `.pa` geometry patch workflow must treat `x/y/w/h` and `endx/endy`
 as one geometry unit. Preview collision checks only prove visual layout; touch
 hitbox checks must include the hidden end-coordinate fields.
+
+For the reusable build/compile/optional-flash wrapper, see
+`touchsafe_pipeline.md`.

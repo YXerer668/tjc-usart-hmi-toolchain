@@ -1,0 +1,51 @@
+{
+  "name": "my_touchsafe_case",
+  "source_hmi": "build/my_source_case/lcd_test.HMI",
+  "patch_plan": "",
+  "out_dir": "build/my_touchsafe_case",
+  "title": "My Touch-Safe USART HMI Case",
+  "official": {
+    "install_dir": "D:/reverse/USART HMI_decompile/tools/headless_debugger/harness_runtime_clean"
+  },
+  "target": {
+    "port": "COM36",
+    "baud": 9600,
+    "download_baud": 921600,
+    "chunk_size": 4096,
+    "timeout_ms": 3000,
+    "upload_timeout_ms": 8000,
+    "expected_connect": {
+      "mode": "2",
+      "flash_descriptor": "1089-0",
+      "model": "TJC8048X543_011C",
+      "firmware": "277",
+      "mcu_code": "10501",
+      "feature_descriptor": "128974848-0"
+    }
+  },
+  "flash": false,
+  "camera": false,
+  "run_serial_smoke": false,
+  "serial_smoke": [
+    {
+      "label": "page0",
+      "command": "page 0"
+    },
+    {
+      "label": "log_button",
+      "command": "click logbtn,0"
+    },
+    {
+      "label": "page_after_log",
+      "command": "sendme",
+      "expect": {
+        "kind": "page_id",
+        "value": 3
+      }
+    },
+    {
+      "label": "restore_page0",
+      "command": "page 0"
+    }
+  ]
+}
