@@ -21,9 +21,13 @@ Build-only example:
 python tools\codex_touchsafe_official_pipeline.py `
   --source-hmi build\my_source_case\lcd_test.HMI `
   --out-dir build\my_touchsafe_case `
-  --name my_touchsafe_case `
-  --install-dir "D:\reverse\USART HMI_decompile\tools\headless_debugger\harness_runtime_clean"
+  --name my_touchsafe_case
 ```
+
+The official `USART HMI` install is auto-discovered from
+`USARTHMI_OFFICIAL_DIR`, `C:\Program Files (x86)\USART HMI`, or
+`C:\Program Files\USART HMI`. Pass `--install-dir` only when auto-discovery
+cannot find the correct install/runtime directory.
 
 Patch-plan example:
 
@@ -55,6 +59,15 @@ Generated `.HMI`, `.TFT`, screenshots, command stdout/stderr, and preview files
 belong under `build/`, which is ignored by Git. Commit the script, spec, and
 small evidence notes; do not commit generated binary payloads unless the repo
 explicitly moves them into a fixture or LFS policy.
+
+For another Windows machine, build a portable source package with:
+
+```powershell
+python tools\package_touchsafe_headless_toolchain.py --out-dir dist --require-host-exe
+```
+
+See `touchsafe_headless_package.md` for bootstrap, wrapper, and Codex skill
+installation details.
 
 ## Geometry Gate
 

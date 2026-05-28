@@ -1,0 +1,4 @@
+interface:
+  display_name: "USART HMI Headless Toolchain"
+  short_description: "Run touch-safe headless USART HMI official builds"
+  default_prompt: "Build this HMI through the touch-safe headless official USART HMI pipeline."

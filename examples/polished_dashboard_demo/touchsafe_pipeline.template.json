@@ -5,7 +5,7 @@
   "out_dir": "build/my_touchsafe_case",
   "title": "My Touch-Safe USART HMI Case",
   "official": {
-    "install_dir": "D:/reverse/USART HMI_decompile/tools/headless_debugger/harness_runtime_clean"
+    "install_dir": ""
   },
   "target": {
     "port": "COM36",
