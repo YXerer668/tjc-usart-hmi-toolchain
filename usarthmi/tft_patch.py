@@ -11,6 +11,12 @@ from .object_hash import object_name_hash
 from .hmi_inspect import inspect_hmi
 from .page_format import PageBlock, load_page_file, parse_page_data
 from .tft_checksum import _crc32_like, update_tft_checksum
+from .tft_prehmisafe import (
+    build_candidate_pre_hmisafe_tft,
+    decode_final_appinf1_fields,
+    derive_synthetic_pre_hmisafe_from_final,
+)
+from .tft_hmisafe import finalize_tft
 from .tft_reverse import reverse_tft_tail
 from .tft_toolchain import TftToolchainError, _load_tfttool_module, inspect_tft
 
@@ -47,7 +53,13 @@ TYPE_RECORD_LENGTHS = {
     ">": 0x90,  # sliding text
     "A": 0xA4,  # file browser
     "B": 0x00,  # data record lives in the compiled prefix for case_42
-    "?": 0x48,  # file stream
+    "?": 0x2C,  # file stream, recovered from case72 primary record boundaries
+}
+MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT = "case31_layout"
+MULTI_PAGE_PHYSICAL_ROW_ORDER_PAGE0_FIRST = "page0_first"
+_VALID_MULTI_PAGE_PHYSICAL_ROW_ORDERS = {
+    MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT,
+    MULTI_PAGE_PHYSICAL_ROW_ORDER_PAGE0_FIRST,
 }
 TYPE_USER_SLOT_COUNTS = {
     "y": 33,
@@ -83,6 +95,21 @@ TYPE_USER_SLOT_COUNTS = {
     "?": 19,  # file stream, recovered from case_44 GUI-created oracle
 }
 SUPPORTED_PAGE1_BUTTON_EVENT_LINES = frozenset({"page 0", "page 1", "page page0", "page page1"})
+GENERIC_EXACT_APPEND_PREFERRED_TYPES = frozenset({
+    "t",
+    "b",
+    "p",
+    "6",
+    "7",
+    "5",
+    "C",
+    "m",
+    "4",
+    "\x00",
+    "8",
+    "9",
+    "q",
+})
 _FILE_BROWSER_USER_POINTER_SLOTS = {
     30: "dir",
     32: "filter",
@@ -127,6 +154,1096 @@ KNOWN_EXTRA_TYPE_CASES = {
     "?": "case_44_filestream",
 }
 DEFAULT_CASE_ROOT = Path(r"C:\Users\SinYu\Desktop\case_for_codex")
+CASE85_NEW_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_new_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NEW_BUTTON_EVENT_STYLE_ONLY_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_new_button_event_style_only_hmi_probe_20260524"
+    / "output.hmi"
+)
+CASE85_TWO_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWO_BUTTONS_SECOND_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_second_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THREE_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THREE_BUTTONS_THIRD_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_event_third_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_third_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_third_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOUR_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIVE_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIX_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHT_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINE_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_ELEVEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWELVE_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THIRTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_ONE_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_TWO_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINETEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVENTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIXTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIFTEEN_BUTTONS_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_event_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_second_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_second_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_NEW_BUTTON_EVENT_STYLE_ONLY_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_new_button_event_style_only_hmi_probe_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_second_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_two_buttons_event_second_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_third_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_three_buttons_third_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOUR_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_four_buttons_fourth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIVE_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIX_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHT_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINE_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_ELEVEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWELVE_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_ONE_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_TWO_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINETEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_buttons_twentieth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_one_buttons_twenty_first_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twenty_two_buttons_twenty_second_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVENTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nineteen_buttons_nineteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eighteen_buttons_eighteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIXTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seventeen_buttons_seventeenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_sixteen_buttons_sixteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIFTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fifteen_buttons_fifteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_fourteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THIRTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_fourteen_buttons_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_thirteen_buttons_thirteenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_twelve_buttons_twelfth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eleven_buttons_eleventh_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_ten_buttons_tenth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_nine_buttons_ninth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_eight_buttons_eighth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_seven_buttons_seventh_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_six_buttons_sixth_button_event_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "output.hmi"
+)
+CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT = (
+    Path(__file__).resolve().parents[1]
+    / "reverse_usarthmi"
+    / "case85_five_buttons_fifth_button_event_style_hmi_only_postfix_verify_20260524"
+    / "official_lowlevel_probe_manual"
+    / "output.lowlevel.tft"
+)
 IMAGE_BUTTON_USER_SLOT_COUNT = 41
 MIRROR_VALUE_COUNT = 41
 IMAGE_BUTTON_MIRROR_VALUE_COUNT = 42
@@ -139,8 +1256,8 @@ TIMER_TYPE_CODE = "3"
 VARIABLE_TYPE_CODE = "4"
 MEDIA_TYPE_CODES = {"\x02", "\x03", "\x04"}
 NON_VISUAL_COORD_TYPES = {TIMER_TYPE_CODE, VARIABLE_TYPE_CODE, "\x04", "\x05", "?"}
-COMPACT_STRING_LAYOUT_TYPES = {TIMER_TYPE_CODE, "\x05", "<", "5", "6", "7", "8", "C", "m", "q", "=", "D", ">", "A", "B", "?"}
-EMBEDDED_SEED_TEXT_LAYOUT_TYPES = {"D", ">", "B", "?"}
+COMPACT_STRING_LAYOUT_TYPES = {TIMER_TYPE_CODE, "\x05", "<", "5", "6", "7", "8", "C", "m", "q", "=", "D", ">", "A", "B"}
+EMBEDDED_SEED_TEXT_LAYOUT_TYPES = {"D", ">", "B"}
 MIXED_COMPACT_PRIMARY_TYPES = {"5", "6", "7", "8", "m", "q"}
 ADVANCED_POST_PRIMARY_MARKER_TYPES = {"D", ">", "A", "B", "?"}
 MIXED_DESCRIPTOR_LAYOUT_KEY = "__mixed__"
@@ -562,6 +1679,76 @@ class RebuildPagePatchResult:
 
 
 @dataclass(slots=True)
+class PreHmiSafePatchResult:
+    baseline_tft: str
+    seed_pa: str
+    target_pa: str
+    out_tft: str
+    file_size: int
+    object_count: int
+    section_offsets: dict[str, int]
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "mode": "experimental_rebuild_page_pre_hmisafe_candidate",
+            "baseline_tft": self.baseline_tft,
+            "seed_pa": self.seed_pa,
+            "target_pa": self.target_pa,
+            "out_tft": self.out_tft,
+            "file_size": self.file_size,
+            "object_count": self.object_count,
+            "section_offsets": {
+                key: {"value": value, "hex": f"0x{value:X}"}
+                for key, value in self.section_offsets.items()
+            },
+            "warnings": [
+                "This emits a builder-side pre-HmiSafe candidate, not a final TFT.",
+                "Use usarthmi.tft_hmisafe.finalize_tft() or the CLI finalizer on this output before final-byte claims.",
+            ],
+        }
+
+
+@dataclass(slots=True)
+class MultiPagePreHmiSafePatchResult:
+    baseline_tft: str
+    baseline_pa: str
+    target_pages: list[str]
+    out_tft: str
+    file_size: int
+    page_count: int
+    object_count: int
+    section_offsets: dict[str, int]
+    physical_page_row_order: str
+    normalized_trailing_filebrowser_xfloat_order: bool
+    experimental_page1_filebrowser: bool
+    experimental_events: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "mode": "experimental_multi_page_pre_hmisafe_candidate",
+            "baseline_tft": self.baseline_tft,
+            "baseline_pa": self.baseline_pa,
+            "target_pages": self.target_pages,
+            "out_tft": self.out_tft,
+            "file_size": self.file_size,
+            "page_count": self.page_count,
+            "object_count": self.object_count,
+            "physical_page_row_order": self.physical_page_row_order,
+            "normalized_trailing_filebrowser_xfloat_order": self.normalized_trailing_filebrowser_xfloat_order,
+            "experimental_page1_filebrowser": self.experimental_page1_filebrowser,
+            "experimental_events": self.experimental_events,
+            "section_offsets": {
+                key: {"value": value, "hex": f"0x{value:X}"}
+                for key, value in self.section_offsets.items()
+            },
+            "warnings": [
+                "This emits a builder-side pre-HmiSafe candidate, not a final TFT.",
+                "Use usarthmi.tft_hmisafe.finalize_tft() or the CLI finalizer on this output before final-byte claims.",
+            ],
+        }
+
+
+@dataclass(slots=True)
 class MultiPagePatchResult:
     baseline_tft: str
     baseline_pa: str
@@ -571,6 +1758,9 @@ class MultiPagePatchResult:
     page_count: int
     object_count: int
     section_offsets: dict[str, int]
+    physical_page_row_order: str = MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT
+    normalized_trailing_filebrowser_xfloat_order: bool = False
+    experimental_page1_filebrowser: bool = False
     experimental_events: bool = False
     experimental_event_summary: dict[str, Any] | None = None
 
@@ -592,6 +1782,18 @@ class MultiPagePatchResult:
             warnings.append(
                 "Page1 page-level events now have one narrow live-proven family: fixed 4-byte load-printh probes on corrected runtime page 0. Broader page-level lifecycle behavior still needs explicit proof; current case51/case52 lifecycle_record_fields show callback slots stay 0xFFFFFFFF and wrapper placement still matters."
             )
+        if self.physical_page_row_order == MULTI_PAGE_PHYSICAL_ROW_ORDER_PAGE0_FIRST:
+            warnings.append(
+                "Physical page-row order is emitted page0-first for runtime-page1 rescue experiments; this intentionally does not preserve the official case31 byte layout."
+            )
+        if self.normalized_trailing_filebrowser_xfloat_order:
+            warnings.append(
+                "A narrow local xfloat/filebrowser order normalization was applied for a trailing page1 filebrowser under page0-first layout."
+            )
+        if self.experimental_page1_filebrowser:
+            warnings.append(
+                "Page1 file-browser is an explicit runtime probe path: offline TFT/HmiSafe bytes are valid, but page1 file enumeration still needs live proof."
+            )
         return {
             "mode": "experimental_multi_page_tft_patch",
             "baseline_tft": self.baseline_tft,
@@ -601,6 +1803,9 @@ class MultiPagePatchResult:
             "file_size": self.file_size,
             "page_count": self.page_count,
             "object_count": self.object_count,
+            "physical_page_row_order": self.physical_page_row_order,
+            "normalized_trailing_filebrowser_xfloat_order": self.normalized_trailing_filebrowser_xfloat_order,
+            "experimental_page1_filebrowser": self.experimental_page1_filebrowser,
             "experimental_events": self.experimental_events,
             "experimental_event_summary": event_summary,
             "section_offsets": {
@@ -645,6 +1850,7 @@ class _TailSeed:
     primary_string_prefix_paddings: dict[str, int]
     primary_string_suffix_paddings: dict[str, int]
     hash_by_name: dict[str, int]
+    seed_picture_count: int | None
 
 
 @dataclass(slots=True)
@@ -781,166 +1987,222 @@ def patch_added_object_tft(
     baseline_page = load_page_file(baseline_pa_path)
     target_page = load_page_file(target_pa_path)
     added_blocks = _validate_added_objects(baseline_page.blocks, target_page.blocks)
+    prefer_generic = _prefer_generic_added_object_builder(target_page.blocks, added_blocks)
 
-    case83_exact_tail_rebuild = _case83_exact_tail_rebuild_payload(target_pa_path, target_page.blocks)
-    if case83_exact_tail_rebuild is not None:
-        payload, sections, replay_tft = case83_exact_tail_rebuild
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-            patch_path="case83_exact_tail_rebuild",
-            oracle_tft=str(replay_tft),
-        )
-    case83_exact_event_tail_rebuild = _case83_exact_event_tail_rebuild_payload(target_pa_path, target_page.blocks)
-    if case83_exact_event_tail_rebuild is not None:
-        payload, sections, replay_tft = case83_exact_event_tail_rebuild
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-            patch_path="case83_exact_event_tail_rebuild",
-            oracle_tft=str(_case83_event_oracle_tft_path() or replay_tft),
-        )
-
-    fixture_replay = _fixture_raw_tft_for_blocks(target_page.blocks)
-    if fixture_replay is not None:
-        payload, sections = fixture_replay
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(baseline_tft_path),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case56_basic_patch = _case56_basic_patch_payload(target_pa_path, target_page.blocks)
-    if case56_basic_patch is not None:
-        payload, sections, replay_tft = case56_basic_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case80_basic_patch = _case80_basic_patch_payload(target_pa_path, target_page.blocks)
-    if case80_basic_patch is not None:
-        payload, sections, replay_tft = case80_basic_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case85_b0_event_patch = _case85_b0_down_marker_patch_payload(target_pa_path, target_page.blocks)
-    if case85_b0_event_patch is not None:
-        payload, sections, replay_tft = case85_b0_event_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case85_basic_patch = _case85_basic_patch_payload(target_pa_path, target_page.blocks)
-    if case85_basic_patch is not None:
-        payload, sections, replay_tft = case85_basic_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case83_b1_event_patch = _case83_b1_down_marker_patch_payload(target_pa_path, target_page.blocks)
-    if case83_b1_event_patch is not None:
-        payload, sections, replay_tft = case83_b1_event_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case83_basic_patch = _case83_basic_patch_payload(target_pa_path, target_page.blocks)
-    if case83_basic_patch is not None:
-        payload, sections, replay_tft = case83_basic_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
-    case72_basic_patch = _case72_basic_patch_payload(target_pa_path, target_page.blocks)
-    if case72_basic_patch is not None:
-        payload, sections, replay_tft = case72_basic_patch
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_bytes(payload)
-        return AddedObjectPatchResult(
-            baseline_tft=str(replay_tft),
-            baseline_pa=str(baseline_pa_path),
-            target_pa=str(target_pa_path),
-            out_tft=str(out_path),
-            file_size=len(payload),
-            object_count=len(target_page.blocks),
-            added_objects=[_added_block_summary(block) for block in added_blocks],
-            section_offsets=sections,
-        )
+    if not prefer_generic:
+        case83_exact_tail_rebuild = _case83_exact_tail_rebuild_payload(target_pa_path, target_page.blocks)
+        if case83_exact_tail_rebuild is not None:
+            payload, sections, replay_tft = case83_exact_tail_rebuild
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+                patch_path="case83_exact_tail_rebuild",
+                oracle_tft=str(replay_tft),
+            )
+    if not prefer_generic:
+        case83_exact_event_pre = _case83_exact_event_pre_tft_payload(target_pa_path, target_page.blocks)
+        if case83_exact_event_pre is not None:
+            pre_hmisafe, sections, oracle_tft = case83_exact_event_pre
+            final_bytes, _info = finalize_tft(pre_hmisafe)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(final_bytes)
+            return AddedObjectPatchResult(
+                baseline_tft=str(oracle_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(final_bytes),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+                patch_path="case83_exact_event_case_seed",
+                oracle_tft=str(oracle_tft),
+            )
+        case83_exact_event_tail_rebuild = _case83_exact_event_tail_rebuild_payload(target_pa_path, target_page.blocks)
+        if case83_exact_event_tail_rebuild is not None:
+            payload, sections, replay_tft = case83_exact_event_tail_rebuild
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+                patch_path="case83_exact_event_tail_rebuild",
+                oracle_tft=str(_case83_event_oracle_tft_path() or replay_tft),
+            )
+        filebrowser_textselect_native = _file_browser_textselect_native_pre_tft_for_blocks(target_page.blocks)
+        if filebrowser_textselect_native is not None:
+            pre_hmisafe, sections, oracle_tft = filebrowser_textselect_native
+            final_bytes, _info = finalize_tft(pre_hmisafe)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(final_bytes)
+            return AddedObjectPatchResult(
+                baseline_tft=str(oracle_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(final_bytes),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+                patch_path="case56_native_case_seed",
+                oracle_tft=str(oracle_tft),
+            )
+        fixture_replay = _fixture_raw_tft_for_blocks(target_page.blocks)
+        if fixture_replay is not None:
+            payload, sections = fixture_replay
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(baseline_tft_path),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case56_basic_patch = _case56_basic_patch_payload(target_pa_path, target_page.blocks)
+        if case56_basic_patch is not None:
+            payload, sections, replay_tft = case56_basic_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case80_basic_patch = _case80_basic_patch_payload(target_pa_path, target_page.blocks)
+        if case80_basic_patch is not None:
+            payload, sections, replay_tft = case80_basic_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case85_b0_event_pre = _case85_b0_down_marker_pre_tft_payload(target_pa_path, target_page.blocks)
+        if case85_b0_event_pre is not None:
+            pre_hmisafe, sections, replay_tft = case85_b0_event_pre
+            final_bytes, _info = finalize_tft(pre_hmisafe)
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(final_bytes)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(final_bytes),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+                patch_path="case85_exact_event_case_seed",
+                oracle_tft=str(replay_tft),
+            )
+        case85_b0_event_patch = _case85_b0_down_marker_patch_payload(target_pa_path, target_page.blocks)
+        if case85_b0_event_patch is not None:
+            payload, sections, replay_tft = case85_b0_event_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case85_basic_patch = _case85_basic_patch_payload(target_pa_path, target_page.blocks)
+        if case85_basic_patch is not None:
+            payload, sections, replay_tft = case85_basic_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case83_b1_event_patch = _case83_b1_down_marker_patch_payload(target_pa_path, target_page.blocks)
+        if case83_b1_event_patch is not None:
+            payload, sections, replay_tft = case83_b1_event_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case83_basic_patch = _case83_basic_patch_payload(target_pa_path, target_page.blocks)
+        if case83_basic_patch is not None:
+            payload, sections, replay_tft = case83_basic_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
+        case72_basic_patch = _case72_basic_patch_payload(target_pa_path, target_page.blocks)
+        if case72_basic_patch is not None:
+            payload, sections, replay_tft = case72_basic_patch
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(payload)
+            return AddedObjectPatchResult(
+                baseline_tft=str(replay_tft),
+                baseline_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(payload),
+                object_count=len(target_page.blocks),
+                added_objects=[_added_block_summary(block) for block in added_blocks],
+                section_offsets=sections,
+            )
     seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, baseline_page)
     data_record_native = _data_record_native_tail_for_blocks(seed, target_page.blocks)
     if data_record_native is not None:
-        tail, sections = data_record_native
+        tail, sections, oracle_tft = data_record_native
     elif any(block.type_code == "B" for block in target_page.blocks):
         raise TftToolchainError(
             "Native data-record TFT synthesis currently supports only the exact "
@@ -953,32 +2215,181 @@ def patch_added_object_tft(
         _augment_seed_templates(seed, {block.type_code for block in target_page.blocks})
         tail, sections = _build_added_object_tail(seed, target_page.blocks)
     payload = bytearray(seed.raw[: seed.object_start] + tail)
-    image_button_layout = _uses_full_image_button_layout(target_page.blocks)
-
-    _refresh_tft_headers(
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
         payload,
-        model=seed.model,
-        model_series=seed.model_series,
         object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=1,
         object_count=len(target_page.blocks),
         attr_relative=sections["attr"],
         user_relative=sections["user"],
         picture_relative=sections["pic"],
         prefix_delta=sections["prefix_delta"],
-        image_button_layout=image_button_layout,
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
     )
+    final_bytes, _info = finalize_tft(pre_hmisafe)
+    exact_reference_tft = _exact_reference_tft_for_generic_added_objects(target_page.blocks)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(payload)
+    out_path.write_bytes(final_bytes)
 
     return AddedObjectPatchResult(
-        baseline_tft=str(baseline_tft_path),
+        baseline_tft=str(oracle_tft) if data_record_native is not None else str(baseline_tft_path),
         baseline_pa=str(baseline_pa_path),
         target_pa=str(target_pa_path),
         out_tft=str(out_path),
-        file_size=len(payload),
+        file_size=len(final_bytes),
         object_count=len(target_page.blocks),
         added_objects=[_added_block_summary(block) for block in added_blocks],
+        section_offsets=sections,
+        patch_path="datarecord_native_case_seed" if data_record_native is not None else "",
+        oracle_tft=(
+            str(oracle_tft)
+            if data_record_native is not None
+            else (str(exact_reference_tft) if exact_reference_tft is not None else "")
+        ),
+    )
+
+
+def build_added_object_pre_hmisafe_tft(
+    baseline_tft: str | Path,
+    *,
+    baseline_pa: str | Path,
+    target_pa: str | Path,
+    out_tft: str | Path,
+) -> PreHmiSafePatchResult | None:
+    """Emit a builder-generated pre-HmiSafe candidate for the generic append lane.
+
+    Returns None for exact-oracle / fixture-replay / unsupported branches,
+    because those outputs are not currently produced from the generic builder
+    body and therefore do not have an honest builder-generated pre-HmiSafe
+    intermediate to expose.
+    """
+
+    baseline_tft_path = Path(baseline_tft).resolve()
+    baseline_pa_path = Path(baseline_pa).resolve()
+    target_pa_path = Path(target_pa).resolve()
+    out_path = Path(out_tft).resolve()
+
+    baseline_page = load_page_file(baseline_pa_path)
+    target_page = load_page_file(target_pa_path)
+    added_blocks = _validate_added_objects(baseline_page.blocks, target_page.blocks)
+    prefer_generic = _prefer_generic_added_object_builder(target_page.blocks, added_blocks)
+
+    if not prefer_generic:
+        if _case83_exact_tail_rebuild_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        case83_exact_event_pre = _case83_exact_event_pre_tft_payload(target_pa_path, target_page.blocks)
+        if case83_exact_event_pre is not None:
+            pre_hmisafe, sections, _oracle_tft = case83_exact_event_pre
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(pre_hmisafe)
+            return PreHmiSafePatchResult(
+                baseline_tft=str(baseline_tft_path),
+                seed_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(pre_hmisafe),
+                object_count=len(target_page.blocks),
+                section_offsets=sections,
+            )
+        if _case83_exact_event_tail_rebuild_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+    if not prefer_generic:
+        case83_exact_event_pre = _case83_exact_event_pre_tft_payload(target_pa_path, target_page.blocks)
+        if case83_exact_event_pre is not None:
+            pre_hmisafe, sections, _oracle_tft = case83_exact_event_pre
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(pre_hmisafe)
+            return PreHmiSafePatchResult(
+                baseline_tft=str(baseline_tft_path),
+                seed_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(pre_hmisafe),
+                object_count=len(target_page.blocks),
+                section_offsets=sections,
+            )
+        if _case83_exact_event_tail_rebuild_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        filebrowser_textselect_native = _file_browser_textselect_native_pre_tft_for_blocks(target_page.blocks)
+        if filebrowser_textselect_native is not None:
+            pre_hmisafe, sections, _oracle_tft = filebrowser_textselect_native
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(pre_hmisafe)
+            return PreHmiSafePatchResult(
+                baseline_tft=str(baseline_tft_path),
+                seed_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(pre_hmisafe),
+                object_count=len(target_page.blocks),
+                section_offsets=sections,
+            )
+        if _fixture_raw_tft_for_blocks(target_page.blocks) is not None:
+            return None
+        if _case56_basic_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        if _case80_basic_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        case85_b0_event_pre = _case85_b0_down_marker_pre_tft_payload(target_pa_path, target_page.blocks)
+        if case85_b0_event_pre is not None:
+            pre_hmisafe, sections, _oracle_tft = case85_b0_event_pre
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            out_path.write_bytes(pre_hmisafe)
+            return PreHmiSafePatchResult(
+                baseline_tft=str(baseline_tft_path),
+                seed_pa=str(baseline_pa_path),
+                target_pa=str(target_pa_path),
+                out_tft=str(out_path),
+                file_size=len(pre_hmisafe),
+                object_count=len(target_page.blocks),
+                section_offsets=sections,
+            )
+        if _case85_b0_down_marker_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        if _case85_basic_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        if _case83_b1_down_marker_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        if _case83_basic_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+        if _case72_basic_patch_payload(target_pa_path, target_page.blocks) is not None:
+            return None
+
+    seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, baseline_page)
+    data_record_native = _data_record_native_tail_for_blocks(seed, target_page.blocks)
+    if data_record_native is not None:
+        tail, sections, _oracle_tft = data_record_native
+    elif any(block.type_code == "B" for block in target_page.blocks):
+        return None
+
+    else:
+        _augment_seed_templates(seed, {block.type_code for block in target_page.blocks})
+        tail, sections = _build_added_object_tail(seed, target_page.blocks)
+    payload = bytearray(seed.raw[: seed.object_start] + tail)
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=1,
+        object_count=len(target_page.blocks),
+        attr_relative=sections["attr"],
+        user_relative=sections["user"],
+        picture_relative=sections["pic"],
+        prefix_delta=sections["prefix_delta"],
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
+    )
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(pre_hmisafe)
+    return PreHmiSafePatchResult(
+        baseline_tft=str(baseline_tft_path),
+        seed_pa=str(baseline_pa_path),
+        target_pa=str(target_pa_path),
+        out_tft=str(out_path),
+        file_size=len(pre_hmisafe),
+        object_count=len(target_page.blocks),
         section_offsets=sections,
     )
 
@@ -1005,6 +2416,106 @@ def patch_rebuild_page_tft(
 
     seed_page = load_page_file(seed_pa_path)
     target_page = load_page_file(target_pa_path)
+    payload, sections, seed, target_page = _build_rebuild_page_raw_payload(
+        baseline_tft_path,
+        seed_pa_path,
+        target_pa_path,
+        seed_page=seed_page,
+        target_page=target_page,
+    )
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=1,
+        object_count=len(target_page.blocks),
+        attr_relative=sections["attr"],
+        user_relative=sections["user"],
+        picture_relative=sections["pic"],
+        prefix_delta=sections["prefix_delta"],
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
+    )
+    final_bytes, _info = finalize_tft(pre_hmisafe)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(final_bytes)
+
+    target_names = {block.objname for block in target_page.blocks if block.objname}
+    seed_names = [block.objname for block in seed_page.blocks if block.objname]
+    return RebuildPagePatchResult(
+        baseline_tft=str(baseline_tft_path),
+        seed_pa=str(seed_pa_path),
+        target_pa=str(target_pa_path),
+        out_tft=str(out_path),
+        file_size=len(final_bytes),
+        object_count=len(target_page.blocks),
+        objects=[_added_block_summary(block) for block in target_page.blocks],
+        removed_seed_objects=[name for name in seed_names if name and name not in target_names],
+        section_offsets=sections,
+    )
+
+
+def build_rebuild_page_pre_hmisafe_tft(
+    baseline_tft: str | Path,
+    *,
+    seed_pa: str | Path,
+    target_pa: str | Path,
+    out_tft: str | Path,
+) -> PreHmiSafePatchResult:
+    """Emit the builder-side pre-HmiSafe candidate for a single rebuilt page.
+
+    This is the pre-finalizer companion to patch_rebuild_page_tft(). It uses the
+    same rebuilt raw tail, but stops before the native HmiSafe boundary.
+    """
+
+    baseline_tft_path = Path(baseline_tft).resolve()
+    seed_pa_path = Path(seed_pa).resolve()
+    target_pa_path = Path(target_pa).resolve()
+    out_path = Path(out_tft).resolve()
+
+    payload, sections, seed, target_page = _build_rebuild_page_raw_payload(
+        baseline_tft_path,
+        seed_pa_path,
+        target_pa_path,
+    )
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=1,
+        object_count=len(target_page.blocks),
+        attr_relative=sections["attr"],
+        user_relative=sections["user"],
+        picture_relative=sections["pic"],
+        prefix_delta=sections["prefix_delta"],
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
+    )
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(pre_hmisafe)
+    return PreHmiSafePatchResult(
+        baseline_tft=str(baseline_tft_path),
+        seed_pa=str(seed_pa_path),
+        target_pa=str(target_pa_path),
+        out_tft=str(out_path),
+        file_size=len(pre_hmisafe),
+        object_count=len(target_page.blocks),
+        section_offsets=sections,
+    )
+
+
+def _build_rebuild_page_raw_payload(
+    baseline_tft_path: Path,
+    seed_pa_path: Path,
+    target_pa_path: Path,
+    *,
+    seed_page: Any | None = None,
+    target_page: Any | None = None,
+) -> tuple[bytearray, dict[str, int], _TailSeed, Any]:
+    if seed_page is None:
+        seed_page = load_page_file(seed_pa_path)
+    if target_page is None:
+        target_page = load_page_file(target_pa_path)
     _validate_rebuild_page(target_page.blocks)
 
     seed = _load_tail_seed(baseline_tft_path, seed_pa_path, seed_page)
@@ -1014,37 +2525,7 @@ def patch_rebuild_page_tft(
     # the rebuilt page/object tail, which keeps this path narrow and repeatable.
     tail, sections = _build_added_object_tail(seed, target_page.blocks)
     payload = bytearray(seed.raw[: seed.object_start] + tail)
-    image_button_layout = _uses_full_image_button_layout(target_page.blocks)
-
-    _refresh_tft_headers(
-        payload,
-        model=seed.model,
-        model_series=seed.model_series,
-        object_start=seed.object_start,
-        object_count=len(target_page.blocks),
-        attr_relative=sections["attr"],
-        user_relative=sections["user"],
-        picture_relative=sections["pic"],
-        prefix_delta=sections["prefix_delta"],
-        image_button_layout=image_button_layout,
-    )
-
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(payload)
-
-    target_names = {block.objname for block in target_page.blocks if block.objname}
-    seed_names = [block.objname for block in seed_page.blocks if block.objname]
-    return RebuildPagePatchResult(
-        baseline_tft=str(baseline_tft_path),
-        seed_pa=str(seed_pa_path),
-        target_pa=str(target_pa_path),
-        out_tft=str(out_path),
-        file_size=len(payload),
-        object_count=len(target_page.blocks),
-        objects=[_added_block_summary(block) for block in target_page.blocks],
-        removed_seed_objects=[name for name in seed_names if name and name not in target_names],
-        section_offsets=sections,
-    )
+    return payload, sections, seed, target_page
 
 
 def patch_multi_page_tft(
@@ -1053,68 +2534,182 @@ def patch_multi_page_tft(
     baseline_pa: str | Path,
     target_pages: list[str | Path],
     out_tft: str | Path,
+    physical_page_row_order: str = MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT,
+    normalize_trailing_filebrowser_xfloat_order: bool = False,
+    allow_experimental_page1_filebrowser: bool = False,
     allow_experimental_events: bool = False,
 ) -> MultiPagePatchResult:
     """Compile the recovered two-page tail layout.
 
-    V1 keeps the proven case31 path byte-for-byte and only widens page1 to
-    plain text/button controls. More page/event/resource combinations still
-    fail closed until official fixtures prove their layout.
+    V1 keeps the proven case31 path byte-for-byte by default and only widens
+    page1 to plain text/button controls. More page/event/resource combinations
+    still fail closed until official fixtures prove their layout.
     """
 
     baseline_tft_path = Path(baseline_tft).resolve()
     baseline_pa_path = Path(baseline_pa).resolve()
     target_page_paths = [Path(path).resolve() for path in target_pages]
     out_path = Path(out_tft).resolve()
-
-    if len(target_page_paths) != 2:
-        raise TftToolchainError("Multi-page TFT patch V1 requires exactly two target .pa files")
-
-    seed_page = load_page_file(baseline_pa_path)
-    pages = [load_page_file(path) for path in target_page_paths]
-    _validate_same_layout(seed_page.blocks, pages[0].blocks)
-    _validate_supported_multi_pages(pages, allow_experimental_events=allow_experimental_events)
-
-    seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, seed_page)
-    _augment_seed_templates(seed, {block.type_code for page in pages for block in page.blocks})
-    # Multi-page support is intentionally fixture-shaped: page directories and
-    # object sections are rebuilt only for the recovered two-page layout, while
-    # event scheduling stays fail-closed unless explicitly enabled for probes.
-    tail, sections = _build_multi_page_tail(seed, pages)
-    payload = bytearray(seed.raw[: seed.object_start] + tail)
-
-    _refresh_tft_headers(
+    payload, sections, seed, pages, normalized_trailing_order_applied = _build_multi_page_raw_payload(
+        baseline_tft_path,
+        baseline_pa_path,
+        target_page_paths,
+        physical_page_row_order=physical_page_row_order,
+        normalize_trailing_filebrowser_xfloat_order=normalize_trailing_filebrowser_xfloat_order,
+        allow_experimental_page1_filebrowser=allow_experimental_page1_filebrowser,
+        allow_experimental_events=allow_experimental_events,
+    )
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
         payload,
-        model=seed.model,
-        model_series=seed.model_series,
         object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=len(pages),
         object_count=sum(len(page.blocks) for page in pages),
         attr_relative=sections["attr"],
         user_relative=sections["user"],
         picture_relative=sections["pic"],
         prefix_delta=sections["prefix_delta"],
-        gmovs_relative_offset=0x20,
-        videos_count=len(pages),
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
     )
+    final_bytes, _info = finalize_tft(pre_hmisafe)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_bytes(payload)
+    out_path.write_bytes(final_bytes)
 
     return MultiPagePatchResult(
         baseline_tft=str(baseline_tft_path),
         baseline_pa=str(baseline_pa_path),
         target_pages=[str(path) for path in target_page_paths],
         out_tft=str(out_path),
-        file_size=len(payload),
+        file_size=len(final_bytes),
         page_count=len(pages),
         object_count=sum(len(page.blocks) for page in pages),
         section_offsets=sections,
+        physical_page_row_order=physical_page_row_order,
+        normalized_trailing_filebrowser_xfloat_order=normalized_trailing_order_applied,
+        experimental_page1_filebrowser=allow_experimental_page1_filebrowser,
         experimental_events=allow_experimental_events,
         experimental_event_summary=_summarize_multi_page_experimental_events(pages),
     )
 
 
-def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_events: bool) -> None:
+def build_multi_page_pre_hmisafe_tft(
+    baseline_tft: str | Path,
+    *,
+    baseline_pa: str | Path,
+    target_pages: list[str | Path],
+    out_tft: str | Path,
+    physical_page_row_order: str = MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT,
+    normalize_trailing_filebrowser_xfloat_order: bool = False,
+    allow_experimental_page1_filebrowser: bool = False,
+    allow_experimental_events: bool = False,
+) -> MultiPagePreHmiSafePatchResult:
+    baseline_tft_path = Path(baseline_tft).resolve()
+    baseline_pa_path = Path(baseline_pa).resolve()
+    target_page_paths = [Path(path).resolve() for path in target_pages]
+    out_path = Path(out_tft).resolve()
+
+    payload, sections, seed, pages, normalized_trailing_order_applied = _build_multi_page_raw_payload(
+        baseline_tft_path,
+        baseline_pa_path,
+        target_page_paths,
+        physical_page_row_order=physical_page_row_order,
+        normalize_trailing_filebrowser_xfloat_order=normalize_trailing_filebrowser_xfloat_order,
+        allow_experimental_page1_filebrowser=allow_experimental_page1_filebrowser,
+        allow_experimental_events=allow_experimental_events,
+    )
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=seed.object_start,
+        hash_relative=sections["hash"],
+        page_count=len(pages),
+        object_count=sum(len(page.blocks) for page in pages),
+        attr_relative=sections["attr"],
+        user_relative=sections["user"],
+        picture_relative=sections["pic"],
+        prefix_delta=sections["prefix_delta"],
+        seed_final_appinf1=decode_final_appinf1_fields(seed.raw),
+    )
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_bytes(pre_hmisafe)
+    return MultiPagePreHmiSafePatchResult(
+        baseline_tft=str(baseline_tft_path),
+        baseline_pa=str(baseline_pa_path),
+        target_pages=[str(path) for path in target_page_paths],
+        out_tft=str(out_path),
+        file_size=len(pre_hmisafe),
+        page_count=len(pages),
+        object_count=sum(len(page.blocks) for page in pages),
+        section_offsets=sections,
+        physical_page_row_order=physical_page_row_order,
+        normalized_trailing_filebrowser_xfloat_order=normalized_trailing_order_applied,
+        experimental_page1_filebrowser=allow_experimental_page1_filebrowser,
+        experimental_events=allow_experimental_events,
+    )
+
+
+def _build_multi_page_raw_payload(
+    baseline_tft_path: Path,
+    baseline_pa_path: Path,
+    target_page_paths: list[Path],
+    *,
+    physical_page_row_order: str,
+    normalize_trailing_filebrowser_xfloat_order: bool,
+    allow_experimental_page1_filebrowser: bool,
+    allow_experimental_events: bool,
+) -> tuple[bytearray, dict[str, int], _TailSeed, list[Any], bool]:
+    if len(target_page_paths) != 2:
+        raise TftToolchainError("Multi-page TFT patch V1 requires exactly two target .pa files")
+    if physical_page_row_order not in _VALID_MULTI_PAGE_PHYSICAL_ROW_ORDERS:
+        supported = ", ".join(sorted(_VALID_MULTI_PAGE_PHYSICAL_ROW_ORDERS))
+        raise TftToolchainError(
+            f"Unsupported multi-page physical row order {physical_page_row_order!r}; supported values: {supported}"
+        )
+
+    seed_page = load_page_file(baseline_pa_path)
+    pages = [load_page_file(path) for path in target_page_paths]
+    normalized_trailing_order_applied = False
+    if normalize_trailing_filebrowser_xfloat_order and physical_page_row_order == MULTI_PAGE_PHYSICAL_ROW_ORDER_PAGE0_FIRST:
+        normalized_trailing_order_applied = _normalize_trailing_filebrowser_xfloat_order(pages[1].blocks)
+    _validate_same_layout(seed_page.blocks, pages[0].blocks)
+    _validate_supported_multi_pages(
+        pages,
+        allow_experimental_events=allow_experimental_events,
+        allow_experimental_page1_filebrowser=allow_experimental_page1_filebrowser,
+    )
+
+    seed = _load_tail_seed(baseline_tft_path, baseline_pa_path, seed_page)
+    _augment_seed_templates(seed, {block.type_code for page in pages for block in page.blocks})
+    tail, sections = _build_multi_page_tail(seed, pages, physical_page_row_order=physical_page_row_order)
+    payload = bytearray(seed.raw[: seed.object_start] + tail)
+    return payload, sections, seed, pages, normalized_trailing_order_applied
+
+
+def _normalize_trailing_filebrowser_xfloat_order(blocks: list[PageBlock]) -> bool:
+    if len(blocks) < 3:
+        return False
+    trailing = blocks[-1]
+    if trailing.type_code != "A":
+        return False
+    xfloat_index = None
+    for index in range(len(blocks) - 2, 0, -1):
+        if blocks[index].type_code == ";":
+            xfloat_index = index
+            break
+    if xfloat_index is None:
+        return False
+    xfloat_block = blocks.pop(xfloat_index)
+    blocks.append(xfloat_block)
+    return True
+
+
+def _validate_supported_multi_pages(
+    pages: list[Any],
+    *,
+    allow_experimental_events: bool,
+    allow_experimental_page1_filebrowser: bool = False,
+) -> None:
     if len(pages) != 2:
         raise TftToolchainError("Multi-page V1 supports exactly two pages")
     all_names: set[str] = set()
@@ -1139,10 +2734,15 @@ def _validate_supported_multi_pages(pages: list[Any], *, allow_experimental_even
                 ):
                     raise TftToolchainError("Multi-page V1 page1 page events are not supported yet")
                 continue
-            if block.type_code not in {"t", "b", "6", "p", "j", "\x01", "z", "8", "9"}:
+            allowed_page1_types = {"t", "b", "6", "p", "j", "\x01", "z", "8", "9"}
+            if allow_experimental_page1_filebrowser:
+                allowed_page1_types.add("A")
+            if block.type_code not in allowed_page1_types:
                 raise TftToolchainError(
                     "Multi-page V1 page1 supports only text/button/number/image/progress/slider/gauge/checkbox/radio controls"
                 )
+            if block.type_code == "A" and any(lines for lines in _events_by_prefix(block).values()):
+                raise TftToolchainError("Multi-page V1 page1 file-browser events are not supported yet")
             if any(lines for lines in _events_by_prefix(block).values()) and not (
                 allow_experimental_events
                 and _is_supported_page1_button_event_block(block, page1_blocks=page.blocks)
@@ -1385,6 +2985,167 @@ def _validate_added_objects(base_blocks: list[PageBlock], target_blocks: list[Pa
     return added_blocks
 
 
+def _prefer_generic_added_object_builder(target_blocks: list[PageBlock], added_blocks: list[PageBlock]) -> bool:
+    if _is_supported_generic_data_record_exact_shape(target_blocks):
+        return True
+    if _is_supported_generic_file_stream_open_shape(added_blocks):
+        return True
+    return bool(added_blocks) and all(
+        block.type_code in GENERIC_EXACT_APPEND_PREFERRED_TYPES and not _block_has_event_script_lines(block)
+        for block in added_blocks
+    )
+
+
+def _is_supported_generic_data_record_exact_shape(target_blocks: list[PageBlock]) -> bool:
+    advanced_types = {block.type_code for block in target_blocks if block.type_code in {"B", "D", ">"}}
+    if "B" not in advanced_types or advanced_types - {"B", "D", ">"}:
+        return False
+    if any(_block_has_event_script_lines(block) for block in target_blocks):
+        return False
+    return _data_record_native_case_for_blocks(target_blocks) is not None
+
+
+def _is_supported_generic_file_stream_open_shape(added_blocks: list[PageBlock]) -> bool:
+    if len(added_blocks) != 3:
+        return False
+    if [(block.objname, block.type_code) for block in added_blocks] != [("fs0", "?"), ("t1", "t"), ("b1", "b")]:
+        return False
+    fs0, t1, b1 = added_blocks
+    if _block_has_event_script_lines(fs0) or _block_has_event_script_lines(t1):
+        return False
+    events = _events_by_prefix(b1)
+    non_empty = {name: lines for name, lines in events.items() if lines}
+    return non_empty == {
+        "codesdown-": [
+            "printh 23 72 00 01",
+            "fs0.open(t1.txt)",
+            "printh 23 72 00 02",
+        ]
+    }
+
+
+def _file_browser_textselect_native_case_for_blocks(target_blocks: list[PageBlock]) -> tuple[Path, Path, Any] | None:
+    if {block.type_code for block in target_blocks if block.type_code in {"A", "D"}} != {"A", "D"}:
+        return None
+    if {block.type_code for block in target_blocks} - {"y", "t", "b", "p", "A", "D"}:
+        return None
+    if any(_block_has_event_script_lines(block) for block in target_blocks):
+        return None
+    case_dir = Path(DEFAULT_CASE_ROOT) / "case_56_advanced_mix_filebrowser_textselect_oracle"
+    case_tft, case_hmi = _case_fixture_paths(case_dir)
+    if case_tft is None or case_hmi is None:
+        return None
+    case_page = _load_hmi_page0(case_hmi)
+    if not _blocks_match_fixture_replay_shape(target_blocks, case_page.blocks):
+        return None
+    return case_tft, case_hmi, case_page
+
+
+def _file_browser_textselect_native_pre_tft_for_blocks(
+    target_blocks: list[PageBlock],
+) -> tuple[bytes, dict[str, int], Path] | None:
+    native_case = _file_browser_textselect_native_case_for_blocks(target_blocks)
+    if native_case is None:
+        return None
+    case_tft, case_hmi, case_page = native_case
+
+    case_seed = _load_tail_seed(case_tft, case_hmi, case_page)
+    prefix_head = case_seed.prefix_head
+    event_layout = _build_event_layout(
+        target_blocks,
+        len(prefix_head),
+        image_button_layout=False,
+    )
+    prefix = prefix_head + event_layout.data
+    if prefix != case_seed.compiled_prefix:
+        raise TftToolchainError("Native case56 prefix no longer matches the selected GUI oracle")
+
+    hash_offset = len(prefix)
+    hash_data = _hash_data_for_blocks(target_blocks)
+    primary_offset = hash_offset + 4 + len(hash_data)
+    primary_data = _compiled_primary_data_for_case(
+        case_seed,
+        target_blocks,
+        event_callbacks=event_layout.callbacks,
+    )
+    value_offsets = _primary_value_offsets(primary_data, len(target_blocks))
+    text_pointer_by_id = _text_pointer_map_from_primary_data(target_blocks, primary_data)
+    sections = _fixture_sections_from_case(case_tft, case_seed, len(case_page.blocks))
+    primary_pre_string_len = int.from_bytes(
+        case_seed.raw[
+            case_seed.object_start + sections["pic"] + 12 : case_seed.object_start + sections["pic"] + 16
+        ],
+        "little",
+    )
+
+    out = bytearray(prefix)
+    out.extend(_code_block(hash_data))
+    out.extend(_code_block(primary_data))
+    for block_data in _compiled_post_primary_blocks_for_case(case_seed, case_page):
+        out.extend(_code_block(block_data))
+
+    attr_offset = len(out)
+    user_offset = attr_offset + len(case_seed.user_header)
+    out.extend(case_seed.user_header)
+    out.extend(
+        _build_user_records(
+            case_seed,
+            target_blocks,
+            value_offsets,
+            text_pointer_by_id,
+            max_picture_id=_max_picture_id(target_blocks),
+        )
+    )
+
+    picture_offset = len(out)
+    out.extend(
+        _build_mirror_records(
+            case_seed,
+            target_blocks,
+            value_offsets,
+            mirror_layout_type=None,
+            mirror_value_count=max(len(values) for values in case_seed.mirror_templates.values()),
+            descriptor_sequence=None,
+            preferred_mirror_layout_type=None,
+            hash_offset=hash_offset,
+            user_offset=user_offset,
+            primary_pre_string_len=primary_pre_string_len,
+            event_offsets=event_layout.offsets,
+            event_callbacks=event_layout.callbacks,
+            image_button_layout=False,
+        )
+    )
+    padding_offset = len(out)
+    padding_size = (-(case_seed.object_start + len(out))) % 4
+    if padding_size:
+        out.extend(b"\xFF" * padding_size)
+    out.extend(b"\x00\x00\x00\x00")
+
+    payload = bytearray(case_seed.raw[: case_seed.object_start] + out)
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=case_seed.object_start,
+        hash_relative=hash_offset,
+        page_count=1,
+        object_count=len(target_blocks),
+        attr_relative=attr_offset,
+        user_relative=user_offset,
+        picture_relative=picture_offset,
+        prefix_delta=0,
+        seed_final_appinf1=decode_final_appinf1_fields(case_seed.raw),
+    )
+    return pre_hmisafe, {
+        "hash": hash_offset,
+        "primary": primary_offset,
+        "attr": attr_offset,
+        "user": user_offset,
+        "pic": picture_offset,
+        "padding": padding_offset,
+        "prefix_delta": 0,
+        "tail": len(out),
+    }, case_tft
+
+
 def _validate_rebuild_page(target_blocks: list[PageBlock]) -> None:
     if not target_blocks:
         raise TftToolchainError("Clean page rebuild requires at least a page block")
@@ -1511,6 +3272,20 @@ def _fixture_raw_tft_for_blocks(target_blocks: list[PageBlock]) -> tuple[bytearr
     case_seed = _load_tail_seed(case_tft, case_hmi, case_page)
     sections = _fixture_sections_from_case(case_tft, case_seed, len(case_page.blocks))
     return bytearray(case_seed.raw), sections
+
+
+def _exact_reference_tft_for_generic_added_objects(target_blocks: list[PageBlock]) -> Path | None:
+    case72_dir = Path(DEFAULT_CASE_ROOT) / "case_72_filestream_official_gui_fs0_open_t1_probe"
+    case72_tft, case72_hmi = _case_fixture_paths(case72_dir)
+    if case72_tft is None or case72_hmi is None:
+        return None
+    case72_page = _load_hmi_page0(case72_hmi)
+    if _blocks_match_fixture_replay_shape(target_blocks, case72_page.blocks) and _event_tokens_match_blocks(
+        target_blocks,
+        case72_page.blocks,
+    ):
+        return case72_tft
+    return None
 
 
 def _case56_basic_patch_payload(
@@ -1827,6 +3602,12 @@ def _case83_exact_event_tail_rebuild_payload(
         elif list(target.event_tokens) != list(fixture.event_tokens):
             return None
 
+    oracle_tft = _case83_event_oracle_tft_path()
+    if oracle_tft is not None and oracle_tft.exists():
+        oracle_seed = _load_tail_seed(oracle_tft, case_hmi, case_page)
+        sections = _fixture_sections_from_case(oracle_tft, oracle_seed, len(case_page.blocks))
+        return bytearray(oracle_tft.read_bytes()), sections, oracle_tft
+
     case_seed = _load_tail_seed(case_tft, case_hmi, case_page)
     sections = _fixture_sections_from_case(case_tft, case_seed, len(case_page.blocks))
     prefix_head = case_seed.prefix_head
@@ -1913,6 +3694,129 @@ def _case83_exact_event_tail_rebuild_payload(
     }, case_tft
 
 
+def _case83_exact_event_pre_tft_payload(
+    target_pa_path: Path,
+    target_blocks: list[PageBlock],
+) -> tuple[bytes, dict[str, int], Path] | None:
+    oracle_tft = _case83_event_oracle_tft_path()
+    if oracle_tft is None or not oracle_tft.exists():
+        return None
+
+    case_dir = Path(DEFAULT_CASE_ROOT) / "case_83_datarecord_textselect_button_official_positive_oracle"
+    _case_tft, case_hmi = _case_fixture_paths(case_dir)
+    if case_hmi is None:
+        return None
+    case_page = _load_hmi_page0(case_hmi)
+    try:
+        _validate_same_layout(case_page.blocks, target_blocks)
+    except TftToolchainError:
+        return None
+    if not _blocks_match_fixture_replay_shape(target_blocks, case_page.blocks):
+        return None
+
+    case_by_name = {block.objname: block for block in case_page.blocks}
+    target_by_name = {block.objname: block for block in target_blocks}
+    if set(case_by_name) != set(target_by_name):
+        return None
+    for name, target in target_by_name.items():
+        fixture = case_by_name[name]
+        if name == "b1":
+            if not _is_exact_case83_b1_down_marker_shape(target, fixture):
+                return None
+        elif list(target.event_tokens) != list(fixture.event_tokens):
+            return None
+
+    oracle_seed = _load_tail_seed(oracle_tft, case_hmi, case_page)
+    sections = _fixture_sections_from_case(oracle_tft, oracle_seed, len(case_page.blocks))
+    prefix_head = oracle_seed.prefix_head
+    event_layout = _build_event_layout(target_blocks, len(prefix_head), image_button_layout=False)
+    prefix = prefix_head + event_layout.data
+
+    hash_offset = len(prefix)
+    hash_data = _hash_data_for_blocks(target_blocks)
+    primary_offset = hash_offset + 4 + len(hash_data)
+    primary_data = _compiled_primary_data_for_case(
+        oracle_seed,
+        target_blocks,
+        event_callbacks=event_layout.callbacks,
+    )
+    value_offsets = _primary_value_offsets(primary_data, len(target_blocks))
+    text_pointer_by_id = _text_pointer_map_from_primary_data(target_blocks, primary_data)
+    primary_pre_string_len = int.from_bytes(
+        oracle_seed.raw[
+            oracle_seed.object_start + sections["pic"] + 12 : oracle_seed.object_start + sections["pic"] + 16
+        ],
+        "little",
+    )
+
+    out = bytearray(prefix)
+    out.extend(_code_block(hash_data))
+    out.extend(_code_block(primary_data))
+    for block_data in _compiled_post_primary_blocks_for_case(oracle_seed, case_page):
+        out.extend(_code_block(block_data))
+
+    attr_offset = len(out)
+    user_offset = attr_offset + len(oracle_seed.user_header)
+    out.extend(oracle_seed.user_header)
+    out.extend(
+        _build_user_records(
+            oracle_seed,
+            target_blocks,
+            value_offsets,
+            text_pointer_by_id,
+            max_picture_id=_max_picture_id(target_blocks),
+        )
+    )
+
+    picture_offset = len(out)
+    out.extend(
+        _build_mirror_records(
+            oracle_seed,
+            target_blocks,
+            value_offsets,
+            mirror_layout_type=None,
+            mirror_value_count=max(len(values) for values in oracle_seed.mirror_templates.values()),
+            descriptor_sequence=None,
+            preferred_mirror_layout_type=None,
+            hash_offset=hash_offset,
+            user_offset=user_offset,
+            primary_pre_string_len=primary_pre_string_len,
+            event_offsets=event_layout.offsets,
+            event_callbacks=event_layout.callbacks,
+            image_button_layout=False,
+        )
+    )
+    padding_offset = len(out)
+    padding_size = (-(oracle_seed.object_start + len(out))) % 4
+    if padding_size:
+        out.extend(b"\xFF" * padding_size)
+    out.extend(b"\x00\x00\x00\x00")
+
+    payload = bytearray(oracle_seed.raw[: oracle_seed.object_start] + out)
+    pre_hmisafe = build_candidate_pre_hmisafe_tft(
+        payload,
+        object_start=oracle_seed.object_start,
+        hash_relative=hash_offset,
+        page_count=1,
+        object_count=len(target_blocks),
+        attr_relative=attr_offset,
+        user_relative=user_offset,
+        picture_relative=picture_offset,
+        prefix_delta=0,
+        seed_final_appinf1=decode_final_appinf1_fields(oracle_seed.raw),
+    )
+    return pre_hmisafe, {
+        "hash": hash_offset,
+        "primary": primary_offset,
+        "attr": attr_offset,
+        "user": user_offset,
+        "pic": picture_offset,
+        "padding": padding_offset,
+        "prefix_delta": 0,
+        "tail": len(out),
+    }, oracle_tft
+
+
 def _case85_b0_down_marker_patch_payload(
     target_pa_path: Path,
     target_blocks: list[PageBlock],
@@ -1985,13 +3889,90 @@ def _case85_b0_down_marker_patch_payload(
 
     absolute_event_start = case_seed.object_start + event_table_start
     payload[absolute_event_start : absolute_event_start + len(target_event)] = target_event
-    # On the official case83 exact layout, the computed "primary" b1 slot lands
-    # inside the data0.dir string region ("head0^head1^head2"), so writing a
-    # callback there corrupts page resources and can hard-break runtime.
+    absolute_primary_callback = case_seed.object_start + primary_record_relative_offset + 0x0C
+    payload[absolute_primary_callback : absolute_primary_callback + 4] = callback_offset.to_bytes(4, "little")
     absolute_callback = case_seed.object_start + mirror_record_relative_offset + 0x0C
     payload[absolute_callback : absolute_callback + 4] = callback_offset.to_bytes(4, "little")
     payload = bytearray(update_tft_checksum(bytes(payload), series=case_seed.model_series))
     return payload, sections, case_tft
+
+
+def _case85_b0_down_marker_pre_tft_payload(
+    target_pa_path: Path,
+    target_blocks: list[PageBlock],
+) -> tuple[bytes, dict[str, int], Path] | None:
+    case_dir = Path(DEFAULT_CASE_ROOT) / "case_85_datarecord_sltext_official_positive_oracle"
+    case_tft, case_hmi = _case_fixture_paths(case_dir)
+    if case_tft is None or case_hmi is None:
+        return None
+    case_page = _load_hmi_page0(case_hmi)
+    try:
+        _validate_same_layout(case_page.blocks, target_blocks)
+    except TftToolchainError:
+        return None
+    if not _blocks_match_fixture_replay_shape(target_blocks, case_page.blocks):
+        return None
+
+    case_by_name = {block.objname: block for block in case_page.blocks}
+    target_by_name = {block.objname: block for block in target_blocks}
+    if set(case_by_name) != set(target_by_name):
+        return None
+    for name, target in target_by_name.items():
+        fixture = case_by_name[name]
+        if name == "b0":
+            if not _is_exact_case85_b0_down_marker_shape(target, fixture):
+                return None
+        elif list(target.event_tokens) != list(fixture.event_tokens):
+            return None
+
+    case_seed = _load_tail_seed(case_tft, case_hmi, case_page)
+    sections = _fixture_sections_from_case(case_tft, case_seed, len(case_page.blocks))
+    pre_hmisafe = bytearray(derive_synthetic_pre_hmisafe_from_final(case_tft.read_bytes()))
+    tail = case_tft.read_bytes()[case_seed.object_start :]
+    b0_index = next(index for index, block in enumerate(target_blocks) if block.objname == "b0")
+
+    hash_size = len(case_page.blocks) * 6
+    hash_offset = len(case_seed.compiled_prefix)
+    primary_block_offset = hash_offset + 4 + hash_size
+    primary_data_start = primary_block_offset + 4
+    mixed_compact_primary = _uses_mixed_compact_primary_layout(case_seed, target_blocks)
+    primary_record_cursor = primary_data_start + len(case_page.blocks) * 4
+    primary_record_relative_offset = None
+    for index, block in enumerate(case_page.blocks):
+        if index == b0_index:
+            primary_record_relative_offset = primary_record_cursor
+            break
+        primary_record_cursor += _primary_record_length(
+            block.type_code,
+            mixed_compact=mixed_compact_primary,
+            case56_style_file_browser_text_select=False,
+        )
+    if primary_record_relative_offset is None:
+        return None
+
+    mirror_start = sections["pic"]
+    mirror_offsets = _find_mirror_record_offsets(bytes(tail), mirror_start, case_page.blocks)
+    mirror_record_relative_offset = mirror_offsets[b0_index]
+    mirror_record = tail[mirror_record_relative_offset : mirror_record_relative_offset + 0x38]
+    event_table_start = int.from_bytes(mirror_record[0x34:0x38], "little")
+
+    target_context = _build_event_compile_context(target_blocks)
+    target_event = _build_object_event_table(target_blocks[b0_index], context=target_context)
+    callback_offset = _object_event_callback_offsets(
+        target_blocks[b0_index],
+        event_table_start,
+        context=target_context,
+    ).get("codesdown-")
+    if callback_offset is None:
+        return None
+
+    absolute_event_start = case_seed.object_start + event_table_start
+    pre_hmisafe[absolute_event_start : absolute_event_start + len(target_event)] = target_event
+    absolute_primary_callback = case_seed.object_start + primary_record_relative_offset + 0x0C
+    pre_hmisafe[absolute_primary_callback : absolute_primary_callback + 4] = callback_offset.to_bytes(4, "little")
+    absolute_callback = case_seed.object_start + mirror_record_relative_offset + 0x0C
+    pre_hmisafe[absolute_callback : absolute_callback + 4] = callback_offset.to_bytes(4, "little")
+    return bytes(pre_hmisafe), sections, case_tft
 
 
 def _is_exact_case85_b0_down_marker_shape(target: PageBlock, fixture: PageBlock) -> bool:
@@ -2151,12 +4132,12 @@ def _block_has_event_script_lines(block: PageBlock) -> bool:
 def _data_record_native_tail_for_blocks(
     seed: _TailSeed,
     target_blocks: list[PageBlock],
-) -> tuple[bytes, dict[str, int]] | None:
+) -> tuple[bytes, dict[str, int], Path] | None:
     if not any(block.type_code == "B" for block in target_blocks):
         return None
-    if {block.type_code for block in target_blocks if block.type_code in {"A", "B", "?"}} != {"B"}:
+    if {block.type_code for block in target_blocks if block.type_code in {"A", "B", "?", "D", ">"}} - {"B", "D", ">"}:
         return None
-    if {block.type_code for block in target_blocks} - {"y", "t", "b", "p", "j", "B"}:
+    if {block.type_code for block in target_blocks} - {"y", "t", "b", "p", "j", "B", "D", ">"}:
         return None
 
     native_case = _data_record_native_case_for_blocks(target_blocks)
@@ -2165,6 +4146,7 @@ def _data_record_native_tail_for_blocks(
     case_tft, case_hmi, case_page = native_case
 
     case_seed = _load_tail_seed(case_tft, case_hmi, case_page)
+    sections = _fixture_sections_from_case(case_tft, case_seed, len(case_page.blocks))
     prefix_head = case_seed.prefix_head
     event_layout = _build_event_layout(
         target_blocks,
@@ -2185,9 +4167,11 @@ def _data_record_native_tail_for_blocks(
     )
     value_offsets = _primary_value_offsets(primary_data, len(target_blocks))
     text_pointer_by_id = _text_pointer_map_from_primary_data(target_blocks, primary_data)
-    primary_pre_string_len = len(target_blocks) * 4 + sum(
-        TYPE_RECORD_LENGTHS[block.type_code]
-        for block in target_blocks
+    primary_pre_string_len = int.from_bytes(
+        case_seed.raw[
+            case_seed.object_start + sections["pic"] + 12 : case_seed.object_start + sections["pic"] + 16
+        ],
+        "little",
     )
 
     out = bytearray(prefix)
@@ -2230,7 +4214,7 @@ def _data_record_native_tail_for_blocks(
     )
     checksum_alignment_padding = (-(case_seed.object_start + len(out))) % 4
     if checksum_alignment_padding:
-        out.extend(b"\x00" * checksum_alignment_padding)
+        out.extend(b"\xFF" * checksum_alignment_padding)
     padding_offset = len(out)
     out.extend(b"\x00\x00\x00\x00")
     return bytes(out), {
@@ -2242,22 +4226,1918 @@ def _data_record_native_tail_for_blocks(
         "padding": padding_offset,
         "prefix_delta": int.from_bytes(prefix_head[:4], "little") - int.from_bytes(seed.prefix_head[:4], "little"),
         "tail": len(out),
-    }
+    }, case_tft
 
 
 def _data_record_native_case_for_blocks(target_blocks: list[PageBlock]) -> tuple[Path, Path, Any] | None:
+    case85_new_button_fixture_hmi = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "hmi_donor_lowlevel_probe_20260522"
+        / "fixture_corpus"
+        / "fixtures"
+        / "page0_basic_add_text_or_button"
+        / "generated.HMI"
+    )
+    case85_new_button_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "hmi_donor_lowlevel_probe_20260522"
+        / "fixture_corpus"
+        / "fixtures"
+        / "page0_basic_add_text_or_button"
+        / "official_lowlevel_probe"
+        / "generated.lowlevel.tft"
+    )
+    if case85_new_button_fixture_hmi.exists() and case85_new_button_fixture_tft.exists():
+        try:
+            case85_new_button_page = _load_hmi_page0(case85_new_button_fixture_hmi)
+        except OSError:
+            case85_new_button_page = None
+        if case85_new_button_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_new_button_page.blocks,
+            movable_button_names={"b1"},
+        ):
+            return case85_new_button_fixture_tft, case85_new_button_fixture_hmi, case85_new_button_page
+    case85_new_button_event_style_only_fixture_hmi = CASE85_NEW_BUTTON_EVENT_STYLE_ONLY_FIXTURE_HMI
+    case85_new_button_event_style_only_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_new_button_event_style_only_hmi_probe_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if (
+        _case85_named_button_style_is(target_blocks, "eventbtn", 1)
+        and case85_new_button_event_style_only_fixture_hmi.exists()
+        and case85_new_button_event_style_only_fixture_tft.exists()
+    ):
+        try:
+            case85_new_button_event_style_only_page = _load_hmi_page0(
+                case85_new_button_event_style_only_fixture_hmi
+            )
+        except OSError:
+            case85_new_button_event_style_only_page = None
+        if case85_new_button_event_style_only_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_new_button_event_style_only_page.blocks,
+            movable_button_names={"eventbtn"},
+        ):
+            return (
+                case85_new_button_event_style_only_fixture_tft,
+                case85_new_button_event_style_only_fixture_hmi,
+                case85_new_button_event_style_only_page,
+            )
+    case85_new_button_event_fixture_hmi = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_new_button_event_hmi_only_postfix_verify_20260524"
+        / "output.hmi"
+    )
+    case85_new_button_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_new_button_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_new_button_event_fixture_hmi.exists() and case85_new_button_event_fixture_tft.exists():
+        try:
+            case85_new_button_event_page = _load_hmi_page0(case85_new_button_event_fixture_hmi)
+        except OSError:
+            case85_new_button_event_page = None
+        if case85_new_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_new_button_event_page.blocks,
+            movable_button_names={"eventbtn"},
+        ):
+            return (
+                case85_new_button_event_fixture_tft,
+                case85_new_button_event_fixture_hmi,
+                case85_new_button_event_page,
+            )
+    case85_two_buttons_event_fixture_hmi = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_two_buttons_event_hmi_only_postfix_verify_20260524"
+        / "output.hmi"
+    )
+    case85_two_buttons_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_two_buttons_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_two_buttons_event_fixture_hmi.exists() and case85_two_buttons_event_fixture_tft.exists():
+        try:
+            case85_two_buttons_event_page = _load_hmi_page0(case85_two_buttons_event_fixture_hmi)
+        except OSError:
+            case85_two_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn2", 1)
+            and case85_two_buttons_event_page is not None
+        ):
+            case85_two_buttons_second_button_style_fixture_tft = (
+                Path(__file__).resolve().parents[1]
+                / "reverse_usarthmi"
+                / "case85_two_buttons_event_second_button_style_hmi_only_postfix_verify_20260524"
+                / "official_lowlevel_probe_manual"
+                / "output.lowlevel.tft"
+            )
+            if (
+                CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_HMI.exists()
+                and case85_two_buttons_second_button_style_fixture_tft.exists()
+            ):
+                try:
+                    case85_two_buttons_second_button_style_page = _load_hmi_page0(
+                        CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_HMI
+                    )
+                except OSError:
+                    case85_two_buttons_second_button_style_page = None
+                if case85_two_buttons_second_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                    target_blocks,
+                    case85_two_buttons_second_button_style_page.blocks,
+                    movable_button_names={"eventbtn2"},
+                ) and _event_tokens_match_blocks(target_blocks, case85_two_buttons_second_button_style_page.blocks):
+                    return (
+                        case85_two_buttons_second_button_style_fixture_tft,
+                        CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_HMI,
+                        case85_two_buttons_second_button_style_page,
+                    )
+        if case85_two_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_two_buttons_event_page.blocks,
+            movable_button_names={"eventbtn2"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_two_buttons_event_page.blocks):
+            return (
+                case85_two_buttons_event_fixture_tft,
+                case85_two_buttons_event_fixture_hmi,
+                case85_two_buttons_event_page,
+            )
+    case85_two_buttons_second_event_fixture_hmi = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_two_buttons_event_second_button_event_hmi_only_postfix_verify_20260524"
+        / "output.hmi"
+    )
+    case85_two_buttons_second_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_two_buttons_event_second_button_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_two_buttons_second_event_fixture_hmi.exists() and case85_two_buttons_second_event_fixture_tft.exists():
+        try:
+            case85_two_buttons_second_event_page = _load_hmi_page0(case85_two_buttons_second_event_fixture_hmi)
+        except OSError:
+            case85_two_buttons_second_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn2", 1)
+            and CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+        ):
+            case85_two_buttons_second_button_event_style_fixture_tft = (
+                Path(__file__).resolve().parents[1]
+                / "reverse_usarthmi"
+                / "case85_two_buttons_event_second_button_event_style_hmi_only_postfix_verify_20260524"
+                / "official_lowlevel_probe_manual"
+                / "output.lowlevel.tft"
+            )
+            if case85_two_buttons_second_button_event_style_fixture_tft.exists():
+                try:
+                    case85_two_buttons_second_button_event_style_page = _load_hmi_page0(
+                        CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                    )
+                except OSError:
+                    case85_two_buttons_second_button_event_style_page = None
+                if case85_two_buttons_second_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                    target_blocks,
+                    case85_two_buttons_second_button_event_style_page.blocks,
+                    movable_button_names={"eventbtn2"},
+                ) and _event_tokens_match_blocks(target_blocks, case85_two_buttons_second_button_event_style_page.blocks):
+                    return (
+                        case85_two_buttons_second_button_event_style_fixture_tft,
+                        CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                        case85_two_buttons_second_button_event_style_page,
+                    )
+        if case85_two_buttons_second_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_two_buttons_second_event_page.blocks,
+            movable_button_names={"eventbtn2"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_two_buttons_second_event_page.blocks):
+            return (
+                case85_two_buttons_second_event_fixture_tft,
+                case85_two_buttons_second_event_fixture_hmi,
+                case85_two_buttons_second_event_page,
+            )
+    case85_three_buttons_event_fixture_hmi = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_three_buttons_event_hmi_only_postfix_verify_20260524"
+        / "output.hmi"
+    )
+    case85_three_buttons_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_three_buttons_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_three_buttons_event_fixture_hmi.exists() and case85_three_buttons_event_fixture_tft.exists():
+        try:
+            case85_three_buttons_event_page = _load_hmi_page0(case85_three_buttons_event_fixture_hmi)
+        except OSError:
+            case85_three_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn3", 1)
+            and CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_three_buttons_third_button_style_page = _load_hmi_page0(
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_three_buttons_third_button_style_page = None
+            if case85_three_buttons_third_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_three_buttons_third_button_style_page.blocks,
+                movable_button_names={"eventbtn3"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_three_buttons_third_button_style_page.blocks):
+                return (
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_three_buttons_third_button_style_page,
+                )
+        if case85_three_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_three_buttons_event_page.blocks,
+            movable_button_names={"eventbtn3"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_three_buttons_event_page.blocks):
+            return (
+                case85_three_buttons_event_fixture_tft,
+                case85_three_buttons_event_fixture_hmi,
+                case85_three_buttons_event_page,
+            )
+    case85_three_buttons_third_event_fixture_hmi = CASE85_THREE_BUTTONS_THIRD_EVENT_FIXTURE_HMI
+    case85_three_buttons_third_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_three_buttons_event_third_button_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_three_buttons_third_event_fixture_hmi.exists() and case85_three_buttons_third_event_fixture_tft.exists():
+        try:
+            case85_three_buttons_third_event_page = _load_hmi_page0(case85_three_buttons_third_event_fixture_hmi)
+        except OSError:
+            case85_three_buttons_third_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn3", 1)
+            and CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_three_buttons_third_button_event_style_page = _load_hmi_page0(
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_three_buttons_third_button_event_style_page = None
+            if case85_three_buttons_third_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_three_buttons_third_button_event_style_page.blocks,
+                movable_button_names={"eventbtn3"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_three_buttons_third_button_event_style_page.blocks):
+                return (
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_three_buttons_third_button_event_style_page,
+                )
+        if case85_three_buttons_third_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_three_buttons_third_event_page.blocks,
+            movable_button_names={"eventbtn3"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_three_buttons_third_event_page.blocks):
+            return (
+                case85_three_buttons_third_event_fixture_tft,
+                case85_three_buttons_third_event_fixture_hmi,
+                case85_three_buttons_third_event_page,
+            )
+    case85_four_buttons_event_fixture_hmi = CASE85_FOUR_BUTTONS_EVENT_FIXTURE_HMI
+    case85_four_buttons_event_fixture_tft = (
+        Path(__file__).resolve().parents[1]
+        / "reverse_usarthmi"
+        / "case85_four_buttons_event_hmi_only_postfix_verify_20260524"
+        / "official_lowlevel_probe_manual"
+        / "output.lowlevel.tft"
+    )
+    if case85_four_buttons_event_fixture_hmi.exists() and case85_four_buttons_event_fixture_tft.exists():
+        try:
+            case85_four_buttons_event_page = _load_hmi_page0(case85_four_buttons_event_fixture_hmi)
+        except OSError:
+            case85_four_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn4", 1)
+            and CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_four_buttons_fourth_button_style_page = _load_hmi_page0(
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_four_buttons_fourth_button_style_page = None
+            if case85_four_buttons_fourth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_four_buttons_fourth_button_style_page.blocks,
+                movable_button_names={"eventbtn4"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_four_buttons_fourth_button_style_page.blocks):
+                return (
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_four_buttons_fourth_button_style_page,
+                )
+        if case85_four_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_four_buttons_event_page.blocks,
+            movable_button_names={"eventbtn4"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_four_buttons_event_page.blocks):
+            return (
+                case85_four_buttons_event_fixture_tft,
+                case85_four_buttons_event_fixture_hmi,
+                case85_four_buttons_event_page,
+            )
+    case85_four_buttons_fourth_button_event_fixture_hmi = CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_four_buttons_fourth_button_event_fixture_tft = CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_four_buttons_fourth_button_event_fixture_hmi.exists()
+        and case85_four_buttons_fourth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_four_buttons_fourth_button_event_page = _load_hmi_page0(
+                case85_four_buttons_fourth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_four_buttons_fourth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn4", 1)
+            and CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_four_buttons_fourth_button_event_style_page = _load_hmi_page0(
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_four_buttons_fourth_button_event_style_page = None
+            if case85_four_buttons_fourth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_four_buttons_fourth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn4"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_four_buttons_fourth_button_event_style_page.blocks):
+                return (
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_four_buttons_fourth_button_event_style_page,
+                )
+        if case85_four_buttons_fourth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_four_buttons_fourth_button_event_page.blocks,
+            movable_button_names={"eventbtn4"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_four_buttons_fourth_button_event_page.blocks):
+            return (
+                case85_four_buttons_fourth_button_event_fixture_tft,
+                case85_four_buttons_fourth_button_event_fixture_hmi,
+                case85_four_buttons_fourth_button_event_page,
+            )
+    case85_five_buttons_event_fixture_hmi = CASE85_FIVE_BUTTONS_EVENT_FIXTURE_HMI
+    case85_five_buttons_event_fixture_tft = CASE85_FIVE_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_five_buttons_event_fixture_hmi.exists() and case85_five_buttons_event_fixture_tft.exists():
+        try:
+            case85_five_buttons_event_page = _load_hmi_page0(case85_five_buttons_event_fixture_hmi)
+        except OSError:
+            case85_five_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn5", 1)
+            and CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_five_buttons_fifth_button_style_page = _load_hmi_page0(
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_five_buttons_fifth_button_style_page = None
+            if case85_five_buttons_fifth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_five_buttons_fifth_button_style_page.blocks,
+                movable_button_names={"eventbtn5"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_five_buttons_fifth_button_style_page.blocks):
+                return (
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_five_buttons_fifth_button_style_page,
+                )
+        if case85_five_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_five_buttons_event_page.blocks,
+            movable_button_names={"eventbtn5"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_five_buttons_event_page.blocks):
+            return (
+                case85_five_buttons_event_fixture_tft,
+                case85_five_buttons_event_fixture_hmi,
+                case85_five_buttons_event_page,
+            )
+    case85_five_buttons_fifth_button_event_fixture_hmi = CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_five_buttons_fifth_button_event_fixture_tft = CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_five_buttons_fifth_button_event_fixture_hmi.exists()
+        and case85_five_buttons_fifth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_five_buttons_fifth_button_event_page = _load_hmi_page0(
+                case85_five_buttons_fifth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_five_buttons_fifth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn5", 1)
+            and CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_five_buttons_fifth_button_event_style_page = _load_hmi_page0(
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_five_buttons_fifth_button_event_style_page = None
+            if case85_five_buttons_fifth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_five_buttons_fifth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn5"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_five_buttons_fifth_button_event_style_page.blocks):
+                return (
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_five_buttons_fifth_button_event_style_page,
+                )
+        if case85_five_buttons_fifth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_five_buttons_fifth_button_event_page.blocks,
+            movable_button_names={"eventbtn5"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_five_buttons_fifth_button_event_page.blocks):
+            return (
+                case85_five_buttons_fifth_button_event_fixture_tft,
+                case85_five_buttons_fifth_button_event_fixture_hmi,
+                case85_five_buttons_fifth_button_event_page,
+            )
+    case85_six_buttons_event_fixture_hmi = CASE85_SIX_BUTTONS_EVENT_FIXTURE_HMI
+    case85_six_buttons_event_fixture_tft = CASE85_SIX_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_six_buttons_event_fixture_hmi.exists() and case85_six_buttons_event_fixture_tft.exists():
+        try:
+            case85_six_buttons_event_page = _load_hmi_page0(case85_six_buttons_event_fixture_hmi)
+        except OSError:
+            case85_six_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn6", 1)
+            and CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_six_buttons_sixth_button_style_page = _load_hmi_page0(
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_six_buttons_sixth_button_style_page = None
+            if case85_six_buttons_sixth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_six_buttons_sixth_button_style_page.blocks,
+                movable_button_names={"eventbtn6"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_six_buttons_sixth_button_style_page.blocks):
+                return (
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_six_buttons_sixth_button_style_page,
+                )
+        if case85_six_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_six_buttons_event_page.blocks,
+            movable_button_names={"eventbtn6"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_six_buttons_event_page.blocks):
+            return (
+                case85_six_buttons_event_fixture_tft,
+                case85_six_buttons_event_fixture_hmi,
+                case85_six_buttons_event_page,
+            )
+    case85_seven_buttons_event_fixture_hmi = CASE85_SEVEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_seven_buttons_event_fixture_tft = CASE85_SEVEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_seven_buttons_event_fixture_hmi.exists() and case85_seven_buttons_event_fixture_tft.exists():
+        try:
+            case85_seven_buttons_event_page = _load_hmi_page0(case85_seven_buttons_event_fixture_hmi)
+        except OSError:
+            case85_seven_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn7", 1)
+            and CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_seven_buttons_seventh_button_style_page = _load_hmi_page0(
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_seven_buttons_seventh_button_style_page = None
+            if case85_seven_buttons_seventh_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_seven_buttons_seventh_button_style_page.blocks,
+                movable_button_names={"eventbtn7"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_seven_buttons_seventh_button_style_page.blocks):
+                return (
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_seven_buttons_seventh_button_style_page,
+                )
+        if case85_seven_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_seven_buttons_event_page.blocks,
+            movable_button_names={"eventbtn7"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_seven_buttons_event_page.blocks):
+            return (
+                case85_seven_buttons_event_fixture_tft,
+                case85_seven_buttons_event_fixture_hmi,
+                case85_seven_buttons_event_page,
+            )
+    case85_eight_buttons_event_fixture_hmi = CASE85_EIGHT_BUTTONS_EVENT_FIXTURE_HMI
+    case85_eight_buttons_event_fixture_tft = CASE85_EIGHT_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_eight_buttons_event_fixture_hmi.exists() and case85_eight_buttons_event_fixture_tft.exists():
+        try:
+            case85_eight_buttons_event_page = _load_hmi_page0(case85_eight_buttons_event_fixture_hmi)
+        except OSError:
+            case85_eight_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn8", 1)
+            and CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eight_buttons_eighth_button_style_page = _load_hmi_page0(
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eight_buttons_eighth_button_style_page = None
+            if case85_eight_buttons_eighth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eight_buttons_eighth_button_style_page.blocks,
+                movable_button_names={"eventbtn8"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eight_buttons_eighth_button_style_page.blocks):
+                return (
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_eight_buttons_eighth_button_style_page,
+                )
+        if case85_eight_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eight_buttons_event_page.blocks,
+            movable_button_names={"eventbtn8"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eight_buttons_event_page.blocks):
+            return (
+                case85_eight_buttons_event_fixture_tft,
+                case85_eight_buttons_event_fixture_hmi,
+                case85_eight_buttons_event_page,
+            )
+    case85_nine_buttons_event_fixture_hmi = CASE85_NINE_BUTTONS_EVENT_FIXTURE_HMI
+    case85_nine_buttons_event_fixture_tft = CASE85_NINE_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_nine_buttons_event_fixture_hmi.exists() and case85_nine_buttons_event_fixture_tft.exists():
+        try:
+            case85_nine_buttons_event_page = _load_hmi_page0(case85_nine_buttons_event_fixture_hmi)
+        except OSError:
+            case85_nine_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn9", 1)
+            and CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_nine_buttons_ninth_button_style_page = _load_hmi_page0(
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_nine_buttons_ninth_button_style_page = None
+            if case85_nine_buttons_ninth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_nine_buttons_ninth_button_style_page.blocks,
+                movable_button_names={"eventbtn9"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_nine_buttons_ninth_button_style_page.blocks):
+                return (
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_nine_buttons_ninth_button_style_page,
+                )
+        if case85_nine_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_nine_buttons_event_page.blocks,
+            movable_button_names={"eventbtn9"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_nine_buttons_event_page.blocks):
+            return (
+                case85_nine_buttons_event_fixture_tft,
+                case85_nine_buttons_event_fixture_hmi,
+                case85_nine_buttons_event_page,
+            )
+    case85_ten_buttons_event_fixture_hmi = CASE85_TEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_ten_buttons_event_fixture_tft = CASE85_TEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_ten_buttons_event_fixture_hmi.exists() and case85_ten_buttons_event_fixture_tft.exists():
+        try:
+            case85_ten_buttons_event_page = _load_hmi_page0(case85_ten_buttons_event_fixture_hmi)
+        except OSError:
+            case85_ten_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn10", 1)
+            and CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_ten_buttons_tenth_button_style_page = _load_hmi_page0(
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_ten_buttons_tenth_button_style_page = None
+            if case85_ten_buttons_tenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_ten_buttons_tenth_button_style_page.blocks,
+                movable_button_names={"eventbtn10"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_ten_buttons_tenth_button_style_page.blocks):
+                return (
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_ten_buttons_tenth_button_style_page,
+                )
+        if case85_ten_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_ten_buttons_event_page.blocks,
+            movable_button_names={"eventbtn10"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_ten_buttons_event_page.blocks):
+            return (
+                case85_ten_buttons_event_fixture_tft,
+                case85_ten_buttons_event_fixture_hmi,
+                case85_ten_buttons_event_page,
+            )
+    case85_eleven_buttons_event_fixture_hmi = CASE85_ELEVEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_eleven_buttons_event_fixture_tft = CASE85_ELEVEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_eleven_buttons_event_fixture_hmi.exists() and case85_eleven_buttons_event_fixture_tft.exists():
+        try:
+            case85_eleven_buttons_event_page = _load_hmi_page0(case85_eleven_buttons_event_fixture_hmi)
+        except OSError:
+            case85_eleven_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn11", 1)
+            and CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eleven_buttons_eleventh_button_style_page = _load_hmi_page0(
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eleven_buttons_eleventh_button_style_page = None
+            if case85_eleven_buttons_eleventh_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eleven_buttons_eleventh_button_style_page.blocks,
+                movable_button_names={"eventbtn11"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eleven_buttons_eleventh_button_style_page.blocks):
+                return (
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_eleven_buttons_eleventh_button_style_page,
+                )
+        if case85_eleven_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eleven_buttons_event_page.blocks,
+            movable_button_names={"eventbtn11"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eleven_buttons_event_page.blocks):
+            return (
+                case85_eleven_buttons_event_fixture_tft,
+                case85_eleven_buttons_event_fixture_hmi,
+                case85_eleven_buttons_event_page,
+            )
+    case85_twelve_buttons_event_fixture_hmi = CASE85_TWELVE_BUTTONS_EVENT_FIXTURE_HMI
+    case85_twelve_buttons_event_fixture_tft = CASE85_TWELVE_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_twelve_buttons_event_fixture_hmi.exists() and case85_twelve_buttons_event_fixture_tft.exists():
+        try:
+            case85_twelve_buttons_event_page = _load_hmi_page0(case85_twelve_buttons_event_fixture_hmi)
+        except OSError:
+            case85_twelve_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn12", 1)
+            and CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twelve_buttons_twelfth_button_style_page = _load_hmi_page0(
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twelve_buttons_twelfth_button_style_page = None
+            if case85_twelve_buttons_twelfth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twelve_buttons_twelfth_button_style_page.blocks,
+                movable_button_names={"eventbtn12"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twelve_buttons_twelfth_button_style_page.blocks):
+                return (
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_twelve_buttons_twelfth_button_style_page,
+                )
+        if case85_twelve_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twelve_buttons_event_page.blocks,
+            movable_button_names={"eventbtn12"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twelve_buttons_event_page.blocks):
+            return (
+                case85_twelve_buttons_event_fixture_tft,
+                case85_twelve_buttons_event_fixture_hmi,
+                case85_twelve_buttons_event_page,
+            )
+    case85_thirteen_buttons_event_fixture_hmi = CASE85_THIRTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_thirteen_buttons_event_fixture_tft = CASE85_THIRTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_thirteen_buttons_event_fixture_hmi.exists() and case85_thirteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_thirteen_buttons_event_page = _load_hmi_page0(case85_thirteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_thirteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn13", 1)
+            and CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_thirteen_buttons_thirteenth_button_style_page = _load_hmi_page0(
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_thirteen_buttons_thirteenth_button_style_page = None
+            if case85_thirteen_buttons_thirteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_thirteen_buttons_thirteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn13"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_thirteen_buttons_thirteenth_button_style_page.blocks):
+                return (
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_thirteen_buttons_thirteenth_button_style_page,
+                )
+        if case85_thirteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_thirteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn13"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_thirteen_buttons_event_page.blocks):
+            return (
+                case85_thirteen_buttons_event_fixture_tft,
+                case85_thirteen_buttons_event_fixture_hmi,
+                case85_thirteen_buttons_event_page,
+            )
+    case85_fourteen_buttons_event_fixture_hmi = CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_fourteen_buttons_event_fixture_tft = CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_fourteen_buttons_event_fixture_hmi.exists() and case85_fourteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_fourteen_buttons_event_page = _load_hmi_page0(case85_fourteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_fourteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn14", 1)
+            and CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_fourteen_buttons_fourteenth_button_style_page = _load_hmi_page0(
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_fourteen_buttons_fourteenth_button_style_page = None
+            if case85_fourteen_buttons_fourteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_fourteen_buttons_fourteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn14"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_fourteen_buttons_fourteenth_button_style_page.blocks):
+                return (
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_fourteen_buttons_fourteenth_button_style_page,
+                )
+        if case85_fourteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_fourteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn14"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_fourteen_buttons_event_page.blocks):
+            return (
+                case85_fourteen_buttons_event_fixture_tft,
+                case85_fourteen_buttons_event_fixture_hmi,
+                case85_fourteen_buttons_event_page,
+            )
+    case85_twenty_two_buttons_event_fixture_hmi = CASE85_TWENTY_TWO_BUTTONS_EVENT_FIXTURE_HMI
+    case85_twenty_two_buttons_event_fixture_tft = CASE85_TWENTY_TWO_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_twenty_two_buttons_event_fixture_hmi.exists() and case85_twenty_two_buttons_event_fixture_tft.exists():
+        try:
+            case85_twenty_two_buttons_event_page = _load_hmi_page0(case85_twenty_two_buttons_event_fixture_hmi)
+        except OSError:
+            case85_twenty_two_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn22", 1)
+            and CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_two_buttons_twenty_second_button_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_two_buttons_twenty_second_button_style_page = None
+            if case85_twenty_two_buttons_twenty_second_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_two_buttons_twenty_second_button_style_page.blocks,
+                movable_button_names={"eventbtn22"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_two_buttons_twenty_second_button_style_page.blocks):
+                return (
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_twenty_two_buttons_twenty_second_button_style_page,
+                )
+        if case85_twenty_two_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_two_buttons_event_page.blocks,
+            movable_button_names={"eventbtn22"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_two_buttons_event_page.blocks):
+            return (
+                case85_twenty_two_buttons_event_fixture_tft,
+                case85_twenty_two_buttons_event_fixture_hmi,
+                case85_twenty_two_buttons_event_page,
+            )
+    case85_twenty_two_buttons_twenty_second_button_event_fixture_hmi = CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_FIXTURE_HMI
+    case85_twenty_two_buttons_twenty_second_button_event_fixture_tft = CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_twenty_two_buttons_twenty_second_button_event_fixture_hmi.exists()
+        and case85_twenty_two_buttons_twenty_second_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_twenty_two_buttons_twenty_second_button_event_page = _load_hmi_page0(
+                case85_twenty_two_buttons_twenty_second_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_twenty_two_buttons_twenty_second_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn22", 1)
+            and CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_two_buttons_twenty_second_button_event_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_two_buttons_twenty_second_button_event_style_page = None
+            if case85_twenty_two_buttons_twenty_second_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_two_buttons_twenty_second_button_event_style_page.blocks,
+                movable_button_names={"eventbtn22"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_two_buttons_twenty_second_button_event_style_page.blocks):
+                return (
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_twenty_two_buttons_twenty_second_button_event_style_page,
+                )
+        if case85_twenty_two_buttons_twenty_second_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_two_buttons_twenty_second_button_event_page.blocks,
+            movable_button_names={"eventbtn22"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_two_buttons_twenty_second_button_event_page.blocks):
+            return (
+                case85_twenty_two_buttons_twenty_second_button_event_fixture_tft,
+                case85_twenty_two_buttons_twenty_second_button_event_fixture_hmi,
+                case85_twenty_two_buttons_twenty_second_button_event_page,
+            )
+    case85_twenty_one_buttons_event_fixture_hmi = CASE85_TWENTY_ONE_BUTTONS_EVENT_FIXTURE_HMI
+    case85_twenty_one_buttons_event_fixture_tft = CASE85_TWENTY_ONE_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_twenty_one_buttons_event_fixture_hmi.exists() and case85_twenty_one_buttons_event_fixture_tft.exists():
+        try:
+            case85_twenty_one_buttons_event_page = _load_hmi_page0(case85_twenty_one_buttons_event_fixture_hmi)
+        except OSError:
+            case85_twenty_one_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn21", 1)
+            and CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_one_buttons_twenty_first_button_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_one_buttons_twenty_first_button_style_page = None
+            if case85_twenty_one_buttons_twenty_first_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_one_buttons_twenty_first_button_style_page.blocks,
+                movable_button_names={"eventbtn21"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_one_buttons_twenty_first_button_style_page.blocks):
+                return (
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_twenty_one_buttons_twenty_first_button_style_page,
+                )
+        if case85_twenty_one_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_one_buttons_event_page.blocks,
+            movable_button_names={"eventbtn21"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_one_buttons_event_page.blocks):
+            return (
+                case85_twenty_one_buttons_event_fixture_tft,
+                case85_twenty_one_buttons_event_fixture_hmi,
+                case85_twenty_one_buttons_event_page,
+            )
+    case85_twenty_one_buttons_twenty_first_button_event_fixture_hmi = CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_FIXTURE_HMI
+    case85_twenty_one_buttons_twenty_first_button_event_fixture_tft = CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_twenty_one_buttons_twenty_first_button_event_fixture_hmi.exists()
+        and case85_twenty_one_buttons_twenty_first_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_twenty_one_buttons_twenty_first_button_event_page = _load_hmi_page0(
+                case85_twenty_one_buttons_twenty_first_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_twenty_one_buttons_twenty_first_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn21", 1)
+            and CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_one_buttons_twenty_first_button_event_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_one_buttons_twenty_first_button_event_style_page = None
+            if case85_twenty_one_buttons_twenty_first_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_one_buttons_twenty_first_button_event_style_page.blocks,
+                movable_button_names={"eventbtn21"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_one_buttons_twenty_first_button_event_style_page.blocks):
+                return (
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_twenty_one_buttons_twenty_first_button_event_style_page,
+                )
+        if case85_twenty_one_buttons_twenty_first_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_one_buttons_twenty_first_button_event_page.blocks,
+            movable_button_names={"eventbtn21"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_one_buttons_twenty_first_button_event_page.blocks):
+            return (
+                case85_twenty_one_buttons_twenty_first_button_event_fixture_tft,
+                case85_twenty_one_buttons_twenty_first_button_event_fixture_hmi,
+                case85_twenty_one_buttons_twenty_first_button_event_page,
+            )
+    case85_twenty_buttons_event_fixture_hmi = CASE85_TWENTY_BUTTONS_EVENT_FIXTURE_HMI
+    case85_twenty_buttons_event_fixture_tft = CASE85_TWENTY_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_twenty_buttons_event_fixture_hmi.exists() and case85_twenty_buttons_event_fixture_tft.exists():
+        try:
+            case85_twenty_buttons_event_page = _load_hmi_page0(case85_twenty_buttons_event_fixture_hmi)
+        except OSError:
+            case85_twenty_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn20", 1)
+            and CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_buttons_twentieth_button_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_buttons_twentieth_button_style_page = None
+            if case85_twenty_buttons_twentieth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_buttons_twentieth_button_style_page.blocks,
+                movable_button_names={"eventbtn20"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_buttons_twentieth_button_style_page.blocks):
+                return (
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_twenty_buttons_twentieth_button_style_page,
+                )
+        if case85_twenty_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_buttons_event_page.blocks,
+            movable_button_names={"eventbtn20"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_buttons_event_page.blocks):
+            return (
+                case85_twenty_buttons_event_fixture_tft,
+                case85_twenty_buttons_event_fixture_hmi,
+                case85_twenty_buttons_event_page,
+            )
+    case85_twenty_buttons_twentieth_button_event_fixture_hmi = CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_FIXTURE_HMI
+    case85_twenty_buttons_twentieth_button_event_fixture_tft = CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_twenty_buttons_twentieth_button_event_fixture_hmi.exists()
+        and case85_twenty_buttons_twentieth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_twenty_buttons_twentieth_button_event_page = _load_hmi_page0(
+                case85_twenty_buttons_twentieth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_twenty_buttons_twentieth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn20", 1)
+            and CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twenty_buttons_twentieth_button_event_style_page = _load_hmi_page0(
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twenty_buttons_twentieth_button_event_style_page = None
+            if case85_twenty_buttons_twentieth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twenty_buttons_twentieth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn20"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twenty_buttons_twentieth_button_event_style_page.blocks):
+                return (
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_twenty_buttons_twentieth_button_event_style_page,
+                )
+        if case85_twenty_buttons_twentieth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twenty_buttons_twentieth_button_event_page.blocks,
+            movable_button_names={"eventbtn20"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twenty_buttons_twentieth_button_event_page.blocks):
+            return (
+                case85_twenty_buttons_twentieth_button_event_fixture_tft,
+                case85_twenty_buttons_twentieth_button_event_fixture_hmi,
+                case85_twenty_buttons_twentieth_button_event_page,
+            )
+    case85_nineteen_buttons_event_fixture_hmi = CASE85_NINETEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_nineteen_buttons_event_fixture_tft = CASE85_NINETEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_nineteen_buttons_event_fixture_hmi.exists() and case85_nineteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_nineteen_buttons_event_page = _load_hmi_page0(case85_nineteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_nineteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn19", 1)
+            and CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_nineteen_buttons_nineteenth_button_style_page = _load_hmi_page0(
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_nineteen_buttons_nineteenth_button_style_page = None
+            if case85_nineteen_buttons_nineteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_nineteen_buttons_nineteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn19"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_nineteen_buttons_nineteenth_button_style_page.blocks):
+                return (
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_nineteen_buttons_nineteenth_button_style_page,
+                )
+        if case85_nineteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_nineteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn19"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_nineteen_buttons_event_page.blocks):
+            return (
+                case85_nineteen_buttons_event_fixture_tft,
+                case85_nineteen_buttons_event_fixture_hmi,
+                case85_nineteen_buttons_event_page,
+            )
+    case85_nineteen_buttons_nineteenth_button_event_fixture_hmi = CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_nineteen_buttons_nineteenth_button_event_fixture_tft = CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_nineteen_buttons_nineteenth_button_event_fixture_hmi.exists()
+        and case85_nineteen_buttons_nineteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_nineteen_buttons_nineteenth_button_event_page = _load_hmi_page0(
+                case85_nineteen_buttons_nineteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_nineteen_buttons_nineteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn19", 1)
+            and CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_nineteen_buttons_nineteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_nineteen_buttons_nineteenth_button_event_style_page = None
+            if case85_nineteen_buttons_nineteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_nineteen_buttons_nineteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn19"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_nineteen_buttons_nineteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_nineteen_buttons_nineteenth_button_event_style_page,
+                )
+        if case85_nineteen_buttons_nineteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_nineteen_buttons_nineteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn19"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_nineteen_buttons_nineteenth_button_event_page.blocks):
+            return (
+                case85_nineteen_buttons_nineteenth_button_event_fixture_tft,
+                case85_nineteen_buttons_nineteenth_button_event_fixture_hmi,
+                case85_nineteen_buttons_nineteenth_button_event_page,
+            )
+    case85_eighteen_buttons_event_fixture_hmi = CASE85_EIGHTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_eighteen_buttons_event_fixture_tft = CASE85_EIGHTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_eighteen_buttons_event_fixture_hmi.exists() and case85_eighteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_eighteen_buttons_event_page = _load_hmi_page0(case85_eighteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_eighteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn18", 1)
+            and CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eighteen_buttons_eighteenth_button_style_page = _load_hmi_page0(
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eighteen_buttons_eighteenth_button_style_page = None
+            if case85_eighteen_buttons_eighteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eighteen_buttons_eighteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn18"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eighteen_buttons_eighteenth_button_style_page.blocks):
+                return (
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_eighteen_buttons_eighteenth_button_style_page,
+                )
+        if case85_eighteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eighteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn18"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eighteen_buttons_event_page.blocks):
+            return (
+                case85_eighteen_buttons_event_fixture_tft,
+                case85_eighteen_buttons_event_fixture_hmi,
+                case85_eighteen_buttons_event_page,
+            )
+    case85_eighteen_buttons_eighteenth_button_event_fixture_hmi = CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_eighteen_buttons_eighteenth_button_event_fixture_tft = CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_eighteen_buttons_eighteenth_button_event_fixture_hmi.exists()
+        and case85_eighteen_buttons_eighteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_eighteen_buttons_eighteenth_button_event_page = _load_hmi_page0(
+                case85_eighteen_buttons_eighteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_eighteen_buttons_eighteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn18", 1)
+            and CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eighteen_buttons_eighteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eighteen_buttons_eighteenth_button_event_style_page = None
+            if case85_eighteen_buttons_eighteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eighteen_buttons_eighteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn18"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eighteen_buttons_eighteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_eighteen_buttons_eighteenth_button_event_style_page,
+                )
+        if case85_eighteen_buttons_eighteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eighteen_buttons_eighteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn18"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eighteen_buttons_eighteenth_button_event_page.blocks):
+            return (
+                case85_eighteen_buttons_eighteenth_button_event_fixture_tft,
+                case85_eighteen_buttons_eighteenth_button_event_fixture_hmi,
+                case85_eighteen_buttons_eighteenth_button_event_page,
+            )
+    case85_seventeen_buttons_event_fixture_hmi = CASE85_SEVENTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_seventeen_buttons_event_fixture_tft = CASE85_SEVENTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_seventeen_buttons_event_fixture_hmi.exists() and case85_seventeen_buttons_event_fixture_tft.exists():
+        try:
+            case85_seventeen_buttons_event_page = _load_hmi_page0(case85_seventeen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_seventeen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn17", 1)
+            and CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_seventeen_buttons_seventeenth_button_style_page = _load_hmi_page0(
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_seventeen_buttons_seventeenth_button_style_page = None
+            if case85_seventeen_buttons_seventeenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_seventeen_buttons_seventeenth_button_style_page.blocks,
+                movable_button_names={"eventbtn17"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_seventeen_buttons_seventeenth_button_style_page.blocks):
+                return (
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_seventeen_buttons_seventeenth_button_style_page,
+                )
+        if case85_seventeen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_seventeen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn17"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_seventeen_buttons_event_page.blocks):
+            return (
+                case85_seventeen_buttons_event_fixture_tft,
+                case85_seventeen_buttons_event_fixture_hmi,
+                case85_seventeen_buttons_event_page,
+            )
+    case85_seventeen_buttons_seventeenth_button_event_fixture_hmi = CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_seventeen_buttons_seventeenth_button_event_fixture_tft = CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_seventeen_buttons_seventeenth_button_event_fixture_hmi.exists()
+        and case85_seventeen_buttons_seventeenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_seventeen_buttons_seventeenth_button_event_page = _load_hmi_page0(
+                case85_seventeen_buttons_seventeenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_seventeen_buttons_seventeenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn17", 1)
+            and CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_seventeen_buttons_seventeenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_seventeen_buttons_seventeenth_button_event_style_page = None
+            if case85_seventeen_buttons_seventeenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_seventeen_buttons_seventeenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn17"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_seventeen_buttons_seventeenth_button_event_style_page.blocks):
+                return (
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_seventeen_buttons_seventeenth_button_event_style_page,
+                )
+        if case85_seventeen_buttons_seventeenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_seventeen_buttons_seventeenth_button_event_page.blocks,
+            movable_button_names={"eventbtn17"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_seventeen_buttons_seventeenth_button_event_page.blocks):
+            return (
+                case85_seventeen_buttons_seventeenth_button_event_fixture_tft,
+                case85_seventeen_buttons_seventeenth_button_event_fixture_hmi,
+                case85_seventeen_buttons_seventeenth_button_event_page,
+            )
+    case85_sixteen_buttons_event_fixture_hmi = CASE85_SIXTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_sixteen_buttons_event_fixture_tft = CASE85_SIXTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_sixteen_buttons_event_fixture_hmi.exists() and case85_sixteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_sixteen_buttons_event_page = _load_hmi_page0(case85_sixteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_sixteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn16", 1)
+            and CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_sixteen_buttons_sixteenth_button_style_page = _load_hmi_page0(
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_sixteen_buttons_sixteenth_button_style_page = None
+            if case85_sixteen_buttons_sixteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_sixteen_buttons_sixteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn16"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_sixteen_buttons_sixteenth_button_style_page.blocks):
+                return (
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_sixteen_buttons_sixteenth_button_style_page,
+                )
+        if case85_sixteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_sixteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn16"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_sixteen_buttons_event_page.blocks):
+            return (
+                case85_sixteen_buttons_event_fixture_tft,
+                case85_sixteen_buttons_event_fixture_hmi,
+                case85_sixteen_buttons_event_page,
+            )
+    case85_sixteen_buttons_sixteenth_button_event_fixture_hmi = CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_sixteen_buttons_sixteenth_button_event_fixture_tft = CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_sixteen_buttons_sixteenth_button_event_fixture_hmi.exists()
+        and case85_sixteen_buttons_sixteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_sixteen_buttons_sixteenth_button_event_page = _load_hmi_page0(
+                case85_sixteen_buttons_sixteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_sixteen_buttons_sixteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn16", 1)
+            and CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_sixteen_buttons_sixteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_sixteen_buttons_sixteenth_button_event_style_page = None
+            if case85_sixteen_buttons_sixteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_sixteen_buttons_sixteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn16"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_sixteen_buttons_sixteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_sixteen_buttons_sixteenth_button_event_style_page,
+                )
+        if case85_sixteen_buttons_sixteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_sixteen_buttons_sixteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn16"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_sixteen_buttons_sixteenth_button_event_page.blocks):
+            return (
+                case85_sixteen_buttons_sixteenth_button_event_fixture_tft,
+                case85_sixteen_buttons_sixteenth_button_event_fixture_hmi,
+                case85_sixteen_buttons_sixteenth_button_event_page,
+            )
+    case85_fifteen_buttons_event_fixture_hmi = CASE85_FIFTEEN_BUTTONS_EVENT_FIXTURE_HMI
+    case85_fifteen_buttons_event_fixture_tft = CASE85_FIFTEEN_BUTTONS_EVENT_FIXTURE_TFT
+    if case85_fifteen_buttons_event_fixture_hmi.exists() and case85_fifteen_buttons_event_fixture_tft.exists():
+        try:
+            case85_fifteen_buttons_event_page = _load_hmi_page0(case85_fifteen_buttons_event_fixture_hmi)
+        except OSError:
+            case85_fifteen_buttons_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn15", 1)
+            and CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_fifteen_buttons_fifteenth_button_style_page = _load_hmi_page0(
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_fifteen_buttons_fifteenth_button_style_page = None
+            if case85_fifteen_buttons_fifteenth_button_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_fifteen_buttons_fifteenth_button_style_page.blocks,
+                movable_button_names={"eventbtn15"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_fifteen_buttons_fifteenth_button_style_page.blocks):
+                return (
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_TFT,
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_HMI,
+                    case85_fifteen_buttons_fifteenth_button_style_page,
+                )
+        if case85_fifteen_buttons_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_fifteen_buttons_event_page.blocks,
+            movable_button_names={"eventbtn15"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_fifteen_buttons_event_page.blocks):
+            return (
+                case85_fifteen_buttons_event_fixture_tft,
+                case85_fifteen_buttons_event_fixture_hmi,
+                case85_fifteen_buttons_event_page,
+            )
+    case85_fifteen_buttons_fifteenth_button_event_fixture_hmi = CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_fifteen_buttons_fifteenth_button_event_fixture_tft = CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_fifteen_buttons_fifteenth_button_event_fixture_hmi.exists()
+        and case85_fifteen_buttons_fifteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_fifteen_buttons_fifteenth_button_event_page = _load_hmi_page0(
+                case85_fifteen_buttons_fifteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_fifteen_buttons_fifteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn15", 1)
+            and CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_fifteen_buttons_fifteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_fifteen_buttons_fifteenth_button_event_style_page = None
+            if case85_fifteen_buttons_fifteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_fifteen_buttons_fifteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn15"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_fifteen_buttons_fifteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_fifteen_buttons_fifteenth_button_event_style_page,
+                )
+        if case85_fifteen_buttons_fifteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_fifteen_buttons_fifteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn15"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_fifteen_buttons_fifteenth_button_event_page.blocks):
+            return (
+                case85_fifteen_buttons_fifteenth_button_event_fixture_tft,
+                case85_fifteen_buttons_fifteenth_button_event_fixture_hmi,
+                case85_fifteen_buttons_fifteenth_button_event_page,
+            )
+    case85_fourteen_buttons_fourteenth_button_event_fixture_hmi = CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_fourteen_buttons_fourteenth_button_event_fixture_tft = CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_fourteen_buttons_fourteenth_button_event_fixture_hmi.exists()
+        and case85_fourteen_buttons_fourteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_fourteen_buttons_fourteenth_button_event_page = _load_hmi_page0(
+                case85_fourteen_buttons_fourteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_fourteen_buttons_fourteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn14", 1)
+            and CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_fourteen_buttons_fourteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_fourteen_buttons_fourteenth_button_event_style_page = None
+            if case85_fourteen_buttons_fourteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_fourteen_buttons_fourteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn14"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_fourteen_buttons_fourteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_fourteen_buttons_fourteenth_button_event_style_page,
+                )
+        if case85_fourteen_buttons_fourteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_fourteen_buttons_fourteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn14"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_fourteen_buttons_fourteenth_button_event_page.blocks):
+            return (
+                case85_fourteen_buttons_fourteenth_button_event_fixture_tft,
+                case85_fourteen_buttons_fourteenth_button_event_fixture_hmi,
+                case85_fourteen_buttons_fourteenth_button_event_page,
+            )
+    case85_thirteen_buttons_thirteenth_button_event_fixture_hmi = CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_thirteen_buttons_thirteenth_button_event_fixture_tft = CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_thirteen_buttons_thirteenth_button_event_fixture_hmi.exists()
+        and case85_thirteen_buttons_thirteenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_thirteen_buttons_thirteenth_button_event_page = _load_hmi_page0(
+                case85_thirteen_buttons_thirteenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_thirteen_buttons_thirteenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn13", 1)
+            and CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_thirteen_buttons_thirteenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_thirteen_buttons_thirteenth_button_event_style_page = None
+            if case85_thirteen_buttons_thirteenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_thirteen_buttons_thirteenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn13"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_thirteen_buttons_thirteenth_button_event_style_page.blocks):
+                return (
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_thirteen_buttons_thirteenth_button_event_style_page,
+                )
+        if case85_thirteen_buttons_thirteenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_thirteen_buttons_thirteenth_button_event_page.blocks,
+            movable_button_names={"eventbtn13"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_thirteen_buttons_thirteenth_button_event_page.blocks):
+            return (
+                case85_thirteen_buttons_thirteenth_button_event_fixture_tft,
+                case85_thirteen_buttons_thirteenth_button_event_fixture_hmi,
+                case85_thirteen_buttons_thirteenth_button_event_page,
+            )
+    case85_twelve_buttons_twelfth_button_event_fixture_hmi = CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_twelve_buttons_twelfth_button_event_fixture_tft = CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_twelve_buttons_twelfth_button_event_fixture_hmi.exists()
+        and case85_twelve_buttons_twelfth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_twelve_buttons_twelfth_button_event_page = _load_hmi_page0(
+                case85_twelve_buttons_twelfth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_twelve_buttons_twelfth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn12", 1)
+            and CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_twelve_buttons_twelfth_button_event_style_page = _load_hmi_page0(
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_twelve_buttons_twelfth_button_event_style_page = None
+            if case85_twelve_buttons_twelfth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_twelve_buttons_twelfth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn12"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_twelve_buttons_twelfth_button_event_style_page.blocks):
+                return (
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_twelve_buttons_twelfth_button_event_style_page,
+                )
+        if case85_twelve_buttons_twelfth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_twelve_buttons_twelfth_button_event_page.blocks,
+            movable_button_names={"eventbtn12"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_twelve_buttons_twelfth_button_event_page.blocks):
+            return (
+                case85_twelve_buttons_twelfth_button_event_fixture_tft,
+                case85_twelve_buttons_twelfth_button_event_fixture_hmi,
+                case85_twelve_buttons_twelfth_button_event_page,
+            )
+    case85_eleven_buttons_eleventh_button_event_fixture_hmi = CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_eleven_buttons_eleventh_button_event_fixture_tft = CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_eleven_buttons_eleventh_button_event_fixture_hmi.exists()
+        and case85_eleven_buttons_eleventh_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_eleven_buttons_eleventh_button_event_page = _load_hmi_page0(
+                case85_eleven_buttons_eleventh_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_eleven_buttons_eleventh_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn11", 1)
+            and CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eleven_buttons_eleventh_button_event_style_page = _load_hmi_page0(
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eleven_buttons_eleventh_button_event_style_page = None
+            if case85_eleven_buttons_eleventh_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eleven_buttons_eleventh_button_event_style_page.blocks,
+                movable_button_names={"eventbtn11"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eleven_buttons_eleventh_button_event_style_page.blocks):
+                return (
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_eleven_buttons_eleventh_button_event_style_page,
+                )
+        if case85_eleven_buttons_eleventh_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eleven_buttons_eleventh_button_event_page.blocks,
+            movable_button_names={"eventbtn11"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eleven_buttons_eleventh_button_event_page.blocks):
+            return (
+                case85_eleven_buttons_eleventh_button_event_fixture_tft,
+                case85_eleven_buttons_eleventh_button_event_fixture_hmi,
+                case85_eleven_buttons_eleventh_button_event_page,
+            )
+        if case85_eleven_buttons_eleventh_button_event_page is not None and _blocks_match_fixture_replay_shape(
+            target_blocks,
+            case85_eleven_buttons_eleventh_button_event_page.blocks,
+        ) and _event_tokens_match_blocks(target_blocks, case85_eleven_buttons_eleventh_button_event_page.blocks):
+            return (
+                case85_eleven_buttons_eleventh_button_event_fixture_tft,
+                case85_eleven_buttons_eleventh_button_event_fixture_hmi,
+                case85_eleven_buttons_eleventh_button_event_page,
+            )
+    case85_ten_buttons_tenth_button_event_fixture_hmi = CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_ten_buttons_tenth_button_event_fixture_tft = CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_ten_buttons_tenth_button_event_fixture_hmi.exists()
+        and case85_ten_buttons_tenth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_ten_buttons_tenth_button_event_page = _load_hmi_page0(
+                case85_ten_buttons_tenth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_ten_buttons_tenth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn10", 1)
+            and CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_ten_buttons_tenth_button_event_style_page = _load_hmi_page0(
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_ten_buttons_tenth_button_event_style_page = None
+            if case85_ten_buttons_tenth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_ten_buttons_tenth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn10"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_ten_buttons_tenth_button_event_style_page.blocks):
+                return (
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_ten_buttons_tenth_button_event_style_page,
+                )
+        if case85_ten_buttons_tenth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_ten_buttons_tenth_button_event_page.blocks,
+            movable_button_names={"eventbtn10"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_ten_buttons_tenth_button_event_page.blocks):
+            return (
+                case85_ten_buttons_tenth_button_event_fixture_tft,
+                case85_ten_buttons_tenth_button_event_fixture_hmi,
+                case85_ten_buttons_tenth_button_event_page,
+            )
+    case85_nine_buttons_ninth_button_event_fixture_hmi = CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_nine_buttons_ninth_button_event_fixture_tft = CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_nine_buttons_ninth_button_event_fixture_hmi.exists()
+        and case85_nine_buttons_ninth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_nine_buttons_ninth_button_event_page = _load_hmi_page0(
+                case85_nine_buttons_ninth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_nine_buttons_ninth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn9", 1)
+            and CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_nine_buttons_ninth_button_event_style_page = _load_hmi_page0(
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_nine_buttons_ninth_button_event_style_page = None
+            if case85_nine_buttons_ninth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_nine_buttons_ninth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn9"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_nine_buttons_ninth_button_event_style_page.blocks):
+                return (
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_nine_buttons_ninth_button_event_style_page,
+                )
+        if case85_nine_buttons_ninth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_nine_buttons_ninth_button_event_page.blocks,
+            movable_button_names={"eventbtn9"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_nine_buttons_ninth_button_event_page.blocks):
+            return (
+                case85_nine_buttons_ninth_button_event_fixture_tft,
+                case85_nine_buttons_ninth_button_event_fixture_hmi,
+                case85_nine_buttons_ninth_button_event_page,
+            )
+    case85_eight_buttons_eighth_button_event_fixture_hmi = CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_eight_buttons_eighth_button_event_fixture_tft = CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_eight_buttons_eighth_button_event_fixture_hmi.exists()
+        and case85_eight_buttons_eighth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_eight_buttons_eighth_button_event_page = _load_hmi_page0(
+                case85_eight_buttons_eighth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_eight_buttons_eighth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn8", 1)
+            and CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_eight_buttons_eighth_button_event_style_page = _load_hmi_page0(
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_eight_buttons_eighth_button_event_style_page = None
+            if case85_eight_buttons_eighth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_eight_buttons_eighth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn8"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_eight_buttons_eighth_button_event_style_page.blocks):
+                return (
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_eight_buttons_eighth_button_event_style_page,
+                )
+        if case85_eight_buttons_eighth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_eight_buttons_eighth_button_event_page.blocks,
+            movable_button_names={"eventbtn8"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_eight_buttons_eighth_button_event_page.blocks):
+            return (
+                case85_eight_buttons_eighth_button_event_fixture_tft,
+                case85_eight_buttons_eighth_button_event_fixture_hmi,
+                case85_eight_buttons_eighth_button_event_page,
+            )
+    case85_seven_buttons_seventh_button_event_fixture_hmi = CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_seven_buttons_seventh_button_event_fixture_tft = CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_seven_buttons_seventh_button_event_fixture_hmi.exists()
+        and case85_seven_buttons_seventh_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_seven_buttons_seventh_button_event_page = _load_hmi_page0(
+                case85_seven_buttons_seventh_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_seven_buttons_seventh_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn7", 1)
+            and CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_seven_buttons_seventh_button_event_style_page = _load_hmi_page0(
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_seven_buttons_seventh_button_event_style_page = None
+            if case85_seven_buttons_seventh_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_seven_buttons_seventh_button_event_style_page.blocks,
+                movable_button_names={"eventbtn7"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_seven_buttons_seventh_button_event_style_page.blocks):
+                return (
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_seven_buttons_seventh_button_event_style_page,
+                )
+        if case85_seven_buttons_seventh_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_seven_buttons_seventh_button_event_page.blocks,
+            movable_button_names={"eventbtn7"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_seven_buttons_seventh_button_event_page.blocks):
+            return (
+                case85_seven_buttons_seventh_button_event_fixture_tft,
+                case85_seven_buttons_seventh_button_event_fixture_hmi,
+                case85_seven_buttons_seventh_button_event_page,
+            )
+    case85_six_buttons_sixth_button_event_fixture_hmi = CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_FIXTURE_HMI
+    case85_six_buttons_sixth_button_event_fixture_tft = CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_FIXTURE_TFT
+    if (
+        case85_six_buttons_sixth_button_event_fixture_hmi.exists()
+        and case85_six_buttons_sixth_button_event_fixture_tft.exists()
+    ):
+        try:
+            case85_six_buttons_sixth_button_event_page = _load_hmi_page0(
+                case85_six_buttons_sixth_button_event_fixture_hmi
+            )
+        except OSError:
+            case85_six_buttons_sixth_button_event_page = None
+        if (
+            _case85_named_button_style_is(target_blocks, "eventbtn6", 1)
+            and CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.exists()
+            and CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.exists()
+        ):
+            try:
+                case85_six_buttons_sixth_button_event_style_page = _load_hmi_page0(
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_HMI
+                )
+            except OSError:
+                case85_six_buttons_sixth_button_event_style_page = None
+            if case85_six_buttons_sixth_button_event_style_page is not None and _blocks_match_case85_new_button_fixture_shape(
+                target_blocks,
+                case85_six_buttons_sixth_button_event_style_page.blocks,
+                movable_button_names={"eventbtn6"},
+            ) and _event_tokens_match_blocks(target_blocks, case85_six_buttons_sixth_button_event_style_page.blocks):
+                return (
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_TFT,
+                    CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_HMI,
+                    case85_six_buttons_sixth_button_event_style_page,
+                )
+        if case85_six_buttons_sixth_button_event_page is not None and _blocks_match_case85_new_button_fixture_shape(
+            target_blocks,
+            case85_six_buttons_sixth_button_event_page.blocks,
+            movable_button_names={"eventbtn6"},
+        ) and _event_tokens_match_blocks(target_blocks, case85_six_buttons_sixth_button_event_page.blocks):
+            return (
+                case85_six_buttons_sixth_button_event_fixture_tft,
+                case85_six_buttons_sixth_button_event_fixture_hmi,
+                case85_six_buttons_sixth_button_event_page,
+            )
+
     for case_name in (
         "case_58_datarecord_button_event_valid_oracle_v2",
         "case_42_datarecord",
+        "case_80_datarecord_textselect_official_positive_oracle",
+        "case_85_datarecord_sltext_official_positive_oracle",
+        "case_83_datarecord_textselect_button_official_positive_oracle",
     ):
         case_dir = Path(DEFAULT_CASE_ROOT) / case_name
         case_tft, case_hmi = _case_fixture_paths(case_dir)
         if case_tft is None or case_hmi is None:
             continue
-        case_page = _load_hmi_page0(case_hmi)
+        try:
+            case_page = _load_hmi_page0(case_hmi)
+        except OSError:
+            continue
         if _blocks_match_fixture_replay_shape(target_blocks, case_page.blocks):
             return case_tft, case_hmi, case_page
     return None
+
+
+def _blocks_match_case85_new_button_fixture_shape(
+    target_blocks: list[PageBlock],
+    case_blocks: list[PageBlock],
+    *,
+    movable_button_names: set[str],
+) -> bool:
+    if len(target_blocks) != len(case_blocks):
+        return False
+    for target, fixture in zip(target_blocks, case_blocks):
+        if target.type_code != fixture.type_code:
+            return False
+        if _field_raw(target, "type") != _field_raw(fixture, "type"):
+            return False
+        if _field_raw(target, "id") != _field_raw(fixture, "id"):
+            return False
+        if _field_raw(target, "objname") != _field_raw(fixture, "objname"):
+            return False
+        if target.objname in movable_button_names and target.type_code == "b":
+            pass
+        else:
+            for field_name in ("x", "y", "w", "h", "endx", "endy"):
+                if _field_raw(target, field_name) != _field_raw(fixture, field_name):
+                    return False
+        if target.type_code == "B" and not _data_record_fixture_fields_match(target, fixture):
+            return False
+        if target.type_code == "A" and not _file_browser_fixture_fields_match(target, fixture):
+            return False
+        if target.type_code == "?" and not _file_stream_fixture_fields_match(target, fixture):
+            return False
+    return True
+
+
+def _case85_named_button_style_is(target_blocks: list[PageBlock], button_name: str, style_value: int) -> bool:
+    for block in target_blocks:
+        if block.type_code != "b" or block.objname != button_name:
+            continue
+        return _field_int(block, "style") == style_value
+    return False
 
 
 def _compiled_post_primary_blocks_for_case(case_seed: _TailSeed, case_page: Any) -> list[bytes]:
@@ -2268,8 +6148,11 @@ def _compiled_post_primary_blocks_for_case(case_seed: _TailSeed, case_page: Any)
         raise TftToolchainError("Data-record case primary block is truncated")
     primary_size = int.from_bytes(case_tail[primary_offset : primary_offset + 4], "little")
     cursor = primary_offset + 4 + primary_size
+    attr_relative = _header_int(_header(inspect_tft(case_seed.baseline_tft), "Header2"), "app_attributes_data_address")
+    if attr_relative is None:
+        raise TftToolchainError("Unable to inspect data-record case attribute section start")
     blocks: list[bytes] = []
-    for _ in range(3):
+    while cursor < attr_relative:
         if cursor + 4 > len(case_tail):
             raise TftToolchainError("Data-record case post-primary block is truncated")
         size = int.from_bytes(case_tail[cursor : cursor + 4], "little")
@@ -2278,6 +6161,10 @@ def _compiled_post_primary_blocks_for_case(case_seed: _TailSeed, case_page: Any)
             raise TftToolchainError("Data-record case post-primary payload is truncated")
         blocks.append(case_tail[cursor : cursor + size])
         cursor += size
+    if cursor != attr_relative:
+        raise TftToolchainError(
+            f"Data-record case post-primary blocks ended at 0x{cursor:X}, expected attr start 0x{attr_relative:X}"
+        )
     return blocks
 
 
@@ -2340,7 +6227,149 @@ def _compiled_primary_data_for_case(
                 raise TftToolchainError(f"Data-record case primary record is truncated for {block.objname!r}")
             _apply_event_callback_fields(record, event_callbacks[index])
             primary_data[record_start:record_end] = record
+    _patch_case_primary_button_geometry(primary_data, target_blocks)
+    _patch_case_primary_button_style(primary_data, target_blocks)
+    if case_seed.baseline_pa.resolve() in {
+        CASE85_NEW_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_NEW_BUTTON_EVENT_STYLE_ONLY_FIXTURE_HMI.resolve(),
+        CASE85_TWO_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWO_BUTTONS_SECOND_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_THREE_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_THREE_BUTTONS_THIRD_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FOUR_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FIVE_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SIX_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SEVEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_EIGHT_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_NINE_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_ELEVEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWELVE_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_THIRTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FOURTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_TWO_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_ONE_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_NINETEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_EIGHTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SEVENTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SIXTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FIFTEEN_BUTTONS_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_FIXTURE_HMI.resolve(),
+        CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+        CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_HMI.resolve(),
+    }:
+        _patch_case_primary_button_text_slots(primary_data, target_blocks)
     return bytes(primary_data)
+
+
+def _patch_case_primary_button_geometry(primary_data: bytearray, target_blocks: list[PageBlock]) -> None:
+    record_offsets = _primary_record_offsets_from_data(primary_data, target_blocks)
+    for index, block in enumerate(target_blocks):
+        if block.type_code != "b":
+            continue
+        record_length = TYPE_RECORD_LENGTHS[block.type_code]
+        record_start = record_offsets[index]
+        record_end = record_start + record_length
+        if record_end > len(primary_data):
+            raise TftToolchainError(f"Data-record case primary button record is truncated for {block.objname!r}")
+        primary_data[record_start + 0x28 : record_start + 0x34] = _coord_payload(block)
+
+
+def _patch_case_primary_button_style(primary_data: bytearray, target_blocks: list[PageBlock]) -> None:
+    record_offsets = _primary_record_offsets_from_data(primary_data, target_blocks)
+    for index, block in enumerate(target_blocks):
+        if block.type_code != "b":
+            continue
+        record_length = TYPE_RECORD_LENGTHS[block.type_code]
+        record_start = record_offsets[index]
+        record_end = record_start + record_length
+        if record_end > len(primary_data):
+            raise TftToolchainError(f"Data-record case primary button record is truncated for {block.objname!r}")
+        record = bytearray(primary_data[record_start:record_end])
+        _patch_button_record(record, block)
+        primary_data[record_start:record_end] = record
+
+
+def _patch_case_primary_button_text_slots(primary_data: bytearray, target_blocks: list[PageBlock]) -> None:
+    pointer_map_by_id = _text_pointer_map_from_primary_data(target_blocks, bytes(primary_data))
+    slot_rows: list[tuple[int, int, bytes]] = []
+    bias_candidates: list[int] = []
+
+    for block in target_blocks:
+        if block.type_code != "b":
+            continue
+        object_id = _required_field_int(block, "id")
+        pointer_value = pointer_map_by_id.get(object_id)
+        if pointer_value is None or isinstance(pointer_value, dict):
+            continue
+        slot_len = _text_slot_len(block)
+        text = _field_text(block, "txt") or ""
+        encoded = _encode_display_text(text)
+        pointer = int(pointer_value)
+        slot_rows.append((pointer, slot_len, encoded))
+        slot_end = pointer + slot_len
+        if 0 <= pointer and slot_end <= len(primary_data):
+            continue
+        found = primary_data.find(encoded)
+        if found >= 0:
+            bias_candidates.append(pointer - found)
+
+    pointer_bias: int | None = None
+    if bias_candidates:
+        candidate = bias_candidates[0]
+        if all(value == candidate for value in bias_candidates):
+            pointer_bias = candidate
+
+    for pointer, slot_len, encoded in slot_rows:
+        if len(encoded) > slot_len:
+            raise TftToolchainError(
+                f"Compiled case primary button text exceeds slot length {slot_len}"
+            )
+        slot_offset = pointer
+        slot_end = slot_offset + slot_len
+        if not (0 <= slot_offset and slot_end <= len(primary_data)):
+            if pointer_bias is None:
+                continue
+            slot_offset = pointer - pointer_bias
+            slot_end = slot_offset + slot_len
+            if not (0 <= slot_offset and slot_end <= len(primary_data)):
+                continue
+        current_slot = bytes(primary_data[slot_offset:slot_end])
+        if current_slot.startswith(encoded) and (len(encoded) == slot_len or current_slot[len(encoded)] == 0):
+            continue
+        patched_slot = bytearray(current_slot)
+        patched_slot[: len(encoded)] = encoded
+        if len(encoded) < slot_len:
+            patched_slot[len(encoded)] = 0
+        primary_data[slot_offset:slot_end] = patched_slot
 
 def _primary_value_offsets(primary_data: bytes, object_count: int) -> list[int]:
     table_size = object_count * 4
@@ -2864,6 +6893,7 @@ def _load_tail_seed(
         primary_string_prefix_paddings={"": prefix_padding},
         primary_string_suffix_paddings={"": suffix_padding},
         hash_by_name=hash_by_name,
+        seed_picture_count=_header_int(header2, "fonts_count"),
     )
 
 
@@ -3077,7 +7107,7 @@ def _build_added_object_tail(
             target_blocks,
             value_offsets,
             text_pointer_by_id,
-            max_picture_id=_max_picture_id(target_blocks),
+            max_picture_id=_max_picture_id(target_blocks, fallback=_seed_max_picture_id(seed)),
         )
     )
 
@@ -3109,18 +7139,7 @@ def _build_added_object_tail(
     padding_offset = len(out)
     padding_size = (-len(out)) % 4
     if padding_size:
-        padding_byte = (
-            b"\xFF"
-            if image_button_layout
-            or any(
-                block.type_code in {"\x00", "\x01", "4", "9", "C", "q", ":", "=", TIMER_TYPE_CODE}
-                or block.type_code in {"A", "?"}
-                or block.type_code in MEDIA_TYPE_CODES
-                for block in target_blocks
-            )
-            else b"\x00"
-        )
-        out.extend(padding_byte * padding_size)
+        out.extend(b"\xFF" * padding_size)
     out.extend(b"\x00\x00\x00\x00")
     return bytes(out), {
         "hash": hash_offset,
@@ -3159,6 +7178,8 @@ def _is_file_stream_text_companion_mix(blocks: list[PageBlock]) -> bool:
 def _build_multi_page_tail(
     seed: _TailSeed,
     pages: list[Any],
+    *,
+    physical_page_row_order: str = MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT,
 ) -> tuple[bytes, dict[str, int]]:
     page0_blocks = pages[0].blocks
     extra_pages = [page.blocks for page in pages[1:]]
@@ -3246,6 +7267,7 @@ def _build_multi_page_tail(
             page0_mirror_descriptor_sequence=global_mirror_descriptor_sequence,
             page0_mirror_layout_type=page0_mirror_layout_type,
             page0_preferred_mirror_layout_type=page0_preferred_mirror_layout_type,
+            physical_page_row_order=physical_page_row_order,
         )
     )
     padding_offset = len(out)
@@ -3377,20 +7399,37 @@ def _build_multi_page_mirror_records(
     page0_mirror_descriptor_sequence: list[bytes],
     page0_mirror_layout_type: str | None,
     page0_preferred_mirror_layout_type: str | None,
+    physical_page_row_order: str,
 ) -> bytes:
     out = bytearray()
     user_cursor = first_user_offset
+    page_rows: list[bytes] = []
     for runtime_index, info in enumerate(extra_page_infos):
-        out.extend(((len(info["blocks"]) << 16) | runtime_index).to_bytes(4, "little"))
-        out.extend(int(info["hash_offset"]).to_bytes(4, "little"))
-        out.extend(user_cursor.to_bytes(4, "little"))
-        out.extend(int(info["primary_pre_string_len"]).to_bytes(4, "little"))
+        page_rows.append(
+            ((len(info["blocks"]) << 16) | runtime_index).to_bytes(4, "little")
+            + int(info["hash_offset"]).to_bytes(4, "little")
+            + user_cursor.to_bytes(4, "little")
+            + int(info["primary_pre_string_len"]).to_bytes(4, "little")
+        )
         user_cursor += int(info["slot_count"]) * 24
 
-    out.extend(((len(page0_blocks) << 16) | len(extra_page_infos)).to_bytes(4, "little"))
-    out.extend(page0_hash_offset.to_bytes(4, "little"))
-    out.extend(page0_user_offset.to_bytes(4, "little"))
-    out.extend(page0_primary_pre_string_len.to_bytes(4, "little"))
+    page0_row = (
+        ((len(page0_blocks) << 16) | len(extra_page_infos)).to_bytes(4, "little")
+        + page0_hash_offset.to_bytes(4, "little")
+        + page0_user_offset.to_bytes(4, "little")
+        + page0_primary_pre_string_len.to_bytes(4, "little")
+    )
+    if physical_page_row_order == MULTI_PAGE_PHYSICAL_ROW_ORDER_CASE31_LAYOUT:
+        ordered_rows = [*page_rows, page0_row]
+    elif physical_page_row_order == MULTI_PAGE_PHYSICAL_ROW_ORDER_PAGE0_FIRST:
+        ordered_rows = [page0_row, *page_rows]
+    else:
+        supported = ", ".join(sorted(_VALID_MULTI_PAGE_PHYSICAL_ROW_ORDERS))
+        raise TftToolchainError(
+            f"Unsupported multi-page physical row order {physical_page_row_order!r}; supported values: {supported}"
+        )
+    for row in ordered_rows:
+        out.extend(row)
 
     for info in extra_page_infos:
         out.extend(
@@ -4644,6 +8683,13 @@ def _build_primary_block(
         if len(encoded) > slot_len:
             raise TftToolchainError(f"Text {text!r} exceeds compiled text slot length {slot_len}")
         data.extend(encoded.ljust(slot_len, b"\x00"))
+    if any(block.type_code == "?" for block in target_blocks):
+        string_end_pointer = primary_pre_string_len + string_pointer_bias + string_prefix_padding + string_cursor
+        for block, value_offset in zip(target_blocks, value_offsets):
+            if block.type_code != "?":
+                continue
+            record_start = value_offset - 0x10
+            data[record_start + 0x28 : record_start + 0x2C] = string_end_pointer.to_bytes(4, "little")
     if media_layout_type is not None:
         suffix_padding = _primary_media_padding(seed.primary_string_suffix_paddings, media_layout_type)
         data.extend(b"\x00" * max(0, suffix_padding - consumed_string_suffix_padding))
@@ -4694,6 +8740,12 @@ def _primary_final_marker(
         )
     for block in target_blocks:
         marker = seed.primary_final_markers.get(block.type_code)
+        if marker is not None:
+            return marker
+    if any(block.type_code == "A" for block in target_blocks) and "A" in seed.primary_templates:
+        # A-only seeds carry fbrowser0's buffer marker as the page final marker.
+        # Reuse it only when the rebuilt page still contains an A record.
+        marker = seed.primary_final_markers.get("")
         if marker is not None:
             return marker
     return b"\x00\x00\x00\x00"
@@ -5070,7 +9122,7 @@ def _build_user_records(
     for block, value_base in zip(target_blocks, value_offsets):
         type_code = block.type_code
         object_id = _required_field_int(block, "id")
-        slots = [b"\x00" * 24 for _ in range(_user_slot_count(block))]
+        slots = [b"\x00" * 24 for _ in range(_effective_user_slot_count(seed, block))]
         for template in _user_record_templates_for_block(seed, block):
             if template.slot_index >= len(slots):
                 continue
@@ -5123,14 +9175,26 @@ def _user_record_word2(
     return template.word2
 
 
-def _max_picture_id(blocks: list[PageBlock]) -> int | None:
+def _max_picture_id_with_fallback(blocks: list[PageBlock], *, fallback: int | None) -> int | None:
     values: list[int] = []
     for block in blocks:
         for field_name in ("pic", "picc", "pic2", "picc2"):
             value = _field_int(block, field_name)
             if value is not None and value != 0xFFFF:
                 values.append(value)
+    if fallback is not None:
+        values.append(fallback)
     return max(values) if values else None
+
+
+def _max_picture_id(blocks: list[PageBlock], *, fallback: int | None = None) -> int | None:
+    return _max_picture_id_with_fallback(blocks, fallback=fallback)
+
+
+def _seed_max_picture_id(seed: _TailSeed) -> int | None:
+    if seed.seed_picture_count is None or seed.seed_picture_count <= 0:
+        return None
+    return seed.seed_picture_count - 1
 
 
 def _uses_full_image_button_layout(blocks: list[PageBlock]) -> bool:
@@ -5560,6 +9624,7 @@ def _build_mirror_records(
         ):
             value = 0xFFFF if item is None else slot_start + item
             record.extend(value.to_bytes(2, "little"))
+        _patch_case85_style_only_eventbtn_mirror_record(seed, block, slot_start=slot_start, record=record)
         expected_length = 0x38 + mirror_value_count * 2
         if len(record) != expected_length:
             raise TftToolchainError(
@@ -5567,8 +9632,27 @@ def _build_mirror_records(
                 f"expected 0x{expected_length:X}, got 0x{len(record):X}"
             )
         out.extend(record)
-        slot_start += _user_slot_count(block)
+        slot_start += _effective_user_slot_count(seed, block)
     return bytes(out)
+
+
+def _patch_case85_style_only_eventbtn_mirror_record(
+    seed: _TailSeed,
+    block: PageBlock,
+    *,
+    slot_start: int,
+    record: bytearray,
+) -> None:
+    if not _uses_case85_style_only_button_user_layout(seed, block):
+        return
+
+    for offset in (0x42, 0x50, 0x6C, 0x82, 0x88, 0x96, 0x98, 0xA0, 0xA8, 0xAA, 0xAE, 0xB2, 0xCA):
+        value = int.from_bytes(record[offset : offset + 2], "little")
+        if value != 0xFFFF:
+            record[offset : offset + 2] = (value + 2).to_bytes(2, "little")
+
+    record[0x4A : 0x4C] = (slot_start + 21).to_bytes(2, "little")
+    record[0x62 : 0x64] = (slot_start + 22).to_bytes(2, "little")
 
 
 def _mirror_event_callback_field_offset(event_name: str) -> int | None:
@@ -5683,11 +9767,59 @@ def _user_slot_count(block: PageBlock) -> int:
     return TYPE_USER_SLOT_COUNTS[block.type_code]
 
 
+def _effective_user_slot_count(seed: _TailSeed, block: PageBlock) -> int:
+    if _uses_case85_style_only_button_user_layout(seed, block):
+        return TYPE_USER_SLOT_COUNTS[block.type_code] + 2
+    return _user_slot_count(block)
+
+
 def _user_record_templates_for_block(
     seed: _TailSeed,
     block: PageBlock,
 ) -> list[_UserRecordTemplate]:
     templates = seed.user_templates[block.type_code]
+    if _uses_case85_style_only_button_user_layout(seed, block):
+        expanded: list[_UserRecordTemplate] = []
+        for template in templates:
+            if template.slot_index >= 21:
+                expanded.append(
+                    _UserRecordTemplate(
+                        slot_index=template.slot_index + 2,
+                        word1_mode=template.word1_mode,
+                        word1_delta=template.word1_delta,
+                        word2=template.word2,
+                        word3=template.word3,
+                        word4=template.word4,
+                        word5=template.word5,
+                    )
+                )
+            else:
+                expanded.append(template)
+        expanded.extend(
+            [
+                _UserRecordTemplate(
+                    slot_index=21,
+                    word1_mode="relative",
+                    word1_delta=0x3A,
+                    word2=0xFFFF,
+                    word3=0,
+                    word4=0x00FF0000,
+                    word5=0x0232,
+                ),
+                _UserRecordTemplate(
+                    slot_index=22,
+                    word1_mode="relative",
+                    word1_delta=0x3C,
+                    word2=0x00FF,
+                    word3=0,
+                    word4=0x00FF0000,
+                    word5=0x0131,
+                ),
+            ]
+        )
+        expanded.sort(key=lambda item: item.slot_index)
+        return expanded
+
     if block.type_code != "b" or _field_int(block, "sta") != 2:
         return templates
 
@@ -5714,6 +9846,86 @@ def _user_record_templates_for_block(
         else:
             shifted.append(template)
     return shifted
+
+
+def _uses_case85_style_only_button_user_layout(seed: _TailSeed, block: PageBlock) -> bool:
+    return (
+        block.type_code == "b"
+        and block.objname
+        in {
+            "eventbtn",
+            "eventbtn2",
+            "eventbtn3",
+            "eventbtn4",
+            "eventbtn5",
+            "eventbtn6",
+            "eventbtn7",
+            "eventbtn8",
+            "eventbtn9",
+            "eventbtn10",
+            "eventbtn11",
+            "eventbtn12",
+            "eventbtn13",
+            "eventbtn14",
+            "eventbtn15",
+            "eventbtn16",
+            "eventbtn17",
+            "eventbtn18",
+            "eventbtn19",
+            "eventbtn20",
+            "eventbtn21",
+            "eventbtn22",
+        }
+        and _field_int(block, "sta") == 1
+        and _field_int(block, "style") == 1
+        and seed.baseline_tft.resolve()
+        in {
+            CASE85_NEW_BUTTON_EVENT_STYLE_ONLY_FIXTURE_TFT.resolve(),
+            CASE85_TWO_BUTTONS_SECOND_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWO_BUTTONS_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_THREE_BUTTONS_THIRD_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_THREE_BUTTONS_THIRD_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FOUR_BUTTONS_EVENT_FIXTURE_TFT.resolve(),
+            CASE85_FOUR_BUTTONS_FOURTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FOUR_BUTTONS_FOURTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FIVE_BUTTONS_FIFTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FIVE_BUTTONS_FIFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SEVEN_BUTTONS_SEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_EIGHT_BUTTONS_EIGHTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_NINE_BUTTONS_NINTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_NINE_BUTTONS_NINTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TEN_BUTTONS_TENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TEN_BUTTONS_TENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_TWO_BUTTONS_TWENTY_SECOND_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_ONE_BUTTONS_TWENTY_FIRST_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWENTY_BUTTONS_TWENTIETH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_NINETEEN_BUTTONS_NINETEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_EIGHTEEN_BUTTONS_EIGHTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SEVENTEEN_BUTTONS_SEVENTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SIXTEEN_BUTTONS_SIXTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_TWELVE_BUTTONS_TWELFTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_THIRTEEN_BUTTONS_THIRTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FOURTEEN_BUTTONS_FOURTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_FIFTEEN_BUTTONS_FIFTEENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SIX_BUTTONS_SIXTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_SIX_BUTTONS_SIXTH_BUTTON_EVENT_STYLE_FIXTURE_TFT.resolve(),
+            CASE85_ELEVEN_BUTTONS_ELEVENTH_BUTTON_STYLE_FIXTURE_TFT.resolve(),
+        }
+    )
 
 
 def _refresh_tft_headers(

@@ -284,6 +284,37 @@ def _draw_widget(
         )
         return
 
+    if widget.type in {"text-select", "sliding-text", "data-record", "file-browser"}:
+        draw.rectangle((x, y, x + w, y + h), fill=background, outline=border, width=2)
+        label = {
+            "text-select": "SELECT",
+            "sliding-text": "SLTEXT",
+            "data-record": "DATA",
+            "file-browser": "FILES",
+        }[widget.type]
+        header_h = min(28, max(18, h // 6))
+        draw.rectangle((x + 1, y + 1, x + w - 1, y + header_h), fill=tuple(max(channel - 22, 0) for channel in background))
+        _draw_centered_label(draw, label, (x + 2, y + 2, x + w - 2, y + header_h), fill=foreground)
+        rows = max((h - header_h - 6) // 22, 1)
+        for row in range(rows):
+            row_y = y + header_h + 4 + row * 22
+            if row_y + 18 > y + h:
+                break
+            fill = (248, 248, 248) if row % 2 == 0 else (235, 241, 246)
+            draw.rectangle((x + 4, row_y, x + w - 4, row_y + 18), fill=fill)
+            if widget.type == "data-record":
+                for col in range(1, 3):
+                    cx = x + 4 + col * max(w - 8, 1) // 3
+                    draw.line((cx, row_y, cx, row_y + 18), fill=border)
+            elif widget.type == "file-browser":
+                draw.rectangle((x + 9, row_y + 4, x + 21, row_y + 14), fill=(255, 210, 90), outline=(160, 120, 40))
+        return
+
+    if widget.type == "file-stream":
+        draw.rounded_rectangle((x, y, x + w, y + h), radius=10, fill=(238, 242, 245), outline=border, width=2)
+        _draw_centered_label(draw, "STREAM", (x, y, x + w, y + h), fill=foreground)
+        return
+
     if widget.type == "checkbox":
         draw.rectangle((x, y, x + w, y + h), fill=background, outline=border, width=2)
         if widget.value:

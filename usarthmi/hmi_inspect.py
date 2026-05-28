@@ -203,6 +203,39 @@ class PABlockSummary:
 
 
 @dataclass(slots=True)
+class PAPageSummary:
+    entry_index: int
+    entry_name: str
+    page_index: int | None
+    data_offset: int
+    length: int
+    parse_status: str
+    parse_error: str | None
+    strings: list[PAString]
+    page_names: list[str]
+    object_names: list[str]
+    property_names: list[str]
+    blocks: list[PABlockSummary]
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "entry_index": self.entry_index,
+            "entry_name": self.entry_name,
+            "page_index": self.page_index,
+            "data_offset": self.data_offset,
+            "data_offset_hex": f"0x{self.data_offset:08X}",
+            "length": self.length,
+            "parse_status": self.parse_status,
+            "parse_error": self.parse_error,
+            "strings": [item.to_dict() for item in self.strings],
+            "page_names": self.page_names,
+            "object_names": self.object_names,
+            "property_names": self.property_names,
+            "blocks": [item.to_dict() for item in self.blocks],
+        }
+
+
+@dataclass(slots=True)
 class HMIInspection:
     path: Path
     entry_count: int
@@ -214,6 +247,7 @@ class HMIInspection:
     property_names: list[str]
     pa_blocks: list[PABlockSummary]
     pa_parse_error: str | None
+    pa_pages: list[PAPageSummary]
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -227,6 +261,8 @@ class HMIInspection:
             "property_names": self.property_names,
             "pa_blocks": [item.to_dict() for item in self.pa_blocks],
             "pa_parse_error": self.pa_parse_error,
+            "pa_page_count": len(self.pa_pages),
+            "pa_pages": [item.to_dict() for item in self.pa_pages],
         }
 
 
@@ -252,6 +288,8 @@ def inspect_hmi(path: str | Path) -> HMIInspection:
     if "Program.s" in resources:
         program_text = _decode_text(resources["Program.s"])
 
+    pa_pages = [_summarize_pa_page(raw, entry) for entry in _pa_entries(entries) if entry.in_file]
+
     pa_strings: list[PAString] = []
     page_names: list[str] = []
     object_names: list[str] = []
@@ -259,23 +297,15 @@ def inspect_hmi(path: str | Path) -> HMIInspection:
     pa_blocks: list[PABlockSummary] = []
     pa_parse_error = None
     if "0.pa" in resources:
-        pa_data = resources["0.pa"]
-        pa_strings = _extract_ascii_runs(pa_data)
-        page_names = sorted({item.text for item in pa_strings if PAGE_NAME_RE.match(item.text)})
-        property_names = sorted({item.text for item in pa_strings if item.text in KNOWN_PA_PROPERTIES})
-        object_names = sorted(
-            {
-                item.text
-                for item in pa_strings
-                if OBJECT_NAME_RE.match(item.text)
-                and item.text not in KNOWN_PA_PROPERTIES
-                and not PAGE_NAME_RE.match(item.text)
-            }
-        )
-        try:
-            pa_blocks = _summarize_pa_blocks(pa_data)
-        except ValueError as exc:
-            pa_parse_error = str(exc)
+        primary_page = next((item for item in pa_pages if item.entry_name == "0.pa"), None)
+        if primary_page is None:
+            primary_page = _summarize_pa_data("0.pa", -1, 0, resources["0.pa"])
+        pa_strings = primary_page.strings
+        page_names = primary_page.page_names
+        object_names = primary_page.object_names
+        property_names = primary_page.property_names
+        pa_blocks = primary_page.blocks
+        pa_parse_error = primary_page.parse_error
 
     return HMIInspection(
         path=file_path,
@@ -288,6 +318,7 @@ def inspect_hmi(path: str | Path) -> HMIInspection:
         property_names=property_names,
         pa_blocks=pa_blocks,
         pa_parse_error=pa_parse_error,
+        pa_pages=pa_pages,
     )
 
 
@@ -348,6 +379,17 @@ def _parse_entries(raw: bytes, entry_count: int) -> list[HMIEntry]:
     return entries
 
 
+def _pa_entries(entries: list[HMIEntry]) -> list[HMIEntry]:
+    return sorted((entry for entry in entries if entry.name.endswith(".pa")), key=_pa_entry_sort_key)
+
+
+def _pa_entry_sort_key(entry: HMIEntry) -> tuple[int, int | str, int]:
+    stem = entry.name[:-3]
+    if stem.isdigit():
+        return (0, int(stem), entry.index)
+    return (1, stem, entry.index)
+
+
 def _decode_name(name_bytes: bytes) -> str:
     chars = []
     for value in name_bytes:
@@ -381,6 +423,57 @@ def _extract_ascii_runs(data: bytes, min_length: int = MIN_ASCII_RUN) -> list[PA
     if start >= 0 and len(data) - start >= min_length:
         runs.append(PAString(offset=start, text=data[start:].decode("ascii", errors="ignore")))
     return runs
+
+
+def _summarize_pa_page(raw: bytes, entry: HMIEntry) -> PAPageSummary:
+    data = raw[entry.data_offset : entry.data_offset + entry.length]
+    return _summarize_pa_data(entry.name, entry.index, entry.data_offset, data)
+
+
+def _summarize_pa_data(entry_name: str, entry_index: int, data_offset: int, data: bytes) -> PAPageSummary:
+    strings = _extract_ascii_runs(data)
+    page_names = sorted({item.text for item in strings if PAGE_NAME_RE.match(item.text)})
+    property_names = sorted({item.text for item in strings if item.text in KNOWN_PA_PROPERTIES})
+    object_names = sorted(
+        {
+            item.text
+            for item in strings
+            if OBJECT_NAME_RE.match(item.text)
+            and item.text not in KNOWN_PA_PROPERTIES
+            and not PAGE_NAME_RE.match(item.text)
+        }
+    )
+    page_index = _pa_page_index(entry_name)
+    parse_error = None
+    blocks: list[PABlockSummary] = []
+    parse_status = "ok"
+    try:
+        blocks = _summarize_pa_blocks(data)
+    except ValueError as exc:
+        parse_status = "error"
+        parse_error = str(exc)
+
+    return PAPageSummary(
+        entry_index=entry_index,
+        entry_name=entry_name,
+        page_index=page_index,
+        data_offset=data_offset,
+        length=len(data),
+        parse_status=parse_status,
+        parse_error=parse_error,
+        strings=strings,
+        page_names=page_names,
+        object_names=object_names,
+        property_names=property_names,
+        blocks=blocks,
+    )
+
+
+def _pa_page_index(entry_name: str) -> int | None:
+    stem = entry_name[:-3]
+    if stem.isdigit():
+        return int(stem)
+    return None
 
 
 def _summarize_pa_blocks(data: bytes) -> list[PABlockSummary]:

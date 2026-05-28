@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from hashlib import sha256
 import json
+import re
 import shutil
 import struct
 import subprocess
@@ -19,6 +20,7 @@ from .hmi_cfs import (
     rewrite_native_cfs_record,
 )
 from .hmi_inspect import inspect_hmi
+from .official_lowlevel_probe import probe_official_lowlevel_hmi
 from .hmi_pagesafe import inspect_page_safe_status, refresh_page_safe_header
 from .page_format import parse_page_data
 
@@ -26,6 +28,8 @@ from .page_format import parse_page_data
 PATCH_SPEC_SCHEMA_VERSION = 1
 RESOURCE_EXPECTATION_PRESERVE_NON_PAGE_ENTRIES = "preserve_non_page_entries"
 DEFAULT_DONOR_CORPUS_ROOT = Path(__file__).resolve().parents[1] / "reverse_usarthmi" / "hmi_donor_lowlevel_probe_20260522"
+LOWLEVEL_COMPATIBLE_CONTROL_MAP_NAME = "lowlevel_compatible_control_map.json"
+REOPEN_SAFE_CONTROL_MAP_NAME = "reopen_safe_control_map.json"
 SHADOW_SYNC_MODE_AUTO = "auto"
 SHADOW_SYNC_MODE_OFF = "off"
 SHADOW_SYNC_MODE_CASE83_DELETE_B1_GUI = "case83-delete-b1-gui"
@@ -60,6 +64,8 @@ CASE83_DELETE_B1_SHADOW_SYNC = {
 PAGE_DATAINFO_ADDR_OFFSET = 0x08
 PAGE_DATAINFO_QTY_OFFSET = 0x0C
 PAGE_DATAINFO_RECORD_SIZE = 12
+EVENT_HEADER_RE = re.compile(r"^(codes[A-Za-z0-9_]+)-(\d+)$")
+TRAILING_DIGITS_RE = re.compile(r"^(.*?)(\d+)$")
 
 
 def build_donor_patch_parser() -> argparse.ArgumentParser:
@@ -162,34 +168,69 @@ def generate_reopen_safe_fixture(
     *,
     corpus_root: str | Path = DEFAULT_DONOR_CORPUS_ROOT,
 ) -> dict[str, Any]:
+    return _generate_control_map_fixture(
+        control_type,
+        out_dir,
+        corpus_root=corpus_root,
+        control_map_name=REOPEN_SAFE_CONTROL_MAP_NAME,
+        map_kind="reopen-safe",
+        require_probe_reopen=True,
+    )
+
+
+def generate_lowlevel_compatible_fixture(
+    control_type: str,
+    out_dir: str | Path,
+    *,
+    corpus_root: str | Path = DEFAULT_DONOR_CORPUS_ROOT,
+) -> dict[str, Any]:
+    return _generate_control_map_fixture(
+        control_type,
+        out_dir,
+        corpus_root=corpus_root,
+        control_map_name=LOWLEVEL_COMPATIBLE_CONTROL_MAP_NAME,
+        map_kind="lowlevel-compatible",
+        require_probe_reopen=False,
+    )
+
+
+def _generate_control_map_fixture(
+    control_type: str,
+    out_dir: str | Path,
+    *,
+    corpus_root: str | Path,
+    control_map_name: str,
+    map_kind: str,
+    require_probe_reopen: bool,
+) -> dict[str, Any]:
     corpus = Path(corpus_root).resolve()
-    control_map_path = corpus / "reopen_safe_control_map.json"
+    control_map_path = corpus / control_map_name
     if not control_map_path.exists():
-        raise FileNotFoundError(f"reopen-safe control map does not exist: {control_map_path}")
+        raise FileNotFoundError(f"{map_kind} control map does not exist: {control_map_path}")
     payload = json.loads(control_map_path.read_text(encoding="utf-8"))
     controls = payload.get("controls") or {}
     entry = controls.get(control_type)
     if entry is None:
         known = ", ".join(sorted(controls))
-        raise ValueError(f"reopen-safe control {control_type!r} is not available; known: {known}")
+        raise ValueError(f"{map_kind} control {control_type!r} is not available; known: {known}")
     case_id = str(entry["case_id"])
     spec_path = corpus / "fixture_corpus" / "specs" / f"{case_id}.json"
     if not spec_path.exists():
-        raise FileNotFoundError(f"reopen-safe patch spec does not exist: {spec_path}")
+        raise FileNotFoundError(f"{map_kind} patch spec does not exist: {spec_path}")
     spec = load_patch_spec_json(spec_path)
     spec = dict(spec)
     spec["probe_lowlevel"] = True
-    spec["probe_reopen"] = True
+    spec["probe_reopen"] = require_probe_reopen
     report = patch_hmi_donor(
         donor_hmi=None,
         out_dir=Path(out_dir).resolve(),
         spec=spec,
         probe_lowlevel=True,
-        probe_reopen=True,
+        probe_reopen=require_probe_reopen,
     )
-    report["reopen_safe_control_type"] = control_type
-    report["reopen_safe_source_case_id"] = case_id
-    report["reopen_safe_control_map_json"] = str(control_map_path)
+    report[f"{map_kind.replace('-', '_')}_control_type"] = control_type
+    report[f"{map_kind.replace('-', '_')}_source_case_id"] = case_id
+    report[f"{map_kind.replace('-', '_')}_control_map_json"] = str(control_map_path)
     return report
 
 
@@ -239,16 +280,18 @@ def patch_hmi_donor(
     page = parse_page_data(raw[entry.data_offset : entry.data_offset + entry.length])
     blocks_by_name = {block.objname: block for block in page.blocks if block.objname}
     operations: list[dict[str, Any]] = []
+    object_aliases: dict[str, str] = {}
 
     for operation in normalized_spec["operations"]:
         kind = operation["kind"]
         if kind == "delete":
-            objname = operation["object"]
+            objname = _resolve_object_ref(operation["object"], object_aliases)
             if objname == page.page_name:
                 raise ValueError("Refusing to delete the page root block")
             if objname not in blocks_by_name:
                 raise ValueError(f"Delete target {objname!r} not found in {donor_hmi}")
             page.blocks = [block for block in page.blocks if block.objname != objname]
+            _scrub_deleted_object_event_refs(page.blocks, {objname})
             operations.append({"kind": "delete", "object": objname})
             blocks_by_name.pop(objname, None)
             continue
@@ -257,13 +300,24 @@ def patch_hmi_donor(
             source_hmi = Path(operation["source_hmi"]).resolve()
             source_page = operation["source_page"]
             source_obj = operation["source_object"]
-            target_obj = operation["target_object"]
+            target_obj = operation.get("target_object")
+            target_obj_strategy = operation.get("target_object_strategy")
+            target_obj_alias = operation.get("target_object_alias")
             x = int(operation["x"])
             y = int(operation["y"])
             w = int(operation["w"])
             h = int(operation["h"])
+            if target_obj not in (None, "") and str(target_obj).startswith("@"):
+                raise ValueError("Graft target_object cannot use @alias syntax")
+            if target_obj in (None, ""):
+                if target_obj_strategy != "compatible-auto":
+                    raise ValueError("Graft target_object is required unless target_object_strategy=compatible-auto is set")
+                target_obj = compatible_target_object_name(set(blocks_by_name), source_obj)
             if target_obj in blocks_by_name:
                 raise ValueError(f"Graft target object {target_obj!r} already exists")
+            if target_obj_alias:
+                if target_obj_alias in object_aliases:
+                    raise ValueError(f"Graft target_object_alias {target_obj_alias!r} is already bound")
             source_inspection = inspect_hmi(source_hmi)
             source_raw = source_hmi.read_bytes()
             source_entry = next((item for item in source_inspection.entries if item.name == source_page), None)
@@ -287,6 +341,8 @@ def patch_hmi_donor(
             cloned.set_int("endy", y + h - 1, width=2)
             page.blocks.append(cloned)
             blocks_by_name[target_obj] = cloned
+            if target_obj_alias:
+                object_aliases[target_obj_alias] = target_obj
             operations.append(
                 {
                     "kind": "graft",
@@ -294,6 +350,8 @@ def patch_hmi_donor(
                     "source_page": source_page,
                     "source_object": source_obj,
                     "target_object": target_obj,
+                    "target_object_strategy": target_obj_strategy,
+                    "target_object_alias": target_obj_alias,
                     "x": x,
                     "y": y,
                     "w": w,
@@ -303,7 +361,7 @@ def patch_hmi_donor(
             continue
 
         if kind == "move":
-            objname = operation["object"]
+            objname = _resolve_object_ref(operation["object"], object_aliases)
             x = int(operation["x"])
             y = int(operation["y"])
             w = int(operation["w"])
@@ -319,7 +377,7 @@ def patch_hmi_donor(
             continue
 
         if kind == "set-int":
-            objname = operation["object"]
+            objname = _resolve_object_ref(operation["object"], object_aliases)
             field_name = operation["field"]
             value = int(operation["value"])
             block = _require_block(blocks_by_name, objname)
@@ -334,7 +392,7 @@ def patch_hmi_donor(
             continue
 
         if kind == "set-str":
-            objname = operation["object"]
+            objname = _resolve_object_ref(operation["object"], object_aliases)
             field_name = operation["field"]
             value = str(operation["value"])
             block = _require_block(blocks_by_name, objname)
@@ -449,41 +507,51 @@ def patch_hmi_donor(
 
     if probe_lowlevel:
         probe_dir = out_dir / "official_lowlevel_probe"
-        command = [
-            sys.executable,
-            str(Path(__file__).resolve().parents[1] / "tools" / "official_hmi_lowlevel_probe.py"),
-            str(generated_hmi),
-            "--out-dir",
-            str(probe_dir),
-        ]
-        proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
-        if proc.returncode:
-            raise RuntimeError(
-                "official_hmi_lowlevel_probe.py failed with "
-                f"exit code {proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
-            )
-        lowlevel_report = json.loads(proc.stdout)
+        lowlevel_report = probe_official_lowlevel_hmi(
+            generated_hmi,
+            probe_dir,
+            run_compile=True,
+            patch_spec_payload=normalized_spec,
+            request_context={
+                "probe_source": "patch_hmi_donor",
+                "case_id": normalized_spec["case_id"],
+            },
+        )
         report["official_lowlevel_probe"] = lowlevel_report
         report["open_lowlevel_ok"] = lowlevel_report["accepted_by_open_lowlevel"]
         report["compile_lowlevel_ok"] = lowlevel_report["accepted_by_compile_lowlevel"]
+        report["official_lowlevel_probe_cache_hit"] = bool(lowlevel_report.get("cache_hit"))
+        report["official_lowlevel_probe_cache_miss"] = bool(lowlevel_report.get("cache_miss"))
+        report["official_lowlevel_probe_cache_key"] = lowlevel_report.get("cache_key")
         open_json = probe_dir / "open_lowlevel.result.json"
         compile_json = probe_dir / "compile_lowlevel.result.json"
         official_json = probe_dir / f"{generated_hmi.stem}.official_lowlevel.json"
+        cache_manifest_json = probe_dir / "cache_manifest.json"
         open_output_json = out_dir / "open_lowlevel.output.json"
         compile_output_json = out_dir / "compile_lowlevel.output.json"
         official_output_json = out_dir / "official_lowlevel_probe.json"
+        cache_manifest_output_json = out_dir / "official_lowlevel_probe.cache_manifest.json"
         if open_json.exists():
             shutil.copy2(open_json, open_output_json)
         if compile_json.exists():
             shutil.copy2(compile_json, compile_output_json)
         if official_json.exists():
             shutil.copy2(official_json, official_output_json)
+        if cache_manifest_json.exists():
+            shutil.copy2(cache_manifest_json, cache_manifest_output_json)
         report["open_lowlevel_output_json"] = str(open_output_json) if open_output_json.exists() else None
         report["compile_lowlevel_output_json"] = str(compile_output_json) if compile_output_json.exists() else None
         report["official_lowlevel_probe_json"] = str(official_output_json) if official_output_json.exists() else None
+        report["official_lowlevel_probe_cache_manifest_json"] = (
+            str(cache_manifest_output_json) if cache_manifest_output_json.exists() else None
+        )
         manifest["open_lowlevel_output_json"] = report["open_lowlevel_output_json"]
         manifest["compile_lowlevel_output_json"] = report["compile_lowlevel_output_json"]
         manifest["official_lowlevel_probe_json"] = report["official_lowlevel_probe_json"]
+        manifest["official_lowlevel_probe_cache_manifest_json"] = report["official_lowlevel_probe_cache_manifest_json"]
+        manifest["official_lowlevel_probe_cache_hit"] = report["official_lowlevel_probe_cache_hit"]
+        manifest["official_lowlevel_probe_cache_miss"] = report["official_lowlevel_probe_cache_miss"]
+        manifest["official_lowlevel_probe_cache_key"] = report["official_lowlevel_probe_cache_key"]
     else:
         report["open_lowlevel_ok"] = None
         report["compile_lowlevel_ok"] = None
@@ -628,6 +696,19 @@ def _maybe_apply_experimental_shadow_sync(
             report=report,
         )
     if shadow_sync_mode == SHADOW_SYNC_MODE_AUTO:
+        if operation_kinds == {"set-str"}:
+            auto_report = _maybe_promote_active_named_page(
+                generated_hmi=generated_hmi,
+                generated_raw=generated_raw,
+                generated_inspection=generated_inspection,
+                generated_candidates_before=generated_candidates_before,
+                normalized_spec=normalized_spec,
+                report=report,
+            )
+            if auto_report.get("applied"):
+                return auto_report
+            report["reason"] = f"auto_set_str_promote_failed:{auto_report.get('reason')}"
+            return report
         if not (operation_kinds & {"delete", "graft"}):
             report["reason"] = "auto_skipped_non_structural_operation"
             return report
@@ -700,8 +781,8 @@ def _maybe_apply_experimental_shadow_sync(
         report["native_named_0pa_before"]["objects"] = native_page_objects
         return report
 
-    delete_index = int(match["delete_object_index"])
-    rewritten_page = _rewrite_native_named_page_delete(native_page_before, delete_index)
+    delete_indices = [int(index) for index in match["delete_object_indices"]]
+    rewritten_page = _rewrite_native_named_page_delete(native_page_before, delete_indices)
     patched_raw = bytearray(generated_raw)
     patched_raw[native_page.data_offset : native_page.data_offset + native_page.length] = rewritten_page
     try:
@@ -787,15 +868,18 @@ def _match_case83_delete_shadow_sync(
     if not normalized_spec.get("exact_donor", False):
         return {"eligible": False, "reason": "non_exact_donor"}
     operations = normalized_spec["operations"]
-    if len(operations) != 1 or operations[0].get("kind") != "delete":
+    if not operations or any(op.get("kind") != "delete" for op in operations):
         return {"eligible": False, "reason": "operation_not_calibrated"}
-    delete_object = str(operations[0]["object"])
     donor_expected = CASE83_DELETE_B1_SHADOW_SYNC["expected_donor_objects"]
-    if delete_object == donor_expected[0]["name"]:
+    delete_targets = [str(op["object"]) for op in operations]
+    if len(set(delete_targets)) != len(delete_targets):
+        return {"eligible": False, "reason": "duplicate_delete_target"}
+    if donor_expected[0]["name"] in delete_targets:
         return {"eligible": False, "reason": "delete_root_not_allowed"}
-    expected_after_delete = [item for item in donor_expected if item["name"] != delete_object]
-    if len(expected_after_delete) != len(donor_expected) - 1:
+    donor_names = {item["name"] for item in donor_expected}
+    if any(name not in donor_names for name in delete_targets):
         return {"eligible": False, "reason": "delete_target_not_in_case83_family"}
+    expected_after_delete = [item for item in donor_expected if item["name"] not in set(delete_targets)]
 
     donor_active = next((item for item in donor_candidates if item["entry_name"] == "0.pa"), None)
     if donor_active is None or not donor_active["parse_ok"]:
@@ -831,16 +915,16 @@ def _match_case83_delete_shadow_sync(
         return {"eligible": False, "reason": "authoritative_shadow_not_unique"}
     if authoritative[0]["objects"] != donor_expected:
         return {"eligible": False, "reason": "authoritative_shadow_object_graph_mismatch"}
-    delete_index = next((i for i, item in enumerate(donor_expected) if item["name"] == delete_object), -1)
-    if delete_index < 0:
+    delete_indices = [i for i, item in enumerate(donor_expected) if item["name"] in set(delete_targets)]
+    if len(delete_indices) != len(delete_targets):
         return {"eligible": False, "reason": "delete_target_index_not_found"}
     return {
         "eligible": True,
         "reason": "matched_case83_native_page_delete_manifest",
         "authoritative_shadow_index": int(authoritative[0]["index"]),
         "active_entry_index": int(generated_active["index"]),
-        "delete_object": delete_object,
-        "delete_object_index": delete_index,
+        "delete_objects": delete_targets,
+        "delete_object_indices": delete_indices,
         "expected_objects_after_delete": expected_after_delete,
     }
 
@@ -944,17 +1028,113 @@ def _entry_data(raw: bytes, entry) -> bytes:
     return raw[entry.data_offset : entry.data_offset + entry.length]
 
 
-def _rewrite_native_named_page_delete(page_bytes: bytes, delete_index: int) -> bytes:
+def _scrub_deleted_object_event_refs(blocks: list[Any], deleted_objects: set[str]) -> None:
+    if not deleted_objects:
+        return
+    for block in blocks:
+        if not getattr(block, "event_tokens", None):
+            continue
+        block.event_tokens = _scrub_event_tokens(list(block.event_tokens), deleted_objects)
+
+
+def _scrub_event_tokens(tokens: list[str], deleted_objects: set[str]) -> list[str]:
+    if not tokens:
+        return tokens
+    scrubbed: list[str] = []
+    for header, lines in _iter_event_sections(tokens):
+        kept_lines = [line for line in lines if not _line_references_deleted_object(line, deleted_objects)]
+        scrubbed.append(_rewrite_event_header_count(header, len(kept_lines)))
+        scrubbed.extend(kept_lines)
+    return scrubbed
+
+
+def _iter_event_sections(tokens: list[str]) -> list[tuple[str, list[str]]]:
+    sections: list[tuple[str, list[str]]] = []
+    cursor = 0
+    while cursor < len(tokens):
+        header = tokens[cursor]
+        cursor += 1
+        line_count = _event_header_line_count(header)
+        lines = tokens[cursor : cursor + line_count]
+        cursor += line_count
+        sections.append((header, lines))
+    return sections
+
+
+def _event_header_line_count(header: str) -> int:
+    match = EVENT_HEADER_RE.match(header)
+    if not match:
+        return 0
+    try:
+        return int(match.group(2))
+    except ValueError:
+        return 0
+
+
+def _rewrite_event_header_count(header: str, line_count: int) -> str:
+    match = EVENT_HEADER_RE.match(header)
+    if not match:
+        return header
+    return f"{match.group(1)}-{line_count}"
+
+
+def _line_references_deleted_object(line: str, deleted_objects: set[str]) -> bool:
+    for objname in deleted_objects:
+        if re.search(rf"(?<![A-Za-z0-9_]){re.escape(objname)}(?![A-Za-z0-9_])", line):
+            return True
+    return False
+
+
+def compatible_target_object_name(existing_names: set[str], source_objname: str) -> str:
+    match = TRAILING_DIGITS_RE.match(source_objname)
+    if match:
+        prefix, digits = match.groups()
+        width = len(digits)
+        for index in range(10**width - 1, -1, -1):
+            candidate = f"{prefix}{index:0{width}d}"
+            if candidate != source_objname and candidate not in existing_names:
+                return candidate
+    if len(source_objname) > 1:
+        for suffix in "9876543210zyxwvutsrqponmlkjihgfedcba":
+            candidate = f"{source_objname[:-1]}{suffix}"
+            if candidate != source_objname and candidate not in existing_names:
+                return candidate
+    for suffix in "zyxwvutsrqponmlkjihgfedcba9876543210":
+        candidate = f"{source_objname}{suffix}"
+        if candidate not in existing_names:
+            return candidate
+    raise ValueError(f"Unable to derive a compatible unique object name from {source_objname!r}")
+
+
+def _resolve_object_ref(value: str, aliases: dict[str, str]) -> str:
+    text = str(value)
+    if not text.startswith("@"):
+        return text
+    alias = text[1:]
+    if alias not in aliases:
+        raise ValueError(f"Unknown graft alias reference {text!r}")
+    return aliases[alias]
+
+
+def _rewrite_native_named_page_delete(page_bytes: bytes, delete_indices: list[int]) -> bytes:
     page = bytearray(page_bytes)
     object_count = struct.unpack_from("<I", page, PAGE_DATAINFO_QTY_OFFSET)[0]
-    if object_count <= delete_index:
-        raise ValueError(f"delete_index {delete_index} outside page datainformation count {object_count}")
     table_offset = struct.unpack_from("<I", page, PAGE_DATAINFO_ADDR_OFFSET)[0]
-    for index in range(delete_index, object_count - 1):
-        src = table_offset + (index + 1) * PAGE_DATAINFO_RECORD_SIZE
-        dst = table_offset + index * PAGE_DATAINFO_RECORD_SIZE
-        page[dst : dst + PAGE_DATAINFO_RECORD_SIZE] = page[src : src + PAGE_DATAINFO_RECORD_SIZE]
-    return refresh_page_safe_header(page, datainformation_qyt=object_count - 1)
+    delete_set = set(int(index) for index in delete_indices)
+    if not delete_set:
+        return bytes(page)
+    if min(delete_set) < 0 or max(delete_set) >= object_count:
+        raise ValueError(f"delete_indices {sorted(delete_set)} outside page datainformation count {object_count}")
+    rows = [
+        bytes(page[table_offset + index * PAGE_DATAINFO_RECORD_SIZE : table_offset + (index + 1) * PAGE_DATAINFO_RECORD_SIZE])
+        for index in range(object_count)
+    ]
+    kept_rows = [row for index, row in enumerate(rows) if index not in delete_set]
+    cursor = table_offset
+    for row in kept_rows:
+        page[cursor : cursor + PAGE_DATAINFO_RECORD_SIZE] = row
+        cursor += PAGE_DATAINFO_RECORD_SIZE
+    return refresh_page_safe_header(page, datainformation_qyt=len(kept_rows))
 
 
 def _maybe_promote_active_named_page(
@@ -979,7 +1159,7 @@ def _maybe_promote_active_named_page(
         report["reason"] = "generated_active_page_missing"
         return report
 
-    expected_objects = normalized_spec["expectations"]["objects"] or report["actual_objects"]
+    expected_objects = normalized_spec["expectations"]["objects"] or active_candidate["objects"]
     if active_candidate["objects"] != expected_objects:
         report["reason"] = "generated_active_object_graph_mismatch"
         return report
@@ -1151,13 +1331,20 @@ def normalize_patch_spec(spec: dict[str, Any]) -> dict[str, Any]:
             )
             continue
         if kind == "graft":
+            target_object = raw_op.get("target_object")
+            target_object_strategy = raw_op.get("target_object_strategy")
+            target_object_alias = raw_op.get("target_object_alias")
+            if target_object in (None, "") and target_object_strategy != "compatible-auto":
+                raise ValueError(f"Patch operation #{index} missing target_object")
             normalized_ops.append(
                 {
                     "kind": "graft",
                     "source_hmi": str(Path(_required_str(raw_op, "source_hmi", index)).resolve()),
                     "source_page": _required_str(raw_op, "source_page", index),
                     "source_object": _required_str(raw_op, "source_object", index),
-                    "target_object": _required_str(raw_op, "target_object", index),
+                    "target_object": None if target_object in (None, "") else str(target_object),
+                    "target_object_strategy": None if target_object_strategy in (None, "") else str(target_object_strategy),
+                    "target_object_alias": None if target_object_alias in (None, "") else str(target_object_alias),
                     "x": _required_int(raw_op, "x", index),
                     "y": _required_int(raw_op, "y", index),
                     "w": _required_int(raw_op, "w", index),

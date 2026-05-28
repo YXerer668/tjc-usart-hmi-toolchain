@@ -13,7 +13,7 @@ def test_package_manifest_file_set_has_portable_entrypoints() -> None:
     assert "tools/run_touchsafe_pipeline.ps1" in files
     assert "tools/official_gui_host_select.py" in files
     assert "tools/OfficialGuiHostSelect.cs" in files
-    assert "skills/usarthmi-headless-toolchain/SKILL.md" in files
+    assert "skills" in package_tool.REQUIRED_DIRS
 
 
 def test_package_excludes_generated_hmi_and_tft_payloads() -> None:

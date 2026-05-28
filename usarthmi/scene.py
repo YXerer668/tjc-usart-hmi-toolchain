@@ -7,132 +7,55 @@ from typing import Any
 
 import yaml
 
+from .widgets import (
+    HMI_ONLY_FIXTURE_WIDGET_TYPES,
+    SUPPORTED_WIDGET_TYPES,
+    UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES,
+    WIDGET_TYPE_ALIASES,
+    normalize_widget_type as _normalize_widget_type,
+)
+
 
 class SceneError(ValueError):
     """Raised when a scene file is invalid."""
 
 
-SUPPORTED_WIDGET_TYPES = {
-    "animation",
-    "audio",
-    "button",
-    "checkbox",
-    "dual-button",
-    "dualstate-button",
-    "external-picture",
-    "gauge",
-    "image",
-    "number",
-    "qrcode",
-    "radio",
-    "slider",
-    "state-button",
-    "scrolling-text",
-    "text",
-    "timer",
-    "touch-capture",
-    "variable",
-    "waveform",
-    "video",
-    "xfloat",
-    "combobox",
-    "hotspot",
-    "progress",
-    "crop-image",
+SUPPORTED_WIDGET_TYPE_ALIASES = dict(WIDGET_TYPE_ALIASES)
+LIVE_SMOKE_SCHEMA_VERSION = 1
+LIVE_SMOKE_ALLOWED_KEYS = {
+    "version",
+    "auto",
+    "auto_expectations",
+    "auto_steps",
+    "page_id",
+    "select_page",
+    "restore_page",
+    "expectations",
+    "set_expectations",
+    "steps",
+    "generation_warnings",
 }
-
-SUPPORTED_WIDGET_TYPE_ALIASES = {
-    "animated-image": "animation",
-    "animated image": "animation",
-    "animation": "animation",
-    "gmov": "animation",
-    "moving-picture": "animation",
-    "moving picture": "animation",
-    "audio": "audio",
-    "btn": "button",
-    "checkboxes": "checkbox",
-    "dualbutton": "dual-button",
-    "dual-state-button": "dual-button",
-    "dual state button": "dual-button",
-    "dual-state": "dual-button",
-    "dualb": "dual-button",
-    "external-picture": "external-picture",
-    "external picture": "external-picture",
-    "external-image": "external-picture",
-    "external image": "external-picture",
-    "expicture": "external-picture",
-    "expic": "external-picture",
-    "gauge1": "gauge",
-    "hotspot-area": "hotspot",
-    "hotspot-touch": "hotspot",
-    "hotspot-touch-area": "hotspot",
-    "pic": "image",
-    "picture": "image",
-    "progressbar": "progress",
-    "qrcode": "qrcode",
-    "radio-button": "radio",
-    "marquee": "scrolling-text",
-    "scrolling": "scrolling-text",
-    "scrolling text": "scrolling-text",
-    "scrolling-text": "scrolling-text",
-    "sliding-text": "sliding-text",
-    "sliding text": "sliding-text",
-    "sltext": "sliding-text",
-    "statebutton": "state-button",
-    "state-button": "state-button",
-    "state_btn": "state-button",
-    "state button": "state-button",
-    "toggle": "state-button",
-    "touchcap": "touch-capture",
-    "touch-capture": "touch-capture",
-    "touch capture": "touch-capture",
-    "touch-capture-area": "touch-capture",
-    "txt": "text",
-    "sound": "audio",
-    "variable": "variable",
-    "var": "variable",
-    "video": "video",
-    "wave": "waveform",
-    "waveform": "waveform",
-    "float": "xfloat",
-    "virtual-float": "xfloat",
-    "xfloat": "xfloat",
-    "combo": "combobox",
-    "combobox": "combobox",
-    "combo-box": "combobox",
-    "wav": "audio",
-    "wave-audio": "audio",
-    "select-text": "text-select",
-    "select text": "text-select",
-    "text-select": "text-select",
-    "text select": "text-select",
-    "textselect": "text-select",
-    "datarecord": "data-record",
-    "data-record": "data-record",
-    "data record": "data-record",
-    "filebrowser": "file-browser",
-    "file-browser": "file-browser",
-    "file browser": "file-browser",
-    "filestream": "file-stream",
-    "file-stream": "file-stream",
-    "file stream": "file-stream",
-}
-UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES = {
-    "text-select": "case_38_text_select was dropped by the official compiler for TJC8048X543_011C",
-    "sliding-text": "case_41_sltext was dropped by the official compiler for TJC8048X543_011C",
-    "data-record": "case_42_datarecord was dropped by the official compiler for TJC8048X543_011C",
-    "file-browser": "case_43_filebrowser was dropped by the official compiler for TJC8048X543_011C",
-    "file-stream": "case_44_filestream was dropped by the official compiler for TJC8048X543_011C",
+LIVE_SMOKE_EXPECTATION_ALLOWED_KEYS = {"target", "name", "expected", "expected_kind", "attempts"}
+LIVE_SMOKE_STEP_ALLOWED_KEYS = {
+    "label",
+    "command",
+    "expected_kind",
+    "expected",
+    "expected_value",
+    "expected_min",
+    "expected_max",
+    "expected_hex",
+    "expected_ascii_preview",
+    "delay_ms",
+    "attempts",
 }
 
 
 def normalize_widget_type(widget_type: Any) -> str:
-    if not isinstance(widget_type, str):
-        raise SceneError("widget.type must be a non-empty string")
-    raw = widget_type.strip().lower()
-    if not raw:
-        raise SceneError("widget.type must be a non-empty string")
-    return SUPPORTED_WIDGET_TYPE_ALIASES.get(raw, raw)
+    try:
+        return _normalize_widget_type(widget_type)
+    except ValueError as exc:
+        raise SceneError(str(exc)) from exc
 
 
 @dataclass(slots=True)
@@ -276,6 +199,8 @@ def validate_scene(payload: dict[str, Any]) -> SceneModel:
     if not isinstance(assets, dict):
         raise SceneError("assets must be an object map")
 
+    project = _validate_project(project)
+
     width = int(canvas.get("width", 0))
     height = int(canvas.get("height", 0))
     if width <= 0 or height <= 0:
@@ -314,6 +239,156 @@ def validate_scene(payload: dict[str, Any]) -> SceneModel:
     )
 
 
+def _validate_project(project: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(project)
+    normalized["live_smoke"] = _validate_live_smoke(project.get("live_smoke"))
+    if normalized["live_smoke"] is None:
+        normalized.pop("live_smoke", None)
+    return normalized
+
+
+def _validate_live_smoke(payload: Any) -> dict[str, Any] | None:
+    if payload is None:
+        return None
+    if not isinstance(payload, dict):
+        raise SceneError("project.live_smoke must be an object")
+    unknown_keys = sorted(set(payload) - LIVE_SMOKE_ALLOWED_KEYS)
+    if unknown_keys:
+        raise SceneError(f"project.live_smoke has unsupported keys: {', '.join(unknown_keys)}")
+    normalized: dict[str, Any] = {}
+    version = payload.get("version", LIVE_SMOKE_SCHEMA_VERSION)
+    if not isinstance(version, int) or version != LIVE_SMOKE_SCHEMA_VERSION:
+        raise SceneError(f"project.live_smoke.version must be {LIVE_SMOKE_SCHEMA_VERSION}")
+    normalized["version"] = version
+    for key in ("auto", "auto_expectations", "auto_steps"):
+        if key in payload:
+            value = payload[key]
+            if not isinstance(value, bool):
+                raise SceneError(f"project.live_smoke.{key} must be a boolean")
+            normalized[key] = value
+    if "page_id" in payload:
+        normalized["page_id"] = _validate_live_smoke_int(payload["page_id"], "project.live_smoke.page_id", minimum=0)
+    for key in ("select_page", "restore_page"):
+        if key in payload:
+            normalized[key] = _validate_live_smoke_page_selector(payload[key], f"project.live_smoke.{key}")
+    if "expectations" in payload:
+        normalized["expectations"] = _validate_live_smoke_expectations(payload["expectations"], "project.live_smoke.expectations")
+    if "set_expectations" in payload:
+        normalized["set_expectations"] = _validate_live_smoke_expectations(
+            payload["set_expectations"],
+            "project.live_smoke.set_expectations",
+        )
+    if "steps" in payload:
+        normalized["steps"] = _validate_live_smoke_steps(payload["steps"], "project.live_smoke.steps")
+    if "generation_warnings" in payload:
+        normalized["generation_warnings"] = _validate_live_smoke_string_list(
+            payload["generation_warnings"],
+            "project.live_smoke.generation_warnings",
+        )
+    return normalized
+
+
+def _validate_live_smoke_page_selector(value: Any, context: str) -> str | int:
+    if isinstance(value, bool):
+        raise SceneError(f"{context} must be an integer or non-empty string")
+    if isinstance(value, int):
+        if value < 0:
+            raise SceneError(f"{context} must be >= 0")
+        return value
+    if isinstance(value, str) and value.strip():
+        return value
+    raise SceneError(f"{context} must be an integer or non-empty string")
+
+
+def _validate_live_smoke_expectations(payload: Any, context: str) -> dict[str, Any] | list[dict[str, Any]]:
+    if isinstance(payload, dict):
+        normalized: dict[str, Any] = {}
+        for key, value in payload.items():
+            if not isinstance(key, str) or not key.strip():
+                raise SceneError(f"{context} keys must be non-empty strings")
+            normalized[key] = value
+        return normalized
+    if not isinstance(payload, list):
+        raise SceneError(f"{context} must be an object map or list")
+    normalized_list: list[dict[str, Any]] = []
+    for index, item in enumerate(payload):
+        if not isinstance(item, dict):
+            raise SceneError(f"{context}[{index}] must be an object")
+        unknown_keys = sorted(set(item) - LIVE_SMOKE_EXPECTATION_ALLOWED_KEYS)
+        if unknown_keys:
+            raise SceneError(f"{context}[{index}] has unsupported keys: {', '.join(unknown_keys)}")
+        target = item.get("target", item.get("name"))
+        if not isinstance(target, str) or not target.strip():
+            raise SceneError(f"{context}[{index}] requires non-empty target")
+        normalized = dict(item)
+        normalized["target"] = target
+        attempts = item.get("attempts", 3)
+        normalized["attempts"] = _validate_live_smoke_int(attempts, f"{context}[{index}].attempts", minimum=1)
+        expected_kind = item.get("expected_kind")
+        if expected_kind is not None and (not isinstance(expected_kind, str) or not expected_kind.strip()):
+            raise SceneError(f"{context}[{index}].expected_kind must be a non-empty string when provided")
+        normalized_list.append(normalized)
+    return normalized_list
+
+
+def _validate_live_smoke_steps(payload: Any, context: str) -> list[dict[str, Any]]:
+    if not isinstance(payload, list):
+        raise SceneError(f"{context} must be a list")
+    normalized: list[dict[str, Any]] = []
+    for index, item in enumerate(payload):
+        if not isinstance(item, dict):
+            raise SceneError(f"{context}[{index}] must be an object")
+        unknown_keys = sorted(set(item) - LIVE_SMOKE_STEP_ALLOWED_KEYS)
+        if unknown_keys:
+            raise SceneError(f"{context}[{index}] has unsupported keys: {', '.join(unknown_keys)}")
+        command = item.get("command")
+        if not isinstance(command, str) or not command.strip():
+            raise SceneError(f"{context}[{index}].command must be a non-empty string")
+        label = item.get("label")
+        if label is not None and (not isinstance(label, str) or not label.strip()):
+            raise SceneError(f"{context}[{index}].label must be a non-empty string when provided")
+        expected_kind = item.get("expected_kind")
+        if expected_kind is not None and (not isinstance(expected_kind, str) or not expected_kind.strip()):
+            raise SceneError(f"{context}[{index}].expected_kind must be a non-empty string when provided")
+        normalized_item = dict(item)
+        normalized_item["attempts"] = _validate_live_smoke_int(
+            item.get("attempts", 3),
+            f"{context}[{index}].attempts",
+            minimum=1,
+        )
+        if "delay_ms" in item:
+            normalized_item["delay_ms"] = _validate_live_smoke_int(
+                item["delay_ms"],
+                f"{context}[{index}].delay_ms",
+                minimum=0,
+            )
+        normalized.append(normalized_item)
+    return normalized
+
+
+def _validate_live_smoke_string_list(payload: Any, context: str) -> list[str]:
+    if not isinstance(payload, list):
+        raise SceneError(f"{context} must be a list of strings")
+    normalized: list[str] = []
+    for index, item in enumerate(payload):
+        if not isinstance(item, str) or not item.strip():
+            raise SceneError(f"{context}[{index}] must be a non-empty string")
+        normalized.append(item)
+    return normalized
+
+
+def _validate_live_smoke_int(value: Any, context: str, *, minimum: int) -> int:
+    if isinstance(value, bool):
+        raise SceneError(f"{context} must be an integer >= {minimum}")
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise SceneError(f"{context} must be an integer >= {minimum}") from exc
+    if parsed < minimum:
+        raise SceneError(f"{context} must be >= {minimum}")
+    return parsed
+
+
 def _validate_page(payload: dict[str, Any]) -> PageSpec:
     if not isinstance(payload, dict):
         raise SceneError("Each page must be an object")
@@ -346,7 +421,7 @@ def _validate_widget(payload: dict[str, Any]) -> WidgetSpec:
     if widget_type in UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES:
         reason = UNSUPPORTED_CURRENT_TARGET_WIDGET_TYPES[widget_type]
         raise SceneError(f"widget '{widget_id}' has unsupported type '{widget_type}' for the current target: {reason}")
-    if widget_type not in SUPPORTED_WIDGET_TYPES:
+    if widget_type not in SUPPORTED_WIDGET_TYPES and widget_type not in HMI_ONLY_FIXTURE_WIDGET_TYPES:
         raise SceneError(f"widget '{widget_id}' has unsupported type '{widget_type}'")
 
     for key in ("x", "y", "w", "h"):

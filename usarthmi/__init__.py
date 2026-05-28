@@ -1,6 +1,88 @@
-"""USART HMI command line tooling."""
+"""USART HMI Python package."""
 
-__all__ = ["__version__"]
+__all__ = [
+    "__version__",
+    "add_scene_asset_document",
+    "add_scene_page_document",
+    "add_scene_widget_document",
+    "append_scene_event_command_document",
+    "build_scene_artifacts",
+    "check_hmi_roundtrip_file",
+    "check_next_probe_invariants",
+    "check_scene_file",
+    "clear_scene_event_slot",
+    "copy_scene_widget_document",
+    "copy_scene_widget_to_page_document",
+    "create_scene_file",
+    "cut_scene_widget_document",
+    "delete_scene_asset_document",
+    "delete_scene_page_document",
+    "delete_scene_widget_document",
+    "design_align_widgets_document",
+    "design_distribute_widgets_document",
+    "design_match_size_widgets_document",
+    "design_move_widget_document",
+    "design_resize_widget_document",
+    "duplicate_scene_page_document",
+    "duplicate_scene_widget_document",
+    "edit_scene_event_command_document",
+    "export_scene_bundle_document",
+    "get_capability_manifest",
+    "get_builder_calibration_status",
+    "get_current_target_completion_audit",
+    "get_current_target_status_summary",
+    "get_editor_capability_manifest",
+    "get_editor_completion_audit",
+    "get_next_live_probe_bundle",
+    "get_page1_filebrowser_frontier_report",
+    "get_page1_filebrowser_native_init_compare_targets_report",
+    "get_scene_event_slot",
+    "get_tft_readiness",
+    "get_widget_template_document",
+    "get_widget_capability",
+    "generate_agent_preview",
+    "generate_lowlevel_compatible_hmi_fixture",
+    "generate_reopen_safe_hmi_fixture",
+    "graph_scene_event_navigation",
+    "import_hmi_file",
+    "inspect_hmi_file",
+    "inspect_tft_event_index_batch_files",
+    "inspect_tft_event_index_file",
+    "inspect_tft_file",
+    "lint_scene_event_logic",
+    "list_event_snippets",
+    "list_scene_event_slots",
+    "list_scene_event_commands_document",
+    "list_scene_asset_documents",
+    "list_widget_template_documents",
+    "list_widget_capabilities",
+    "list_tft_models",
+    "move_scene_widget_document",
+    "paste_scene_widget_document",
+    "patch_hmi_donor_file",
+    "replay_agent_patch_document",
+    "run_next_live_probe",
+    "run_scene_smoke_document",
+    "run_scene_scenario_document",
+    "save_scene_file_as",
+    "set_scene_event_slot",
+    "simulate_scene_event_document",
+    "update_scene_asset_document",
+    "update_scene_page_document",
+    "update_scene_project_document",
+    "update_scene_widget_document",
+    "validate_scene_document",
+    "validate_scene_file",
+]
 
 __version__ = "0.1.0"
 
+_API_EXPORTS = set(__all__) - {"__version__"}
+
+
+def __getattr__(name: str):
+    if name in _API_EXPORTS:
+        from . import api
+
+        return getattr(api, name)
+    raise AttributeError(f"module 'usarthmi' has no attribute {name!r}")

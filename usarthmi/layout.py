@@ -66,7 +66,7 @@ def _resolve_children(widgets: list[WidgetSpec], layout: dict, x: int, y: int, w
 
 
 def _is_nonvisual_widget(widget: WidgetSpec) -> bool:
-    return widget.type in {"audio", "timer", "touch-capture", "variable"}
+    return widget.type in {"audio", "timer", "touch-capture", "variable", "file-stream"}
 
 
 def _resolve_nonvisual_widget(widget: WidgetSpec, x: int, y: int) -> None:

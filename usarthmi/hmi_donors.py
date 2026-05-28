@@ -6,6 +6,9 @@ from typing import Iterable
 
 from .tft_patch import DEFAULT_CASE_ROOT
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DONOR_FIXTURE_ROOT = REPO_ROOT / "reverse_usarthmi" / "hmi_donor_lowlevel_probe_20260522"
+
 
 @dataclass(frozen=True, slots=True)
 class HMIDonor:
@@ -19,10 +22,13 @@ class HMIDonor:
     lowlevel_open_accepted: bool | None = None
     lowlevel_compile_accepted: bool | None = None
     hmi_relative_path: str = "lcd_test.HMI"
+    hmi_path_override: str | None = None
     notes: str | None = None
 
     @property
     def hmi_path(self) -> Path:
+        if self.hmi_path_override:
+            return Path(self.hmi_path_override)
         return Path(DEFAULT_CASE_ROOT) / self.case_name / self.hmi_relative_path
 
     def matches_signature(self, signature: Iterable[tuple[str | None, str | None]]) -> bool:
@@ -44,6 +50,53 @@ class HMIDonor:
 
 
 HMI_COMPLEX_DONORS: tuple[HMIDonor, ...] = (
+    HMIDonor(
+        donor_id="page0-bar1-only-exact-delete-from-case83",
+        case_name="",
+        block_signature=(
+            ("page0", "y"),
+            ("t0", "t"),
+            ("b0", "b"),
+            ("p0", "p"),
+            ("bar1", "j"),
+        ),
+        evidence="examples/advanced_direct_tft_demo/bar1_compile_positive_donor_2026-05-23.json",
+        reopen_preserved_blocks=True,
+        compile_success=True,
+        compile_preserved_complex_page=True,
+        lowlevel_open_accepted=True,
+        lowlevel_compile_accepted=True,
+        hmi_path_override=str(REPO_ROOT / "reverse_usarthmi" / "case83_delete_data0_select0_b1_probe_20260523" / "generated.HMI"),
+        notes=(
+            "Repo-local compile-positive donor from the exact case83 donor with data0/select0/b1 deleted. "
+            "It preserves page0/t0/b0/p0/bar1 and is low-level compile/reopen positive, making it a "
+            "compile-positive container for progress-only builder pages that keep the baseline controls."
+        ),
+    ),
+    HMIDonor(
+        donor_id="page0-bar1-data0-exact-delete-select0-b1-from-case83",
+        case_name="",
+        block_signature=(
+            ("page0", "y"),
+            ("t0", "t"),
+            ("b0", "b"),
+            ("p0", "p"),
+            ("bar1", "j"),
+            ("data0", "B"),
+        ),
+        evidence="examples/advanced_direct_tft_demo/bar1_data0_compile_positive_donor_2026-05-23.json",
+        reopen_preserved_blocks=True,
+        compile_success=True,
+        compile_preserved_complex_page=True,
+        lowlevel_open_accepted=True,
+        lowlevel_compile_accepted=True,
+        hmi_path_override=str(REPO_ROOT / "reverse_usarthmi" / "case83_delete_select0_b1_probe_20260523" / "generated.HMI"),
+        notes=(
+            "Repo-local compile-positive donor from the exact case83 donor with select0/b1 deleted. "
+            "It preserves page0/t0/b0/p0/bar1/data0 and is low-level compile/reopen positive, making it a "
+            "compile-positive container for builder pages that stop at the data-record stage."
+        ),
+    ),
     HMIDonor(
         donor_id="case80-exact",
         case_name="case_80_datarecord_textselect_official_positive_oracle",
@@ -135,6 +188,20 @@ def iter_proven_complex_donors(
     )
 
 
+def find_proven_complex_hmi_donor_entry(
+    blocks,
+    *,
+    require_compile_preserved_complex_page: bool = True,
+) -> HMIDonor | None:
+    signature = block_signature_of(blocks)
+    for donor in iter_proven_complex_donors(
+        require_compile_preserved_complex_page=require_compile_preserved_complex_page,
+    ):
+        if donor.matches_signature(signature) and donor.hmi_path.exists():
+            return donor
+    return None
+
+
 def iter_lowlevel_accepted_complex_donors() -> tuple[HMIDonor, ...]:
     return tuple(
         donor
@@ -143,18 +210,38 @@ def iter_lowlevel_accepted_complex_donors() -> tuple[HMIDonor, ...]:
     )
 
 
+def find_prefix_proven_complex_hmi_donor_entry(
+    blocks,
+    *,
+    require_compile_preserved_complex_page: bool = True,
+) -> HMIDonor | None:
+    signature = block_signature_of(blocks)
+    matches: list[HMIDonor] = []
+    for donor in iter_proven_complex_donors(
+        require_compile_preserved_complex_page=require_compile_preserved_complex_page,
+    ):
+        if not donor.hmi_path.exists():
+            continue
+        if len(donor.block_signature) >= len(signature):
+            continue
+        if signature[: len(donor.block_signature)] == donor.block_signature:
+            matches.append(donor)
+    if not matches:
+        return None
+    matches.sort(key=lambda donor: len(donor.block_signature), reverse=True)
+    return matches[0]
+
+
 def find_proven_complex_hmi_donor(
     blocks,
     *,
     require_compile_preserved_complex_page: bool = True,
 ) -> Path | None:
-    signature = block_signature_of(blocks)
-    for donor in iter_proven_complex_donors(
+    donor = find_proven_complex_hmi_donor_entry(
+        blocks,
         require_compile_preserved_complex_page=require_compile_preserved_complex_page,
-    ):
-        if donor.matches_signature(signature) and donor.hmi_path.exists():
-            return donor.hmi_path
-    return None
+    )
+    return donor.hmi_path if donor is not None else None
 
 
 def find_lowlevel_accepted_complex_hmi_donor(blocks) -> Path | None:

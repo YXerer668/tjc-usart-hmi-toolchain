@@ -1,0 +1,4 @@
+interface:
+  display_name: "USART HMI Scene Authoring"
+  short_description: "Author and check USART HMI scenes for agent handoff"
+  default_prompt: "Create or edit a USART HMI scene and run the offline preview/check gates."

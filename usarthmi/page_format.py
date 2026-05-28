@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
-FIELD_MARKER_DEFAULT = 0x11
 HEADER_SIZE = 0x38
 EVENT_PREFIXES = (
     "codesdown-",
@@ -121,7 +120,7 @@ class PageBlock:
         encoded = value.encode(encoding, errors="ignore")
         field = self.get_field(name)
         if field is None:
-            self._append_field(name, encoded, FIELD_MARKER_DEFAULT)
+            self._append_field(name, encoded, 0)
             return
         field.value = encoded
 
@@ -133,8 +132,6 @@ class PageBlock:
             return
         size = width or max(1, len(field.value))
         field.value = int(value).to_bytes(size, "little", signed=False)
-        if field.marker is None:
-            field.marker = None
 
     def set_event(self, name_prefix: str, lines: list[str]) -> None:
         events = _parse_event_specs(self.event_tokens)
@@ -152,16 +149,14 @@ class PageBlock:
         parts = [
             len(self.attr_name).to_bytes(4, "little"),
             self.attr_name.encode("ascii"),
-            self.attr_marker.to_bytes(4, "little"),
         ]
         for field in self.fields:
             name_bytes = field.name.encode("ascii")
             if len(name_bytes) > 16:
                 raise ValueError(f"Field name too long: {field.name}")
-            parts.append(name_bytes.ljust(16, b"\x00"))
-            parts.append(field.value)
-            if field.marker is not None:
-                parts.append(field.marker.to_bytes(4, "little"))
+            chunk = name_bytes.ljust(16, b"\x00") + field.value
+            parts.append(len(chunk).to_bytes(4, "little"))
+            parts.append(chunk)
 
         for token in self.event_tokens:
             encoded = _encode_event_token(token)
@@ -171,10 +166,6 @@ class PageBlock:
         return b"".join(parts)
 
     def _append_field(self, name: str, value: bytes, marker: int) -> None:
-        if self.fields:
-            last = self.fields[-1]
-            if last.marker is None:
-                last.marker = FIELD_MARKER_DEFAULT
         self.fields.append(BlockField(name=name, value=value, marker=None))
 
 
@@ -208,6 +199,41 @@ class PageFile:
             table.extend(unknown.to_bytes(4, "little"))
         return bytes(header + table + b"".join(block_bytes))
 
+    def parsed_end_offset(self) -> int:
+        return HEADER_SIZE + (len(self.blocks) * 12) + sum(len(block.serialize()) for block in self.blocks)
+
+    def trailing_tail(self, original_bytes: bytes) -> bytes:
+        end = self.parsed_end_offset()
+        return original_bytes[end:]
+
+    def raw_block_bounds(self, original_bytes: bytes) -> tuple[int, int]:
+        if not self.blocks:
+            table_end = HEADER_SIZE + (self.object_count * 12)
+            return table_end, table_end
+        first_start = None
+        last_end = None
+        for index in range(self.object_count):
+            base = HEADER_SIZE + index * 12
+            rel_offset = int.from_bytes(original_bytes[base : base + 4], "little")
+            block_length = int.from_bytes(original_bytes[base + 4 : base + 8], "little")
+            block_start = HEADER_SIZE + rel_offset
+            block_end = block_start + block_length
+            if first_start is None or block_start < first_start:
+                first_start = block_start
+            if last_end is None or block_end > last_end:
+                last_end = block_end
+        assert first_start is not None and last_end is not None
+        return first_start, last_end
+
+    def hidden_gap_after_table(self, original_bytes: bytes) -> bytes:
+        table_end = HEADER_SIZE + (self.object_count * 12)
+        first_start, _ = self.raw_block_bounds(original_bytes)
+        return original_bytes[table_end:first_start]
+
+    def post_block_tail(self, original_bytes: bytes) -> bytes:
+        _, last_end = self.raw_block_bounds(original_bytes)
+        return original_bytes[last_end:]
+
 
 def parse_page_data(data: bytes) -> PageFile:
     if len(data) < HEADER_SIZE:
@@ -238,31 +264,39 @@ def parse_block_bytes(block: bytes) -> PageBlock:
     attr_len = int.from_bytes(block[:4], "little")
     attr_name = block[4 : 4 + attr_len].decode("ascii", errors="ignore")
     cursor = 4 + attr_len
-    attr_marker = int.from_bytes(block[cursor : cursor + 4], "little")
-    cursor += 4
 
     fields: list[BlockField] = []
     event_tokens: list[str] = []
+    event_mode = False
     while cursor < len(block):
-        field_name = _decode_field_name_chunk(block[cursor : cursor + 16])
-        if field_name is None:
-            raise ValueError(f"Unable to parse field name in block {attr_name!r} at offset {cursor}")
-
-        value_start = cursor + 16
-        candidate = _find_field_end(block, value_start)
-        if candidate is None:
-            raise ValueError(f"Unable to locate field boundary for {field_name!r} in block {attr_name!r}")
-
-        end_kind, value_end, marker, events = candidate
-        fields.append(BlockField(name=field_name, value=block[value_start:value_end], marker=marker))
-        if end_kind == "event":
-            event_tokens = events or []
+        if cursor + 4 > len(block):
+            raise ValueError(f"Truncated chunk header in block {attr_name!r} at offset {cursor}")
+        chunk_len = int.from_bytes(block[cursor : cursor + 4], "little")
+        cursor += 4
+        if chunk_len == 0:
+            if cursor != len(block):
+                raise ValueError(f"Unexpected bytes after block terminator in {attr_name!r}")
             break
-        cursor = value_end + 4
+        if cursor + chunk_len > len(block):
+            raise ValueError(f"Chunk overruns block {attr_name!r} at offset {cursor}")
+        chunk = block[cursor : cursor + chunk_len]
+        cursor += chunk_len
+
+        if not event_mode and chunk_len >= 16:
+            field_name = _decode_field_name_chunk(chunk[:16])
+            if field_name is not None:
+                fields.append(BlockField(name=field_name, value=chunk[16:], marker=None))
+                continue
+
+        text = _decode_event_token(chunk)
+        if text is None:
+            raise ValueError(f"Unable to parse chunk in block {attr_name!r} at offset {cursor - chunk_len}")
+        event_mode = True
+        event_tokens.append(text)
 
     return PageBlock(
         attr_name=attr_name,
-        attr_marker=attr_marker,
+        attr_marker=0,
         fields=fields,
         event_tokens=event_tokens,
     )
@@ -270,6 +304,30 @@ def parse_block_bytes(block: bytes) -> PageBlock:
 
 def load_page_file(path: str | Path) -> PageFile:
     return parse_page_data(Path(path).read_bytes())
+
+
+def page_parsed_end_offset(page: PageFile) -> int:
+    return page.parsed_end_offset()
+
+
+def page_trailing_tail(page_data: bytes) -> bytes:
+    page = parse_page_data(page_data)
+    return page.trailing_tail(page_data)
+
+
+def page_raw_block_bounds(page_data: bytes) -> tuple[int, int]:
+    page = parse_page_data(page_data)
+    return page.raw_block_bounds(page_data)
+
+
+def page_hidden_gap_after_table(page_data: bytes) -> bytes:
+    page = parse_page_data(page_data)
+    return page.hidden_gap_after_table(page_data)
+
+
+def page_post_block_tail(page_data: bytes) -> bytes:
+    page = parse_page_data(page_data)
+    return page.post_block_tail(page_data)
 
 
 def find_first_block(page: PageFile, type_code: str) -> PageBlock:

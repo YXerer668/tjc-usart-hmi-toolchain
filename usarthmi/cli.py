@@ -9,7 +9,33 @@ import time
 from typing import Any
 
 from . import __version__
+from .api import (
+    check_next_probe_invariants,
+    generate_agent_preview,
+    get_builder_calibration_status,
+    get_capability_manifest,
+    get_current_target_completion_audit,
+    get_current_target_status_summary,
+    get_next_live_probe_bundle,
+    get_page1_filebrowser_frontier_report,
+    get_page1_filebrowser_native_init_compare_targets_report,
+    get_widget_capability,
+    list_widget_capabilities,
+    run_next_live_probe,
+)
+from .design_ops import (
+    design_align_widgets,
+    design_distribute_widgets,
+    design_match_size_widgets,
+    design_move_widget,
+    design_resize_widget,
+    replay_agent_patch,
+)
 from .editor import EditorError, build_scene, import_asset
+from .editor_capabilities import editor_capability_manifest, editor_completion_audit
+from .event_logic import graph_scene_events, lint_scene_events, list_event_command_snippets
+from .event_simulator import simulate_scene_event
+from .export_bundle import export_scene_bundle
 from .font_toolchain import (
     FontToolchainError,
     collect_scene_text,
@@ -19,6 +45,9 @@ from .font_toolchain import (
     replace_hmi_font,
 )
 from .hmi_inspect import HMIParseError, extract_hmi, inspect_hmi
+from .hmi_import import import_hmi_project
+from .hmi_donor_patch import generate_lowlevel_compatible_fixture, generate_reopen_safe_fixture, patch_hmi_donor
+from .hmi_roundtrip import check_hmi_roundtrip
 from .object_hash import OBJECT_NAME_HASH_WIDTH, object_name_hash
 from .preview import render_hmi_preview, render_pa_preview, render_scene_preview
 from .protocol import (
@@ -35,7 +64,39 @@ from .protocol import (
     parse_response,
 )
 from .runtime_preview import build_scene_runtime_commands, push_scene_runtime_preview
+from .sd_recovery_guard import pending_sd_recovery_reason
 from .scene import SceneError, WidgetSpec, load_scene, save_scene_json, validate_scene
+from .scene_check import check_scene_project
+from .scenario_runner import run_scene_scenario
+from .scene_edit import (
+    add_scene_asset,
+    add_scene_page,
+    append_scene_event_command,
+    clear_scene_event,
+    copy_scene_widget,
+    copy_scene_widget_to_page,
+    cut_scene_widget,
+    create_scene_document,
+    delete_scene_asset,
+    delete_scene_page,
+    delete_scene_widget,
+    duplicate_scene_page,
+    duplicate_scene_widget,
+    edit_scene_event_command,
+    get_scene_event,
+    list_scene_event_commands,
+    list_scene_assets,
+    list_scene_events,
+    move_scene_widget,
+    paste_scene_widget,
+    save_scene_document_as,
+    set_scene_event,
+    update_scene_asset,
+    update_scene_page,
+    update_scene_project,
+    update_scene_widget,
+)
+from .scene_smoke import build_scene_smoke_parser, run_scene_smoke
 from .serial_health import probe_serial_health
 from .tft_download import (
     DEFAULT_DOWNLOAD_BAUD,
@@ -50,10 +111,15 @@ from .tft_case_diff import compare_case_folder
 from .tft_checksum import inspect_tft_checksum
 from .tft_font_pack import TftFontPackError, inspect_tft_font_run, pack_tft_font_run
 from .tft_fonts import patch_tft_font
+from .tft_hmisafe import diff_bytes as diff_hmisafe_bytes
+from .tft_hmisafe import HmiSafeUnsupportedModeError, finalize_tft_file, verify_final_tft_file
+from .tft_event_index import inspect_tft_event_index, inspect_tft_event_index_batch
 from .tft_patch import patch_added_object_tft, patch_basic_tft, patch_rebuild_page_tft
 from .tft_reverse import reverse_tft_tail
 from .tft_toolchain import TftToolchainError, inspect_tft, list_supported_tft_models
 from .transport import SerialConfig, SerialTransport, SerialTransportError
+from .widget_templates import get_widget_template, list_widget_templates
+from .widgets import WidgetSupport
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -91,6 +157,14 @@ def main(argv: list[str] | None = None) -> int:
             result = _handle_hmi_command(args)
         elif args.command == "tft":
             result = _handle_tft_command(args)
+        elif args.command == "capabilities":
+            result = _handle_capabilities_command(args)
+        elif args.command == "widgets":
+            result = _handle_widgets_command(args)
+        elif args.command == "editor":
+            result = _handle_editor_command(args)
+        elif args.command == "target":
+            result = _handle_target_command(args)
         else:
             parser.error(f"Unknown command: {args.command}")
             return 2
@@ -104,6 +178,7 @@ def main(argv: list[str] | None = None) -> int:
         FontToolchainError,
         TftToolchainError,
         TftFontPackError,
+        HmiSafeUnsupportedModeError,
     ) as exc:
         if getattr(args, "json", False):
             print(json.dumps({"error": str(exc)}, ensure_ascii=False, indent=2))
@@ -114,14 +189,24 @@ def main(argv: list[str] | None = None) -> int:
     exit_code = 0
     if (
         getattr(args, "command", None) == "tft"
-        and getattr(args, "tft_command", None) in {"health", "preflight"}
-        and not result.get("summary", {}).get("healthy", False)
+        and getattr(args, "tft_command", None) in {"health", "preflight", "readiness"}
+        and not (
+            result.get("summary", {}).get("healthy", False)
+            if getattr(args, "tft_command", None) in {"health", "preflight"}
+            else result.get("summary", {}).get("ready_for_live_upload", False)
+        )
     ):
         exit_code = 1
     if (
         getattr(args, "command", None) == "tft"
         and getattr(args, "tft_command", None) == "upload"
         and result.get("post_upload_verification", {}).get("summary", {}).get("ok") is False
+    ):
+        exit_code = 1
+    if (
+        getattr(args, "command", None) == "target"
+        and getattr(args, "target_command", None) in {"run-next-probe", "check-next-probe"}
+        and result.get("summary", {}).get("ok") is False
     ):
         exit_code = 1
 
@@ -189,13 +274,47 @@ def _build_parser() -> argparse.ArgumentParser:
 
     scene_parser = subparsers.add_parser("scene", help="Scene file operations")
     scene_sub = scene_parser.add_subparsers(dest="scene_command")
+    scene_new = scene_sub.add_parser("new", help="Create a new empty scene JSON/YAML")
+    scene_new.add_argument("scene_path", help="Scene path to create")
+    scene_new.add_argument("--name", help="Project name; defaults to the file stem")
+    scene_new.add_argument("--width", type=int, default=800, help="Canvas width")
+    scene_new.add_argument("--height", type=int, default=480, help="Canvas height")
+    scene_new.add_argument("--background-color", type=int, default=65535, help="Canvas background color")
+    scene_new.add_argument("--page", default="page0", help="Default page id")
+    scene_new.add_argument("--overwrite", action="store_true", help="Overwrite an existing scene file")
+    scene_save_as = scene_sub.add_parser("save-as", help="Validate and save a scene under a new path")
+    scene_save_as.add_argument("scene_path", help="Source scene JSON/YAML file")
+    scene_save_as.add_argument("out", help="Destination scene JSON/YAML file")
+    scene_save_as.add_argument("--overwrite", action="store_true", help="Overwrite an existing destination")
+    scene_project = scene_sub.add_parser("project", help="Manage scene project and canvas settings")
+    scene_project_sub = scene_project.add_subparsers(dest="scene_project_command")
+    scene_project_update = scene_project_sub.add_parser("update", help="Update project metadata and canvas settings")
+    scene_project_update.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_project_update.add_argument("--name", help="Project name")
+    scene_project_update.add_argument("--default-page", help="Default page id")
+    scene_project_update.add_argument("--width", type=int, help="Canvas width")
+    scene_project_update.add_argument("--height", type=int, help="Canvas height")
+    scene_project_update.add_argument("--background-color", type=int, help="Canvas background color")
     scene_validate = scene_sub.add_parser("validate", help="Validate a scene JSON/YAML")
     scene_validate.add_argument("scene_path", help="Scene file path")
+    scene_check = scene_sub.add_parser("check", help="Run an offline editor-style scene check report")
+    scene_check.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_check.add_argument("--out-dir", help="Write scene_check_report.json to this directory")
+    scene_check.add_argument("--target", default="TJC8048X543_011C", help="Target model name")
+    scene_check.add_argument("--simulate-events", action="store_true", help="Offline-simulate non-empty event slots")
+    scene_check.add_argument("--max-event-slots", type=int, default=50, help="Maximum non-empty event slots to simulate")
+    scene_check.add_argument("--max-steps", type=int, default=128, help="Maximum event command lines per simulation")
+    scene_check.add_argument("--scenario", action="append", default=[], help="Scenario YAML/JSON file to run; repeatable")
     scene_preview = scene_sub.add_parser("preview", help="Render a scene to a PNG preview")
     scene_preview.add_argument("scene_path", help="Scene JSON/YAML file")
     scene_preview.add_argument("--out", required=True, help="Preview PNG path")
     scene_preview.add_argument("--page", default="page0", help="Page id")
     scene_preview.add_argument("--font", action="append", help="Preview .zi font path, optionally FONT_ID=path")
+    scene_agent_preview = scene_sub.add_parser("agent-preview", help="Generate preview files and agent_context.json")
+    scene_agent_preview.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_agent_preview.add_argument("--out-dir", required=True, help="Output directory for preview bundle")
+    scene_agent_preview.add_argument("--target", default="TJC8048X543_011C", help="Target model name")
+    scene_agent_preview.add_argument("--page", help="Page id; defaults to project.default_page")
     scene_push = scene_sub.add_parser("push-preview", help="Push a runtime preview of a scene to the serial screen")
     scene_push.add_argument("scene_path", help="Scene JSON/YAML file")
     scene_push.add_argument("--port", required=True, help="Serial port, for example COM36")
@@ -210,9 +329,275 @@ def _build_parser() -> argparse.ArgumentParser:
     scene_build.add_argument("--baseline-tft", help="Optional baseline TFT used to emit output.tft")
     scene_build.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
     scene_build.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
+    scene_export = scene_sub.add_parser("export", help="Create an offline compile-style bundle and report")
+    scene_export.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_export.add_argument("--out-dir", required=True, help="Output directory for preview/build/report artifacts")
+    scene_export.add_argument("--seed", help="Optional seed HMI used to emit output.hmi")
+    scene_export.add_argument("--baseline-tft", help="Optional baseline TFT used to emit output.tft")
+    scene_export.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
+    scene_export.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
+    scene_export.add_argument("--target", default="TJC8048X543_011C", help="Target model name")
+    scene_smoke = scene_sub.add_parser("smoke", help="Build a scene and continue into readiness/preflight/live smoke")
+    build_scene_smoke_parser(scene_smoke)
+    scene_events = scene_sub.add_parser("events", help="List, read, and edit scene-level event scripts")
+    scene_events_sub = scene_events.add_subparsers(dest="scene_events_command")
+    scene_events_list = scene_events_sub.add_parser("list", help="List known event slots")
+    scene_events_list.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_list.add_argument("--non-empty", action="store_true", help="Only return event slots that contain script lines")
+    scene_events_lint = scene_events_sub.add_parser("lint", help="Analyze event commands and references")
+    scene_events_lint.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_graph = scene_events_sub.add_parser("graph", help="Build a page-navigation graph from event code")
+    scene_events_graph.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_sub.add_parser("snippets", help="List structured event command snippets")
+    scene_events_get = scene_events_sub.add_parser("get", help="Read one event slot, e.g. page0.btn0.down")
+    scene_events_get.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_get.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_set = scene_events_sub.add_parser("set", help="Replace one event slot")
+    scene_events_set.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_set.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_set.add_argument("--line", action="append", default=[], help="Event source line; repeatable")
+    scene_events_set.add_argument("--code", help="Multi-line event source text")
+    scene_events_set.add_argument("--from-file", help="Read event source text from a file")
+    scene_events_set.add_argument("--append", action="store_true", help="Append to the existing event instead of replacing")
+    scene_events_append_command = scene_events_sub.add_parser(
+        "append-command",
+        help="Append one structured guarded command to an event slot",
+    )
+    scene_events_append_command.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_append_command.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_append_command.add_argument(
+        "--command",
+        dest="event_command",
+        required=True,
+        choices=("page", "ref", "vis", "tsw", "click", "get", "set", "printh", "delay", "raw"),
+        help="Structured event command family",
+    )
+    scene_events_append_command.add_argument("--target", help="Target page/object/attribute")
+    scene_events_append_command.add_argument("--value", help="Command value, for example 0, 1, or text")
+    scene_events_append_command.add_argument(
+        "--op",
+        default="=",
+        choices=("=", "++", "--", "+=", "-="),
+        help="Assignment operator used by --command set",
+    )
+    scene_events_append_command.add_argument(
+        "--attribute",
+        default="val",
+        help="Attribute appended to --target for get/set when target has no dot",
+    )
+    scene_events_append_command.add_argument("--hex", dest="hex_bytes", help="Hex byte string for --command printh")
+    scene_events_append_command.add_argument("--delay-ms", type=int, help="Delay in milliseconds for --command delay")
+    scene_events_append_command.add_argument("--raw-line", help="Raw event line for --command raw")
+    scene_events_append_command.add_argument("--dry-run", action="store_true", help="Build the line without modifying the scene")
+    scene_events_commands = scene_events_sub.add_parser(
+        "commands",
+        help="List and patch individual event command lines",
+    )
+    scene_events_commands_sub = scene_events_commands.add_subparsers(dest="scene_event_commands_command")
+    scene_events_commands_list = scene_events_commands_sub.add_parser("list", help="List parsed command lines in one event slot")
+    scene_events_commands_list.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_commands_list.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_commands_insert = scene_events_commands_sub.add_parser("insert", help="Insert one event command line")
+    scene_events_commands_insert.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_commands_insert.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_commands_insert.add_argument("--index", type=int, help="Insert before this zero-based line index; default appends")
+    _add_scene_event_command_patch_args(scene_events_commands_insert)
+    scene_events_commands_replace = scene_events_commands_sub.add_parser("replace", help="Replace one event command line")
+    scene_events_commands_replace.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_commands_replace.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_commands_replace.add_argument("--index", type=int, required=True, help="Zero-based line index to replace")
+    _add_scene_event_command_patch_args(scene_events_commands_replace)
+    scene_events_commands_delete = scene_events_commands_sub.add_parser("delete", help="Delete one event command line")
+    scene_events_commands_delete.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_commands_delete.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_commands_delete.add_argument("--index", type=int, required=True, help="Zero-based line index to delete")
+    _add_scene_event_patch_common_args(scene_events_commands_delete)
+    scene_events_commands_move = scene_events_commands_sub.add_parser("move", help="Move one event command line")
+    scene_events_commands_move.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_commands_move.add_argument("event_path", help="page.event or page.widget.event")
+    scene_events_commands_move.add_argument("--from-index", type=int, required=True, help="Zero-based line index to move")
+    scene_events_commands_move.add_argument("--to-index", type=int, required=True, help="Zero-based destination index after removal")
+    _add_scene_event_patch_common_args(scene_events_commands_move)
+    scene_events_clear = scene_events_sub.add_parser("clear", help="Clear one event slot")
+    scene_events_clear.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_events_clear.add_argument("event_path", help="page.event or page.widget.event")
+    scene_simulate = scene_sub.add_parser("simulate", help="Run an offline simulation of one event slot")
+    scene_simulate.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_simulate.add_argument("event_path", help="page.event or page.widget.event, for example page0.btn0.up")
+    scene_simulate.add_argument("--out-dir", help="Write runtime_trace.json, runtime_state.json, and simulation_report.json")
+    scene_simulate.add_argument("--initial-page", help="Initial runtime page; defaults to the triggered event's page")
+    scene_simulate.add_argument("--max-steps", type=int, default=128, help="Maximum event command lines to execute")
+    scene_scenario = scene_sub.add_parser("scenario", help="Run offline multi-step scene interaction scenarios")
+    scene_scenario_sub = scene_scenario.add_subparsers(dest="scene_scenario_command")
+    scene_scenario_run = scene_scenario_sub.add_parser("run", help="Run one YAML/JSON scenario file")
+    scene_scenario_run.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_scenario_run.add_argument("scenario_path", help="Scenario YAML/JSON file")
+    scene_scenario_run.add_argument("--out-dir", help="Write runtime_trace.json, runtime_state.json, and scenario_report.json")
+    scene_scenario_run.add_argument("--initial-page", help="Initial runtime page; defaults to scenario or first trigger page")
+    scene_scenario_run.add_argument("--max-steps", type=int, help="Maximum event command lines across all trigger steps")
+    scene_assets = scene_sub.add_parser("assets", help="Manage scene assets without opening the GUI")
+    scene_assets_sub = scene_assets.add_subparsers(dest="scene_assets_command")
+    scene_assets_list = scene_assets_sub.add_parser("list", help="List scene assets")
+    scene_assets_list.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_assets_add = scene_assets_sub.add_parser("add", help="Add one scene asset")
+    scene_assets_add.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_assets_add.add_argument("asset_id", help="Asset key to add")
+    _add_scene_asset_args(scene_assets_add)
+    scene_assets_update = scene_assets_sub.add_parser("update", help="Update one scene asset")
+    scene_assets_update.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_assets_update.add_argument("asset_id", help="Asset key to update")
+    _add_scene_asset_args(scene_assets_update)
+    scene_assets_delete = scene_assets_sub.add_parser("delete", help="Delete one scene asset")
+    scene_assets_delete.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_assets_delete.add_argument("asset_id", help="Asset key to delete")
+    scene_assets_delete.add_argument("--force", action="store_true", help="Delete even when widgets still reference this asset")
+    scene_widgets = scene_sub.add_parser("widgets", help="Manage scene widgets without opening the GUI")
+    scene_widgets_sub = scene_widgets.add_subparsers(dest="scene_widgets_command")
+    scene_widgets_update = scene_widgets_sub.add_parser("update", help="Update one widget's scene properties")
+    scene_widgets_update.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_update.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_update.add_argument("--id", dest="new_id", help="Rename the widget")
+    scene_widgets_update.add_argument("--type", dest="widget_type", help="Widget type or alias")
+    scene_widgets_update.add_argument("--x", type=int, help="Widget x")
+    scene_widgets_update.add_argument("--y", type=int, help="Widget y")
+    scene_widgets_update.add_argument("--w", type=int, help="Widget width")
+    scene_widgets_update.add_argument("--h", type=int, help="Widget height")
+    scene_widgets_update.add_argument("--text", help="Widget text")
+    scene_widgets_update.add_argument("--clear-text", action="store_true", help="Clear widget text")
+    scene_widgets_update.add_argument("--value", type=int, help="Widget numeric value")
+    scene_widgets_update.add_argument("--clear-value", action="store_true", help="Clear widget value")
+    scene_widgets_update.add_argument("--style", action="append", help="Patch style key=value; null removes the key")
+    scene_widgets_update.add_argument("--style-json", help="Replace style with a JSON object before --style patches")
+    scene_widgets_update.add_argument("--resource", action="append", help="Patch resource key=value; null removes the key")
+    scene_widgets_update.add_argument("--resources-json", help="Replace resources with a JSON object before --resource patches")
+    scene_widgets_update.add_argument("--binding", action="append", help="Patch binding key=value; null removes the key")
+    scene_widgets_update.add_argument("--bindings-json", help="Replace bindings with a JSON object before --binding patches")
+    scene_widgets_update.add_argument(
+        "--rewrite-event-references",
+        action="store_true",
+        help="When renaming the widget id, rewrite same-page event-script references to the old id",
+    )
+    scene_widgets_delete = scene_widgets_sub.add_parser("delete", help="Delete one widget, e.g. page0.btn0")
+    scene_widgets_delete.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_delete.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_duplicate = scene_widgets_sub.add_parser("duplicate", help="Duplicate one widget next to the original")
+    scene_widgets_duplicate.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_duplicate.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_duplicate.add_argument("--id", dest="new_id", help="New widget id; default is <id>_copy")
+    scene_widgets_duplicate.add_argument("--offset-x", type=int, default=16, help="X offset applied to the duplicate")
+    scene_widgets_duplicate.add_argument("--offset-y", type=int, default=16, help="Y offset applied to the duplicate")
+    scene_widgets_copy = scene_widgets_sub.add_parser("copy", help="Return a widget clipboard payload without editing the scene")
+    scene_widgets_copy.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_copy.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_cut = scene_widgets_sub.add_parser("cut", help="Copy one widget to a clipboard payload and delete it")
+    scene_widgets_cut.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_cut.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_paste = scene_widgets_sub.add_parser("paste", help="Paste a widget clipboard payload into a page")
+    scene_widgets_paste.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_paste.add_argument("page_id", help="Target page id")
+    paste_source = scene_widgets_paste.add_mutually_exclusive_group(required=True)
+    paste_source.add_argument("--widget-json", help="Widget JSON object or clipboard JSON object")
+    paste_source.add_argument("--from-file", help="Read widget/clipboard JSON from a file")
+    scene_widgets_paste.add_argument("--id", dest="new_id", help="New widget id")
+    scene_widgets_paste.add_argument("--offset-x", type=int, default=16, help="X offset applied when --x is omitted")
+    scene_widgets_paste.add_argument("--offset-y", type=int, default=16, help="Y offset applied when --y is omitted")
+    scene_widgets_paste.add_argument("--x", type=int, help="Absolute pasted x")
+    scene_widgets_paste.add_argument("--y", type=int, help="Absolute pasted y")
+    scene_widgets_copy_to = scene_widgets_sub.add_parser("copy-to", help="Copy one widget and paste it into a target page")
+    scene_widgets_copy_to.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_copy_to.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_copy_to.add_argument("target_page", help="Target page id")
+    scene_widgets_copy_to.add_argument("--id", dest="new_id", help="New widget id")
+    scene_widgets_copy_to.add_argument("--offset-x", type=int, default=16, help="X offset applied when --x is omitted")
+    scene_widgets_copy_to.add_argument("--offset-y", type=int, default=16, help="Y offset applied when --y is omitted")
+    scene_widgets_copy_to.add_argument("--x", type=int, help="Absolute pasted x")
+    scene_widgets_copy_to.add_argument("--y", type=int, help="Absolute pasted y")
+    scene_widgets_move = scene_widgets_sub.add_parser("move", help="Move one widget in page z-order")
+    scene_widgets_move.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_widgets_move.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_widgets_move.add_argument("--direction", required=True, choices=("up", "down", "front", "back"), help="Z-order move")
+    scene_pages = scene_sub.add_parser("pages", help="Manage scene pages without opening the GUI")
+    scene_pages_sub = scene_pages.add_subparsers(dest="scene_pages_command")
+    scene_pages_add = scene_pages_sub.add_parser("add", help="Append a new empty page")
+    scene_pages_add.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_pages_add.add_argument("page_id", help="New page id")
+    scene_pages_duplicate = scene_pages_sub.add_parser("duplicate", help="Duplicate one page")
+    scene_pages_duplicate.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_pages_duplicate.add_argument("page_id", help="Source page id")
+    scene_pages_duplicate.add_argument("--id", dest="new_id", help="New page id; default is <page>_copy")
+    scene_pages_delete = scene_pages_sub.add_parser("delete", help="Delete one page")
+    scene_pages_delete.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_pages_delete.add_argument("page_id", help="Page id to delete")
+    scene_pages_update = scene_pages_sub.add_parser("update", help="Update one page id or layout")
+    scene_pages_update.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_pages_update.add_argument("page_id", help="Page id to update")
+    scene_pages_update.add_argument("--id", dest="new_id", help="New page id")
+    scene_pages_update.add_argument("--layout-json", help="Replace page layout with a JSON object")
+    scene_design = scene_sub.add_parser("design", help="Canvas-style design operations with agent patch output")
+    scene_design_sub = scene_design.add_subparsers(dest="scene_design_command")
+    scene_design_move = scene_design_sub.add_parser("move", help="Move one widget and write agent_patch.json")
+    scene_design_move.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_move.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_design_move.add_argument("--out-dir", help="Output directory for design_session.json and agent_patch.json")
+    scene_design_move.add_argument("--x", type=int, help="Absolute x")
+    scene_design_move.add_argument("--y", type=int, help="Absolute y")
+    scene_design_move.add_argument("--dx", type=int, default=0, help="Relative x delta")
+    scene_design_move.add_argument("--dy", type=int, default=0, help="Relative y delta")
+    scene_design_move.add_argument("--snap", type=int, default=1, help="Snap grid in pixels")
+    scene_design_move.add_argument("--no-clamp", action="store_true", help="Allow geometry outside the canvas")
+    scene_design_resize = scene_design_sub.add_parser("resize", help="Resize one widget and write agent_patch.json")
+    scene_design_resize.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_resize.add_argument("widget_path", help="page.widget, for example page0.btn0")
+    scene_design_resize.add_argument("--out-dir", help="Output directory for design_session.json and agent_patch.json")
+    scene_design_resize.add_argument("--w", type=int, help="Absolute width")
+    scene_design_resize.add_argument("--h", type=int, help="Absolute height")
+    scene_design_resize.add_argument("--dw", type=int, default=0, help="Relative width delta")
+    scene_design_resize.add_argument("--dh", type=int, default=0, help="Relative height delta")
+    scene_design_resize.add_argument("--min-size", type=int, default=1, help="Minimum width/height")
+    scene_design_resize.add_argument("--snap", type=int, default=1, help="Snap grid in pixels")
+    scene_design_resize.add_argument("--no-clamp", action="store_true", help="Allow geometry outside the canvas")
+    scene_design_align = scene_design_sub.add_parser("align", help="Align widgets on one page and write agent_patch.json")
+    scene_design_align.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_align.add_argument("widget_paths", nargs="+", help="page.widget paths, all on the same page")
+    scene_design_align.add_argument("--edge", required=True, choices=("left", "right", "top", "bottom", "hcenter", "vcenter"), help="Alignment edge")
+    scene_design_align.add_argument("--anchor", default="first", choices=("first", "last", "canvas"), help="Alignment anchor")
+    scene_design_align.add_argument("--out-dir", help="Output directory for design_session.json and agent_patch.json")
+    scene_design_align.add_argument("--snap", type=int, default=1, help="Snap grid in pixels")
+    scene_design_align.add_argument("--no-clamp", action="store_true", help="Allow geometry outside the canvas")
+    scene_design_distribute = scene_design_sub.add_parser("distribute", help="Distribute widgets evenly on one page and write agent_patch.json")
+    scene_design_distribute.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_distribute.add_argument("widget_paths", nargs="+", help="page.widget paths, all on the same page")
+    scene_design_distribute.add_argument("--axis", required=True, choices=("horizontal", "vertical"), help="Distribution axis")
+    scene_design_distribute.add_argument("--out-dir", help="Output directory for design_session.json and agent_patch.json")
+    scene_design_distribute.add_argument("--snap", type=int, default=1, help="Snap grid in pixels")
+    scene_design_distribute.add_argument("--no-clamp", action="store_true", help="Allow geometry outside the canvas")
+    scene_design_match_size = scene_design_sub.add_parser("match-size", help="Match widget widths/heights on one page and write agent_patch.json")
+    scene_design_match_size.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_match_size.add_argument("widget_paths", nargs="+", help="page.widget paths, all on the same page")
+    scene_design_match_size.add_argument("--mode", required=True, choices=("width", "height", "both"), help="Size component to match")
+    scene_design_match_size.add_argument("--anchor", default="first", choices=("first", "last"), help="Widget whose size should be copied")
+    scene_design_match_size.add_argument("--out-dir", help="Output directory for design_session.json and agent_patch.json")
+    scene_design_match_size.add_argument("--min-size", type=int, default=1, help="Minimum width/height")
+    scene_design_match_size.add_argument("--snap", type=int, default=1, help="Snap grid in pixels")
+    scene_design_match_size.add_argument("--no-clamp", action="store_true", help="Allow geometry outside the canvas")
+    scene_design_replay = scene_design_sub.add_parser("replay", help="Replay a design agent_patch.json")
+    scene_design_replay.add_argument("scene_path", help="Scene JSON/YAML file")
+    scene_design_replay.add_argument("patch_path", help="agent_patch.json file")
+    scene_design_replay.add_argument("--out-dir", help="Output directory for replay design artifacts")
 
     hmi_parser = subparsers.add_parser("hmi", help="Scene authoring helpers")
     hmi_sub = hmi_parser.add_subparsers(dest="hmi_command")
+    hmi_import_project = hmi_sub.add_parser("import", help="Import an official HMI into a lossy editable scene bundle")
+    hmi_import_project.add_argument("hmi_path", help="Official .HMI file")
+    hmi_import_project.add_argument("--out-dir", required=True, help="Output directory for imported scene and preview bundle")
+    hmi_import_project.add_argument("--target", default="TJC8048X543_011C", help="Target model name")
+    hmi_import_project.add_argument("--overwrite", action="store_true", help="Overwrite existing import outputs")
+    hmi_roundtrip = hmi_sub.add_parser("roundtrip-check", help="Import, regenerate, and diagnose HMI roundtrip loss")
+    hmi_roundtrip.add_argument("hmi_path", help="Official .HMI file")
+    hmi_roundtrip.add_argument("--out-dir", required=True, help="Output directory for roundtrip artifacts")
+    hmi_roundtrip.add_argument("--target", default="TJC8048X543_011C", help="Target model name")
+    hmi_roundtrip.add_argument("--overwrite", action="store_true", help="Overwrite existing roundtrip/import outputs")
+    hmi_roundtrip.add_argument("--source-tft", help="Optional official .tft/.run oracle for compiled event-index evidence")
     hmi_import = hmi_sub.add_parser("import-image", help="Normalize a PNG/JPG into build assets")
     hmi_import.add_argument("source", help="PNG/JPG file")
     hmi_import.add_argument("--out", required=True, help="Asset output directory")
@@ -282,6 +667,66 @@ def _build_parser() -> argparse.ArgumentParser:
     hmi_build.add_argument("--baseline-tft", help="Optional baseline TFT used to emit output.tft")
     hmi_build.add_argument("--font-zi", help="Optional .zi font to patch into output.hmi and output.tft")
     hmi_build.add_argument("--font-entry", default="0.zi", help="HMI font entry to replace when --font-zi is used")
+    hmi_donor_patch = hmi_sub.add_parser(
+        "donor-patch",
+        help="Patch a donor HMI page while preserving the donor container/shadow chain",
+    )
+    hmi_donor_patch.add_argument("donor_hmi", nargs="?", help="Input donor .HMI file")
+    hmi_donor_patch.add_argument("--out-dir", required=True, help="Output directory")
+    hmi_donor_patch.add_argument("--spec-json", help="Patch spec JSON file")
+    hmi_donor_patch.add_argument("--page-entry", default="0.pa", help="Page entry to patch")
+    hmi_donor_patch.add_argument("--delete-obj", action="append", default=[], help="Delete one object by name")
+    hmi_donor_patch.add_argument(
+        "--move-obj",
+        action="append",
+        default=[],
+        help="Move object geometry as name:x:y:w:h",
+    )
+    hmi_donor_patch.add_argument(
+        "--set-int",
+        action="append",
+        default=[],
+        help="Set integer field as obj.field=value",
+    )
+    hmi_donor_patch.add_argument(
+        "--set-str",
+        action="append",
+        default=[],
+        help="Set string field as obj.field=text",
+    )
+    hmi_donor_patch.add_argument(
+        "--graft-obj",
+        action="append",
+        default=[],
+        help="Add one block from another donor as source_hmi|page|source_obj|target_obj|x|y|w|h",
+    )
+    hmi_donor_patch.add_argument(
+        "--probe-lowlevel",
+        action="store_true",
+        help="Run tools/official_hmi_lowlevel_probe.py on the patched output",
+    )
+    hmi_donor_patch.add_argument(
+        "--probe-reopen",
+        action="store_true",
+        help="Run tools/official_hmi_reopen_probe.py on a copy of the generated output",
+    )
+    hmi_reopen_safe = hmi_sub.add_parser(
+        "reopen-safe-fixture",
+        help="Generate the canonical reopen-safe donor fixture for one control type",
+    )
+    hmi_reopen_safe.add_argument("control_type", help="Control type such as text, file-browser, xfloat")
+    hmi_reopen_safe.add_argument("--out-dir", required=True, help="Output directory")
+    hmi_reopen_safe.add_argument("--corpus-root", help="Optional donor corpus root containing reopen_safe_control_map.json")
+    hmi_lowlevel_compatible = hmi_sub.add_parser(
+        "lowlevel-compatible-fixture",
+        help="Generate the canonical lowlevel-compatible donor fixture for one control type",
+    )
+    hmi_lowlevel_compatible.add_argument("control_type", help="Control type such as text, file-browser, xfloat")
+    hmi_lowlevel_compatible.add_argument("--out-dir", required=True, help="Output directory")
+    hmi_lowlevel_compatible.add_argument(
+        "--corpus-root",
+        help="Optional donor corpus root containing lowlevel_compatible_control_map.json",
+    )
     hmi_preview_pa = hmi_sub.add_parser("preview-pa", help="Render an extracted .pa page to a PNG preview")
     hmi_preview_pa.add_argument("--pa", required=True, help="Extracted page file such as 0.pa")
     hmi_preview_pa.add_argument("--out", required=True, help="Preview PNG path")
@@ -328,6 +773,33 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_reverse.add_argument("--hmi-pa", help="Extracted HMI page file such as 0.pa")
     tft_reverse.add_argument("--install-dir", help="USART HMI installation directory for static resource matching")
     tft_reverse.add_argument("--context-bytes", type=int, default=48, help="Hex context around every match")
+    tft_event_index = tft_sub.add_parser("event-index", help="Inspect compiled TFT event-index/scheduler evidence")
+    tft_event_index_sub = tft_event_index.add_subparsers(dest="tft_event_index_command")
+    tft_event_index_inspect = tft_event_index_sub.add_parser("inspect", help="Inspect an HMI/TFT pair for event dispatch evidence")
+    tft_event_index_inspect.add_argument("--hmi", required=True, help="Source HMI file containing 0.pa event tokens")
+    tft_event_index_inspect.add_argument("--tft", required=True, help="Official or generated TFT/run file to inspect")
+    tft_event_index_inspect.add_argument("--out", help="Optional JSON report path")
+    tft_event_index_inspect.add_argument(
+        "--force-post-primary-page-load",
+        action="store_true",
+        help="Also search the experimental post-primary page-load chunk for non-media pages",
+    )
+    tft_event_index_batch = tft_event_index_sub.add_parser(
+        "batch",
+        help="Batch-scan HMI files for nearby TFT event-index oracles",
+    )
+    tft_event_index_batch.add_argument("paths", nargs="+", help="HMI files or directories to scan")
+    tft_event_index_batch.add_argument("--out", help="Optional JSON report path")
+    tft_event_index_batch.add_argument(
+        "--force-post-primary-page-load",
+        action="store_true",
+        help="Also search the experimental post-primary page-load chunk for non-media pages",
+    )
+    tft_event_index_batch.add_argument(
+        "--include-object-only",
+        action="store_true",
+        help="Include fixtures that have object events but no page-level event script",
+    )
     tft_models = tft_sub.add_parser("list-models", help="List TFT models known by the local TFTTool")
     tft_hash_name = tft_sub.add_parser("hash-name", help="Compute a compiled TFT page/object-name hash")
     tft_hash_name.add_argument("name", help="Page/object name, for example t0 or page0")
@@ -356,6 +828,8 @@ def _build_parser() -> argparse.ArgumentParser:
         default="TJC8048X543_011C",
         help="Expected model, for example TJC8048X543_011C; pass an empty string to skip model matching",
     )
+    tft_readiness = tft_sub.add_parser("readiness", help="Offline TFT readiness summary from checksum + sibling build manifest")
+    tft_readiness.add_argument("--file", required=True, help="TFT file path")
     tft_upload = tft_sub.add_parser("upload", help="Upload a .tft file to a screen over serial")
     tft_upload.add_argument("--file", required=True, help="TFT file path")
     tft_upload.add_argument("--port", required=True, help="Serial port")
@@ -383,6 +857,30 @@ def _build_parser() -> argparse.ArgumentParser:
         "--no-preflight",
         action="store_true",
         help="Skip default checksum and serial-health preflight; only use for deliberate recovery/reverse probes",
+    )
+    tft_upload.add_argument(
+        "--allow-quarantined-touch-capture",
+        action="store_true",
+        help=(
+            "Allow upload of a generated TFT whose sibling manifest contains touch-capture; "
+            "use only after explicit recovery planning"
+        ),
+    )
+    tft_upload.add_argument(
+        "--allow-hardware-quarantine",
+        action="store_true",
+        help=(
+            "Allow upload of a TFT whose manifest or known fixture path is hardware-quarantined; "
+            "use only after an explicit recovery/live plan"
+        ),
+    )
+    tft_upload.add_argument(
+        "--allow-pending-sd-recovery",
+        action="store_true",
+        help=(
+            "Override the local pending SD-recovery block; use only after the SD card "
+            "has been removed and the panel was power-cycled once"
+        ),
     )
     tft_upload.add_argument(
         "--expected-model",
@@ -538,6 +1036,92 @@ def _build_parser() -> argparse.ArgumentParser:
     tft_rebuild_page.add_argument("--out", required=True, help="Output experimental clean-page TFT")
     tft_checksum = tft_sub.add_parser("checksum", help="Verify the final 4-byte TFT checksum")
     tft_checksum.add_argument("--file", required=True, help="TFT file path")
+    tft_hmisafe_finalize = tft_sub.add_parser(
+        "hmisafe-finalize",
+        help="Apply the reproduced achmi.dll HmiSafe finalizer to a pre-HmiSafe TFT",
+    )
+    tft_hmisafe_finalize.add_argument("--input", required=True, help="Pre-HmiSafe intermediate TFT")
+    tft_hmisafe_finalize.add_argument("--out", required=True, help="Output final TFT path")
+    tft_hmisafe_finalize.add_argument("--final", help="Optional official final TFT to byte-compare")
+    tft_hmisafe_verify = tft_sub.add_parser(
+        "hmisafe-verify",
+        help="Verify HmiSafe 400-byte header CRCs and EOF-4 finalizer checksum",
+    )
+    tft_hmisafe_verify.add_argument("--file", required=True, help="Final TFT file path")
+
+    capabilities_parser = subparsers.add_parser("capabilities", help="Show current target capabilities")
+    capabilities_parser.add_argument("--widget", help="Show one widget capability by type or alias")
+    capabilities_parser.add_argument(
+        "--support",
+        choices=[item.value for item in WidgetSupport],
+        help="List widgets filtered by support status instead of returning the full manifest",
+    )
+    capabilities_parser.add_argument("--include-aliases", action="store_true", help="Include accepted widget aliases")
+
+    widgets_parser = subparsers.add_parser("widgets", help="Inspect widget capability metadata")
+    widgets_sub = widgets_parser.add_subparsers(dest="widgets_command")
+    widgets_list = widgets_sub.add_parser("list", help="List registered widget capabilities")
+    widgets_list.add_argument(
+        "--support",
+        choices=[item.value for item in WidgetSupport],
+        help="Filter by support status",
+    )
+    widgets_list.add_argument("--include-aliases", action="store_true", help="Include accepted aliases")
+    widgets_show = widgets_sub.add_parser("show", help="Show one widget capability by type or alias")
+    widgets_show.add_argument("widget_type", help="Widget type or alias")
+    widgets_show.add_argument("--include-aliases", action="store_true", help="Include accepted aliases")
+    widgets_manifest = widgets_sub.add_parser("manifest", help="Show the full widget capability manifest")
+    widgets_manifest.add_argument("--include-aliases", action="store_true", help="Include accepted aliases")
+    widgets_template = widgets_sub.add_parser("template", help="Show an authoring template for one widget type")
+    widgets_template.add_argument("widget_type", help="Widget type or alias")
+    widgets_template.add_argument("--id", dest="widget_id", help="Widget id to place in the template")
+    widgets_template.add_argument("--x", type=int, default=40, help="Template x coordinate")
+    widgets_template.add_argument("--y", type=int, default=40, help="Template y coordinate")
+    widgets_sub.add_parser("templates", help="List available widget authoring templates")
+
+    editor_parser = subparsers.add_parser("editor", help="Inspect editor/agent authoring capabilities")
+    editor_sub = editor_parser.add_subparsers(dest="editor_command")
+    editor_sub.add_parser("capabilities", help="Show desktop/headless editor capability manifest")
+    editor_sub.add_parser("audit", help="Show official-editor parity audit checklist")
+
+    target_parser = subparsers.add_parser("target", help="Inspect current target status artifacts")
+    target_sub = target_parser.add_subparsers(dest="target_command")
+    target_sub.add_parser("summary", help="Show compact current target status summary")
+    target_sub.add_parser("audit", help="Show current target completion audit")
+    target_sub.add_parser("calibration", help="Show builder-facing calibration status")
+    target_sub.add_parser("frontier", help="Show the current page1 file-browser frontier report")
+    target_sub.add_parser("compare-targets", help="Show the current page1 file-browser native-init compare-targets report")
+    target_sub.add_parser("next-probe", help="Show the exact next live-probe bundle and recovery commands")
+    target_check_next_probe = target_sub.add_parser(
+        "check-next-probe",
+        help="Run offline builder field-map invariants for the current next-probe TFT",
+    )
+    target_check_next_probe.add_argument("--file", help="Override TFT path; defaults to the field-map next-probe TFT")
+    target_run_next_probe = target_sub.add_parser(
+        "run-next-probe",
+        help="Run safe checks from the exact next live-probe bundle; no upload unless explicitly requested",
+    )
+    target_run_next_probe.add_argument("--preflight", action="store_true", help="Run serial preflight after offline checks")
+    target_run_next_probe.add_argument("--live-smoke", action="store_true", help="Run live readback checks with live_tft_smoke.py")
+    target_run_next_probe.add_argument("--upload", action="store_true", help="Upload during live smoke; requires --live-smoke")
+    target_run_next_probe.add_argument(
+        "--allow-hardware-quarantine",
+        action="store_true",
+        help="Allow the one controlled quarantined recovery upload",
+    )
+    target_run_next_probe.add_argument(
+        "--allow-pending-sd-recovery",
+        action="store_true",
+        help="Allow live smoke when the local SD recovery guard is pending",
+    )
+    target_run_next_probe.add_argument("--capture", action="store_true", help="Capture the screen during live smoke")
+    target_run_next_probe.add_argument("--progress", action="store_true", help="Show upload progress during live smoke")
+    target_run_next_probe.add_argument("--port", default="COM36")
+    target_run_next_probe.add_argument("--baud", type=int, default=9600)
+    target_run_next_probe.add_argument("--download-baud", type=int, default=DEFAULT_DOWNLOAD_BAUD)
+    target_run_next_probe.add_argument("--timeout-ms", type=int, default=3000)
+    target_run_next_probe.add_argument("--out-dir", help="Override live_probe output directory")
+    target_run_next_probe.add_argument("--result-json", help="Write the runner result JSON to this path")
 
     return parser
 
@@ -576,9 +1160,33 @@ def _handle_extract_hmi(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def _handle_scene_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_command == "new":
+        return create_scene_document(
+            args.scene_path,
+            project_name=args.name,
+            width=args.width,
+            height=args.height,
+            default_page=args.page,
+            background_color=args.background_color,
+            overwrite=args.overwrite,
+        )
+    if args.scene_command == "save-as":
+        return save_scene_document_as(args.scene_path, args.out, overwrite=args.overwrite)
+    if args.scene_command == "project":
+        return _handle_scene_project_command(args)
     if args.scene_command == "validate":
         scene = load_scene(args.scene_path)
         return {"scene_path": str(Path(args.scene_path).resolve()), "normalized": scene.to_dict()}
+    if args.scene_command == "check":
+        return check_scene_project(
+            args.scene_path,
+            out_dir=args.out_dir,
+            target=args.target,
+            simulate_events=args.simulate_events,
+            max_event_slots=args.max_event_slots,
+            max_steps=args.max_steps,
+            scenario_paths=args.scenario,
+        )
     if args.scene_command == "preview":
         scene = load_scene(args.scene_path)
         target = render_scene_preview(
@@ -592,6 +1200,13 @@ def _handle_scene_command(args: argparse.Namespace) -> dict[str, Any]:
             "page_id": args.page,
             "preview_png": str(target),
         }
+    if args.scene_command == "agent-preview":
+        return generate_agent_preview(
+            args.scene_path,
+            args.out_dir,
+            target=args.target,
+            page_id=args.page,
+        )
     if args.scene_command == "push-preview":
         scene = load_scene(args.scene_path)
         result = push_scene_runtime_preview(
@@ -616,10 +1231,367 @@ def _handle_scene_command(args: argparse.Namespace) -> dict[str, Any]:
             font_zi=args.font_zi,
             font_entry=args.font_entry,
         )
+    if args.scene_command == "export":
+        return export_scene_bundle(
+            args.scene_path,
+            args.out_dir,
+            seed_hmi=args.seed,
+            baseline_tft=args.baseline_tft,
+            font_zi=args.font_zi,
+            font_entry=args.font_entry,
+            target=args.target,
+        )
+    if args.scene_command == "smoke":
+        return run_scene_smoke(
+            args.scene_path,
+            seed_hmi=args.seed,
+            baseline_tft=args.baseline_tft,
+            out_dir=args.out,
+            expect_json=args.expect_json,
+            check_expect_path=args.check_expect,
+            write_expect_path=args.write_expect,
+            skip_build=args.skip_build,
+            preflight=args.preflight,
+            smoke=args.smoke,
+            upload=args.upload,
+            capture=args.capture,
+            port=args.port,
+            baud=args.baud,
+            download_baud=args.download_baud,
+            timeout_ms=args.timeout_ms,
+            expected_model=args.expected_model,
+            progress=args.progress,
+            known_current=args.known_current,
+            skip_if_identical=args.skip_if_identical,
+            allow_hardware_quarantine=args.allow_hardware_quarantine,
+            allow_pending_sd_recovery=args.allow_pending_sd_recovery,
+        )
+    if args.scene_command == "simulate":
+        return simulate_scene_event(
+            args.scene_path,
+            args.event_path,
+            out_dir=args.out_dir,
+            initial_page=args.initial_page,
+            max_steps=args.max_steps,
+        )
+    if args.scene_command == "scenario":
+        return _handle_scene_scenario_command(args)
+    if args.scene_command == "events":
+        return _handle_scene_events_command(args)
+    if args.scene_command == "assets":
+        return _handle_scene_assets_command(args)
+    if args.scene_command == "widgets":
+        return _handle_scene_widgets_command(args)
+    if args.scene_command == "pages":
+        return _handle_scene_pages_command(args)
+    if args.scene_command == "design":
+        return _handle_scene_design_command(args)
     raise SceneError("Unsupported scene subcommand")
 
 
+def _handle_scene_scenario_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_scenario_command == "run":
+        return run_scene_scenario(
+            args.scene_path,
+            args.scenario_path,
+            out_dir=args.out_dir,
+            initial_page=args.initial_page,
+            max_steps=args.max_steps,
+        )
+    raise SceneError("Unsupported scene scenario subcommand")
+
+
+def _handle_scene_events_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_events_command == "list":
+        return list_scene_events(args.scene_path, include_empty=not args.non_empty)
+    if args.scene_events_command == "lint":
+        return lint_scene_events(args.scene_path)
+    if args.scene_events_command == "graph":
+        return graph_scene_events(args.scene_path)
+    if args.scene_events_command == "snippets":
+        return list_event_command_snippets()
+    if args.scene_events_command == "get":
+        return {
+            "scene_path": str(Path(args.scene_path).resolve()),
+            "event": get_scene_event(args.scene_path, args.event_path),
+        }
+    if args.scene_events_command == "set":
+        lines = _scene_event_lines_from_args(args.line, args.code, args.from_file)
+        return {
+            "scene_path": str(Path(args.scene_path).resolve()),
+            "event": set_scene_event(args.scene_path, args.event_path, lines, append=args.append),
+        }
+    if args.scene_events_command == "append-command":
+        return append_scene_event_command(
+            args.scene_path,
+            args.event_path,
+            command=args.event_command,
+            target=args.target,
+            value=args.value,
+            op=args.op,
+            attribute=args.attribute,
+            hex_bytes=args.hex_bytes,
+            delay_ms=args.delay_ms,
+            raw_line=args.raw_line,
+            dry_run=args.dry_run,
+        )
+    if args.scene_events_command == "commands":
+        return _handle_scene_event_commands_command(args)
+    if args.scene_events_command == "clear":
+        return {
+            "scene_path": str(Path(args.scene_path).resolve()),
+            "event": clear_scene_event(args.scene_path, args.event_path),
+        }
+    raise SceneError("Unsupported scene events subcommand")
+
+
+def _handle_scene_event_commands_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_event_commands_command == "list":
+        return list_scene_event_commands(args.scene_path, args.event_path)
+    if args.scene_event_commands_command in {"insert", "replace"}:
+        return edit_scene_event_command(
+            args.scene_path,
+            args.event_path,
+            action=args.scene_event_commands_command,
+            index=args.index,
+            line=_scene_event_command_line_from_args(args),
+            command=args.event_command,
+            target=args.target,
+            value=args.value,
+            op=args.op,
+            attribute=args.attribute,
+            hex_bytes=args.hex_bytes,
+            delay_ms=args.delay_ms,
+            raw_line=args.raw_line,
+            dry_run=args.dry_run,
+            simulate=args.simulate,
+            out_dir=args.out_dir,
+            max_steps=args.max_steps,
+        )
+    if args.scene_event_commands_command == "delete":
+        return edit_scene_event_command(
+            args.scene_path,
+            args.event_path,
+            action="delete",
+            index=args.index,
+            dry_run=args.dry_run,
+            simulate=args.simulate,
+            out_dir=args.out_dir,
+            max_steps=args.max_steps,
+        )
+    if args.scene_event_commands_command == "move":
+        return edit_scene_event_command(
+            args.scene_path,
+            args.event_path,
+            action="move",
+            index=args.from_index,
+            to_index=args.to_index,
+            dry_run=args.dry_run,
+            simulate=args.simulate,
+            out_dir=args.out_dir,
+            max_steps=args.max_steps,
+        )
+    raise SceneError("Unsupported scene event commands subcommand")
+
+
+def _handle_scene_assets_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_assets_command == "list":
+        return list_scene_assets(args.scene_path)
+    if args.scene_assets_command == "add":
+        return add_scene_asset(args.scene_path, asset_id=args.asset_id, asset=_scene_asset_payload_from_args(args))
+    if args.scene_assets_command == "update":
+        return update_scene_asset(args.scene_path, asset_id=args.asset_id, updates=_scene_asset_payload_from_args(args))
+    if args.scene_assets_command == "delete":
+        return delete_scene_asset(args.scene_path, asset_id=args.asset_id, force=args.force)
+    raise SceneError("Unsupported scene assets subcommand")
+
+
+def _handle_scene_project_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_project_command == "update":
+        return update_scene_project(
+            args.scene_path,
+            name=args.name,
+            default_page=args.default_page,
+            width=args.width,
+            height=args.height,
+            background_color=args.background_color,
+        )
+    raise SceneError("Unsupported scene project subcommand")
+
+
+def _handle_scene_widgets_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_widgets_command == "update":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return update_scene_widget(
+            args.scene_path,
+            page_id=page_id,
+            widget_id=widget_id,
+            updates=_scene_widget_update_payload_from_args(args, page_id=page_id, widget_id=widget_id),
+            rewrite_event_references=args.rewrite_event_references,
+        )
+    if args.scene_widgets_command == "delete":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return delete_scene_widget(args.scene_path, page_id=page_id, widget_id=widget_id)
+    if args.scene_widgets_command == "duplicate":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return duplicate_scene_widget(
+            args.scene_path,
+            page_id=page_id,
+            widget_id=widget_id,
+            new_id=args.new_id,
+            offset_x=args.offset_x,
+            offset_y=args.offset_y,
+        )
+    if args.scene_widgets_command == "copy":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return copy_scene_widget(args.scene_path, page_id=page_id, widget_id=widget_id)
+    if args.scene_widgets_command == "cut":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return cut_scene_widget(args.scene_path, page_id=page_id, widget_id=widget_id)
+    if args.scene_widgets_command == "paste":
+        return paste_scene_widget(
+            args.scene_path,
+            page_id=args.page_id,
+            widget=_scene_widget_clipboard_payload_from_args(args),
+            new_id=args.new_id,
+            offset_x=args.offset_x,
+            offset_y=args.offset_y,
+            x=args.x,
+            y=args.y,
+        )
+    if args.scene_widgets_command == "copy-to":
+        source_page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return copy_scene_widget_to_page(
+            args.scene_path,
+            source_page_id=source_page_id,
+            widget_id=widget_id,
+            target_page_id=args.target_page,
+            new_id=args.new_id,
+            offset_x=args.offset_x,
+            offset_y=args.offset_y,
+            x=args.x,
+            y=args.y,
+        )
+    if args.scene_widgets_command == "move":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return move_scene_widget(args.scene_path, page_id=page_id, widget_id=widget_id, direction=args.direction)
+    raise SceneError("Unsupported scene widgets subcommand")
+
+
+def _handle_scene_pages_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_pages_command == "add":
+        return add_scene_page(args.scene_path, page_id=args.page_id)
+    if args.scene_pages_command == "duplicate":
+        return duplicate_scene_page(args.scene_path, page_id=args.page_id, new_id=args.new_id)
+    if args.scene_pages_command == "delete":
+        return delete_scene_page(args.scene_path, page_id=args.page_id)
+    if args.scene_pages_command == "update":
+        layout = _parse_json_object_arg(args.layout_json, "--layout-json") if args.layout_json is not None else None
+        return update_scene_page(args.scene_path, page_id=args.page_id, new_id=args.new_id, layout=layout)
+    raise SceneError("Unsupported scene pages subcommand")
+
+
+def _handle_scene_design_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.scene_design_command == "move":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return design_move_widget(
+            args.scene_path,
+            args.out_dir,
+            page_id=page_id,
+            widget_id=widget_id,
+            x=args.x,
+            y=args.y,
+            dx=args.dx,
+            dy=args.dy,
+            snap=args.snap,
+            clamp=not args.no_clamp,
+            source="cli-scene-design-move",
+        )
+    if args.scene_design_command == "resize":
+        page_id, widget_id = _parse_scene_widget_path(args.widget_path)
+        return design_resize_widget(
+            args.scene_path,
+            args.out_dir,
+            page_id=page_id,
+            widget_id=widget_id,
+            w=args.w,
+            h=args.h,
+            dw=args.dw,
+            dh=args.dh,
+            min_size=args.min_size,
+            snap=args.snap,
+            clamp=not args.no_clamp,
+            source="cli-scene-design-resize",
+        )
+    if args.scene_design_command == "align":
+        widget_targets = [_parse_scene_widget_path(value) for value in args.widget_paths]
+        page_ids = {page_id for page_id, _widget_id in widget_targets}
+        if len(page_ids) != 1:
+            raise SceneError("scene design align requires all widget paths to be on the same page")
+        page_id = next(iter(page_ids))
+        return design_align_widgets(
+            args.scene_path,
+            args.out_dir,
+            page_id=page_id,
+            widget_ids=[widget_id for _page_id, widget_id in widget_targets],
+            edge=args.edge,
+            anchor=args.anchor,
+            snap=args.snap,
+            clamp=not args.no_clamp,
+            source="cli-scene-design-align",
+        )
+    if args.scene_design_command == "distribute":
+        widget_targets = [_parse_scene_widget_path(value) for value in args.widget_paths]
+        page_ids = {page_id for page_id, _widget_id in widget_targets}
+        if len(page_ids) != 1:
+            raise SceneError("scene design distribute requires all widget paths to be on the same page")
+        page_id = next(iter(page_ids))
+        return design_distribute_widgets(
+            args.scene_path,
+            args.out_dir,
+            page_id=page_id,
+            widget_ids=[widget_id for _page_id, widget_id in widget_targets],
+            axis=args.axis,
+            snap=args.snap,
+            clamp=not args.no_clamp,
+            source="cli-scene-design-distribute",
+        )
+    if args.scene_design_command == "match-size":
+        widget_targets = [_parse_scene_widget_path(value) for value in args.widget_paths]
+        page_ids = {page_id for page_id, _widget_id in widget_targets}
+        if len(page_ids) != 1:
+            raise SceneError("scene design match-size requires all widget paths to be on the same page")
+        page_id = next(iter(page_ids))
+        return design_match_size_widgets(
+            args.scene_path,
+            args.out_dir,
+            page_id=page_id,
+            widget_ids=[widget_id for _page_id, widget_id in widget_targets],
+            mode=args.mode,
+            anchor=args.anchor,
+            min_size=args.min_size,
+            snap=args.snap,
+            clamp=not args.no_clamp,
+            source="cli-scene-design-match-size",
+        )
+    if args.scene_design_command == "replay":
+        return replay_agent_patch(args.scene_path, args.patch_path, args.out_dir)
+    raise SceneError("Unsupported scene design subcommand")
+
+
 def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.hmi_command == "import":
+        return import_hmi_project(args.hmi_path, args.out_dir, target=args.target, overwrite=args.overwrite)
+
+    if args.hmi_command == "roundtrip-check":
+        return check_hmi_roundtrip(
+            args.hmi_path,
+            args.out_dir,
+            target=args.target,
+            overwrite=args.overwrite,
+            source_tft=args.source_tft,
+        )
+
     if args.hmi_command == "import-image":
         return import_asset(args.source, args.out)
 
@@ -728,6 +1700,39 @@ def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
             font_entry=args.font_entry,
         )
 
+    if args.hmi_command == "donor-patch":
+        return patch_hmi_donor(
+            donor_hmi=None if args.donor_hmi is None else Path(args.donor_hmi).resolve(),
+            out_dir=Path(args.out_dir).resolve(),
+            page_entry=args.page_entry,
+            delete_objects=list(args.delete_obj),
+            graft_specs=list(args.graft_obj),
+            move_specs=list(args.move_obj),
+            int_specs=list(args.set_int),
+            str_specs=list(args.set_str),
+            probe_lowlevel=args.probe_lowlevel,
+            probe_reopen=args.probe_reopen,
+            spec=None if args.spec_json is None else json.loads(Path(args.spec_json).read_text(encoding="utf-8")),
+        )
+
+    if args.hmi_command == "reopen-safe-fixture":
+        if args.corpus_root:
+            return generate_reopen_safe_fixture(
+                args.control_type,
+                args.out_dir,
+                corpus_root=args.corpus_root,
+            )
+        return generate_reopen_safe_fixture(args.control_type, args.out_dir)
+
+    if args.hmi_command == "lowlevel-compatible-fixture":
+        if args.corpus_root:
+            return generate_lowlevel_compatible_fixture(
+                args.control_type,
+                args.out_dir,
+                corpus_root=args.corpus_root,
+            )
+        return generate_lowlevel_compatible_fixture(args.control_type, args.out_dir)
+
     if args.hmi_command == "preview-pa":
         return render_pa_preview(
             args.pa,
@@ -751,6 +1756,90 @@ def _handle_hmi_command(args: argparse.Namespace) -> dict[str, Any]:
         )
 
     raise SceneError("Unsupported hmi subcommand")
+
+
+def _handle_widgets_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.widgets_command == "list":
+        return {
+            "widgets": list_widget_capabilities(
+                support=args.support,
+                include_aliases=args.include_aliases,
+            )
+        }
+    if args.widgets_command == "show":
+        return {
+            "widget": get_widget_capability(
+                args.widget_type,
+                include_aliases=args.include_aliases,
+            )
+        }
+    if args.widgets_command == "manifest":
+        return get_capability_manifest(include_aliases=args.include_aliases)
+    if args.widgets_command == "template":
+        return get_widget_template(args.widget_type, widget_id=args.widget_id, x=args.x, y=args.y)
+    if args.widgets_command == "templates":
+        return list_widget_templates()
+    raise SceneError("Unsupported widgets subcommand")
+
+
+def _handle_editor_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.editor_command == "capabilities":
+        return editor_capability_manifest()
+    if args.editor_command == "audit":
+        return editor_completion_audit()
+    raise SceneError("Unsupported editor subcommand")
+
+
+def _handle_target_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.target_command == "summary":
+        return get_current_target_status_summary()
+    if args.target_command == "audit":
+        return get_current_target_completion_audit()
+    if args.target_command == "calibration":
+        return get_builder_calibration_status()
+    if args.target_command == "frontier":
+        return get_page1_filebrowser_frontier_report()
+    if args.target_command == "compare-targets":
+        return get_page1_filebrowser_native_init_compare_targets_report()
+    if args.target_command == "next-probe":
+        return get_next_live_probe_bundle()
+    if args.target_command == "check-next-probe":
+        return check_next_probe_invariants(args.file)
+    if args.target_command == "run-next-probe":
+        return run_next_live_probe(
+            preflight=args.preflight,
+            live_smoke=args.live_smoke,
+            upload=args.upload,
+            allow_hardware_quarantine=args.allow_hardware_quarantine,
+            allow_pending_sd_recovery=args.allow_pending_sd_recovery,
+            capture=args.capture,
+            progress=args.progress,
+            port=args.port,
+            baud=args.baud,
+            download_baud=args.download_baud,
+            timeout_ms=args.timeout_ms,
+            out_dir=args.out_dir,
+            result_json=args.result_json,
+        )
+    raise SceneError("Unsupported target subcommand")
+
+
+def _handle_capabilities_command(args: argparse.Namespace) -> dict[str, Any]:
+    if args.widget:
+        return {
+            "widget": get_widget_capability(
+                args.widget,
+                include_aliases=args.include_aliases,
+            )
+        }
+    if args.support:
+        return {
+            "widgets": list_widget_capabilities(
+                support=args.support,
+                include_aliases=args.include_aliases,
+            )
+        }
+    return get_capability_manifest(include_aliases=args.include_aliases)
 
 
 def _handle_font_command(args: argparse.Namespace) -> dict[str, Any]:
@@ -823,6 +1912,22 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
             install_dir=args.install_dir,
             context_bytes=args.context_bytes,
         )
+    if args.tft_command == "event-index":
+        if args.tft_event_index_command == "inspect":
+            return inspect_tft_event_index(
+                args.hmi,
+                args.tft,
+                force_post_primary_page_load=args.force_post_primary_page_load,
+                out_path=args.out,
+            )
+        if args.tft_event_index_command == "batch":
+            return inspect_tft_event_index_batch(
+                args.paths,
+                force_post_primary_page_load=args.force_post_primary_page_load,
+                include_object_only=args.include_object_only,
+                out_path=args.out,
+            )
+        raise SceneError("Unsupported tft event-index subcommand")
     if args.tft_command == "list-models":
         return {"models": list_supported_tft_models()}
     if args.tft_command == "hash-name":
@@ -859,6 +1964,9 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
     if args.tft_command == "preflight":
         expected_model = str(args.expected_model or "") or None
         checksum = inspect_tft_checksum(args.file)
+        quarantine_reason = _dangerous_tft_quarantine_reason(args.file)
+        sd_recovery_reason = pending_sd_recovery_reason()
+        build_manifest = _load_build_manifest_metadata(args.file)
         health = probe_serial_health(
             port=args.port,
             baud=args.baud,
@@ -868,8 +1976,11 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
         )
         checksum_ok = bool(checksum.get("valid"))
         serial_ready = bool(health["summary"].get("public_upload_ready"))
-        ready = checksum_ok and serial_ready
-        if ready:
+        blocked_reason = quarantine_reason or sd_recovery_reason
+        ready = checksum_ok and serial_ready and not blocked_reason
+        if blocked_reason:
+            diagnosis = blocked_reason
+        elif ready:
             diagnosis = "TFT checksum is valid and serial runtime is ready for public upload."
         elif not checksum_ok and not serial_ready:
             diagnosis = "TFT checksum is invalid and serial runtime is not ready for public upload."
@@ -887,15 +1998,76 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
                 "ready": ready,
                 "tft_checksum_valid": checksum_ok,
                 "serial_upload_ready": serial_ready,
+                "hardware_quarantine_blocked": bool(quarantine_reason),
+                "sd_recovery_blocked": bool(sd_recovery_reason),
                 "diagnosis": diagnosis,
             },
             "checksum": checksum,
+            "build_manifest": build_manifest,
+            "dangerous_tft_quarantine_reason": quarantine_reason,
+            "sd_recovery_pending_reason": sd_recovery_reason,
             "serial_health": health,
+        }
+    if args.tft_command == "readiness":
+        checksum = inspect_tft_checksum(args.file)
+        build_manifest = _load_build_manifest_metadata(args.file)
+        quarantine_reason = _dangerous_tft_quarantine_reason(args.file)
+        sd_recovery_reason = pending_sd_recovery_reason()
+        checksum_ok = bool(checksum.get("valid"))
+        delivery_status = build_manifest.get("delivery_status") if build_manifest else None
+        manifest_ready = None
+        manifest_reason = None
+        if isinstance(delivery_status, dict):
+            ready_value = delivery_status.get("ready_for_live_upload")
+            manifest_ready = bool(ready_value) if isinstance(ready_value, bool) else None
+            raw_reason = delivery_status.get("reason")
+            manifest_reason = str(raw_reason) if raw_reason else None
+        ready = checksum_ok and not quarantine_reason and not sd_recovery_reason and (manifest_ready is not False)
+        if not checksum_ok:
+            diagnosis = "TFT checksum is invalid; do not upload until it is repaired."
+        elif quarantine_reason:
+            diagnosis = quarantine_reason
+        elif sd_recovery_reason:
+            diagnosis = sd_recovery_reason
+        elif manifest_ready is False and manifest_reason:
+            diagnosis = manifest_reason
+        else:
+            diagnosis = "offline build appears eligible for live upload; run `tft preflight` next for serial health."
+        return {
+            "file": str(Path(args.file).resolve()),
+            "summary": {
+                "ready_for_live_upload": ready,
+                "tft_checksum_valid": checksum_ok,
+                "build_manifest_present": build_manifest is not None,
+                "hardware_quarantine_blocked": bool(quarantine_reason),
+                "sd_recovery_blocked": bool(sd_recovery_reason),
+                "diagnosis": diagnosis,
+            },
+            "checksum": checksum,
+            "build_manifest": build_manifest,
+            "dangerous_tft_quarantine_reason": quarantine_reason,
+            "sd_recovery_pending_reason": sd_recovery_reason,
         }
     if args.tft_command == "upload":
         preflight_checksum = None
         preflight_health = None
         skip_current_decision = None
+        if not (args.allow_hardware_quarantine or args.allow_quarantined_touch_capture):
+            quarantine_reason = _dangerous_tft_quarantine_reason(args.file)
+            if quarantine_reason:
+                raise TftToolchainError(
+                    "TFT upload blocked: generated TFT is quarantined after a known runtime wedge. "
+                    f"{quarantine_reason} "
+                    "Use --allow-hardware-quarantine only with explicit recovery planning."
+                )
+        if not args.allow_pending_sd_recovery:
+            sd_recovery_reason = pending_sd_recovery_reason()
+            if sd_recovery_reason:
+                raise TftToolchainError(
+                    "TFT upload blocked: SD-card recovery state is still pending. "
+                    f"{sd_recovery_reason} "
+                    "Use --allow-pending-sd-recovery only after the card is removed and the panel was power-cycled."
+                )
         run_checksum_preflight = args.require_valid_checksum or not args.no_preflight
         run_runtime_preflight = args.require_runtime_healthy or not args.no_preflight
         expected_model = str(args.expected_model or "") or None
@@ -1030,6 +2202,15 @@ def _handle_tft_command(args: argparse.Namespace) -> dict[str, Any]:
         ).to_dict()
     if args.tft_command == "checksum":
         return inspect_tft_checksum(args.file)
+    if args.tft_command == "hmisafe-finalize":
+        result = finalize_tft_file(args.input, args.out)
+        if args.final:
+            final_data = Path(args.final).read_bytes()
+            ours_data = Path(args.out).read_bytes()
+            result["diff"] = {"official_final": args.final, **diff_hmisafe_bytes(ours_data, final_data)}
+        return result
+    if args.tft_command == "hmisafe-verify":
+        return verify_final_tft_file(args.file)
     raise SceneError("Unsupported tft subcommand")
 
 
@@ -1049,6 +2230,82 @@ def _make_upload_progress():
         )
 
     return progress
+
+
+def _touch_capture_quarantine_reason(tft_file: str | Path) -> str | None:
+    tft_path = Path(tft_file)
+    manifest_path = tft_path.with_name("manifest.json")
+    if not manifest_path.exists():
+        return None
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+    for page in manifest.get("pages", []):
+        for widget in page.get("widgets", []):
+            if widget.get("type") == "touch-capture":
+                return f"sibling manifest {manifest_path} contains widget {widget.get('id')!r} type touch-capture."
+
+    for item in manifest.get("tft_patch", {}).get("objects", []):
+        if item.get("type") == "\x05":
+            return f"sibling manifest {manifest_path} contains object {item.get('name')!r} type 0x05."
+    return None
+
+
+def _manifest_hardware_quarantine_reason(tft_file: str | Path) -> str | None:
+    tft_path = Path(tft_file)
+    manifest_path = tft_path.with_name("manifest.json")
+    if not manifest_path.exists():
+        return None
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    quarantine = manifest.get("hardware_quarantine")
+    if not isinstance(quarantine, dict):
+        return None
+    if not quarantine.get("active"):
+        return None
+    reason = str(quarantine.get("reason") or "").strip()
+    patch_path = str(quarantine.get("patch_path") or "").strip()
+    if not reason:
+        if patch_path:
+            return f"sibling manifest {manifest_path} declares an active hardware quarantine (patch_path={patch_path})."
+        return f"sibling manifest {manifest_path} declares an active hardware quarantine."
+    if patch_path:
+        return f"sibling manifest {manifest_path} declares an active hardware quarantine (patch_path={patch_path}): {reason}"
+    return f"sibling manifest {manifest_path} declares an active hardware quarantine: {reason}"
+
+
+def _load_build_manifest_metadata(tft_file: str | Path) -> dict[str, Any] | None:
+    tft_path = Path(tft_file)
+    manifest_path = tft_path.with_name("manifest.json")
+    if not manifest_path.exists():
+        return None
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return {
+        "manifest_path": str(manifest_path),
+        "delivery_status": manifest.get("delivery_status"),
+        "oracle_alignment": manifest.get("oracle_alignment"),
+        "hardware_quarantine": manifest.get("hardware_quarantine"),
+        "tft_patch": manifest.get("tft_patch"),
+    }
+
+
+def _case83_event_quarantine_reason(tft_file: str | Path) -> str | None:
+    return None
+
+
+def _dangerous_tft_quarantine_reason(tft_file: str | Path) -> str | None:
+    return (
+        _manifest_hardware_quarantine_reason(tft_file)
+        or _touch_capture_quarantine_reason(tft_file)
+        or _case83_event_quarantine_reason(tft_file)
+    )
 
 
 def _skipped_current_upload_result(
@@ -1491,6 +2748,50 @@ def _add_font_generation_args(parser: argparse.ArgumentParser, include_scene: bo
     parser.add_argument("--offset-y", type=float, default=0.0, help="Glyph y offset")
 
 
+def _add_scene_asset_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--id", dest="asset_doc_id", help="Optional stored asset id; defaults to the asset key")
+    parser.add_argument("--source", help="Source image path")
+    parser.add_argument("--normal", help="Normal-state image path")
+    parser.add_argument("--pressed", help="Pressed-state image path")
+    parser.add_argument("--disabled", help="Disabled-state image path")
+
+
+def _add_scene_event_command_patch_args(parser: argparse.ArgumentParser) -> None:
+    source = parser.add_mutually_exclusive_group()
+    source.add_argument("--line", help="Raw event source line to insert/replace")
+    source.add_argument("--from-file", help="Read one event source line from a file")
+    parser.add_argument(
+        "--command",
+        dest="event_command",
+        choices=("page", "ref", "vis", "tsw", "click", "get", "set", "printh", "delay", "raw"),
+        help="Structured event command family; required when --line/--from-file is not used",
+    )
+    parser.add_argument("--target", help="Target page/object/attribute")
+    parser.add_argument("--value", help="Command value, for example 0, 1, or text")
+    parser.add_argument(
+        "--op",
+        default="=",
+        choices=("=", "++", "--", "+=", "-="),
+        help="Assignment operator used by --command set",
+    )
+    parser.add_argument(
+        "--attribute",
+        default="val",
+        help="Attribute appended to --target for get/set when target has no dot",
+    )
+    parser.add_argument("--hex", dest="hex_bytes", help="Hex byte string for --command printh")
+    parser.add_argument("--delay-ms", type=int, help="Delay in milliseconds for --command delay")
+    parser.add_argument("--raw-line", help="Raw event line for --command raw")
+    _add_scene_event_patch_common_args(parser)
+
+
+def _add_scene_event_patch_common_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--dry-run", action="store_true", help="Return patch/diff without modifying the scene")
+    parser.add_argument("--simulate", action="store_true", help="Run before/after offline simulation")
+    parser.add_argument("--out-dir", help="Write event_patch.json, event_diff.json, and optional simulation bundles")
+    parser.add_argument("--max-steps", type=int, default=128, help="Maximum simulated event command lines")
+
+
 def _parse_preview_font_args(values: list[str] | None) -> dict[int, Path]:
     fonts: dict[int, Path] = {}
     next_id = 0
@@ -1518,6 +2819,158 @@ def _parse_cli_map(values: list[str] | None, option_name: str) -> dict[str, Any]
             raise SceneError(f"{option_name} key cannot be empty")
         result[key] = _coerce_cli_value(raw_value.strip())
     return result
+
+
+def _scene_event_lines_from_args(lines: list[str], code: str | None, from_file: str | None = None) -> list[str]:
+    result: list[str] = []
+    if from_file:
+        result.extend(line.rstrip() for line in Path(from_file).read_text(encoding="utf-8").splitlines() if line.strip())
+    if code:
+        result.extend(line.rstrip() for line in code.splitlines() if line.strip())
+    result.extend(line.rstrip() for line in lines if line.strip())
+    if not result:
+        raise SceneError("scene events set requires --line or --code")
+    return result
+
+
+def _scene_event_command_line_from_args(args: argparse.Namespace) -> str | None:
+    if getattr(args, "from_file", None):
+        if getattr(args, "event_command", None):
+            raise SceneError("use either --from-file or --command, not both")
+        return Path(args.from_file).read_text(encoding="utf-8")
+    if getattr(args, "line", None) is not None:
+        if getattr(args, "event_command", None):
+            raise SceneError("use either --line or --command, not both")
+        return args.line
+    return None
+
+
+def _parse_scene_widget_path(value: str) -> tuple[str, str]:
+    parts = [part.strip() for part in value.split(".") if part.strip()]
+    if len(parts) != 2:
+        raise SceneError("scene widget path must be page.widget, for example page0.btn0")
+    return parts[0], parts[1]
+
+
+def _scene_asset_payload_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for arg_name, key in (
+        ("asset_doc_id", "id"),
+        ("source", "source"),
+        ("normal", "normal"),
+        ("pressed", "pressed"),
+        ("disabled", "disabled"),
+    ):
+        value = getattr(args, arg_name, None)
+        if value is not None:
+            payload[key] = value
+    return payload
+
+
+def _scene_widget_update_payload_from_args(
+    args: argparse.Namespace,
+    *,
+    page_id: str,
+    widget_id: str,
+) -> dict[str, Any]:
+    scene = load_scene(args.scene_path)
+    page = next((item for item in scene.pages if item.id == page_id), None)
+    if page is None:
+        raise SceneError(f"Page '{page_id}' not found in scene")
+    widget = next((item for item in page.widgets if item.id == widget_id), None)
+    if widget is None:
+        raise SceneError(f"Widget '{widget_id}' not found on page '{page_id}'")
+
+    updates: dict[str, Any] = {}
+    for arg_name, key in (
+        ("new_id", "id"),
+        ("widget_type", "type"),
+        ("x", "x"),
+        ("y", "y"),
+        ("w", "w"),
+        ("h", "h"),
+    ):
+        value = getattr(args, arg_name, None)
+        if value is not None:
+            updates[key] = value
+    if args.clear_text:
+        updates["text"] = None
+    elif args.text is not None:
+        updates["text"] = args.text
+    if args.clear_value:
+        updates["value"] = None
+    elif args.value is not None:
+        updates["value"] = args.value
+    _merge_widget_map_update(
+        updates,
+        key="style",
+        current=widget.style,
+        json_arg=args.style_json,
+        patch_args=args.style,
+        option_name="--style",
+    )
+    _merge_widget_map_update(
+        updates,
+        key="resources",
+        current=widget.resources,
+        json_arg=args.resources_json,
+        patch_args=args.resource,
+        option_name="--resource",
+    )
+    _merge_widget_map_update(
+        updates,
+        key="bindings",
+        current=widget.bindings,
+        json_arg=args.bindings_json,
+        patch_args=args.binding,
+        option_name="--binding",
+    )
+    if not updates:
+        raise SceneError("scene widgets update requires at least one property option")
+    return updates
+
+
+def _merge_widget_map_update(
+    updates: dict[str, Any],
+    *,
+    key: str,
+    current: dict[str, Any],
+    json_arg: str | None,
+    patch_args: list[str] | None,
+    option_name: str,
+) -> None:
+    if json_arg is None and not patch_args:
+        return
+    merged = _parse_json_object_arg(json_arg, f"--{key}-json") if json_arg is not None else dict(current)
+    for patch_key, value in _parse_cli_map(patch_args, option_name).items():
+        if value is None:
+            merged.pop(patch_key, None)
+        else:
+            merged[patch_key] = value
+    updates[key] = merged
+
+
+def _parse_json_object_arg(raw: str, option_name: str) -> dict[str, Any]:
+    try:
+        value = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise SceneError(f"{option_name} expects a JSON object: {exc}") from exc
+    if not isinstance(value, dict):
+        raise SceneError(f"{option_name} expects a JSON object")
+    return value
+
+
+def _scene_widget_clipboard_payload_from_args(args: argparse.Namespace) -> dict[str, Any]:
+    if args.from_file:
+        raw = Path(args.from_file).read_text(encoding="utf-8")
+        value = _parse_json_object_arg(raw, "--from-file")
+    else:
+        value = _parse_json_object_arg(args.widget_json, "--widget-json")
+    if value.get("kind") == "widget" and isinstance(value.get("widget"), dict):
+        return value["widget"]
+    if isinstance(value.get("clipboard"), dict) and isinstance(value["clipboard"].get("widget"), dict):
+        return value["clipboard"]["widget"]
+    return value
 
 
 def _coerce_cli_value(raw_value: str) -> Any:

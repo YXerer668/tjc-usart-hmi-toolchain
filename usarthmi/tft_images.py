@@ -280,6 +280,91 @@ def pack_picture_resources_into_tft(
         existing_ids=existing_ids,
         picture_budget=picture_budget,
     )
+    return _pack_compiled_picture_resources(
+        baseline_path=baseline_path,
+        out_path=out_path,
+        header1=header1,
+        header2=header2,
+        model=model,
+        model_series=model_series,
+        resource_address=resource_address,
+        resource_size=resource_size,
+        image_resource_address=image_resource_address,
+        old_object_start=old_object_start,
+        records=records,
+        picture_region_end=picture_region_end,
+        compiled=compiled,
+    )
+
+
+def pack_hmi_picture_entries_into_tft(
+    baseline_tft: str | Path,
+    pictures: list[tuple[int, bytes, str]],
+    *,
+    out_tft: str | Path,
+) -> PicturePackResult:
+    baseline_path = Path(baseline_tft).resolve()
+    out_path = Path(out_tft).resolve()
+    if not pictures:
+        raise TftToolchainError("No HMI picture entries were provided")
+
+    inspection = inspect_tft(baseline_path)
+    header1 = _header(inspection, "Header1")
+    header2 = _header(inspection, "Header2")
+    model = str(inspection.get("model") or "")
+    model_series = _required_header_int(header1, "model_series")
+    resource_address = _required_header_int(header1, "ressources_files_address")
+    resource_size = _required_header_int(header1, "ressource_files_size")
+    image_resource_address = _required_header_int(header2, "videos_address")
+    old_object_start = _required_header_int(header2, "unknown_objects_address")
+    if resource_address + resource_size != old_object_start:
+        raise TftToolchainError(
+            "TFT resource region does not end at unknown_objects_address: "
+            f"resource_end=0x{resource_address + resource_size:X}, objects=0x{old_object_start:X}"
+        )
+
+    raw = baseline_path.read_bytes()
+    records, picture_region_end = _parse_picture_resource_records(raw, image_resource_address)
+    existing_ids = {record["picture_id"] for record in records}
+    compiled = _precompiled_hmi_picture_resources(
+        pictures,
+        existing_ids=existing_ids,
+    )
+    return _pack_compiled_picture_resources(
+        baseline_path=baseline_path,
+        out_path=out_path,
+        header1=header1,
+        header2=header2,
+        model=model,
+        model_series=model_series,
+        resource_address=resource_address,
+        resource_size=resource_size,
+        image_resource_address=image_resource_address,
+        old_object_start=old_object_start,
+        records=records,
+        picture_region_end=picture_region_end,
+        compiled=compiled,
+    )
+
+
+def _pack_compiled_picture_resources(
+    *,
+    baseline_path: Path,
+    out_path: Path,
+    header1: dict[str, Any],
+    header2: dict[str, Any],
+    model: str,
+    model_series: int,
+    resource_address: int,
+    resource_size: int,
+    image_resource_address: int,
+    old_object_start: int,
+    records: list[dict[str, Any]],
+    picture_region_end: int,
+    compiled: list[tuple[PackedPictureResource, bytes]],
+) -> PicturePackResult:
+    raw = baseline_path.read_bytes()
+    resource = raw[resource_address:old_object_start]
 
     old_table_size = len(records) * PICTURE_RESOURCE_RECORD_SIZE
     new_table_size = (len(records) + len(compiled)) * PICTURE_RESOURCE_RECORD_SIZE
@@ -408,6 +493,65 @@ def _compile_picture_resources_to_budget(
             f"{total_size} > {picture_budget}"
         )
     return compressed
+
+
+def _precompiled_hmi_picture_resources(
+    pictures: list[tuple[int, bytes, str]],
+    *,
+    existing_ids: set[int],
+) -> list[tuple[PackedPictureResource, bytes]]:
+    used_ids = set(existing_ids)
+    compiled: list[tuple[PackedPictureResource, bytes]] = []
+    for picture_id, entry_data, source_label in pictures:
+        picture_id = int(picture_id)
+        if picture_id in used_ids:
+            raise TftToolchainError(f"Picture id {picture_id} already exists in baseline TFT")
+        info, block = _parse_hmi_picture_entry_resource(
+            picture_id=picture_id,
+            entry_data=entry_data,
+            source_label=source_label,
+        )
+        compiled.append((info, block))
+        used_ids.add(info.picture_id)
+    return compiled
+
+
+def _parse_hmi_picture_entry_resource(
+    *,
+    picture_id: int,
+    entry_data: bytes,
+    source_label: str,
+) -> tuple[PackedPictureResource, bytes]:
+    if len(entry_data) < PICTURE_RESOURCE_RECORD_SIZE:
+        raise TftToolchainError("HMI picture entry is shorter than the 24-byte picture record header")
+    if entry_data[:4] != PICTURE_RESOURCE_MAGIC:
+        raise TftToolchainError("HMI picture entry does not start with the expected picture resource magic")
+    block_offset = int.from_bytes(entry_data[8:12], "little")
+    logical_width = int.from_bytes(entry_data[0x0C:0x0E], "little")
+    logical_height = int.from_bytes(entry_data[0x0E:0x10], "little")
+    block_size = int.from_bytes(entry_data[0x10:0x14], "little")
+    if block_offset < PICTURE_RESOURCE_RECORD_SIZE:
+        raise TftToolchainError(f"HMI picture entry has invalid block offset {block_offset}")
+    block = entry_data[block_offset : block_offset + block_size]
+    if len(block) != block_size:
+        raise TftToolchainError(
+            "HMI picture entry block payload is truncated: "
+            f"expected {block_size} bytes, found {len(block)}"
+        )
+    jpeg_size = max(0, block_size - PICTURE_BLOCK_HEADER_SIZE)
+    info = PackedPictureResource(
+        picture_id=int(picture_id),
+        source=str(source_label),
+        logical_width=logical_width,
+        logical_height=logical_height,
+        compiled_width=logical_width,
+        compiled_height=logical_height,
+        jpeg_size=jpeg_size,
+        block_size=block_size,
+        jpeg_quality=DEFAULT_JPEG_QUALITY,
+        scale_percent=100,
+    )
+    return info, block
 
 
 def _split_picture_budget(sizes: list[int], budget: int) -> list[int]:

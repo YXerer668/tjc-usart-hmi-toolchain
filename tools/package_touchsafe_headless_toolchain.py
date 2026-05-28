@@ -4,6 +4,7 @@ import argparse
 import datetime as dt
 import json
 import shutil
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -33,11 +34,10 @@ REQUIRED_FILES = [
     "examples/polished_dashboard_demo/touchsafe_pipeline.md",
     "examples/polished_dashboard_demo/touchsafe_pipeline.template.json",
     "examples/polished_dashboard_demo/touchsafe_headless_package.md",
-    "skills/usarthmi-headless-toolchain/SKILL.md",
-    "skills/usarthmi-headless-toolchain/agents/openai.yaml",
 ]
 
 REQUIRED_DIRS = [
+    "skills",
     "usarthmi",
 ]
 
@@ -103,7 +103,8 @@ def main() -> int:
         "name": args.name,
         "version_label": args.version_label,
         "created_at_utc": dt.datetime.now(dt.timezone.utc).isoformat(),
-        "source_root": str(REPO_ROOT),
+        "source_repository": "https://github.com/YXerer668/tjc-usart-hmi-toolchain",
+        "source_commit": git_commit(),
         "entrypoints": {
             "bootstrap": "tools/touchsafe_headless_bootstrap.ps1",
             "run": "tools/run_touchsafe_pipeline.ps1",
@@ -124,7 +125,7 @@ def main() -> int:
 
     zip_path = None
     if not args.no_zip:
-        zip_path = package_dir.with_suffix(".zip")
+        zip_path = package_dir.parent / f"{package_dir.name}.zip"
         if zip_path.exists():
             zip_path.unlink()
         write_zip(package_dir, zip_path)
@@ -233,6 +234,23 @@ def safe_name(value: str) -> str:
         else:
             chars.append("-")
     return "".join(chars).strip("-") or "package"
+
+
+def git_commit() -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "--short=12", "HEAD"],
+            cwd=REPO_ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except OSError:
+        return None
+    if completed.returncode != 0:
+        return None
+    return completed.stdout.strip() or None
 
 
 if __name__ == "__main__":

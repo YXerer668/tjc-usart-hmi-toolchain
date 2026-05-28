@@ -16,6 +16,14 @@ Repository = "https://github.com/YXerer668/tjc-usart-hmi-toolchain"
 
 [project.scripts]
 usarthmi = "usarthmi.cli:main"
+usarthmi-preview = "usarthmi.preview_app:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+  "smoke: fast daily regression tier for offline checks that should stay around 30s to 2m",
+  "acceptance: broader offline regression tier for close-out validation without official-tool probes",
+  "official_probe: tests that intentionally invoke official-tool probe paths and require explicit opt-in",
+  "slow: high-cost test or large fixture suite that is not intended for the default daily loop",
+  "full: complete repository regression tier; official_probe items still require explicit opt-in",
+]

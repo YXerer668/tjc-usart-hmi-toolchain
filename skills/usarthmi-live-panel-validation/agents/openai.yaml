@@ -1,0 +1,4 @@
+interface:
+  display_name: "USART HMI Live Validation"
+  short_description: "Safely upload and verify USART HMI TFTs on a live panel"
+  default_prompt: "Validate this USART HMI TFT on the live panel with checksum, serial health, and camera evidence."
