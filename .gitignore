@@ -12,6 +12,7 @@ venv/
 .usarthmi_last_upload.json.tmp
 
 # Local/reverse-engineering artifacts and generated builds.
+build/
 build_*/
 tmp_*/
 hmi_extract*/
