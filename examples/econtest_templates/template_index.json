@@ -1,5 +1,5 @@
 {
-  "schema": "usarthmi.econtest_templates.v1",
+  "schema": "usarthmi.econtest_templates.v2",
   "canvas": {
     "width": 800,
     "height": 480
@@ -7,10 +7,12 @@
   "count": 10,
   "templates": [
     {
-      "slug": "instrument_meter",
-      "name": "Instrument Meter",
-      "cn": "仪器仪表",
-      "scene": "instrument_meter/scene.json",
+      "slug": "power_converter",
+      "name": "Power Converter",
+      "cn": "电源与功率变换",
+      "problem_type": "开关电源 / 恒流源 / 逆变 / MPPT / BMS 前端",
+      "home_kind": "power_flow",
+      "scene": "power_converter/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -19,18 +21,28 @@
       "serial_prefix_hex": "23 31",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "flow_in",
+        "flow_out",
+        "eff_bar",
+        "prot_ovp"
+      ],
+      "topic_widgets": [
+        "flow_in",
+        "flow_out",
+        "eff_bar",
+        "prot_ovp"
       ]
     },
     {
-      "slug": "power_energy",
-      "name": "Power Energy",
-      "cn": "电源能源",
-      "scene": "power_energy/scene.json",
+      "slug": "measurement_scope",
+      "name": "Measurement Scope",
+      "cn": "测量仪器",
+      "problem_type": "示波 / 频率计 / LCR / 数据记录 / 扫频测量",
+      "home_kind": "scope",
+      "scene": "measurement_scope/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -39,18 +51,28 @@
       "serial_prefix_hex": "23 32",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "scope_wave",
+        "range_box",
+        "trig_level",
+        "m0"
+      ],
+      "topic_widgets": [
+        "scope_wave",
+        "range_box",
+        "trig_level",
+        "m0"
       ]
     },
     {
-      "slug": "motor_motion",
-      "name": "Motor Motion",
-      "cn": "电机运动",
-      "scene": "motor_motion/scene.json",
+      "slug": "signal_generator",
+      "name": "Signal Generator",
+      "cn": "信号源与波形",
+      "problem_type": "DDS / 函数发生器 / PWM / 脉冲源 / 滤波输出",
+      "home_kind": "source",
+      "scene": "signal_generator/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -59,18 +81,28 @@
       "serial_prefix_hex": "23 33",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "wave_sine",
+        "freq_set",
+        "amp_set",
+        "out_enable"
+      ],
+      "topic_widgets": [
+        "wave_sine",
+        "freq_set",
+        "amp_set",
+        "out_enable"
       ]
     },
     {
-      "slug": "robot_chassis",
-      "name": "Robot Chassis",
-      "cn": "机器人底盘",
-      "scene": "robot_chassis/scene.json",
+      "slug": "communication_link",
+      "name": "Communication Link",
+      "cn": "通信链路",
+      "problem_type": "无线通信 / 调制解调 / CAN / UART / 误码率测试",
+      "home_kind": "comms",
+      "scene": "communication_link/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -79,18 +111,28 @@
       "serial_prefix_hex": "23 34",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "link_tx",
+        "link_rx",
+        "rssi_gauge",
+        "ber_bar"
+      ],
+      "topic_widgets": [
+        "link_tx",
+        "link_rx",
+        "rssi_gauge",
+        "ber_bar"
       ]
     },
     {
-      "slug": "communication_link",
-      "name": "Communication Link",
-      "cn": "通信链路",
-      "scene": "communication_link/scene.json",
+      "slug": "pid_control",
+      "name": "PID Control",
+      "cn": "闭环控制",
+      "problem_type": "温控 / 液位 / 压力 / 位置伺服 / 稳定平台",
+      "home_kind": "pid",
+      "scene": "pid_control/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -99,18 +141,28 @@
       "serial_prefix_hex": "23 35",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "sp_value",
+        "pv_value",
+        "pid_wave",
+        "auto_mode"
+      ],
+      "topic_widgets": [
+        "sp_value",
+        "pv_value",
+        "pid_wave",
+        "auto_mode"
       ]
     },
     {
-      "slug": "sensor_fusion",
-      "name": "Sensor Fusion",
-      "cn": "传感融合",
-      "scene": "sensor_fusion/scene.json",
+      "slug": "motor_drive",
+      "name": "Motor Drive",
+      "cn": "电机与运动控制",
+      "problem_type": "直流电机 / 步进 / 无刷 / 编码器测速 / 位置闭环",
+      "home_kind": "motor",
+      "scene": "motor_drive/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -119,18 +171,28 @@
       "serial_prefix_hex": "23 36",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "speed_gauge",
+        "dir_fwd",
+        "dir_rev",
+        "brake_btn"
+      ],
+      "topic_widgets": [
+        "speed_gauge",
+        "dir_fwd",
+        "dir_rev",
+        "brake_btn"
       ]
     },
     {
-      "slug": "pid_tuning",
-      "name": "PID Tuning",
-      "cn": "PID 调参",
-      "scene": "pid_tuning/scene.json",
+      "slug": "sensor_daq",
+      "name": "Sensor DAQ",
+      "cn": "传感采集",
+      "problem_type": "多路 ADC / 环境监测 / IMU / 称重 / 光电 / 超声",
+      "home_kind": "daq",
+      "scene": "sensor_daq/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -139,18 +201,28 @@
       "serial_prefix_hex": "23 37",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "sensor_grid",
+        "sample_bar",
+        "cal_zero",
+        "store_bar"
+      ],
+      "topic_widgets": [
+        "sensor_grid",
+        "sample_bar",
+        "cal_zero",
+        "store_bar"
       ]
     },
     {
-      "slug": "battery_bms",
-      "name": "Battery BMS",
-      "cn": "电池管理",
-      "scene": "battery_bms/scene.json",
+      "slug": "robot_task",
+      "name": "Robot Task",
+      "cn": "机器人与小车",
+      "problem_type": "循迹 / 避障 / 机械臂 / 底盘 / 任务调度",
+      "home_kind": "robot",
+      "scene": "robot_task/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -159,18 +231,28 @@
       "serial_prefix_hex": "23 38",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "map_grid_0",
+        "m0",
+        "task_lane",
+        "obs_front"
+      ],
+      "topic_widgets": [
+        "map_grid_0",
+        "m0",
+        "task_lane",
+        "obs_front"
       ]
     },
     {
-      "slug": "vision_aiot",
-      "name": "Vision AIoT",
-      "cn": "视觉识别",
-      "scene": "vision_aiot/scene.json",
+      "slug": "vision_audio",
+      "name": "Vision Audio",
+      "cn": "图像与音频识别",
+      "problem_type": "颜色识别 / 目标检测 / 声源定位 / 语音或频谱特征",
+      "home_kind": "vision",
+      "scene": "vision_audio/scene.json",
       "pages": [
         "page0",
         "page1",
@@ -179,17 +261,27 @@
       "serial_prefix_hex": "23 39",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "camera_frame",
+        "target_list",
+        "conf_gauge",
+        "snap_btn"
+      ],
+      "topic_widgets": [
+        "camera_frame",
+        "target_list",
+        "conf_gauge",
+        "snap_btn"
       ]
     },
     {
       "slug": "field_debug",
       "name": "Field Debug",
-      "cn": "现场调试",
+      "cn": "综合调试",
+      "problem_type": "现场联调 / 状态监控 / 故障诊断 / 日志 / 参数快改",
+      "home_kind": "debug",
       "scene": "field_debug/scene.json",
       "pages": [
         "page0",
@@ -199,11 +291,19 @@
       "serial_prefix_hex": "23 3A",
       "primary_widgets": [
         "run",
-        "main_gauge",
-        "main_bar",
         "tick",
         "sp0",
-        "seq"
+        "seq",
+        "console",
+        "fault_count",
+        "bus_uart",
+        "dump_btn"
+      ],
+      "topic_widgets": [
+        "console",
+        "fault_count",
+        "bus_uart",
+        "dump_btn"
       ]
     }
   ]

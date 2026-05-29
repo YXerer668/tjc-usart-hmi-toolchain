@@ -1,6 +1,6 @@
 {
   "project": {
-    "name": "econtest-power_energy",
+    "name": "econtest-power_converter",
     "default_page": "page0",
     "drop_seed_objects": true
   },
@@ -34,10 +34,10 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "POWER ENERGY",
+          "text": "POWER CONVERTER",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -47,10 +47,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "电源能源 | runtime dashboard",
+          "text": "电源与功率变换 | problem dashboard",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -72,12 +72,38 @@
           "value": 1
         },
         {
-          "id": "card0",
+          "id": "flow_panel",
           "type": "text",
           "x": 24,
-          "y": 104,
-          "w": 166,
-          "h": 96,
+          "y": 106,
+          "w": 370,
+          "h": 210,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "flow_title",
+          "type": "text",
+          "x": 44,
+          "y": 124,
+          "w": 180,
+          "h": 24,
+          "text": "POWER STAGE",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902
+          }
+        },
+        {
+          "id": "m0_card",
+          "type": "text",
+          "x": 44,
+          "y": 166,
+          "w": 128,
+          "h": 78,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -87,23 +113,23 @@
         {
           "id": "m0_lab",
           "type": "text",
-          "x": 38,
-          "y": 116,
-          "w": 72,
-          "h": 22,
+          "x": 54,
+          "y": 174,
+          "w": 58,
+          "h": 18,
           "text": "VIN",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "m0",
           "type": "number",
-          "x": 38,
-          "y": 146,
-          "w": 86,
-          "h": 34,
+          "x": 54,
+          "y": 200,
+          "w": 70,
+          "h": 30,
           "value": 12000,
           "style": {
             "background_color": 65503,
@@ -115,23 +141,23 @@
         {
           "id": "m0_unit",
           "type": "text",
-          "x": 130,
-          "y": 153,
-          "w": 42,
-          "h": 22,
+          "x": 128,
+          "y": 205,
+          "w": 36,
+          "h": 18,
           "text": "mV",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "card1",
+          "id": "m1_card",
           "type": "text",
-          "x": 214,
-          "y": 104,
-          "w": 166,
-          "h": 96,
+          "x": 230,
+          "y": 166,
+          "w": 128,
+          "h": 78,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -141,23 +167,23 @@
         {
           "id": "m1_lab",
           "type": "text",
-          "x": 228,
-          "y": 116,
-          "w": 72,
-          "h": 22,
+          "x": 240,
+          "y": 174,
+          "w": 58,
+          "h": 18,
           "text": "VOUT",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "m1",
           "type": "number",
-          "x": 228,
-          "y": 146,
-          "w": 86,
-          "h": 34,
+          "x": 240,
+          "y": 200,
+          "w": 70,
+          "h": 30,
           "value": 5000,
           "style": {
             "background_color": 65503,
@@ -169,131 +195,62 @@
         {
           "id": "m1_unit",
           "type": "text",
-          "x": 320,
-          "y": 153,
-          "w": 42,
-          "h": 22,
+          "x": 314,
+          "y": 205,
+          "w": 36,
+          "h": 18,
           "text": "mV",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "card2",
+          "id": "flow_in",
           "type": "text",
-          "x": 24,
-          "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m2_lab",
-          "type": "text",
-          "x": 38,
-          "y": 238,
+          "x": 72,
+          "y": 272,
           "w": 72,
-          "h": 22,
-          "text": "LOAD",
+          "h": 24,
+          "text": "INPUT",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "m2",
-          "type": "number",
-          "x": 38,
-          "y": 268,
-          "w": 86,
-          "h": 34,
-          "value": 68,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m2_unit",
+          "id": "flow_arrow",
           "type": "text",
-          "x": 130,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "pct",
+          "x": 152,
+          "y": 270,
+          "w": 88,
+          "h": 26,
+          "text": ">>>",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 4902
           }
         },
         {
-          "id": "card3",
+          "id": "flow_out",
           "type": "text",
-          "x": 214,
-          "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
+          "x": 252,
+          "y": 272,
+          "w": 80,
+          "h": 24,
+          "text": "OUTPUT",
           "style": {
             "background_color": 65503,
-            "foreground_color": 4291
+            "foreground_color": 25521
           }
         },
         {
-          "id": "m3_lab",
-          "type": "text",
-          "x": 228,
-          "y": 238,
-          "w": 72,
-          "h": 22,
-          "text": "EFF",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m3",
-          "type": "number",
-          "x": 228,
-          "y": 268,
-          "w": 86,
-          "h": 34,
-          "value": 91,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m3_unit",
-          "type": "text",
-          "x": 320,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "pct",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "main_panel",
+          "id": "safe_panel",
           "type": "text",
           "x": 420,
-          "y": 104,
+          "y": 106,
           "w": 348,
-          "h": 222,
+          "h": 210,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -301,26 +258,26 @@
           }
         },
         {
-          "id": "main_lab",
+          "id": "safe_title",
           "type": "text",
           "x": 444,
-          "y": 122,
-          "w": 180,
+          "y": 124,
+          "w": 170,
           "h": 24,
-          "text": "SYSTEM LOAD",
+          "text": "PROTECTION",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 4902
           }
         },
         {
-          "id": "main_gauge",
-          "type": "gauge",
-          "x": 454,
-          "y": 156,
-          "w": 126,
-          "h": 126,
-          "value": 68,
+          "id": "prot_ovp",
+          "type": "checkbox",
+          "x": 448,
+          "y": 166,
+          "w": 30,
+          "h": 30,
+          "value": 1,
           "style": {
             "background_color": 65503,
             "foreground_color": 4902,
@@ -328,13 +285,53 @@
           }
         },
         {
-          "id": "main_bar",
+          "id": "ovp_lab",
+          "type": "text",
+          "x": 490,
+          "y": 172,
+          "w": 100,
+          "h": 22,
+          "text": "OVP",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "prot_ocp",
+          "type": "checkbox",
+          "x": 448,
+          "y": 214,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "ocp_lab",
+          "type": "text",
+          "x": 490,
+          "y": 220,
+          "w": 100,
+          "h": 22,
+          "text": "OCP",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "eff_bar",
           "type": "progress",
           "x": 610,
-          "y": 158,
-          "w": 120,
-          "h": 30,
-          "value": 68,
+          "y": 170,
+          "w": 118,
+          "h": 28,
+          "value": 91,
           "style": {
             "background_color": 63423,
             "foreground_color": 34402,
@@ -342,44 +339,43 @@
           }
         },
         {
-          "id": "bar_lab",
+          "id": "eff_lab",
           "type": "text",
           "x": 610,
-          "y": 198,
-          "w": 118,
+          "y": 210,
+          "w": 110,
           "h": 22,
-          "text": "live percent",
+          "text": "efficiency",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "tick",
-          "type": "number",
+          "id": "temp_guard",
+          "type": "gauge",
           "x": 610,
-          "y": 236,
-          "w": 82,
-          "h": 34,
-          "value": 0,
+          "y": 244,
+          "w": 92,
+          "h": 70,
+          "value": 38,
           "style": {
             "background_color": 65503,
             "foreground_color": 4902,
-            "border_color": 52924,
-            "length": 4
+            "border_color": 52924
           }
         },
         {
-          "id": "tick_lab",
+          "id": "temp_lab",
           "type": "text",
-          "x": 698,
-          "y": 244,
-          "w": 38,
+          "x": 708,
+          "y": 266,
+          "w": 42,
           "h": 20,
-          "text": "tick",
+          "text": "temp",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -397,7 +393,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 10 01",
+              "printh 23 31 10 01",
               "run.val=1"
             ]
           }
@@ -417,7 +413,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 10 00",
+              "printh 23 31 10 00",
               "run.val=0"
             ]
           }
@@ -437,7 +433,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 20 01"
+              "printh 23 31 20 01"
             ]
           }
         },
@@ -456,6 +452,21 @@
             "timer": [
               "tick.val++"
             ]
+          }
+        },
+        {
+          "id": "tick",
+          "type": "number",
+          "x": 786,
+          "y": 78,
+          "w": 1,
+          "h": 1,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902,
+            "border_color": 52924,
+            "length": 1
           }
         },
         {
@@ -540,10 +551,10 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "POWER ENERGY",
+          "text": "POWER CONVERTER",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -553,10 +564,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "电源能源 | parameter panel",
+          "text": "电源与功率变换 | parameter panel",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -595,9 +606,9 @@
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 210,
+          "w": 230,
           "h": 26,
-          "text": "CONTROL SETPOINTS",
+          "text": "TOPIC PARAMETERS",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902
@@ -607,48 +618,20 @@
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 172,
+          "y": 178,
           "w": 104,
           "h": 24,
-          "text": "target",
+          "text": "v_set",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp0",
           "type": "number",
           "x": 168,
-          "y": 166,
-          "w": 96,
-          "h": 36,
-          "value": 12000,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "sp1_lab",
-          "type": "text",
-          "x": 48,
-          "y": 222,
-          "w": 104,
-          "h": 24,
-          "text": "limit",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "sp1",
-          "type": "number",
-          "x": 168,
-          "y": 216,
+          "y": 170,
           "w": 96,
           "h": 36,
           "value": 5000,
@@ -660,26 +643,54 @@
           }
         },
         {
+          "id": "sp1_lab",
+          "type": "text",
+          "x": 48,
+          "y": 232,
+          "w": 104,
+          "h": 24,
+          "text": "i_limit",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "sp1",
+          "type": "number",
+          "x": 168,
+          "y": 224,
+          "w": 96,
+          "h": 36,
+          "value": 1000,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
           "id": "sp2_lab",
           "type": "text",
           "x": 48,
-          "y": 272,
+          "y": 286,
           "w": 104,
           "h": 24,
-          "text": "gain",
+          "text": "ramp",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp2",
           "type": "number",
           "x": 168,
-          "y": 266,
+          "y": 278,
           "w": 96,
           "h": 36,
-          "value": 91,
+          "value": 50,
           "style": {
             "background_color": 65503,
             "foreground_color": 4902,
@@ -691,7 +702,7 @@
           "id": "b_dec",
           "type": "button",
           "x": 286,
-          "y": 166,
+          "y": 170,
           "w": 58,
           "h": 36,
           "text": "-1",
@@ -710,7 +721,7 @@
           "id": "b_inc",
           "type": "button",
           "x": 286,
-          "y": 216,
+          "y": 224,
           "w": 58,
           "h": 36,
           "text": "+1",
@@ -740,7 +751,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 30 01"
+              "printh 23 31 30 01"
             ]
           }
         },
@@ -760,7 +771,7 @@
           "events": {
             "up": [
               "sp0.val=0",
-              "printh 23 32 30 00"
+              "printh 23 31 30 00"
             ]
           }
         },
@@ -782,9 +793,9 @@
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 130,
+          "w": 180,
           "h": 24,
-          "text": "MODE SELECT",
+          "text": "RUN OPTIONS",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902
@@ -795,8 +806,8 @@
           "type": "checkbox",
           "x": 448,
           "y": 166,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
@@ -809,12 +820,12 @@
           "type": "text",
           "x": 492,
           "y": 172,
-          "w": 148,
+          "w": 160,
           "h": 24,
-          "text": "auto loop",
+          "text": "closed loop",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -822,8 +833,8 @@
           "type": "checkbox",
           "x": 448,
           "y": 214,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
@@ -836,12 +847,12 @@
           "type": "text",
           "x": 492,
           "y": 220,
-          "w": 148,
+          "w": 160,
           "h": 24,
           "text": "record log",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -868,7 +879,7 @@
           "text": "speed",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -886,7 +897,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 31 01"
+              "printh 23 31 31 01"
             ]
           }
         },
@@ -991,10 +1002,10 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "POWER ENERGY",
+          "text": "POWER CONVERTER",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -1004,10 +1015,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "电源能源 | log and service",
+          "text": "电源与功率变换 | log and service",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -1061,7 +1072,7 @@
           "y": 160,
           "w": 420,
           "h": 48,
-          "text": "BUCK OK | LOAD | OVP",
+          "text": "BUCK OK | OVP | LOAD",
           "style": {
             "background_color": 63423,
             "foreground_color": 4902,
@@ -1076,7 +1087,7 @@
           "w": 420,
           "h": 92,
           "style": {
-            "background_color": 63423,
+            "background_color": 2213,
             "foreground_color": 34402,
             "border_color": 52924
           }
@@ -1091,7 +1102,7 @@
           "text": "seq",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -1143,7 +1154,7 @@
           },
           "events": {
             "up": [
-              "printh 23 32 40 01"
+              "printh 23 31 40 01"
             ]
           }
         },
@@ -1180,7 +1191,7 @@
           "y": 160,
           "w": 128,
           "h": 128,
-          "text": "usarthmi:power_energy",
+          "text": "usarthmi:power_converter",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902,
@@ -1194,10 +1205,10 @@
           "y": 306,
           "w": 170,
           "h": 24,
-          "text": "power_energy",
+          "text": "power_converter",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {

@@ -17,9 +17,10 @@ validation, serial readback, or camera proof from the real panel.
 - Inspect `.HMI` / `.TFT` files and render page previews.
 - Author JSON/YAML scenes, edit widgets and events, and generate agent handoff
   bundles.
-- Start from reusable 800x480 electronic-contest templates for instruments,
-  power, motor control, chassis, communication, sensor fusion, PID, BMS, vision,
-  and field-debug screens.
+- Start from reusable 800x480 electronic-contest templates shaped around common
+  contest problem types: power conversion, measurement, signal generation,
+  communications, PID control, motor drive, sensor DAQ, robot tasks,
+  vision/audio recognition, and field debugging.
 - Build touch-safe cases through the official compiler without manual mouse
   clicks.
 - Catch visual overlaps and hidden touch hitbox mismatches before flashing.
@@ -32,7 +33,7 @@ validation, serial readback, or camera proof from the real panel.
 ```powershell
 python -m pip install -e .
 python -m usarthmi --json scene check examples\polished_dashboard_demo\scene.json --out-dir build\scene_check
-python -m usarthmi --json scene check examples\econtest_templates\power_energy\scene.json --out-dir build\econtest_check --simulate-events
+python -m usarthmi --json scene check examples\econtest_templates\power_converter\scene.json --out-dir build\econtest_check --simulate-events
 python tools\package_touchsafe_headless_toolchain.py --out-dir dist --require-host-exe
 ```
 

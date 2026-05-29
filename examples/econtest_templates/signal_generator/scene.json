@@ -1,13 +1,13 @@
 {
   "project": {
-    "name": "econtest-instrument_meter",
+    "name": "econtest-signal_generator",
     "default_page": "page0",
     "drop_seed_objects": true
   },
   "canvas": {
     "width": 800,
     "height": 480,
-    "background_color": 61439
+    "background_color": 61343
   },
   "assets": {},
   "pages": [
@@ -26,7 +26,7 @@
           "h": 76,
           "text": "",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 4291
           }
         },
@@ -34,12 +34,12 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "INSTRUMENT METER",
+          "text": "SIGNAL GENERATOR",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -47,12 +47,12 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "仪器仪表 | runtime dashboard",
+          "text": "信号源与波形 | problem dashboard",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -65,19 +65,19 @@
           "h": 36,
           "text": "RUN",
           "style": {
-            "background_color": 11959,
+            "background_color": 33919,
             "foreground_color": 4291,
-            "border_color": 11959
+            "border_color": 33919
           },
           "value": 1
         },
         {
-          "id": "card0",
+          "id": "source_panel",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 166,
-          "h": 96,
+          "w": 370,
+          "h": 290,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -85,210 +85,160 @@
           }
         },
         {
-          "id": "m0_lab",
+          "id": "source_title",
           "type": "text",
-          "x": 38,
-          "y": 116,
+          "x": 44,
+          "y": 122,
+          "w": 170,
+          "h": 24,
+          "text": "WAVE OUTPUT",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 19004
+          }
+        },
+        {
+          "id": "wave_sine",
+          "type": "button",
+          "x": 44,
+          "y": 166,
+          "w": 86,
+          "h": 42,
+          "text": "SINE",
+          "style": {
+            "background_color": 19004,
+            "foreground_color": 65503,
+            "border_color": 19004
+          },
+          "events": {
+            "up": [
+              "printh 23 33 22 00"
+            ]
+          }
+        },
+        {
+          "id": "wave_sqr",
+          "type": "button",
+          "x": 148,
+          "y": 166,
+          "w": 86,
+          "h": 42,
+          "text": "SQR",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "printh 23 33 22 01"
+            ]
+          }
+        },
+        {
+          "id": "wave_tri",
+          "type": "button",
+          "x": 252,
+          "y": 166,
+          "w": 86,
+          "h": 42,
+          "text": "TRI",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "printh 23 33 22 02"
+            ]
+          }
+        },
+        {
+          "id": "freq_lab",
+          "type": "text",
+          "x": 48,
+          "y": 232,
           "w": 72,
           "h": 22,
-          "text": "VOLT",
+          "text": "freq",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "m0",
+          "id": "freq_set",
           "type": "number",
-          "x": 38,
-          "y": 146,
-          "w": 86,
-          "h": 34,
-          "value": 3300,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 2994,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m0_unit",
-          "type": "text",
-          "x": 130,
-          "y": 153,
-          "w": 42,
-          "h": 22,
-          "text": "mV",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "card1",
-          "type": "text",
-          "x": 214,
-          "y": 104,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m1_lab",
-          "type": "text",
-          "x": 228,
-          "y": 116,
-          "w": 72,
-          "h": 22,
-          "text": "CURR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m1",
-          "type": "number",
-          "x": 228,
-          "y": 146,
-          "w": 86,
-          "h": 34,
-          "value": 125,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 2994,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m1_unit",
-          "type": "text",
-          "x": 320,
-          "y": 153,
-          "w": 42,
-          "h": 22,
-          "text": "mA",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "card2",
-          "type": "text",
-          "x": 24,
+          "x": 126,
           "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m2_lab",
-          "type": "text",
-          "x": 38,
-          "y": 238,
-          "w": 72,
-          "h": 22,
-          "text": "FREQ",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m2",
-          "type": "number",
-          "x": 38,
-          "y": 268,
-          "w": 86,
+          "w": 100,
           "h": 34,
           "value": 1000,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
         },
         {
-          "id": "m2_unit",
+          "id": "amp_lab",
           "type": "text",
-          "x": 130,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "Hz",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "card3",
-          "type": "text",
-          "x": 214,
-          "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m3_lab",
-          "type": "text",
-          "x": 228,
-          "y": 238,
+          "x": 48,
+          "y": 282,
           "w": 72,
           "h": 22,
-          "text": "TEMP",
+          "text": "amp",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "m3",
+          "id": "amp_set",
           "type": "number",
-          "x": 228,
-          "y": 268,
-          "w": 86,
+          "x": 126,
+          "y": 276,
+          "w": 100,
           "h": 34,
-          "value": 36,
+          "value": 1800,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
         },
         {
-          "id": "m3_unit",
-          "type": "text",
-          "x": 320,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "C",
+          "id": "duty_bar",
+          "type": "progress",
+          "x": 238,
+          "y": 232,
+          "w": 110,
+          "h": 28,
+          "value": 50,
           "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
+            "background_color": 63423,
+            "foreground_color": 33919,
+            "border_color": 52924
           }
         },
         {
-          "id": "main_panel",
+          "id": "duty_lab",
+          "type": "text",
+          "x": 238,
+          "y": 270,
+          "w": 92,
+          "h": 22,
+          "text": "duty",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "preview_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -301,85 +251,49 @@
           }
         },
         {
-          "id": "main_lab",
+          "id": "preview_lab",
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 180,
+          "w": 138,
           "h": 24,
-          "text": "SYSTEM LOAD",
+          "text": "OUTPUT PREVIEW",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 19004
           }
         },
         {
-          "id": "main_gauge",
-          "type": "gauge",
-          "x": 454,
-          "y": 156,
-          "w": 126,
-          "h": 126,
-          "value": 0,
+          "id": "out_wave",
+          "type": "waveform",
+          "x": 444,
+          "y": 162,
+          "w": 286,
+          "h": 102,
           "style": {
-            "background_color": 65503,
-            "foreground_color": 2994,
+            "background_color": 2213,
+            "foreground_color": 33919,
             "border_color": 52924
           }
         },
         {
-          "id": "main_bar",
-          "type": "progress",
-          "x": 610,
-          "y": 158,
-          "w": 120,
-          "h": 30,
-          "value": 0,
+          "id": "out_enable",
+          "type": "state-button",
+          "x": 444,
+          "y": 280,
+          "w": 112,
+          "h": 38,
+          "text": "OUTPUT",
           "style": {
-            "background_color": 63423,
-            "foreground_color": 11959,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "bar_lab",
-          "type": "text",
-          "x": 610,
-          "y": 198,
-          "w": 118,
-          "h": 22,
-          "text": "live percent",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "tick",
-          "type": "number",
-          "x": 610,
-          "y": 236,
-          "w": 82,
-          "h": 34,
-          "value": 0,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 2994,
-            "border_color": 52924,
-            "length": 4
-          }
-        },
-        {
-          "id": "tick_lab",
-          "type": "text",
-          "x": 698,
-          "y": 244,
-          "w": 38,
-          "h": 20,
-          "text": "tick",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
+            "background_color": 19004,
+            "foreground_color": 65503,
+            "border_color": 19004
+          },
+          "value": 1,
+          "events": {
+            "up": [
+              "run.val=1"
+            ]
           }
         },
         {
@@ -391,13 +305,13 @@
           "h": 44,
           "text": "START",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
-              "printh 23 31 10 01",
+              "printh 23 33 10 01",
               "run.val=1"
             ]
           }
@@ -417,7 +331,7 @@
           },
           "events": {
             "up": [
-              "printh 23 31 10 00",
+              "printh 23 33 10 00",
               "run.val=0"
             ]
           }
@@ -429,15 +343,15 @@
           "y": 350,
           "w": 92,
           "h": 44,
-          "text": "CAL",
+          "text": "SYNC",
           "style": {
-            "background_color": 11959,
+            "background_color": 33919,
             "foreground_color": 4291,
-            "border_color": 11959
+            "border_color": 33919
           },
           "events": {
             "up": [
-              "printh 23 31 20 01"
+              "printh 23 33 20 01"
             ]
           }
         },
@@ -459,6 +373,21 @@
           }
         },
         {
+          "id": "tick",
+          "type": "number",
+          "x": 786,
+          "y": 78,
+          "w": 1,
+          "h": 1,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 19004,
+            "border_color": 52924,
+            "length": 1
+          }
+        },
+        {
           "id": "n_home",
           "type": "button",
           "x": 512,
@@ -467,9 +396,9 @@
           "h": 36,
           "text": "HOME",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
@@ -532,7 +461,7 @@
           "h": 76,
           "text": "",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 4291
           }
         },
@@ -540,12 +469,12 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "INSTRUMENT METER",
+          "text": "SIGNAL GENERATOR",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -553,12 +482,12 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "仪器仪表 | parameter panel",
+          "text": "信号源与波形 | parameter panel",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -571,9 +500,9 @@
           "h": 36,
           "text": "RUN",
           "style": {
-            "background_color": 11959,
+            "background_color": 33919,
             "foreground_color": 4291,
-            "border_color": 11959
+            "border_color": 33919
           },
           "value": 1
         },
@@ -595,38 +524,38 @@
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 210,
+          "w": 230,
           "h": 26,
-          "text": "CONTROL SETPOINTS",
+          "text": "TOPIC PARAMETERS",
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994
+            "foreground_color": 19004
           }
         },
         {
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 172,
+          "y": 178,
           "w": 104,
           "h": 24,
-          "text": "target",
+          "text": "freq",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp0",
           "type": "number",
           "x": 168,
-          "y": 166,
+          "y": 170,
           "w": 96,
           "h": 36,
-          "value": 3300,
+          "value": 1000,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
@@ -635,26 +564,26 @@
           "id": "sp1_lab",
           "type": "text",
           "x": 48,
-          "y": 222,
+          "y": 232,
           "w": 104,
           "h": 24,
-          "text": "limit",
+          "text": "amp",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp1",
           "type": "number",
           "x": 168,
-          "y": 216,
+          "y": 224,
           "w": 96,
           "h": 36,
-          "value": 125,
+          "value": 1800,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
@@ -663,26 +592,26 @@
           "id": "sp2_lab",
           "type": "text",
           "x": 48,
-          "y": 272,
+          "y": 286,
           "w": 104,
           "h": 24,
-          "text": "gain",
+          "text": "offset",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp2",
           "type": "number",
           "x": 168,
-          "y": 266,
+          "y": 278,
           "w": 96,
           "h": 36,
-          "value": 36,
+          "value": 0,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
@@ -691,7 +620,7 @@
           "id": "b_dec",
           "type": "button",
           "x": 286,
-          "y": 166,
+          "y": 170,
           "w": 58,
           "h": 36,
           "text": "-1",
@@ -710,14 +639,14 @@
           "id": "b_inc",
           "type": "button",
           "x": 286,
-          "y": 216,
+          "y": 224,
           "w": 58,
           "h": 36,
           "text": "+1",
           "style": {
-            "background_color": 11959,
+            "background_color": 33919,
             "foreground_color": 4291,
-            "border_color": 11959
+            "border_color": 33919
           },
           "events": {
             "up": [
@@ -734,13 +663,13 @@
           "h": 44,
           "text": "SAVE",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
-              "printh 23 31 30 01"
+              "printh 23 33 30 01"
             ]
           }
         },
@@ -760,7 +689,7 @@
           "events": {
             "up": [
               "sp0.val=0",
-              "printh 23 31 30 00"
+              "printh 23 33 30 00"
             ]
           }
         },
@@ -782,12 +711,12 @@
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 130,
+          "w": 180,
           "h": 24,
-          "text": "MODE SELECT",
+          "text": "RUN OPTIONS",
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994
+            "foreground_color": 19004
           }
         },
         {
@@ -795,12 +724,12 @@
           "type": "checkbox",
           "x": 448,
           "y": 166,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924
           }
         },
@@ -809,12 +738,12 @@
           "type": "text",
           "x": 492,
           "y": 172,
-          "w": 148,
+          "w": 160,
           "h": 24,
-          "text": "auto loop",
+          "text": "closed loop",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -822,12 +751,12 @@
           "type": "checkbox",
           "x": 448,
           "y": 214,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924
           }
         },
@@ -836,12 +765,12 @@
           "type": "text",
           "x": 492,
           "y": 220,
-          "w": 148,
+          "w": 160,
           "h": 24,
           "text": "record log",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -854,7 +783,7 @@
           "value": 45,
           "style": {
             "background_color": 63423,
-            "foreground_color": 11959,
+            "foreground_color": 33919,
             "border_color": 52924
           }
         },
@@ -868,7 +797,7 @@
           "text": "speed",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -880,13 +809,13 @@
           "h": 44,
           "text": "APPLY",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
-              "printh 23 31 31 01"
+              "printh 23 33 31 01"
             ]
           }
         },
@@ -937,9 +866,9 @@
           "h": 36,
           "text": "PARAM",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
@@ -983,7 +912,7 @@
           "h": 76,
           "text": "",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 4291
           }
         },
@@ -991,12 +920,12 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
-          "text": "INSTRUMENT METER",
+          "text": "SIGNAL GENERATOR",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -1004,12 +933,12 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "仪器仪表 | log and service",
+          "text": "信号源与波形 | log and service",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503
           }
         },
@@ -1022,9 +951,9 @@
           "h": 36,
           "text": "RUN",
           "style": {
-            "background_color": 11959,
+            "background_color": 33919,
             "foreground_color": 4291,
-            "border_color": 11959
+            "border_color": 33919
           },
           "value": 1
         },
@@ -1051,7 +980,7 @@
           "text": "EVENT STREAM",
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994
+            "foreground_color": 19004
           }
         },
         {
@@ -1061,10 +990,10 @@
           "y": 160,
           "w": 420,
           "h": 48,
-          "text": "ADC OK | TRIG | AUTO",
+          "text": "DDS | OUT | SYNC",
           "style": {
             "background_color": 63423,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924
           }
         },
@@ -1076,8 +1005,8 @@
           "w": 420,
           "h": 92,
           "style": {
-            "background_color": 63423,
-            "foreground_color": 11959,
+            "background_color": 2213,
+            "foreground_color": 33919,
             "border_color": 52924
           }
         },
@@ -1091,7 +1020,7 @@
           "text": "seq",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -1104,7 +1033,7 @@
           "value": 0,
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924,
             "length": 5
           }
@@ -1137,13 +1066,13 @@
           "h": 40,
           "text": "MARK",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [
-              "printh 23 31 40 01"
+              "printh 23 33 40 01"
             ]
           }
         },
@@ -1170,7 +1099,7 @@
           "text": "SERVICE QR",
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994
+            "foreground_color": 19004
           }
         },
         {
@@ -1180,10 +1109,10 @@
           "y": 160,
           "w": 128,
           "h": 128,
-          "text": "usarthmi:instrument_meter",
+          "text": "usarthmi:signal_generator",
           "style": {
             "background_color": 65503,
-            "foreground_color": 2994,
+            "foreground_color": 19004,
             "border_color": 52924
           }
         },
@@ -1194,10 +1123,10 @@
           "y": 306,
           "w": 170,
           "h": 24,
-          "text": "instrument_meter",
+          "text": "signal_generator",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -1264,9 +1193,9 @@
           "h": 36,
           "text": "LOG",
           "style": {
-            "background_color": 2994,
+            "background_color": 19004,
             "foreground_color": 65503,
-            "border_color": 2994
+            "border_color": 19004
           },
           "events": {
             "up": [

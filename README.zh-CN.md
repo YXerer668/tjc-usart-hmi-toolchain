@@ -16,7 +16,7 @@
 
 - 检查 `.HMI` / `.TFT` 文件并渲染页面预览。
 - 用 JSON/YAML 编写页面，编辑控件和事件，生成给 agent 交接的 preview/context 包。
-- 直接从 10 套 `800x480` 电赛通用模板起步，覆盖仪器仪表、电源、电机、底盘、通信、传感融合、PID、BMS、视觉识别和现场调试。
+- 直接从 10 套 `800x480` 电赛题型模板起步，覆盖电源变换、测量仪器、信号源、通信链路、PID 闭环、电机驱动、传感采集、机器人任务、图像/音频识别和现场调试。
 - 通过官方编译器做无鼠标、headless 的 touch-safe 构建。
 - 在烧录前检查可见重叠和隐藏触摸热区 `endx` / `endy` 不一致。
 - 通过公开串口协议上传 TFT，并用 `sendme` / `get` / camera 证明实机状态。
@@ -27,7 +27,7 @@
 ```powershell
 python -m pip install -e .
 python -m usarthmi --json scene check examples\polished_dashboard_demo\scene.json --out-dir build\scene_check
-python -m usarthmi --json scene check examples\econtest_templates\power_energy\scene.json --out-dir build\econtest_check --simulate-events
+python -m usarthmi --json scene check examples\econtest_templates\power_converter\scene.json --out-dir build\econtest_check --simulate-events
 python tools\package_touchsafe_headless_toolchain.py --out-dir dist --require-host-exe
 ```
 

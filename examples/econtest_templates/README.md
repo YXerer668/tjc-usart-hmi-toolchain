@@ -1,37 +1,37 @@
 # 电赛通用串口屏模板
 
-这个目录提供 10 个面向电子设计竞赛的 `800x480` 串口屏模板。每个模板都是
-3 页结构：
+这个目录提供 10 个面向电子设计竞赛题型的 `800x480` 串口屏模板。它们不是
+简单换色皮肤，而是按题目类型调整首页信息架构和控件重点。每个模板都是 3 页结构：
 
 - `page0`: 运行仪表盘，带关键指标、进度条、仪表盘、启动/停止/动作按钮。
 - `page1`: 参数页，带数值设定、复选项、滑块、保存/复位/应用按钮。
 - `page2`: 日志/维护页，带滚动日志、波形区域、序号计数、二维码服务入口。
 
-模板列表见 [`template_index.json`](template_index.json)。当前 10 个主题：
+模板列表见 [`template_index.json`](template_index.json)。当前 10 个题型：
 
-- `instrument_meter`: 仪器仪表
-- `power_energy`: 电源能源
-- `motor_motion`: 电机运动
-- `robot_chassis`: 机器人底盘
-- `communication_link`: 通信链路
-- `sensor_fusion`: 传感融合
-- `pid_tuning`: PID 调参
-- `battery_bms`: 电池管理
-- `vision_aiot`: 视觉识别
-- `field_debug`: 现场调试
+- `power_converter`: 电源与功率变换，突出输入/输出功率流、效率、保护状态。
+- `measurement_scope`: 测量仪器，突出实时波形、量程、触发和测量结果。
+- `signal_generator`: 信号源与波形，突出波形选择、频率/幅度/占空比和输出预览。
+- `communication_link`: 通信链路，突出 TX/RX、RSSI/SNR、误码和配对。
+- `pid_control`: 闭环控制，突出设定值、过程值、误差、输出和阶跃响应。
+- `motor_drive`: 电机与运动控制，突出转速、方向、制动和驱动遥测。
+- `sensor_daq`: 传感采集，突出多传感器网格、采样缓冲、存储和校准。
+- `robot_task`: 机器人与小车，突出任务地图、路径、位姿和障碍距离。
+- `vision_audio`: 图像与音频识别，突出 ROI、目标列表、置信度和延迟。
+- `field_debug`: 综合调试，突出实时控制台、故障板、总线状态和 dump/reset。
 
 ## 使用
 
 先做离线检查：
 
 ```powershell
-python -m usarthmi --json scene check examples\econtest_templates\power_energy\scene.json --out-dir build\econtest_power_check --simulate-events
+python -m usarthmi --json scene check examples\econtest_templates\power_converter\scene.json --out-dir build\econtest_power_check --simulate-events
 ```
 
 生成预览图：
 
 ```powershell
-python -m usarthmi --json scene preview examples\econtest_templates\power_energy\scene.json --page page0 --out build\econtest_power_page0.png
+python -m usarthmi --json scene preview examples\econtest_templates\power_converter\scene.json --page page0 --out build\econtest_power_page0.png
 ```
 
 需要重新生成全部模板时：
@@ -66,4 +66,5 @@ MCU 侧通用 C 封装在 [`../../firmware/usarthmi_serial`](../../firmware/usar
 - 索引中正好有 10 个模板。
 - 每个模板都是 `page0/page1/page2` 三页。
 - 每个模板能通过 `scene check --simulate-events`。
+- 每个模板的 `topic_widgets` 都出现在首页，避免退化成同质化 dashboard。
 - 每个模板的按钮、状态按钮、滑块、复选框等触控控件没有互相重叠。

@@ -27,14 +27,20 @@ class EcontestTemplateTests(unittest.TestCase):
     def test_index_lists_ten_templates(self) -> None:
         index = _load_index()
 
-        self.assertEqual(index["schema"], "usarthmi.econtest_templates.v1")
+        self.assertEqual(index["schema"], "usarthmi.econtest_templates.v2")
         self.assertEqual(index["count"], 10)
         self.assertEqual(len(index["templates"]), 10)
         self.assertEqual({tuple(item["pages"]) for item in index["templates"]}, {("page0", "page1", "page2")})
+        self.assertEqual(
+            {item["home_kind"] for item in index["templates"]},
+            {"power_flow", "scope", "source", "comms", "pid", "motor", "daq", "robot", "vision", "debug"},
+        )
 
         slugs = [item["slug"] for item in index["templates"]]
         self.assertEqual(len(slugs), len(set(slugs)))
         for item in index["templates"]:
+            self.assertTrue(item["problem_type"])
+            self.assertGreaterEqual(len(item["topic_widgets"]), 4)
             self.assertTrue((TEMPLATE_ROOT / item["scene"]).exists(), item["scene"])
 
     def test_templates_validate_check_and_keep_touch_targets_separate(self) -> None:
@@ -46,8 +52,9 @@ class EcontestTemplateTests(unittest.TestCase):
                 self.assertEqual(scene.canvas["height"], 480)
                 self.assertEqual([page.id for page in scene.pages], ["page0", "page1", "page2"])
                 self.assertTrue(_has_widget_type(scene, "timer"))
-                self.assertTrue(_has_widget_type(scene, "progress"))
-                self.assertTrue(_has_widget_type(scene, "gauge"))
+                page0_ids = {widget.id for widget in scene.pages[0].widgets}
+                for widget_id in item["topic_widgets"]:
+                    self.assertIn(widget_id, page0_ids)
 
                 report = check_scene_project(scene_path, simulate_events=True, max_event_slots=80, max_steps=20)
                 self.assertTrue(report["summary"]["ok"], report["diagnostics"])

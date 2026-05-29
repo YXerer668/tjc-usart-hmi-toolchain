@@ -34,7 +34,7 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
           "text": "FIELD DEBUG",
@@ -47,10 +47,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "现场调试 | runtime dashboard",
+          "text": "综合调试 | problem dashboard",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503
@@ -72,227 +72,89 @@
           "value": 1
         },
         {
-          "id": "card0",
+          "id": "console",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 166,
-          "h": 96,
+          "w": 500,
+          "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
+            "background_color": 2213,
             "foreground_color": 4291
           }
         },
         {
-          "id": "m0_lab",
+          "id": "console_title",
           "type": "text",
-          "x": 38,
-          "y": 116,
-          "w": 72,
+          "x": 44,
+          "y": 122,
+          "w": 150,
+          "h": 24,
+          "text": "LIVE CONSOLE",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 38167
+          }
+        },
+        {
+          "id": "console_l0",
+          "type": "text",
+          "x": 44,
+          "y": 160,
+          "w": 310,
           "h": 22,
-          "text": "MODE",
+          "text": "[00] boot ok",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
+            "background_color": 2213,
+            "foreground_color": 65503
           }
         },
         {
-          "id": "m0",
-          "type": "number",
-          "x": 38,
-          "y": 146,
-          "w": 86,
-          "h": 34,
-          "value": 2,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m0_unit",
+          "id": "console_l1",
           "type": "text",
-          "x": 130,
-          "y": 153,
-          "w": 42,
+          "x": 44,
+          "y": 192,
+          "w": 310,
           "h": 22,
-          "text": "id",
+          "text": "[01] uart ok",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
+            "background_color": 2213,
+            "foreground_color": 65503
           }
         },
         {
-          "id": "card1",
+          "id": "console_l2",
           "type": "text",
-          "x": 214,
+          "x": 44,
+          "y": 224,
+          "w": 310,
+          "h": 22,
+          "text": "[02] warn: sensor lag",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "console_l3",
+          "type": "text",
+          "x": 44,
+          "y": 256,
+          "w": 310,
+          "h": 22,
+          "text": "[03] ready",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "fault_panel",
+          "type": "text",
+          "x": 552,
           "y": 104,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m1_lab",
-          "type": "text",
-          "x": 228,
-          "y": 116,
-          "w": 72,
-          "h": 22,
-          "text": "UP",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m1",
-          "type": "number",
-          "x": 228,
-          "y": 146,
-          "w": 86,
-          "h": 34,
-          "value": 360,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m1_unit",
-          "type": "text",
-          "x": 320,
-          "y": 153,
-          "w": 42,
-          "h": 22,
-          "text": "s",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "card2",
-          "type": "text",
-          "x": 24,
-          "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m2_lab",
-          "type": "text",
-          "x": 38,
-          "y": 238,
-          "w": 72,
-          "h": 22,
-          "text": "WARN",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m2",
-          "type": "number",
-          "x": 38,
-          "y": 268,
-          "w": 86,
-          "h": 34,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m2_unit",
-          "type": "text",
-          "x": 130,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "cnt",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "card3",
-          "type": "text",
-          "x": 214,
-          "y": 226,
-          "w": 166,
-          "h": 96,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "m3_lab",
-          "type": "text",
-          "x": 228,
-          "y": 238,
-          "w": 72,
-          "h": 22,
-          "text": "BOOT",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "m3",
-          "type": "number",
-          "x": 228,
-          "y": 268,
-          "w": 86,
-          "h": 34,
-          "value": 12,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "m3_unit",
-          "type": "text",
-          "x": 320,
-          "y": 275,
-          "w": 42,
-          "h": 22,
-          "text": "cnt",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "main_panel",
-          "type": "text",
-          "x": 420,
-          "y": 104,
-          "w": 348,
+          "w": 216,
           "h": 222,
           "text": "",
           "style": {
@@ -301,95 +163,108 @@
           }
         },
         {
-          "id": "main_lab",
+          "id": "fault_lab",
           "type": "text",
-          "x": 444,
+          "x": 574,
           "y": 122,
-          "w": 180,
+          "w": 130,
           "h": 24,
-          "text": "SYSTEM LOAD",
+          "text": "FAULT BOARD",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 17069
           }
         },
         {
-          "id": "main_gauge",
-          "type": "gauge",
-          "x": 454,
-          "y": 156,
-          "w": 126,
-          "h": 126,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "main_bar",
-          "type": "progress",
-          "x": 610,
-          "y": 158,
-          "w": 120,
-          "h": 30,
-          "value": 1,
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 38167,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "bar_lab",
-          "type": "text",
-          "x": 610,
-          "y": 198,
-          "w": 118,
-          "h": 22,
-          "text": "live percent",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 27536
-          }
-        },
-        {
-          "id": "tick",
+          "id": "fault_count",
           "type": "number",
-          "x": 610,
-          "y": 236,
-          "w": 82,
+          "x": 574,
+          "y": 166,
+          "w": 76,
           "h": 34,
           "value": 0,
           "style": {
             "background_color": 65503,
             "foreground_color": 17069,
             "border_color": 52924,
-            "length": 4
+            "length": 5
           }
         },
         {
-          "id": "tick_lab",
+          "id": "fault_unit",
           "type": "text",
-          "x": 698,
-          "y": 244,
-          "w": 38,
+          "x": 660,
+          "y": 174,
+          "w": 60,
           "h": 20,
-          "text": "tick",
+          "text": "fault",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
-          "id": "b_start",
+          "id": "bus_uart",
+          "type": "checkbox",
+          "x": 574,
+          "y": 224,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 17069,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "uart_lab",
+          "type": "text",
+          "x": 616,
+          "y": 230,
+          "w": 80,
+          "h": 22,
+          "text": "UART",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "bus_can",
+          "type": "checkbox",
+          "x": 574,
+          "y": 270,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 17069,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "can_lab",
+          "type": "text",
+          "x": 616,
+          "y": 276,
+          "w": 80,
+          "h": 22,
+          "text": "CAN",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "dump_btn",
           "type": "button",
           "x": 420,
           "y": 350,
           "w": 92,
           "h": 44,
-          "text": "START",
+          "text": "DUMP",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503,
@@ -397,19 +272,18 @@
           },
           "events": {
             "up": [
-              "printh 23 3A 10 01",
-              "run.val=1"
+              "printh 23 3A 26 01"
             ]
           }
         },
         {
-          "id": "b_stop",
+          "id": "reset_btn",
           "type": "button",
           "x": 530,
           "y": 350,
           "w": 92,
           "h": 44,
-          "text": "STOP",
+          "text": "RESET",
           "style": {
             "background_color": 59944,
             "foreground_color": 65503,
@@ -417,27 +291,26 @@
           },
           "events": {
             "up": [
-              "printh 23 3A 10 00",
-              "run.val=0"
+              "printh 23 3A 26 02"
             ]
           }
         },
         {
-          "id": "b_cmd",
+          "id": "mute_btn",
           "type": "button",
           "x": 640,
           "y": 350,
           "w": 92,
           "h": 44,
-          "text": "DUMP",
+          "text": "MUTE",
           "style": {
-            "background_color": 38167,
+            "background_color": 63423,
             "foreground_color": 4291,
-            "border_color": 38167
+            "border_color": 63423
           },
           "events": {
             "up": [
-              "printh 23 3A 20 01"
+              "fault_count.val=0"
             ]
           }
         },
@@ -456,6 +329,21 @@
             "timer": [
               "tick.val++"
             ]
+          }
+        },
+        {
+          "id": "tick",
+          "type": "number",
+          "x": 786,
+          "y": 78,
+          "w": 1,
+          "h": 1,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 17069,
+            "border_color": 52924,
+            "length": 1
           }
         },
         {
@@ -540,7 +428,7 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
           "text": "FIELD DEBUG",
@@ -553,10 +441,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "现场调试 | parameter panel",
+          "text": "综合调试 | parameter panel",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503
@@ -595,9 +483,9 @@
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 210,
+          "w": 230,
           "h": 26,
-          "text": "CONTROL SETPOINTS",
+          "text": "TOPIC PARAMETERS",
           "style": {
             "background_color": 65503,
             "foreground_color": 17069
@@ -607,20 +495,20 @@
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 172,
+          "y": 178,
           "w": 104,
           "h": 24,
-          "text": "target",
+          "text": "mode",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp0",
           "type": "number",
           "x": 168,
-          "y": 166,
+          "y": 170,
           "w": 96,
           "h": 36,
           "value": 2,
@@ -635,23 +523,23 @@
           "id": "sp1_lab",
           "type": "text",
           "x": 48,
-          "y": 222,
+          "y": 232,
           "w": 104,
           "h": 24,
-          "text": "limit",
+          "text": "level",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp1",
           "type": "number",
           "x": 168,
-          "y": 216,
+          "y": 224,
           "w": 96,
           "h": 36,
-          "value": 360,
+          "value": 3,
           "style": {
             "background_color": 65503,
             "foreground_color": 17069,
@@ -663,23 +551,23 @@
           "id": "sp2_lab",
           "type": "text",
           "x": 48,
-          "y": 272,
+          "y": 286,
           "w": 104,
           "h": 24,
-          "text": "gain",
+          "text": "mask",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
           "id": "sp2",
           "type": "number",
           "x": 168,
-          "y": 266,
+          "y": 278,
           "w": 96,
           "h": 36,
-          "value": 12,
+          "value": 255,
           "style": {
             "background_color": 65503,
             "foreground_color": 17069,
@@ -691,7 +579,7 @@
           "id": "b_dec",
           "type": "button",
           "x": 286,
-          "y": 166,
+          "y": 170,
           "w": 58,
           "h": 36,
           "text": "-1",
@@ -710,7 +598,7 @@
           "id": "b_inc",
           "type": "button",
           "x": 286,
-          "y": 216,
+          "y": 224,
           "w": 58,
           "h": 36,
           "text": "+1",
@@ -782,9 +670,9 @@
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 130,
+          "w": 180,
           "h": 24,
-          "text": "MODE SELECT",
+          "text": "RUN OPTIONS",
           "style": {
             "background_color": 65503,
             "foreground_color": 17069
@@ -795,8 +683,8 @@
           "type": "checkbox",
           "x": 448,
           "y": 166,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
@@ -809,12 +697,12 @@
           "type": "text",
           "x": 492,
           "y": 172,
-          "w": 148,
+          "w": 160,
           "h": 24,
-          "text": "auto loop",
+          "text": "closed loop",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -822,8 +710,8 @@
           "type": "checkbox",
           "x": 448,
           "y": 214,
-          "w": 32,
-          "h": 32,
+          "w": 30,
+          "h": 30,
           "value": 1,
           "style": {
             "background_color": 65503,
@@ -836,12 +724,12 @@
           "type": "text",
           "x": 492,
           "y": 220,
-          "w": 148,
+          "w": 160,
           "h": 24,
           "text": "record log",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -868,7 +756,7 @@
           "text": "speed",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -991,7 +879,7 @@
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 14,
+          "y": 13,
           "w": 360,
           "h": 30,
           "text": "FIELD DEBUG",
@@ -1004,10 +892,10 @@
           "id": "sub",
           "type": "text",
           "x": 24,
-          "y": 45,
-          "w": 430,
+          "y": 44,
+          "w": 500,
           "h": 20,
-          "text": "现场调试 | log and service",
+          "text": "综合调试 | log and service",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503
@@ -1076,7 +964,7 @@
           "w": 420,
           "h": 92,
           "style": {
-            "background_color": 63423,
+            "background_color": 2213,
             "foreground_color": 38167,
             "border_color": 52924
           }
@@ -1091,7 +979,7 @@
           "text": "seq",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
@@ -1197,7 +1085,7 @@
           "text": "field_debug",
           "style": {
             "background_color": 65503,
-            "foreground_color": 27536
+            "foreground_color": 25521
           }
         },
         {
