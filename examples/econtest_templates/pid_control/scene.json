@@ -26,20 +26,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 62358,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 47307,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "PID CONTROL",
           "style": {
-            "background_color": 47307,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -48,12 +75,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "闭环控制 | problem dashboard",
           "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "PID",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 62358
           }
         },
         {
@@ -80,8 +120,9 @@
           "h": 290,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -237,8 +278,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -359,6 +401,20 @@
           }
         },
         {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
           "id": "n_home",
           "type": "button",
           "x": 512,
@@ -432,20 +488,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 62358,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 47307,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "PID CONTROL",
           "style": {
-            "background_color": 47307,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -454,12 +537,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "闭环控制 | PID gain tuning",
           "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "PID",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 62358
           }
         },
         {
@@ -486,8 +582,9 @@
           "h": 290,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -624,8 +721,9 @@
           "h": 290,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -702,6 +800,20 @@
           }
         },
         {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
           "id": "n_home",
           "type": "button",
           "x": 512,
@@ -775,20 +887,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 62358,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 47307,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "PID CONTROL",
           "style": {
-            "background_color": 47307,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -797,12 +936,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "闭环控制 | response analysis",
           "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "PID",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 62358
           }
         },
         {
@@ -829,8 +981,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -868,8 +1021,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -1050,6 +1204,20 @@
             "timer": [
               "seq.val++"
             ]
+          }
+        },
+        {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {

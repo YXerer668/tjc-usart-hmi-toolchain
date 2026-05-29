@@ -19,12 +19,29 @@ P = {
     "ink": rgb565(20, 24, 31),
     "muted": rgb565(100, 116, 139),
     "white": rgb565(248, 250, 252),
+    "card": rgb565(255, 255, 255),
     "paper": rgb565(241, 245, 249),
     "line": rgb565(203, 213, 225),
     "dark": rgb565(15, 23, 42),
+    "slate": rgb565(30, 41, 59),
+    "soft": rgb565(248, 250, 252),
     "red": rgb565(239, 68, 68),
     "green": rgb565(34, 197, 94),
     "amber": rgb565(245, 158, 11),
+}
+
+
+THEME_BADGES = {
+    "power_flow": "PWR",
+    "scope": "OSC",
+    "source": "DDS",
+    "comms": "LINK",
+    "pid": "PID",
+    "motor": "DRV",
+    "daq": "DAQ",
+    "robot": "BOT",
+    "vision": "AI",
+    "debug": "DBG",
 }
 
 
@@ -213,8 +230,17 @@ def text(wid: str, x: int, y: int, w: int, h: int, value: str, bg: int, fg: int 
     }
 
 
-def panel(wid: str, x: int, y: int, w: int, h: int, bg: int = P["white"]) -> dict[str, Any]:
-    return text(wid, x, y, w, h, "", bg, P["ink"])
+def panel(wid: str, x: int, y: int, w: int, h: int, bg: int = P["card"]) -> dict[str, Any]:
+    return {
+        "id": wid,
+        "type": "text",
+        "x": x,
+        "y": y,
+        "w": w,
+        "h": h,
+        "text": "",
+        "style": style(bg, P["ink"], P["line"]),
+    }
 
 
 def num(wid: str, x: int, y: int, w: int, h: int, value: int, fg: int, length: int = 5) -> dict[str, Any]:
@@ -300,16 +326,19 @@ def timer(wid: str, ms: int, event: str) -> dict[str, Any]:
 
 def header(cfg: dict[str, Any], label: str) -> list[dict[str, Any]]:
     return [
-        panel("topbar", 0, 0, 800, 76, cfg["accent"]),
-        text("title", 24, 13, 360, 30, cfg["name"].upper(), cfg["accent"], P["white"]),
-        text("sub", 24, 44, 500, 20, f"{cfg['cn']} | {label}", cfg["accent"], P["white"]),
+        panel("topbar", 0, 0, 800, 76, P["dark"]),
+        text("top_accent", 0, 0, 800, 6, "", cfg["accent2"], P["white"]),
+        text("side_accent", 0, 6, 8, 70, "", cfg["accent"], P["white"]),
+        text("title", 24, 12, 360, 30, cfg["name"].upper(), P["dark"], P["white"]),
+        text("sub", 24, 44, 520, 20, f"{cfg['cn']} | {label}", P["dark"], P["paper"]),
+        text("domain_badge", 558, 20, 62, 34, THEME_BADGES[cfg["home_kind"]], P["dark"], cfg["accent2"]),
         button("run", 646, 18, 122, 36, "RUN", cfg["accent2"], P["ink"], kind="state-button", value=1),
     ]
 
 
 def nav(active: int, accent: int) -> list[dict[str, Any]]:
     items = [("n_home", "HOME", "page page0"), ("n_param", "PARAM", "page page1"), ("n_log", "LOG", "page page2")]
-    widgets: list[dict[str, Any]] = []
+    widgets: list[dict[str, Any]] = [panel("nav_dock", 498, 416, 284, 52, P["card"])]
     for idx, (wid, label, cmd) in enumerate(items):
         x = 512 + idx * 88
         selected = idx == active
@@ -322,6 +351,7 @@ def metric(widgets: list[dict[str, Any]], idx: int, x: int, y: int, spec: tuple[
     widgets.extend(
         [
             panel(f"m{idx}_card", x, y, 128, 78),
+            text(f"m{idx}_stripe", x, y, 128, 5, "", accent, P["white"]),
             text(f"m{idx}_lab", x + 10, y + 8, 58, 18, label, P["white"], P["muted"]),
             num(f"m{idx}", x + 10, y + 34, 70, 30, int(value), accent),
             text(f"m{idx}_unit", x + 84, y + 39, 36, 18, unit, P["white"], P["muted"]),

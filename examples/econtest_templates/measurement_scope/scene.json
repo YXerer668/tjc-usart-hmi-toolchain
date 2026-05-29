@@ -26,20 +26,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 11959,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 2994,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "MEASUREMENT SCOPE",
           "style": {
-            "background_color": 2994,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -48,12 +75,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "测量仪器 | problem dashboard",
           "style": {
-            "background_color": 2994,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "OSC",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 11959
           }
         },
         {
@@ -80,8 +120,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -119,8 +160,22 @@
           "h": 78,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "m0_stripe",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 128,
+          "h": 5,
+          "text": "",
+          "style": {
+            "background_color": 2994,
+            "foreground_color": 65503
           }
         },
         {
@@ -173,8 +228,22 @@
           "h": 78,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "m1_stripe",
+          "type": "text",
+          "x": 672,
+          "y": 104,
+          "w": 128,
+          "h": 5,
+          "text": "",
+          "style": {
+            "background_color": 2994,
+            "foreground_color": 65503
           }
         },
         {
@@ -227,8 +296,22 @@
           "h": 78,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "m2_stripe",
+          "type": "text",
+          "x": 552,
+          "y": 202,
+          "w": 128,
+          "h": 5,
+          "text": "",
+          "style": {
+            "background_color": 2994,
+            "foreground_color": 65503
           }
         },
         {
@@ -281,8 +364,22 @@
           "h": 78,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "m3_stripe",
+          "type": "text",
+          "x": 672,
+          "y": 202,
+          "w": 128,
+          "h": 5,
+          "text": "",
+          "style": {
+            "background_color": 2994,
+            "foreground_color": 65503
           }
         },
         {
@@ -335,8 +432,9 @@
           "h": 46,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -457,6 +555,20 @@
           }
         },
         {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
           "id": "n_home",
           "type": "button",
           "x": 512,
@@ -530,20 +642,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 11959,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 2994,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "MEASUREMENT SCOPE",
           "style": {
-            "background_color": 2994,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -552,12 +691,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "测量仪器 | acquisition and trigger setup",
           "style": {
-            "background_color": 2994,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "OSC",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 11959
           }
         },
         {
@@ -584,8 +736,9 @@
           "h": 290,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -720,8 +873,9 @@
           "h": 290,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -809,6 +963,20 @@
           }
         },
         {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
           "id": "n_home",
           "type": "button",
           "x": 512,
@@ -882,20 +1050,47 @@
           "h": 76,
           "text": "",
           "style": {
+            "background_color": 2213,
+            "foreground_color": 4291,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "top_accent",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 6,
+          "text": "",
+          "style": {
+            "background_color": 11959,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "side_accent",
+          "type": "text",
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 70,
+          "text": "",
+          "style": {
             "background_color": 2994,
-            "foreground_color": 4291
+            "foreground_color": 65503
           }
         },
         {
           "id": "title",
           "type": "text",
           "x": 24,
-          "y": 13,
+          "y": 12,
           "w": 360,
           "h": 30,
           "text": "MEASUREMENT SCOPE",
           "style": {
-            "background_color": 2994,
+            "background_color": 2213,
             "foreground_color": 65503
           }
         },
@@ -904,12 +1099,25 @@
           "type": "text",
           "x": 24,
           "y": 44,
-          "w": 500,
+          "w": 520,
           "h": 20,
           "text": "测量仪器 | capture statistics",
           "style": {
-            "background_color": 2994,
-            "foreground_color": 65503
+            "background_color": 2213,
+            "foreground_color": 63423
+          }
+        },
+        {
+          "id": "domain_badge",
+          "type": "text",
+          "x": 558,
+          "y": 20,
+          "w": 62,
+          "h": 34,
+          "text": "OSC",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 11959
           }
         },
         {
@@ -936,8 +1144,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -975,8 +1184,9 @@
           "h": 222,
           "text": "",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
@@ -1157,6 +1367,20 @@
             "timer": [
               "seq.val++"
             ]
+          }
+        },
+        {
+          "id": "nav_dock",
+          "type": "text",
+          "x": 498,
+          "y": 416,
+          "w": 284,
+          "h": 52,
+          "text": "",
+          "style": {
+            "background_color": 65535,
+            "foreground_color": 4291,
+            "border_color": 52924
           }
         },
         {
