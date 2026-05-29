@@ -1,0 +1,210 @@
+{
+  "schema": "usarthmi.econtest_templates.v1",
+  "canvas": {
+    "width": 800,
+    "height": 480
+  },
+  "count": 10,
+  "templates": [
+    {
+      "slug": "instrument_meter",
+      "name": "Instrument Meter",
+      "cn": "仪器仪表",
+      "scene": "instrument_meter/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 31",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "power_energy",
+      "name": "Power Energy",
+      "cn": "电源能源",
+      "scene": "power_energy/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 32",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "motor_motion",
+      "name": "Motor Motion",
+      "cn": "电机运动",
+      "scene": "motor_motion/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 33",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "robot_chassis",
+      "name": "Robot Chassis",
+      "cn": "机器人底盘",
+      "scene": "robot_chassis/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 34",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "communication_link",
+      "name": "Communication Link",
+      "cn": "通信链路",
+      "scene": "communication_link/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 35",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "sensor_fusion",
+      "name": "Sensor Fusion",
+      "cn": "传感融合",
+      "scene": "sensor_fusion/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 36",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "pid_tuning",
+      "name": "PID Tuning",
+      "cn": "PID 调参",
+      "scene": "pid_tuning/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 37",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "battery_bms",
+      "name": "Battery BMS",
+      "cn": "电池管理",
+      "scene": "battery_bms/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 38",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "vision_aiot",
+      "name": "Vision AIoT",
+      "cn": "视觉识别",
+      "scene": "vision_aiot/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 39",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    },
+    {
+      "slug": "field_debug",
+      "name": "Field Debug",
+      "cn": "现场调试",
+      "scene": "field_debug/scene.json",
+      "pages": [
+        "page0",
+        "page1",
+        "page2"
+      ],
+      "serial_prefix_hex": "23 3A",
+      "primary_widgets": [
+        "run",
+        "main_gauge",
+        "main_bar",
+        "tick",
+        "sp0",
+        "seq"
+      ]
+    }
+  ]
+}

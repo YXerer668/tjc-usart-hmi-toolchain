@@ -16,6 +16,7 @@
 
 - 检查 `.HMI` / `.TFT` 文件并渲染页面预览。
 - 用 JSON/YAML 编写页面，编辑控件和事件，生成给 agent 交接的 preview/context 包。
+- 直接从 10 套 `800x480` 电赛通用模板起步，覆盖仪器仪表、电源、电机、底盘、通信、传感融合、PID、BMS、视觉识别和现场调试。
 - 通过官方编译器做无鼠标、headless 的 touch-safe 构建。
 - 在烧录前检查可见重叠和隐藏触摸热区 `endx` / `endy` 不一致。
 - 通过公开串口协议上传 TFT，并用 `sendme` / `get` / camera 证明实机状态。
@@ -26,6 +27,7 @@
 ```powershell
 python -m pip install -e .
 python -m usarthmi --json scene check examples\polished_dashboard_demo\scene.json --out-dir build\scene_check
+python -m usarthmi --json scene check examples\econtest_templates\power_energy\scene.json --out-dir build\econtest_check --simulate-events
 python tools\package_touchsafe_headless_toolchain.py --out-dir dist --require-host-exe
 ```
 
@@ -75,6 +77,10 @@ powershell -ExecutionPolicy Bypass -File .\tools\run_touchsafe_pipeline.ps1 `
 - 外部图片控件：推荐用健康的 `case_00_baseline` 资源布局，SD 卡路径如 `sd0/1.jpg` 已经实机验证。
 - 动画控件：单个内部 GMOV 的 smoke 路线已经跑通；混合媒体还在研究。
 - 多页实验：支持新增 page1 的普通控件/按钮事件，也支持用 `patch_seed_page0_widgets` 给 seed page0 里已有按钮补窄范围事件，便于做双页双向跳转探针。
+
+新增的电赛模板入口在 [`examples/econtest_templates`](examples/econtest_templates/)；
+单片机侧通用 C99 串口通信封装在
+[`firmware/usarthmi_serial`](firmware/usarthmi_serial/)。
 
 ## 已恢复或部分恢复的控件
 

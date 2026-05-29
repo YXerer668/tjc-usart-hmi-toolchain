@@ -1,0 +1,1280 @@
+{
+  "project": {
+    "name": "econtest-motor_motion",
+    "default_page": "page0",
+    "drop_seed_objects": true
+  },
+  "canvas": {
+    "width": 800,
+    "height": 480,
+    "background_color": 61375
+  },
+  "assets": {},
+  "pages": [
+    {
+      "id": "page0",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "topbar",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 76,
+          "text": "",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "title",
+          "type": "text",
+          "x": 24,
+          "y": 14,
+          "w": 360,
+          "h": 30,
+          "text": "MOTOR MOTION",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sub",
+          "type": "text",
+          "x": 24,
+          "y": 45,
+          "w": 430,
+          "h": 20,
+          "text": "电机运动 | runtime dashboard",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "run",
+          "type": "state-button",
+          "x": 646,
+          "y": 18,
+          "w": 122,
+          "h": 36,
+          "text": "RUN",
+          "style": {
+            "background_color": 25919,
+            "foreground_color": 4291,
+            "border_color": 25919
+          },
+          "value": 1
+        },
+        {
+          "id": "card0",
+          "type": "text",
+          "x": 24,
+          "y": 104,
+          "w": 166,
+          "h": 96,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "m0_lab",
+          "type": "text",
+          "x": 38,
+          "y": 116,
+          "w": 72,
+          "h": 22,
+          "text": "RPM",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "m0",
+          "type": "number",
+          "x": 38,
+          "y": 146,
+          "w": 86,
+          "h": 34,
+          "value": 2450,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "m0_unit",
+          "type": "text",
+          "x": 130,
+          "y": 153,
+          "w": 42,
+          "h": 22,
+          "text": "rpm",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "card1",
+          "type": "text",
+          "x": 214,
+          "y": 104,
+          "w": 166,
+          "h": 96,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "m1_lab",
+          "type": "text",
+          "x": 228,
+          "y": 116,
+          "w": 72,
+          "h": 22,
+          "text": "PWM",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "m1",
+          "type": "number",
+          "x": 228,
+          "y": 146,
+          "w": 86,
+          "h": 34,
+          "value": 54,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "m1_unit",
+          "type": "text",
+          "x": 320,
+          "y": 153,
+          "w": 42,
+          "h": 22,
+          "text": "pct",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "card2",
+          "type": "text",
+          "x": 24,
+          "y": 226,
+          "w": 166,
+          "h": 96,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "m2_lab",
+          "type": "text",
+          "x": 38,
+          "y": 238,
+          "w": 72,
+          "h": 22,
+          "text": "POS",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "m2",
+          "type": "number",
+          "x": 38,
+          "y": 268,
+          "w": 86,
+          "h": 34,
+          "value": 180,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "m2_unit",
+          "type": "text",
+          "x": 130,
+          "y": 275,
+          "w": 42,
+          "h": 22,
+          "text": "deg",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "card3",
+          "type": "text",
+          "x": 214,
+          "y": 226,
+          "w": 166,
+          "h": 96,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "m3_lab",
+          "type": "text",
+          "x": 228,
+          "y": 238,
+          "w": 72,
+          "h": 22,
+          "text": "ERR",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "m3",
+          "type": "number",
+          "x": 228,
+          "y": 268,
+          "w": 86,
+          "h": 34,
+          "value": 3,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "m3_unit",
+          "type": "text",
+          "x": 320,
+          "y": 275,
+          "w": 42,
+          "h": 22,
+          "text": "cnt",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "main_panel",
+          "type": "text",
+          "x": 420,
+          "y": 104,
+          "w": 348,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "main_lab",
+          "type": "text",
+          "x": 444,
+          "y": 122,
+          "w": 180,
+          "h": 24,
+          "text": "SYSTEM LOAD",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "main_gauge",
+          "type": "gauge",
+          "x": 454,
+          "y": 156,
+          "w": 126,
+          "h": 126,
+          "value": 80,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "main_bar",
+          "type": "progress",
+          "x": 610,
+          "y": 158,
+          "w": 120,
+          "h": 30,
+          "value": 80,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25919,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "bar_lab",
+          "type": "text",
+          "x": 610,
+          "y": 198,
+          "w": 118,
+          "h": 22,
+          "text": "live percent",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "tick",
+          "type": "number",
+          "x": 610,
+          "y": 236,
+          "w": 82,
+          "h": 34,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 4
+          }
+        },
+        {
+          "id": "tick_lab",
+          "type": "text",
+          "x": 698,
+          "y": 244,
+          "w": 38,
+          "h": 20,
+          "text": "tick",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "b_start",
+          "type": "button",
+          "x": 420,
+          "y": 350,
+          "w": 92,
+          "h": 44,
+          "text": "START",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "printh 23 33 10 01",
+              "run.val=1"
+            ]
+          }
+        },
+        {
+          "id": "b_stop",
+          "type": "button",
+          "x": 530,
+          "y": 350,
+          "w": 92,
+          "h": 44,
+          "text": "STOP",
+          "style": {
+            "background_color": 59944,
+            "foreground_color": 65503,
+            "border_color": 59944
+          },
+          "events": {
+            "up": [
+              "printh 23 33 10 00",
+              "run.val=0"
+            ]
+          }
+        },
+        {
+          "id": "b_cmd",
+          "type": "button",
+          "x": 640,
+          "y": 350,
+          "w": 92,
+          "h": 44,
+          "text": "HOME",
+          "style": {
+            "background_color": 25919,
+            "foreground_color": 4291,
+            "border_color": 25919
+          },
+          "events": {
+            "up": [
+              "printh 23 33 20 01"
+            ]
+          }
+        },
+        {
+          "id": "tm0",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 500,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "tick.val++"
+            ]
+          }
+        },
+        {
+          "id": "n_home",
+          "type": "button",
+          "x": 512,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "HOME",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "page page0"
+            ]
+          }
+        },
+        {
+          "id": "n_param",
+          "type": "button",
+          "x": 600,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "PARAM",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page1"
+            ]
+          }
+        },
+        {
+          "id": "n_log",
+          "type": "button",
+          "x": 688,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "LOG",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "page1",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "topbar",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 76,
+          "text": "",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "title",
+          "type": "text",
+          "x": 24,
+          "y": 14,
+          "w": 360,
+          "h": 30,
+          "text": "MOTOR MOTION",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sub",
+          "type": "text",
+          "x": 24,
+          "y": 45,
+          "w": 430,
+          "h": 20,
+          "text": "电机运动 | parameter panel",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "run",
+          "type": "state-button",
+          "x": 646,
+          "y": 18,
+          "w": 122,
+          "h": 36,
+          "text": "RUN",
+          "style": {
+            "background_color": 25919,
+            "foreground_color": 4291,
+            "border_color": 25919
+          },
+          "value": 1
+        },
+        {
+          "id": "p_left",
+          "type": "text",
+          "x": 24,
+          "y": 104,
+          "w": 350,
+          "h": 290,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "p_title",
+          "type": "text",
+          "x": 44,
+          "y": 122,
+          "w": 210,
+          "h": 26,
+          "text": "CONTROL SETPOINTS",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779
+          }
+        },
+        {
+          "id": "sp0_lab",
+          "type": "text",
+          "x": 48,
+          "y": 172,
+          "w": 104,
+          "h": 24,
+          "text": "target",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "sp0",
+          "type": "number",
+          "x": 168,
+          "y": 166,
+          "w": 96,
+          "h": 36,
+          "value": 2450,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "sp1_lab",
+          "type": "text",
+          "x": 48,
+          "y": 222,
+          "w": 104,
+          "h": 24,
+          "text": "limit",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "sp1",
+          "type": "number",
+          "x": 168,
+          "y": 216,
+          "w": 96,
+          "h": 36,
+          "value": 54,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "sp2_lab",
+          "type": "text",
+          "x": 48,
+          "y": 272,
+          "w": 104,
+          "h": 24,
+          "text": "gain",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "sp2",
+          "type": "number",
+          "x": 168,
+          "y": 266,
+          "w": 96,
+          "h": 36,
+          "value": 3,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "b_dec",
+          "type": "button",
+          "x": 286,
+          "y": 166,
+          "w": 58,
+          "h": 36,
+          "text": "-1",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "sp0.val--"
+            ]
+          }
+        },
+        {
+          "id": "b_inc",
+          "type": "button",
+          "x": 286,
+          "y": 216,
+          "w": 58,
+          "h": 36,
+          "text": "+1",
+          "style": {
+            "background_color": 25919,
+            "foreground_color": 4291,
+            "border_color": 25919
+          },
+          "events": {
+            "up": [
+              "sp0.val++"
+            ]
+          }
+        },
+        {
+          "id": "b_save",
+          "type": "button",
+          "x": 48,
+          "y": 330,
+          "w": 128,
+          "h": 44,
+          "text": "SAVE",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "printh 23 33 30 01"
+            ]
+          }
+        },
+        {
+          "id": "b_rst",
+          "type": "button",
+          "x": 198,
+          "y": 330,
+          "w": 128,
+          "h": 44,
+          "text": "RESET",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "sp0.val=0",
+              "printh 23 33 30 00"
+            ]
+          }
+        },
+        {
+          "id": "p_right",
+          "type": "text",
+          "x": 420,
+          "y": 104,
+          "w": 348,
+          "h": 290,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "mode_lab",
+          "type": "text",
+          "x": 444,
+          "y": 122,
+          "w": 130,
+          "h": 24,
+          "text": "MODE SELECT",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779
+          }
+        },
+        {
+          "id": "cb_auto",
+          "type": "checkbox",
+          "x": 448,
+          "y": 166,
+          "w": 32,
+          "h": 32,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "auto_lab",
+          "type": "text",
+          "x": 492,
+          "y": 172,
+          "w": 148,
+          "h": 24,
+          "text": "auto loop",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "cb_log",
+          "type": "checkbox",
+          "x": 448,
+          "y": 214,
+          "w": 32,
+          "h": 32,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "log_lab",
+          "type": "text",
+          "x": 492,
+          "y": 220,
+          "w": 148,
+          "h": 24,
+          "text": "record log",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "sl0",
+          "type": "slider",
+          "x": 448,
+          "y": 276,
+          "w": 190,
+          "h": 34,
+          "value": 45,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25919,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "slider_lab",
+          "type": "text",
+          "x": 650,
+          "y": 282,
+          "w": 72,
+          "h": 24,
+          "text": "speed",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "b_apply",
+          "type": "button",
+          "x": 448,
+          "y": 330,
+          "w": 122,
+          "h": 44,
+          "text": "APPLY",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "printh 23 33 31 01"
+            ]
+          }
+        },
+        {
+          "id": "b_back",
+          "type": "button",
+          "x": 592,
+          "y": 330,
+          "w": 122,
+          "h": 44,
+          "text": "BACK",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page0"
+            ]
+          }
+        },
+        {
+          "id": "n_home",
+          "type": "button",
+          "x": 512,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "HOME",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page0"
+            ]
+          }
+        },
+        {
+          "id": "n_param",
+          "type": "button",
+          "x": 600,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "PARAM",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "page page1"
+            ]
+          }
+        },
+        {
+          "id": "n_log",
+          "type": "button",
+          "x": 688,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "LOG",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page2"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "page2",
+      "layout": {
+        "type": "absolute"
+      },
+      "widgets": [
+        {
+          "id": "topbar",
+          "type": "text",
+          "x": 0,
+          "y": 0,
+          "w": 800,
+          "h": 76,
+          "text": "",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "title",
+          "type": "text",
+          "x": 24,
+          "y": 14,
+          "w": 360,
+          "h": 30,
+          "text": "MOTOR MOTION",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sub",
+          "type": "text",
+          "x": 24,
+          "y": 45,
+          "w": 430,
+          "h": 20,
+          "text": "电机运动 | log and service",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "run",
+          "type": "state-button",
+          "x": 646,
+          "y": 18,
+          "w": 122,
+          "h": 36,
+          "text": "RUN",
+          "style": {
+            "background_color": 25919,
+            "foreground_color": 4291,
+            "border_color": 25919
+          },
+          "value": 1
+        },
+        {
+          "id": "log_panel",
+          "type": "text",
+          "x": 24,
+          "y": 104,
+          "w": 476,
+          "h": 290,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "log_title",
+          "type": "text",
+          "x": 44,
+          "y": 122,
+          "w": 180,
+          "h": 24,
+          "text": "EVENT STREAM",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779
+          }
+        },
+        {
+          "id": "log0",
+          "type": "scrolling-text",
+          "x": 44,
+          "y": 160,
+          "w": 420,
+          "h": 48,
+          "text": "LOOP OK | ENC | BRAKE",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 6779,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "wave0",
+          "type": "waveform",
+          "x": 44,
+          "y": 232,
+          "w": 420,
+          "h": 92,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25919,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "seq_lab",
+          "type": "text",
+          "x": 44,
+          "y": 342,
+          "w": 70,
+          "h": 24,
+          "text": "seq",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "seq",
+          "type": "number",
+          "x": 118,
+          "y": 336,
+          "w": 90,
+          "h": 36,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "b_clear",
+          "type": "button",
+          "x": 232,
+          "y": 336,
+          "w": 94,
+          "h": 40,
+          "text": "CLEAR",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "seq.val=0"
+            ]
+          }
+        },
+        {
+          "id": "b_mark",
+          "type": "button",
+          "x": 346,
+          "y": 336,
+          "w": 94,
+          "h": 40,
+          "text": "MARK",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "printh 23 33 40 01"
+            ]
+          }
+        },
+        {
+          "id": "svc_panel",
+          "type": "text",
+          "x": 530,
+          "y": 104,
+          "w": 238,
+          "h": 290,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "svc_title",
+          "type": "text",
+          "x": 552,
+          "y": 122,
+          "w": 140,
+          "h": 24,
+          "text": "SERVICE QR",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779
+          }
+        },
+        {
+          "id": "qr0",
+          "type": "qrcode",
+          "x": 574,
+          "y": 160,
+          "w": 128,
+          "h": 128,
+          "text": "usarthmi:motor_motion",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 6779,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "qr_lab",
+          "type": "text",
+          "x": 552,
+          "y": 306,
+          "w": 170,
+          "h": 24,
+          "text": "motor_motion",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 27536
+          }
+        },
+        {
+          "id": "tm1",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 1000,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "seq.val++"
+            ]
+          }
+        },
+        {
+          "id": "n_home",
+          "type": "button",
+          "x": 512,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "HOME",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page0"
+            ]
+          }
+        },
+        {
+          "id": "n_param",
+          "type": "button",
+          "x": 600,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "PARAM",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "page page1"
+            ]
+          }
+        },
+        {
+          "id": "n_log",
+          "type": "button",
+          "x": 688,
+          "y": 424,
+          "w": 72,
+          "h": 36,
+          "text": "LOG",
+          "style": {
+            "background_color": 6779,
+            "foreground_color": 65503,
+            "border_color": 6779
+          },
+          "events": {
+            "up": [
+              "page page2"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -17,6 +17,9 @@ validation, serial readback, or camera proof from the real panel.
 - Inspect `.HMI` / `.TFT` files and render page previews.
 - Author JSON/YAML scenes, edit widgets and events, and generate agent handoff
   bundles.
+- Start from reusable 800x480 electronic-contest templates for instruments,
+  power, motor control, chassis, communication, sensor fusion, PID, BMS, vision,
+  and field-debug screens.
 - Build touch-safe cases through the official compiler without manual mouse
   clicks.
 - Catch visual overlaps and hidden touch hitbox mismatches before flashing.
@@ -29,6 +32,7 @@ validation, serial readback, or camera proof from the real panel.
 ```powershell
 python -m pip install -e .
 python -m usarthmi --json scene check examples\polished_dashboard_demo\scene.json --out-dir build\scene_check
+python -m usarthmi --json scene check examples\econtest_templates\power_energy\scene.json --out-dir build\econtest_check --simulate-events
 python tools\package_touchsafe_headless_toolchain.py --out-dir dist --require-host-exe
 ```
 
@@ -167,6 +171,11 @@ The reusable surface is intentionally small:
 - `usarthmi.widgets` owns widget metadata: aliases, current-target support
   status, writer kind, fixture case, TFT type code, and pending/unsupported
   reasons.
+
+Reusable contest templates live in
+[`examples/econtest_templates`](examples/econtest_templates/). A small MCU-side
+C99 serial helper for STM32 or any UART driver lives in
+[`firmware/usarthmi_serial`](firmware/usarthmi_serial/).
 
 When adding a new widget, update the registry first and let scene validation,
 editor writer guards, docs, and tests consume that same metadata. The matching
