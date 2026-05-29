@@ -45,6 +45,9 @@ class EcontestTemplateTests(unittest.TestCase):
             self.assertGreaterEqual(len(item["page2_widgets"]), 4)
             self.assertEqual(set(item["page_roles"]), {"page0", "page1", "page2"})
             self.assertNotEqual(item["page_roles"]["page1"], item["page_roles"]["page2"])
+            self.assertEqual(item["motion_profile"]["kind"], "timer_safe_header_sweep_plus_topic_pulse")
+            self.assertEqual(item["motion_profile"]["home_timer"], "tm_scene")
+            self.assertTrue(item["motion_profile"]["media_free"])
             self.assertTrue((TEMPLATE_ROOT / item["scene"]).exists(), item["scene"])
 
     def test_templates_validate_check_and_keep_touch_targets_separate(self) -> None:
@@ -57,6 +60,8 @@ class EcontestTemplateTests(unittest.TestCase):
                 self.assertEqual([page.id for page in scene.pages], ["page0", "page1", "page2"])
                 self.assertTrue(_has_widget_type(scene, "timer"))
                 page0_ids = {widget.id for widget in scene.pages[0].widgets}
+                self.assertIn("tm_scene", page0_ids)
+                self.assert_home_motion_timer(scene.pages[0])
                 for widget_id in item["topic_widgets"]:
                     self.assertIn(widget_id, page0_ids)
                 page1_ids = {widget.id for widget in scene.pages[1].widgets}
@@ -84,6 +89,7 @@ class EcontestTemplateTests(unittest.TestCase):
                     self.assertIn("domain_badge", ids)
                     self.assertIn("run", ids)
                     self.assertIn("nav_dock", ids)
+                    self.assert_motion_layer(page)
                     self.assert_nav_button(page, "n_home", "page page0", 512)
                     self.assert_nav_button(page, "n_param", "page page1", 600)
                     self.assert_nav_button(page, "n_log", "page page2", 688)
@@ -136,6 +142,24 @@ class EcontestTemplateTests(unittest.TestCase):
         widget = next(widget for widget in page.widgets if widget.id == widget_id)  # type: ignore[attr-defined]
         self.assertEqual(_rect(widget), (x, 424, 72, 36))
         self.assertIn(command, widget.events.get("up", []))
+
+    def assert_motion_layer(self, page: object) -> None:
+        ids = {widget.id for widget in page.widgets}  # type: ignore[attr-defined]
+        for widget_id in {"motion_bus", "sweep_a", "sweep_b", "sweep_c", "beat", "tm_motion"}:
+            self.assertIn(widget_id, ids)
+        timer_widget = next(widget for widget in page.widgets if widget.id == "tm_motion")  # type: ignore[attr-defined]
+        timer_lines = timer_widget.events.get("timer", [])
+        self.assertIn("beat.val++", timer_lines)
+        self.assertIn("ref beat", timer_lines)
+        self.assertIn("vis sweep_a,1", timer_lines)
+        self.assertLessEqual(len(timer_lines), 20)
+
+    def assert_home_motion_timer(self, page: object) -> None:
+        timer_widget = next(widget for widget in page.widgets if widget.id == "tm_scene")  # type: ignore[attr-defined]
+        timer_lines = timer_widget.events.get("timer", [])
+        self.assertTrue(any(line.startswith("vis ") for line in timer_lines))
+        self.assertTrue(any(line.startswith("ref ") for line in timer_lines))
+        self.assertLessEqual(len(timer_lines), 8)
 
 
 def _load_index() -> dict[str, object]:

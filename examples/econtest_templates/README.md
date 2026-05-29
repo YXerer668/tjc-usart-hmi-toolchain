@@ -7,6 +7,12 @@
 - `page1`: 题型设置页，不同模板分别放限流保护、采样触发、波形合成、协议信道、PID 增益、运动曲线等专属控件。
 - `page2`: 题型诊断页，不同模板分别放纹波/故障、捕获统计、BER、响应分析、编码器、记录报警、路径回放、识别结果等专属控件。
 
+默认模板带有一层 media-free 动效：每页顶栏都有 `tm_motion` 驱动的扫描灯和
+`beat` 计数，首页还有 `tm_scene` 驱动的题型脉冲，例如电源流箭头、示波波形、
+通信 TX/RX 管线、机器人路径节点和视觉 ROI。它只使用 `timer` / `vis` /
+`delay` / `ref` / `.val++` 这类基础事件，不依赖图片、GMOV 或联网素材，便于
+开源复用和离线检查。
+
 模板列表见 [`template_index.json`](template_index.json)。当前 10 个题型：
 
 - `power_converter`: 电源与功率变换，突出输入/输出功率流、效率、保护状态。
@@ -40,6 +46,12 @@ python -m usarthmi --json scene preview examples\econtest_templates\power_conver
 python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery
 ```
 
+生成首页动效 GIF 预览和联系表：
+
+```powershell
+python tools\render_econtest_motion_preview.py --all --out-dir build\econtest_motion_preview
+```
+
 需要重新生成全部模板时：
 
 ```powershell
@@ -55,6 +67,8 @@ python tools\generate_econtest_templates.py
 - `main_gauge`: 主仪表盘。
 - `main_bar`: 主进度条。
 - `tick`: page0 timer 计数。
+- `tm_motion` / `beat`: 每页顶栏的基础扫描动效。
+- `tm_scene`: page0 题型脉冲动效。
 - `sp0`..`sp2`: 参数页设定值。
 - `seq`: 日志页序号。
 - `b_start` / `b_stop` / `b_cmd`: page0 主动作按钮。

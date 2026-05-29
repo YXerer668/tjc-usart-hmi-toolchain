@@ -82,6 +82,10 @@ powershell -ExecutionPolicy Bypass -File .\tools\run_touchsafe_pipeline.ps1 `
 索引里记录了每个模板的三页职责和逐页专属控件，方便 agent 检查它不是只换颜色的同质化页面。
 可以用 `python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery`
 一次生成 10 套模板的三页预览总览。
+模板默认带 media-free timer 动效：`tm_motion` 负责每页顶栏扫描，`tm_scene`
+负责 page0 题型脉冲；可以用
+`python tools\render_econtest_motion_preview.py --all --out-dir build\econtest_motion_preview`
+生成 GIF 动效预览，不需要烧录屏幕。
 单片机侧通用 C99 串口通信封装在
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/)。
 

@@ -181,6 +181,10 @@ with page roles and per-page widget lists so agents can verify that page0,
 page1, and page2 are problem-specific rather than color-only variants. A small
 gallery renderer can preview all three pages for all templates with
 `python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery`.
+The templates also include media-free timer motion: `tm_motion` animates the
+top status sweep on every page and `tm_scene` pulses a page0 topic widget. Use
+`python tools\render_econtest_motion_preview.py --all --out-dir build\econtest_motion_preview`
+to generate GIF previews without flashing a panel.
 A small MCU-side C99 serial helper for STM32 or any UART driver lives in
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/).
 

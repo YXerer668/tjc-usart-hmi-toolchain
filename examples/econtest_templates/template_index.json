@@ -24,11 +24,29 @@
         "page2": "ripple and fault diagnostics"
       },
       "serial_prefix_hex": "23 31",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "flow_in",
         "flow_out",
         "eff_bar",
@@ -78,11 +96,29 @@
         "page2": "capture statistics"
       },
       "serial_prefix_hex": "23 32",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "scope_wave",
         "range_box",
         "trig_level",
@@ -132,11 +168,29 @@
         "page2": "output quality monitor"
       },
       "serial_prefix_hex": "23 33",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "wave_sine",
         "freq_set",
         "amp_set",
@@ -186,11 +240,29 @@
         "page2": "packet and BER diagnostics"
       },
       "serial_prefix_hex": "23 34",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "link_tx",
         "link_rx",
         "rssi_gauge",
@@ -240,11 +312,29 @@
         "page2": "response analysis"
       },
       "serial_prefix_hex": "23 35",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "sp_value",
         "pv_value",
         "pid_wave",
@@ -294,11 +384,29 @@
         "page2": "encoder and drive diagnostics"
       },
       "serial_prefix_hex": "23 36",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "speed_gauge",
         "dir_fwd",
         "dir_rev",
@@ -348,11 +456,29 @@
         "page2": "record and alarm diagnostics"
       },
       "serial_prefix_hex": "23 37",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "sensor_grid",
         "sample_bar",
         "cal_zero",
@@ -402,11 +528,29 @@
         "page2": "path replay diagnostics"
       },
       "serial_prefix_hex": "23 38",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "map_grid_0",
         "m0",
         "task_lane",
@@ -456,11 +600,29 @@
         "page2": "recognition result review"
       },
       "serial_prefix_hex": "23 39",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "camera_frame",
         "target_list",
         "conf_gauge",
@@ -510,11 +672,29 @@
         "page2": "console and fault history"
       },
       "serial_prefix_hex": "23 3A",
+      "motion_profile": {
+        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "header_timer": "tm_motion",
+        "home_timer": "tm_scene",
+        "dynamic_widgets": [
+          "sweep_a",
+          "sweep_b",
+          "sweep_c",
+          "beat"
+        ],
+        "media_free": true
+      },
       "primary_widgets": [
         "run",
         "tick",
         "sp0",
         "seq",
+        "tm_motion",
+        "tm_scene",
+        "beat",
+        "sweep_a",
+        "sweep_b",
+        "sweep_c",
         "console",
         "fault_count",
         "bus_uart",

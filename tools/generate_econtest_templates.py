@@ -320,8 +320,9 @@ def checkbox(wid: str, x: int, y: int, value: int, accent: int) -> dict[str, Any
     return {"id": wid, "type": "checkbox", "x": x, "y": y, "w": 30, "h": 30, "value": value, "style": style(P["white"], accent, P["line"])}
 
 
-def timer(wid: str, ms: int, event: str) -> dict[str, Any]:
-    return {"id": wid, "type": "timer", "x": 0, "y": 0, "w": 1, "h": 1, "style": {"tim": ms, "en": 1}, "events": {"timer": [event]}}
+def timer(wid: str, ms: int, events: str | list[str]) -> dict[str, Any]:
+    event_lines = [events] if isinstance(events, str) else list(events)
+    return {"id": wid, "type": "timer", "x": 0, "y": 0, "w": 1, "h": 1, "style": {"tim": ms, "en": 1}, "events": {"timer": event_lines}}
 
 
 def chip(wid: str, x: int, y: int, w: int, label: str, fg: int, bg: int = P["paper"]) -> dict[str, Any]:
@@ -350,6 +351,37 @@ def page_chrome(cfg: dict[str, Any], page_code: str, marker: str) -> list[dict[s
         chip("mark_chip", 112, 84, 86, f"TX {marker}", P["muted"]),
         chip("mode_chip", 210, 84, 72, "READY", cfg["accent2"]),
         chip("lock_chip", 294, 84, 86, "SAFE UI", P["muted"]),
+    ]
+
+
+def motion_layer(cfg: dict[str, Any], page_code: str) -> list[dict[str, Any]]:
+    pulse_events = [
+        "vis sweep_a,0",
+        "vis sweep_b,0",
+        "vis sweep_c,0",
+        "vis sweep_a,1",
+        "delay=70",
+        "vis sweep_a,0",
+        "vis sweep_b,1",
+        "delay=70",
+        "vis sweep_b,0",
+        "vis sweep_c,1",
+        "delay=70",
+        "vis sweep_c,0",
+        "vis sweep_a,1",
+        "beat.val++",
+        "ref beat",
+    ]
+    return [
+        text("motion_bus", 392, 84, 194, 18, "", P["paper"], P["white"]),
+        text("motion_sig", 400, 87, 34, 12, "", cfg["accent"], P["white"]),
+        text("sweep_a", 444, 87, 34, 12, "", cfg["accent2"], P["white"]),
+        text("sweep_b", 488, 87, 34, 12, "", cfg["accent"], P["white"]),
+        text("sweep_c", 532, 87, 34, 12, "", cfg["accent2"], P["white"]),
+        chip("motion_mode", 596, 84, 50, page_code[:4], cfg["accent2"], P["slate"]),
+        num("beat", 656, 84, 52, 18, 0, cfg["accent"], length=3),
+        chip("motion_fps", 718, 84, 50, "LIVE", P["muted"]),
+        timer("tm_motion", 720, pulse_events),
     ]
 
 
@@ -604,11 +636,32 @@ HOME_BUILDERS = {
 }
 
 
+HOME_MOTION_EVENTS = {
+    "power_flow": ["vis flow_arrow,0", "delay=90", "vis flow_arrow,1", "ref eff_bar"],
+    "scope": ["vis scope_wave,0", "delay=70", "vis scope_wave,1", "ref scope_wave"],
+    "source": ["vis out_wave,0", "delay=70", "vis out_wave,1", "ref out_wave"],
+    "comms": ["vis link_pipe,0", "delay=90", "vis link_pipe,1", "ref ber_bar"],
+    "pid": ["vis pid_wave,0", "delay=70", "vis pid_wave,1", "ref pid_wave"],
+    "motor": ["vis telemetry_lab,0", "delay=70", "vis telemetry_lab,1", "ref speed_gauge"],
+    "daq": ["vis sample_bar,0", "delay=70", "vis sample_bar,1", "ref store_bar"],
+    "robot": ["vis map_grid_1,0", "delay=70", "vis map_grid_1,1", "vis map_grid_3,0", "delay=70", "vis map_grid_3,1", "ref task_lane"],
+    "vision": ["vis roi_box,0", "delay=70", "vis roi_box,1", "ref conf_gauge"],
+    "debug": ["vis console_l3,0", "delay=90", "vis console_l3,1", "ref console"],
+}
+
+
 def make_dashboard(cfg: dict[str, Any]) -> dict[str, Any]:
     widgets = header(cfg, "problem dashboard")
     widgets.extend(page_chrome(cfg, "DASH", f"23 {cfg['code']}"))
+    widgets.extend(motion_layer(cfg, "DASH"))
     widgets.extend(HOME_BUILDERS[cfg["home_kind"]](cfg))
-    widgets.extend([timer("tm0", 500, "tick.val++"), num("tick", 786, 78, 1, 1, 0, cfg["accent"], length=1)])
+    widgets.extend(
+        [
+            timer("tm0", 500, "tick.val++"),
+            timer("tm_scene", 900, HOME_MOTION_EVENTS[cfg["home_kind"]]),
+            num("tick", 786, 78, 1, 1, 0, cfg["accent"], length=1),
+        ]
+    )
     widgets.extend(nav(0, cfg["accent"]))
     return {"id": "page0", "layout": {"type": "absolute"}, "widgets": widgets}
 
@@ -671,6 +724,7 @@ def make_params(cfg: dict[str, Any]) -> dict[str, Any]:
     kind = cfg["home_kind"]
     widgets = header(cfg, PAGE1_ROLES[kind])
     widgets.extend(page_chrome(cfg, "SETUP", f"23 {cfg['code']}"))
+    widgets.extend(motion_layer(cfg, "SETUP"))
     if kind == "power_flow":
         widgets.extend([
             panel("limit_panel", 24, 104, 350, 290), text("limit_title", 44, 122, 220, 24, "OUTPUT LIMITS", P["white"], a),
@@ -803,6 +857,7 @@ def make_log(cfg: dict[str, Any]) -> dict[str, Any]:
     kind = cfg["home_kind"]
     widgets = header(cfg, PAGE2_ROLES[kind])
     widgets.extend(page_chrome(cfg, "DIAG", f"23 {cfg['code']}"))
+    widgets.extend(motion_layer(cfg, "DIAG"))
     if kind == "power_flow":
         widgets.extend([
             panel("diag_panel", 24, 104, 500, 222), text("diag_title", 44, 122, 170, 24, "RIPPLE MONITOR", P["white"], a),
@@ -950,8 +1005,29 @@ def main() -> None:
                     "page2": PAGE2_ROLES[cfg["home_kind"]],
                 },
                 "serial_prefix_hex": f"23 {cfg['code']}",
+                "motion_profile": {
+                    "kind": "timer_safe_header_sweep_plus_topic_pulse",
+                    "header_timer": "tm_motion",
+                    "home_timer": "tm_scene",
+                    "dynamic_widgets": ["sweep_a", "sweep_b", "sweep_c", "beat"],
+                    "media_free": True,
+                },
                 "primary_widgets": ordered_unique(
-                    ["run", "tick", "sp0", "seq", *cfg["topic_widgets"], *PAGE1_WIDGETS[cfg["home_kind"]], *PAGE2_WIDGETS[cfg["home_kind"]]]
+                    [
+                        "run",
+                        "tick",
+                        "sp0",
+                        "seq",
+                        "tm_motion",
+                        "tm_scene",
+                        "beat",
+                        "sweep_a",
+                        "sweep_b",
+                        "sweep_c",
+                        *cfg["topic_widgets"],
+                        *PAGE1_WIDGETS[cfg["home_kind"]],
+                        *PAGE2_WIDGETS[cfg["home_kind"]],
+                    ]
                 ),
                 "topic_widgets": cfg["topic_widgets"],
                 "page1_widgets": PAGE1_WIDGETS[cfg["home_kind"]],

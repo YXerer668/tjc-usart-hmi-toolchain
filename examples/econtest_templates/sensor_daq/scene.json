@@ -216,6 +216,143 @@
           }
         },
         {
+          "id": "motion_bus",
+          "type": "text",
+          "x": 392,
+          "y": 84,
+          "w": 194,
+          "h": 18,
+          "text": "",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_sig",
+          "type": "text",
+          "x": 400,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_a",
+          "type": "text",
+          "x": 444,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_b",
+          "type": "text",
+          "x": 488,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_c",
+          "type": "text",
+          "x": 532,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_mode",
+          "type": "text",
+          "x": 596,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "DASH",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 64996
+          }
+        },
+        {
+          "id": "beat",
+          "type": "number",
+          "x": 656,
+          "y": 84,
+          "w": 52,
+          "h": 18,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 3
+          }
+        },
+        {
+          "id": "motion_fps",
+          "type": "text",
+          "x": 718,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "LIVE",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "tm_motion",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 720,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "vis sweep_a,0",
+              "vis sweep_b,0",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "delay=70",
+              "vis sweep_a,0",
+              "vis sweep_b,1",
+              "delay=70",
+              "vis sweep_b,0",
+              "vis sweep_c,1",
+              "delay=70",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "beat.val++",
+              "ref beat"
+            ]
+          }
+        },
+        {
           "id": "sensor_grid",
           "type": "text",
           "x": 24,
@@ -671,6 +808,26 @@
           }
         },
         {
+          "id": "tm_scene",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 900,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "vis sample_bar,0",
+              "delay=70",
+              "vis sample_bar,1",
+              "ref store_bar"
+            ]
+          }
+        },
+        {
           "id": "tick",
           "type": "number",
           "x": 786,
@@ -960,6 +1117,143 @@
           "style": {
             "background_color": 63423,
             "foreground_color": 25521
+          }
+        },
+        {
+          "id": "motion_bus",
+          "type": "text",
+          "x": 392,
+          "y": 84,
+          "w": 194,
+          "h": 18,
+          "text": "",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_sig",
+          "type": "text",
+          "x": 400,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_a",
+          "type": "text",
+          "x": 444,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_b",
+          "type": "text",
+          "x": 488,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_c",
+          "type": "text",
+          "x": 532,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_mode",
+          "type": "text",
+          "x": 596,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "SETU",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 64996
+          }
+        },
+        {
+          "id": "beat",
+          "type": "number",
+          "x": 656,
+          "y": 84,
+          "w": 52,
+          "h": 18,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 3
+          }
+        },
+        {
+          "id": "motion_fps",
+          "type": "text",
+          "x": 718,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "LIVE",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "tm_motion",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 720,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "vis sweep_a,0",
+              "vis sweep_b,0",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "delay=70",
+              "vis sweep_a,0",
+              "vis sweep_b,1",
+              "delay=70",
+              "vis sweep_b,0",
+              "vis sweep_c,1",
+              "delay=70",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "beat.val++",
+              "ref beat"
+            ]
           }
         },
         {
@@ -1488,6 +1782,143 @@
           "style": {
             "background_color": 63423,
             "foreground_color": 25521
+          }
+        },
+        {
+          "id": "motion_bus",
+          "type": "text",
+          "x": 392,
+          "y": 84,
+          "w": 194,
+          "h": 18,
+          "text": "",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_sig",
+          "type": "text",
+          "x": 400,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_a",
+          "type": "text",
+          "x": 444,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_b",
+          "type": "text",
+          "x": 488,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 45697,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "sweep_c",
+          "type": "text",
+          "x": 532,
+          "y": 87,
+          "w": 34,
+          "h": 12,
+          "text": "",
+          "style": {
+            "background_color": 64996,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "motion_mode",
+          "type": "text",
+          "x": 596,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "DIAG",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 64996
+          }
+        },
+        {
+          "id": "beat",
+          "type": "number",
+          "x": 656,
+          "y": 84,
+          "w": 52,
+          "h": 18,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 3
+          }
+        },
+        {
+          "id": "motion_fps",
+          "type": "text",
+          "x": 718,
+          "y": 84,
+          "w": 50,
+          "h": 18,
+          "text": "LIVE",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "tm_motion",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 720,
+            "en": 1
+          },
+          "events": {
+            "timer": [
+              "vis sweep_a,0",
+              "vis sweep_b,0",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "delay=70",
+              "vis sweep_a,0",
+              "vis sweep_b,1",
+              "delay=70",
+              "vis sweep_b,0",
+              "vis sweep_c,1",
+              "delay=70",
+              "vis sweep_c,0",
+              "vis sweep_a,1",
+              "beat.val++",
+              "ref beat"
+            ]
           }
         },
         {
