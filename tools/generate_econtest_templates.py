@@ -320,9 +320,9 @@ def checkbox(wid: str, x: int, y: int, value: int, accent: int) -> dict[str, Any
     return {"id": wid, "type": "checkbox", "x": x, "y": y, "w": 30, "h": 30, "value": value, "style": style(P["white"], accent, P["line"])}
 
 
-def timer(wid: str, ms: int, events: str | list[str]) -> dict[str, Any]:
-    event_lines = [events] if isinstance(events, str) else list(events)
-    return {"id": wid, "type": "timer", "x": 0, "y": 0, "w": 1, "h": 1, "style": {"tim": ms, "en": 1}, "events": {"timer": event_lines}}
+def timer(wid: str, ms: int) -> dict[str, Any]:
+    # Direct TFT timer bytecode is not live-safe yet; keep timer placeholders disabled.
+    return {"id": wid, "type": "timer", "x": 0, "y": 0, "w": 1, "h": 1, "style": {"tim": ms, "en": 0}}
 
 
 def chip(wid: str, x: int, y: int, w: int, label: str, fg: int, bg: int = P["paper"]) -> dict[str, Any]:
@@ -335,7 +335,7 @@ def header(cfg: dict[str, Any], label: str) -> list[dict[str, Any]]:
         text("top_accent", 0, 0, 800, 6, "", cfg["accent2"], P["white"]),
         text("side_accent", 0, 6, 8, 70, "", cfg["accent"], P["white"]),
         text("title", 24, 12, 360, 30, cfg["name"].upper(), P["dark"], P["white"]),
-        text("sub", 24, 44, 520, 20, f"{cfg['cn']} | {label}", P["dark"], P["paper"]),
+        text("sub", 24, 44, 520, 20, f"{cfg['problem_type']} | {label}", P["dark"], P["paper"]),
         chip("model_chip", 396, 21, 92, "800x480", cfg["accent2"], P["slate"]),
         chip("bus_chip", 498, 21, 52, "UART", P["paper"], P["slate"]),
         text("domain_badge", 558, 20, 62, 34, THEME_BADGES[cfg["home_kind"]], P["dark"], cfg["accent2"]),
@@ -355,33 +355,15 @@ def page_chrome(cfg: dict[str, Any], page_code: str, marker: str) -> list[dict[s
 
 
 def motion_layer(cfg: dict[str, Any], page_code: str) -> list[dict[str, Any]]:
-    pulse_events = [
-        "vis sweep_a,0",
-        "vis sweep_b,0",
-        "vis sweep_c,0",
-        "vis sweep_a,1",
-        "delay=70",
-        "vis sweep_a,0",
-        "vis sweep_b,1",
-        "delay=70",
-        "vis sweep_b,0",
-        "vis sweep_c,1",
-        "delay=70",
-        "vis sweep_c,0",
-        "vis sweep_a,1",
-        "beat.val++",
-        "ref beat",
-    ]
     return [
         text("motion_bus", 392, 84, 194, 18, "", P["paper"], P["white"]),
-        text("motion_sig", 400, 87, 34, 12, "", cfg["accent"], P["white"]),
-        text("sweep_a", 444, 87, 34, 12, "", cfg["accent2"], P["white"]),
-        text("sweep_b", 488, 87, 34, 12, "", cfg["accent"], P["white"]),
-        text("sweep_c", 532, 87, 34, 12, "", cfg["accent2"], P["white"]),
-        chip("motion_mode", 596, 84, 50, page_code[:4], cfg["accent2"], P["slate"]),
+        text("sweep_a", 404, 87, 42, 12, "", cfg["accent2"], P["white"]),
+        text("sweep_b", 462, 87, 42, 12, "", cfg["accent"], P["white"]),
+        text("sweep_c", 520, 87, 42, 12, "", cfg["accent2"], P["white"]),
         num("beat", 656, 84, 52, 18, 0, cfg["accent"], length=3),
-        chip("motion_fps", 718, 84, 50, "LIVE", P["muted"]),
-        timer("tm_motion", 720, pulse_events),
+        timer("tm_motion", 320),
+        timer("tm_motion_b", 470),
+        timer("tm_motion_c", 620),
     ]
 
 
@@ -637,16 +619,29 @@ HOME_BUILDERS = {
 
 
 HOME_MOTION_EVENTS = {
-    "power_flow": ["vis flow_arrow,0", "delay=90", "vis flow_arrow,1", "ref eff_bar"],
-    "scope": ["vis scope_wave,0", "delay=70", "vis scope_wave,1", "ref scope_wave"],
-    "source": ["vis out_wave,0", "delay=70", "vis out_wave,1", "ref out_wave"],
-    "comms": ["vis link_pipe,0", "delay=90", "vis link_pipe,1", "ref ber_bar"],
-    "pid": ["vis pid_wave,0", "delay=70", "vis pid_wave,1", "ref pid_wave"],
-    "motor": ["vis telemetry_lab,0", "delay=70", "vis telemetry_lab,1", "ref speed_gauge"],
-    "daq": ["vis sample_bar,0", "delay=70", "vis sample_bar,1", "ref store_bar"],
-    "robot": ["vis map_grid_1,0", "delay=70", "vis map_grid_1,1", "vis map_grid_3,0", "delay=70", "vis map_grid_3,1", "ref task_lane"],
-    "vision": ["vis roi_box,0", "delay=70", "vis roi_box,1", "ref conf_gauge"],
-    "debug": ["vis console_l3,0", "delay=90", "vis console_l3,1", "ref console"],
+    "power_flow": ["vis flow_arrow,1", "ref eff_bar"],
+    "scope": ["vis scope_wave,1", "ref scope_wave"],
+    "source": ["vis out_wave,1", "ref out_wave"],
+    "comms": ["vis link_pipe,1", "ref ber_bar"],
+    "pid": ["vis pid_wave,1", "ref pid_wave"],
+    "motor": ["vis telemetry_lab,1", "ref speed_gauge"],
+    "daq": ["vis sample_bar,1", "ref store_bar"],
+    "robot": ["vis map_grid_1,1", "vis map_grid_3,0", "ref task_lane"],
+    "vision": ["vis roi_box,1", "ref conf_gauge"],
+    "debug": ["vis console_l3,1", "ref console"],
+}
+
+HOME_MOTION_OFF_EVENTS = {
+    "power_flow": ["vis flow_arrow,0"],
+    "scope": ["vis scope_wave,0"],
+    "source": ["vis out_wave,0"],
+    "comms": ["vis link_pipe,0"],
+    "pid": ["vis pid_wave,0"],
+    "motor": ["vis telemetry_lab,0"],
+    "daq": ["vis sample_bar,0"],
+    "robot": ["vis map_grid_1,0", "vis map_grid_3,1"],
+    "vision": ["vis roi_box,0"],
+    "debug": ["vis console_l3,0"],
 }
 
 
@@ -657,8 +652,9 @@ def make_dashboard(cfg: dict[str, Any]) -> dict[str, Any]:
     widgets.extend(HOME_BUILDERS[cfg["home_kind"]](cfg))
     widgets.extend(
         [
-            timer("tm0", 500, "tick.val++"),
-            timer("tm_scene", 900, HOME_MOTION_EVENTS[cfg["home_kind"]]),
+            timer("tm0", 500),
+            timer("tm_scene", 900),
+            timer("tm_scene_off", 1350),
             num("tick", 786, 78, 1, 1, 0, cfg["accent"], length=1),
         ]
     )
@@ -954,7 +950,7 @@ def make_log(cfg: dict[str, Any]) -> dict[str, Any]:
         num("seq", 118, 344, 90, 36, 0, a),
         button("b_clear", 232, 344, 94, 40, "CLEAR", P["paper"], P["ink"], {"up": ["seq.val=0"]}),
         button("b_mark", 346, 344, 94, 40, "MARK", a, P["white"], {"up": [f"printh 23 {cfg['code']} 40 01"]}),
-        timer("tm1", 1000, "seq.val++"),
+        timer("tm1", 1000),
     ])
     widgets.extend(nav(2, a))
     return {"id": "page2", "layout": {"type": "absolute"}, "widgets": widgets}
@@ -1006,11 +1002,15 @@ def main() -> None:
                 },
                 "serial_prefix_hex": f"23 {cfg['code']}",
                 "motion_profile": {
-                    "kind": "timer_safe_header_sweep_plus_topic_pulse",
+                    "kind": "host_serial_sidecar_motion",
+                    "driver": "tools/run_econtest_serial_motion_demo.py",
                     "header_timer": "tm_motion",
                     "home_timer": "tm_scene",
                     "dynamic_widgets": ["sweep_a", "sweep_b", "sweep_c", "beat"],
                     "media_free": True,
+                    "compiler_safe": True,
+                    "live_safe": True,
+                    "internal_timers_enabled": False,
                 },
                 "primary_widgets": ordered_unique(
                     [
@@ -1019,7 +1019,10 @@ def main() -> None:
                         "sp0",
                         "seq",
                         "tm_motion",
+                        "tm_motion_b",
+                        "tm_motion_c",
                         "tm_scene",
+                        "tm_scene_off",
                         "beat",
                         "sweep_a",
                         "sweep_b",

@@ -82,10 +82,13 @@ powershell -ExecutionPolicy Bypass -File .\tools\run_touchsafe_pipeline.ps1 `
 索引里记录了每个模板的三页职责和逐页专属控件，方便 agent 检查它不是只换颜色的同质化页面。
 可以用 `python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery`
 一次生成 10 套模板的三页预览总览。
-模板默认带 media-free timer 动效：`tm_motion` 负责每页顶栏扫描，`tm_scene`
-负责 page0 题型脉冲；可以用
+模板默认带 media-free 动效对象：`sweep_a` / `sweep_b` / `sweep_c` 和 `beat`
+组成每页顶栏扫描。实机验证发现当前 direct TFT 的内部 timer 字节码在复杂页面上可能
+吐 `0x1A` invalid-reference 帧，所以模板里的 timer 默认禁用。可以用
 `python tools\render_econtest_motion_preview.py --all --out-dir build\econtest_motion_preview`
-生成 GIF 动效预览，不需要烧录屏幕。
+生成 GIF 动效预览，不需要烧录屏幕；实机动态演示走
+`python tools\run_econtest_serial_motion_demo.py --port COM36 --profile power_converter`
+这种有限时长串口 sidecar。
 单片机侧通用 C99 串口通信封装在
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/)。
 

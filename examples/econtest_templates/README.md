@@ -7,11 +7,12 @@
 - `page1`: 题型设置页，不同模板分别放限流保护、采样触发、波形合成、协议信道、PID 增益、运动曲线等专属控件。
 - `page2`: 题型诊断页，不同模板分别放纹波/故障、捕获统计、BER、响应分析、编码器、记录报警、路径回放、识别结果等专属控件。
 
-默认模板带有一层 media-free 动效：每页顶栏都有 `tm_motion` 驱动的扫描灯和
-`beat` 计数，首页还有 `tm_scene` 驱动的题型脉冲，例如电源流箭头、示波波形、
-通信 TX/RX 管线、机器人路径节点和视觉 ROI。它只使用 `timer` / `vis` /
-`delay` / `ref` / `.val++` 这类基础事件，不依赖图片、GMOV 或联网素材，便于
-开源复用和离线检查。
+默认模板带有一层 media-free 动效对象：每页顶栏都有 `sweep_a` / `sweep_b` /
+`sweep_c` 扫描灯和 `beat` 计数位。实机验证发现当前 direct TFT 的内部 timer
+事件会在复杂模板上触发 `0x1A invalid_reference` 干扰，所以模板里的
+`tm_motion` / `tm_scene` 等 timer 仅作为禁用占位，不自启动、不携带 timer 事件。
+需要动态演示时，用 `tools\run_econtest_serial_motion_demo.py` 从 PC 串口 sidecar
+驱动 `vis` / `ref` / `.val=`，这样重启后仍保持稳定。
 
 模板列表见 [`template_index.json`](template_index.json)。当前 10 个题型：
 
@@ -52,6 +53,12 @@ python tools\render_econtest_template_gallery.py --out-dir build\econtest_previe
 python tools\render_econtest_motion_preview.py --all --out-dir build\econtest_motion_preview
 ```
 
+在实机上跑 10 秒左右的安全串口 sidecar 动画：
+
+```powershell
+python tools\run_econtest_serial_motion_demo.py --port COM36 --profile power_converter --out build\econtest_power_motion_demo.json
+```
+
 需要重新生成全部模板时：
 
 ```powershell
@@ -66,9 +73,9 @@ python tools\generate_econtest_templates.py
 - `m0`..`m3`: 四个主指标数值。
 - `main_gauge`: 主仪表盘。
 - `main_bar`: 主进度条。
-- `tick`: page0 timer 计数。
-- `tm_motion` / `beat`: 每页顶栏的基础扫描动效。
-- `tm_scene`: page0 题型脉冲动效。
+- `tick`: 预留计数对象。
+- `tm_motion` / `tm_motion_b` / `tm_motion_c` / `tm_scene` / `tm_scene_off`: 禁用的 timer 占位，默认 `en=0`。
+- `sweep_a` / `sweep_b` / `sweep_c` / `beat`: 可由 MCU 或 PC sidecar 驱动的顶栏动效对象。
 - `sp0`..`sp2`: 参数页设定值。
 - `seq`: 日志页序号。
 - `b_start` / `b_stop` / `b_cmd`: page0 主动作按钮。

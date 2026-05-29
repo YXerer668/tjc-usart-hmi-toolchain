@@ -25,7 +25,8 @@
       },
       "serial_prefix_hex": "23 31",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -34,7 +35,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -42,7 +46,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -97,7 +104,8 @@
       },
       "serial_prefix_hex": "23 32",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -106,7 +114,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -114,7 +125,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -169,7 +183,8 @@
       },
       "serial_prefix_hex": "23 33",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -178,7 +193,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -186,7 +204,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -241,7 +262,8 @@
       },
       "serial_prefix_hex": "23 34",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -250,7 +272,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -258,7 +283,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -313,7 +341,8 @@
       },
       "serial_prefix_hex": "23 35",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -322,7 +351,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -330,7 +362,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -385,7 +420,8 @@
       },
       "serial_prefix_hex": "23 36",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -394,7 +430,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -402,7 +441,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -457,7 +499,8 @@
       },
       "serial_prefix_hex": "23 37",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -466,7 +509,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -474,7 +520,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -529,7 +578,8 @@
       },
       "serial_prefix_hex": "23 38",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -538,7 +588,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -546,7 +599,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -601,7 +657,8 @@
       },
       "serial_prefix_hex": "23 39",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -610,7 +667,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -618,7 +678,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",
@@ -673,7 +736,8 @@
       },
       "serial_prefix_hex": "23 3A",
       "motion_profile": {
-        "kind": "timer_safe_header_sweep_plus_topic_pulse",
+        "kind": "host_serial_sidecar_motion",
+        "driver": "tools/run_econtest_serial_motion_demo.py",
         "header_timer": "tm_motion",
         "home_timer": "tm_scene",
         "dynamic_widgets": [
@@ -682,7 +746,10 @@
           "sweep_c",
           "beat"
         ],
-        "media_free": true
+        "media_free": true,
+        "compiler_safe": true,
+        "live_safe": true,
+        "internal_timers_enabled": false
       },
       "primary_widgets": [
         "run",
@@ -690,7 +757,10 @@
         "sp0",
         "seq",
         "tm_motion",
+        "tm_motion_b",
+        "tm_motion_c",
         "tm_scene",
+        "tm_scene_off",
         "beat",
         "sweep_a",
         "sweep_b",

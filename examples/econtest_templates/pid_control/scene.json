@@ -77,7 +77,7 @@
           "y": 44,
           "w": 520,
           "h": 20,
-          "text": "闭环控制 | problem dashboard",
+          "text": "温控 / 液位 / 压力 / 位置伺服 / 稳定平台 | problem dashboard",
           "style": {
             "background_color": 2213,
             "foreground_color": 63423
@@ -229,24 +229,11 @@
           }
         },
         {
-          "id": "motion_sig",
-          "type": "text",
-          "x": 400,
-          "y": 87,
-          "w": 34,
-          "h": 12,
-          "text": "",
-          "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
-          }
-        },
-        {
           "id": "sweep_a",
           "type": "text",
-          "x": 444,
+          "x": 404,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -257,9 +244,9 @@
         {
           "id": "sweep_b",
           "type": "text",
-          "x": 488,
+          "x": 462,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -270,27 +257,14 @@
         {
           "id": "sweep_c",
           "type": "text",
-          "x": 532,
+          "x": 520,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
             "background_color": 62358,
             "foreground_color": 65503
-          }
-        },
-        {
-          "id": "motion_mode",
-          "type": "text",
-          "x": 596,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "DASH",
-          "style": {
-            "background_color": 6471,
-            "foreground_color": 62358
           }
         },
         {
@@ -309,19 +283,6 @@
           }
         },
         {
-          "id": "motion_fps",
-          "type": "text",
-          "x": 718,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "LIVE",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 25521
-          }
-        },
-        {
           "id": "tm_motion",
           "type": "timer",
           "x": 0,
@@ -329,27 +290,32 @@
           "w": 1,
           "h": 1,
           "style": {
-            "tim": 720,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "vis sweep_a,0",
-              "vis sweep_b,0",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "delay=70",
-              "vis sweep_a,0",
-              "vis sweep_b,1",
-              "delay=70",
-              "vis sweep_b,0",
-              "vis sweep_c,1",
-              "delay=70",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "beat.val++",
-              "ref beat"
-            ]
+            "tim": 320,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_b",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 470,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_c",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 620,
+            "en": 0
           }
         },
         {
@@ -618,12 +584,7 @@
           "h": 1,
           "style": {
             "tim": 500,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "tick.val++"
-            ]
+            "en": 0
           }
         },
         {
@@ -635,15 +596,19 @@
           "h": 1,
           "style": {
             "tim": 900,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "vis pid_wave,0",
-              "delay=70",
-              "vis pid_wave,1",
-              "ref pid_wave"
-            ]
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_scene_off",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 1350,
+            "en": 0
           }
         },
         {
@@ -800,7 +765,7 @@
           "y": 44,
           "w": 520,
           "h": 20,
-          "text": "闭环控制 | PID gain tuning",
+          "text": "温控 / 液位 / 压力 / 位置伺服 / 稳定平台 | PID gain tuning",
           "style": {
             "background_color": 2213,
             "foreground_color": 63423
@@ -952,24 +917,11 @@
           }
         },
         {
-          "id": "motion_sig",
-          "type": "text",
-          "x": 400,
-          "y": 87,
-          "w": 34,
-          "h": 12,
-          "text": "",
-          "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
-          }
-        },
-        {
           "id": "sweep_a",
           "type": "text",
-          "x": 444,
+          "x": 404,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -980,9 +932,9 @@
         {
           "id": "sweep_b",
           "type": "text",
-          "x": 488,
+          "x": 462,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -993,27 +945,14 @@
         {
           "id": "sweep_c",
           "type": "text",
-          "x": 532,
+          "x": 520,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
             "background_color": 62358,
             "foreground_color": 65503
-          }
-        },
-        {
-          "id": "motion_mode",
-          "type": "text",
-          "x": 596,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "SETU",
-          "style": {
-            "background_color": 6471,
-            "foreground_color": 62358
           }
         },
         {
@@ -1032,19 +971,6 @@
           }
         },
         {
-          "id": "motion_fps",
-          "type": "text",
-          "x": 718,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "LIVE",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 25521
-          }
-        },
-        {
           "id": "tm_motion",
           "type": "timer",
           "x": 0,
@@ -1052,27 +978,32 @@
           "w": 1,
           "h": 1,
           "style": {
-            "tim": 720,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "vis sweep_a,0",
-              "vis sweep_b,0",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "delay=70",
-              "vis sweep_a,0",
-              "vis sweep_b,1",
-              "delay=70",
-              "vis sweep_b,0",
-              "vis sweep_c,1",
-              "delay=70",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "beat.val++",
-              "ref beat"
-            ]
+            "tim": 320,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_b",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 470,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_c",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 620,
+            "en": 0
           }
         },
         {
@@ -1440,7 +1371,7 @@
           "y": 44,
           "w": 520,
           "h": 20,
-          "text": "闭环控制 | response analysis",
+          "text": "温控 / 液位 / 压力 / 位置伺服 / 稳定平台 | response analysis",
           "style": {
             "background_color": 2213,
             "foreground_color": 63423
@@ -1592,24 +1523,11 @@
           }
         },
         {
-          "id": "motion_sig",
-          "type": "text",
-          "x": 400,
-          "y": 87,
-          "w": 34,
-          "h": 12,
-          "text": "",
-          "style": {
-            "background_color": 47307,
-            "foreground_color": 65503
-          }
-        },
-        {
           "id": "sweep_a",
           "type": "text",
-          "x": 444,
+          "x": 404,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -1620,9 +1538,9 @@
         {
           "id": "sweep_b",
           "type": "text",
-          "x": 488,
+          "x": 462,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
@@ -1633,27 +1551,14 @@
         {
           "id": "sweep_c",
           "type": "text",
-          "x": 532,
+          "x": 520,
           "y": 87,
-          "w": 34,
+          "w": 42,
           "h": 12,
           "text": "",
           "style": {
             "background_color": 62358,
             "foreground_color": 65503
-          }
-        },
-        {
-          "id": "motion_mode",
-          "type": "text",
-          "x": 596,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "DIAG",
-          "style": {
-            "background_color": 6471,
-            "foreground_color": 62358
           }
         },
         {
@@ -1672,19 +1577,6 @@
           }
         },
         {
-          "id": "motion_fps",
-          "type": "text",
-          "x": 718,
-          "y": 84,
-          "w": 50,
-          "h": 18,
-          "text": "LIVE",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 25521
-          }
-        },
-        {
           "id": "tm_motion",
           "type": "timer",
           "x": 0,
@@ -1692,27 +1584,32 @@
           "w": 1,
           "h": 1,
           "style": {
-            "tim": 720,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "vis sweep_a,0",
-              "vis sweep_b,0",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "delay=70",
-              "vis sweep_a,0",
-              "vis sweep_b,1",
-              "delay=70",
-              "vis sweep_b,0",
-              "vis sweep_c,1",
-              "delay=70",
-              "vis sweep_c,0",
-              "vis sweep_a,1",
-              "beat.val++",
-              "ref beat"
-            ]
+            "tim": 320,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_b",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 470,
+            "en": 0
+          }
+        },
+        {
+          "id": "tm_motion_c",
+          "type": "timer",
+          "x": 0,
+          "y": 0,
+          "w": 1,
+          "h": 1,
+          "style": {
+            "tim": 620,
+            "en": 0
           }
         },
         {
@@ -1941,12 +1838,7 @@
           "h": 1,
           "style": {
             "tim": 1000,
-            "en": 1
-          },
-          "events": {
-            "timer": [
-              "seq.val++"
-            ]
+            "en": 0
           }
         },
         {
