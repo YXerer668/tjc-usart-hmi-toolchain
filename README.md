@@ -179,7 +179,9 @@ Reusable contest templates live in
 [`examples/econtest_templates`](examples/econtest_templates/). They are indexed
 with page roles and per-page widget lists so agents can verify that page0,
 page1, and page2 are problem-specific rather than color-only variants. A small
-MCU-side C99 serial helper for STM32 or any UART driver lives in
+gallery renderer can preview all three pages for all templates with
+`python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery`.
+A small MCU-side C99 serial helper for STM32 or any UART driver lives in
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/).
 
 When adding a new widget, update the registry first and let scene validation,

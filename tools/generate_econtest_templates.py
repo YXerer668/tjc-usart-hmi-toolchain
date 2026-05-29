@@ -324,6 +324,10 @@ def timer(wid: str, ms: int, event: str) -> dict[str, Any]:
     return {"id": wid, "type": "timer", "x": 0, "y": 0, "w": 1, "h": 1, "style": {"tim": ms, "en": 1}, "events": {"timer": [event]}}
 
 
+def chip(wid: str, x: int, y: int, w: int, label: str, fg: int, bg: int = P["paper"]) -> dict[str, Any]:
+    return text(wid, x, y, w, 18, label, bg, fg)
+
+
 def header(cfg: dict[str, Any], label: str) -> list[dict[str, Any]]:
     return [
         panel("topbar", 0, 0, 800, 76, P["dark"]),
@@ -331,8 +335,21 @@ def header(cfg: dict[str, Any], label: str) -> list[dict[str, Any]]:
         text("side_accent", 0, 6, 8, 70, "", cfg["accent"], P["white"]),
         text("title", 24, 12, 360, 30, cfg["name"].upper(), P["dark"], P["white"]),
         text("sub", 24, 44, 520, 20, f"{cfg['cn']} | {label}", P["dark"], P["paper"]),
+        chip("model_chip", 396, 21, 92, "800x480", cfg["accent2"], P["slate"]),
+        chip("bus_chip", 498, 21, 52, "UART", P["paper"], P["slate"]),
         text("domain_badge", 558, 20, 62, 34, THEME_BADGES[cfg["home_kind"]], P["dark"], cfg["accent2"]),
         button("run", 646, 18, 122, 36, "RUN", cfg["accent2"], P["ink"], kind="state-button", value=1),
+    ]
+
+
+def page_chrome(cfg: dict[str, Any], page_code: str, marker: str) -> list[dict[str, Any]]:
+    return [
+        text("header_shadow", 0, 76, 800, 3, "", P["slate"], P["white"]),
+        text("page_rail", 0, 79, 8, 401, "", cfg["accent"], P["white"]),
+        chip("page_chip", 24, 84, 76, page_code, cfg["accent"]),
+        chip("mark_chip", 112, 84, 86, f"TX {marker}", P["muted"]),
+        chip("mode_chip", 210, 84, 72, "READY", cfg["accent2"]),
+        chip("lock_chip", 294, 84, 86, "SAFE UI", P["muted"]),
     ]
 
 
@@ -589,6 +606,7 @@ HOME_BUILDERS = {
 
 def make_dashboard(cfg: dict[str, Any]) -> dict[str, Any]:
     widgets = header(cfg, "problem dashboard")
+    widgets.extend(page_chrome(cfg, "DASH", f"23 {cfg['code']}"))
     widgets.extend(HOME_BUILDERS[cfg["home_kind"]](cfg))
     widgets.extend([timer("tm0", 500, "tick.val++"), num("tick", 786, 78, 1, 1, 0, cfg["accent"], length=1)])
     widgets.extend(nav(0, cfg["accent"]))
@@ -652,6 +670,7 @@ def make_params(cfg: dict[str, Any]) -> dict[str, Any]:
     a = cfg["accent"]
     kind = cfg["home_kind"]
     widgets = header(cfg, PAGE1_ROLES[kind])
+    widgets.extend(page_chrome(cfg, "SETUP", f"23 {cfg['code']}"))
     if kind == "power_flow":
         widgets.extend([
             panel("limit_panel", 24, 104, 350, 290), text("limit_title", 44, 122, 220, 24, "OUTPUT LIMITS", P["white"], a),
@@ -783,6 +802,7 @@ def make_log(cfg: dict[str, Any]) -> dict[str, Any]:
     a = cfg["accent"]
     kind = cfg["home_kind"]
     widgets = header(cfg, PAGE2_ROLES[kind])
+    widgets.extend(page_chrome(cfg, "DIAG", f"23 {cfg['code']}"))
     if kind == "power_flow":
         widgets.extend([
             panel("diag_panel", 24, 104, 500, 222), text("diag_title", 44, 122, 170, 24, "RIPPLE MONITOR", P["white"], a),

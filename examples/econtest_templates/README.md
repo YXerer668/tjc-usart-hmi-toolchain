@@ -34,6 +34,12 @@ python -m usarthmi --json scene check examples\econtest_templates\power_converte
 python -m usarthmi --json scene preview examples\econtest_templates\power_converter\scene.json --page page0 --out build\econtest_power_page0.png
 ```
 
+生成全部模板的三页总览图：
+
+```powershell
+python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery
+```
+
 需要重新生成全部模板时：
 
 ```powershell
@@ -70,3 +76,4 @@ MCU 侧通用 C 封装在 [`../../firmware/usarthmi_serial`](../../firmware/usar
 - 每个模板的 `page1_widgets` / `page2_widgets` 都出现在对应页面，保证第二、第三页不是共用壳。
 - 每个模板的 `page_roles` 明确记录三页职责，且 `page1` 和 `page2` 职责不同。
 - 每个模板的按钮、状态按钮、滑块、复选框等触控控件没有互相重叠。
+- 每页对象数量、文本宽度、控件边界、底部导航位置和导航事件保持在 `800x480` 安全范围内。

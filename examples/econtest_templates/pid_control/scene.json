@@ -84,6 +84,32 @@
           }
         },
         {
+          "id": "model_chip",
+          "type": "text",
+          "x": 396,
+          "y": 21,
+          "w": 92,
+          "h": 18,
+          "text": "800x480",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "bus_chip",
+          "type": "text",
+          "x": 498,
+          "y": 21,
+          "w": 52,
+          "h": 18,
+          "text": "UART",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 63423
+          }
+        },
+        {
           "id": "domain_badge",
           "type": "text",
           "x": 558,
@@ -110,6 +136,84 @@
             "border_color": 62358
           },
           "value": 1
+        },
+        {
+          "id": "header_shadow",
+          "type": "text",
+          "x": 0,
+          "y": 76,
+          "w": 800,
+          "h": 3,
+          "text": "",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_rail",
+          "type": "text",
+          "x": 0,
+          "y": 79,
+          "w": 8,
+          "h": 401,
+          "text": "",
+          "style": {
+            "background_color": 47307,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_chip",
+          "type": "text",
+          "x": 24,
+          "y": 84,
+          "w": 76,
+          "h": 18,
+          "text": "DASH",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 47307
+          }
+        },
+        {
+          "id": "mark_chip",
+          "type": "text",
+          "x": 112,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "TX 23 35",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "mode_chip",
+          "type": "text",
+          "x": 210,
+          "y": 84,
+          "w": 72,
+          "h": 18,
+          "text": "READY",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "lock_chip",
+          "type": "text",
+          "x": 294,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "SAFE UI",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
         },
         {
           "id": "loop_panel",
@@ -546,6 +650,32 @@
           }
         },
         {
+          "id": "model_chip",
+          "type": "text",
+          "x": 396,
+          "y": 21,
+          "w": 92,
+          "h": 18,
+          "text": "800x480",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "bus_chip",
+          "type": "text",
+          "x": 498,
+          "y": 21,
+          "w": 52,
+          "h": 18,
+          "text": "UART",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 63423
+          }
+        },
+        {
           "id": "domain_badge",
           "type": "text",
           "x": 558,
@@ -572,6 +702,84 @@
             "border_color": 62358
           },
           "value": 1
+        },
+        {
+          "id": "header_shadow",
+          "type": "text",
+          "x": 0,
+          "y": 76,
+          "w": 800,
+          "h": 3,
+          "text": "",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_rail",
+          "type": "text",
+          "x": 0,
+          "y": 79,
+          "w": 8,
+          "h": 401,
+          "text": "",
+          "style": {
+            "background_color": 47307,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_chip",
+          "type": "text",
+          "x": 24,
+          "y": 84,
+          "w": 76,
+          "h": 18,
+          "text": "SETUP",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 47307
+          }
+        },
+        {
+          "id": "mark_chip",
+          "type": "text",
+          "x": 112,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "TX 23 35",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "mode_chip",
+          "type": "text",
+          "x": 210,
+          "y": 84,
+          "w": 72,
+          "h": 18,
+          "text": "READY",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "lock_chip",
+          "type": "text",
+          "x": 294,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "SAFE UI",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
         },
         {
           "id": "gain_panel",
@@ -945,6 +1153,32 @@
           }
         },
         {
+          "id": "model_chip",
+          "type": "text",
+          "x": 396,
+          "y": 21,
+          "w": 92,
+          "h": 18,
+          "text": "800x480",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "bus_chip",
+          "type": "text",
+          "x": 498,
+          "y": 21,
+          "w": 52,
+          "h": 18,
+          "text": "UART",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 63423
+          }
+        },
+        {
           "id": "domain_badge",
           "type": "text",
           "x": 558,
@@ -971,6 +1205,84 @@
             "border_color": 62358
           },
           "value": 1
+        },
+        {
+          "id": "header_shadow",
+          "type": "text",
+          "x": 0,
+          "y": 76,
+          "w": 800,
+          "h": 3,
+          "text": "",
+          "style": {
+            "background_color": 6471,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_rail",
+          "type": "text",
+          "x": 0,
+          "y": 79,
+          "w": 8,
+          "h": 401,
+          "text": "",
+          "style": {
+            "background_color": 47307,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "page_chip",
+          "type": "text",
+          "x": 24,
+          "y": 84,
+          "w": 76,
+          "h": 18,
+          "text": "DIAG",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 47307
+          }
+        },
+        {
+          "id": "mark_chip",
+          "type": "text",
+          "x": 112,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "TX 23 35",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "mode_chip",
+          "type": "text",
+          "x": 210,
+          "y": 84,
+          "w": 72,
+          "h": 18,
+          "text": "READY",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 62358
+          }
+        },
+        {
+          "id": "lock_chip",
+          "type": "text",
+          "x": 294,
+          "y": 84,
+          "w": 86,
+          "h": 18,
+          "text": "SAFE UI",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 25521
+          }
         },
         {
           "id": "resp_panel",

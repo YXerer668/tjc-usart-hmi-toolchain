@@ -71,6 +71,22 @@ class EcontestTemplateTests(unittest.TestCase):
                 self.assertEqual(report["summary"]["warning_count"], 0, report["diagnostics"])
                 self.assertEqual(report["summary"]["event_error_count"], 0, report["diagnostics"])
                 self.assert_no_touch_overlap(scene)
+                self.assert_template_layout_is_screen_safe(scene)
+
+    def test_templates_keep_expected_navigation_and_chrome(self) -> None:
+        for item in _load_index()["templates"]:
+            with self.subTest(template=item["slug"]):
+                scene = load_scene(TEMPLATE_ROOT / item["scene"])
+                for page in scene.pages:
+                    ids = {widget.id for widget in page.widgets}
+                    self.assertIn("topbar", ids)
+                    self.assertIn("top_accent", ids)
+                    self.assertIn("domain_badge", ids)
+                    self.assertIn("run", ids)
+                    self.assertIn("nav_dock", ids)
+                    self.assert_nav_button(page, "n_home", "page page0", 512)
+                    self.assert_nav_button(page, "n_param", "page page1", 600)
+                    self.assert_nav_button(page, "n_log", "page page2", 688)
 
     def assert_no_touch_overlap(self, scene: object) -> None:
         for page in scene.pages:  # type: ignore[attr-defined]
@@ -89,6 +105,37 @@ class EcontestTemplateTests(unittest.TestCase):
                         _overlaps(left_rect, right_rect),
                         f"{page.id}.{left.id} overlaps {right.id}: {left_rect} vs {right_rect}",
                     )
+
+    def assert_template_layout_is_screen_safe(self, scene: object) -> None:
+        for page in scene.pages:  # type: ignore[attr-defined]
+            self.assertLessEqual(len(page.widgets), 64, f"{page.id} should stay below a small-screen object budget")
+            ids = [widget.id for widget in page.widgets]
+            self.assertEqual(len(ids), len(set(ids)), f"{page.id} contains duplicate widget ids")
+
+            for widget in page.widgets:
+                rect = _rect(widget)
+                if rect is not None:
+                    x, y, w, h = rect
+                    self.assertGreaterEqual(x, 0, f"{page.id}.{widget.id} x")
+                    self.assertGreaterEqual(y, 0, f"{page.id}.{widget.id} y")
+                    self.assertLessEqual(x + w, 800, f"{page.id}.{widget.id} right edge")
+                    self.assertLessEqual(y + h, 480, f"{page.id}.{widget.id} bottom edge")
+                if widget.type in TOUCHABLE_TYPES:
+                    self.assertGreaterEqual(widget.w, 30, f"{page.id}.{widget.id} touch width")  # type: ignore[attr-defined]
+                    self.assertGreaterEqual(widget.h, 30, f"{page.id}.{widget.id} touch height")  # type: ignore[attr-defined]
+                if widget.type in {"text", "button", "state-button"}:
+                    text_value = getattr(widget, "text", "")
+                    if text_value:
+                        self.assertLessEqual(
+                            _rough_text_width(text_value),
+                            int(widget.w),  # type: ignore[attr-defined]
+                            f"{page.id}.{widget.id} text may overflow: {text_value!r}",
+                        )
+
+    def assert_nav_button(self, page: object, widget_id: str, command: str, x: int) -> None:
+        widget = next(widget for widget in page.widgets if widget.id == widget_id)  # type: ignore[attr-defined]
+        self.assertEqual(_rect(widget), (x, 424, 72, 36))
+        self.assertIn(command, widget.events.get("up", []))
 
 
 def _load_index() -> dict[str, object]:
@@ -113,6 +160,10 @@ def _overlaps(left: tuple[int, int, int, int], right: tuple[int, int, int, int])
     lx, ly, lw, lh = left
     rx, ry, rw, rh = right
     return lx < rx + rw and lx + lw > rx and ly < ry + rh and ly + lh > ry
+
+
+def _rough_text_width(value: str) -> int:
+    return sum(11 if ord(char) > 127 else 6 for char in value) + 8
 
 
 if __name__ == "__main__":

@@ -80,6 +80,8 @@ powershell -ExecutionPolicy Bypass -File .\tools\run_touchsafe_pipeline.ps1 `
 
 新增的电赛模板入口在 [`examples/econtest_templates`](examples/econtest_templates/)；
 索引里记录了每个模板的三页职责和逐页专属控件，方便 agent 检查它不是只换颜色的同质化页面。
+可以用 `python tools\render_econtest_template_gallery.py --out-dir build\econtest_preview_gallery`
+一次生成 10 套模板的三页预览总览。
 单片机侧通用 C99 串口通信封装在
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/)。
 
