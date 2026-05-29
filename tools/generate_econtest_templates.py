@@ -565,55 +565,292 @@ def make_dashboard(cfg: dict[str, Any]) -> dict[str, Any]:
     return {"id": "page0", "layout": {"type": "absolute"}, "widgets": widgets}
 
 
+PAGE1_ROLES = {
+    "power_flow": "limits and protection setup",
+    "scope": "acquisition and trigger setup",
+    "source": "waveform synthesis setup",
+    "comms": "protocol and channel setup",
+    "pid": "PID gain tuning",
+    "motor": "motion profile setup",
+    "daq": "sensor channel setup",
+    "robot": "task and waypoint setup",
+    "vision": "ROI and detection setup",
+    "debug": "service command panel",
+}
+
+PAGE2_ROLES = {
+    "power_flow": "ripple and fault diagnostics",
+    "scope": "capture statistics",
+    "source": "output quality monitor",
+    "comms": "packet and BER diagnostics",
+    "pid": "response analysis",
+    "motor": "encoder and drive diagnostics",
+    "daq": "record and alarm diagnostics",
+    "robot": "path replay diagnostics",
+    "vision": "recognition result review",
+    "debug": "console and fault history",
+}
+
+PAGE1_WIDGETS = {
+    "power_flow": ["sp0", "i_limit", "load_step", "prot_latch"],
+    "scope": ["sp0", "trig_mode", "ch1_en", "sample_depth"],
+    "source": ["sp0", "wave_sine_sel", "mod_en", "sweep_bar"],
+    "comms": ["sp0", "proto_uart", "chan_num", "tx_power"],
+    "pid": ["sp0", "kp_slider", "ki_slider", "manual_out"],
+    "motor": ["sp0", "profile_accel", "dir_select", "current_limit"],
+    "daq": ["sp0", "ch1_en", "avg_depth", "alarm_level"],
+    "robot": ["sp0", "wp_a", "wp_b", "task_mode"],
+    "vision": ["sp0", "roi_x", "threshold_bar", "detect_mode"],
+    "debug": ["sp0", "svc_mask", "bus_uart_cfg", "safe_boot"],
+}
+
+PAGE2_WIDGETS = {
+    "power_flow": ["diag_wave", "fault_ovp", "fault_ocp", "eff_hist"],
+    "scope": ["capture_wave", "stat_min", "stat_max", "cursor_delta"],
+    "source": ["monitor_wave", "thd_bar", "sync_lock", "load_state"],
+    "comms": ["packet_log", "rx_good", "rx_bad", "ber_hist"],
+    "pid": ["response_wave", "settle_time", "overshoot", "steady_err"],
+    "motor": ["encoder_wave", "drv_fault", "thermal_bar", "stall_count"],
+    "daq": ["record_wave", "alarm_ch", "sd_fill", "lost_count"],
+    "robot": ["path_trace", "checkpoint", "miss_count", "pose_log"],
+    "vision": ["result_frame", "class_id", "confidence_bar", "latency_hist"],
+    "debug": ["console_log", "fault_code", "reset_count", "trace_qr"],
+}
+
+
 def make_params(cfg: dict[str, Any]) -> dict[str, Any]:
     a = cfg["accent"]
-    widgets = header(cfg, "parameter panel")
-    widgets.extend([panel("p_left", 24, 104, 350, 290), text("p_title", 44, 122, 230, 26, "TOPIC PARAMETERS", P["white"], a)])
-    for idx, (label, value) in enumerate(cfg["params"]):
-        y = 170 + idx * 54
-        widgets.extend([text(f"sp{idx}_lab", 48, y + 8, 104, 24, label, P["white"], P["muted"]), num(f"sp{idx}", 168, y, 96, 36, int(value), a)])
-    widgets.extend(
-        [
-            button("b_dec", 286, 170, 58, 36, "-1", P["paper"], P["ink"], {"up": ["sp0.val--"]}),
-            button("b_inc", 286, 224, 58, 36, "+1", cfg["accent2"], P["ink"], {"up": ["sp0.val++"]}),
-            button("b_save", 48, 330, 128, 44, "SAVE", a, P["white"], {"up": [f"printh 23 {cfg['code']} 30 01"]}),
-            button("b_rst", 198, 330, 128, 44, "RESET", P["paper"], P["ink"], {"up": ["sp0.val=0", f"printh 23 {cfg['code']} 30 00"]}),
-            panel("p_right", 420, 104, 348, 290),
-            text("mode_lab", 444, 122, 180, 24, "RUN OPTIONS", P["white"], a),
-            checkbox("cb_auto", 448, 166, 1, a),
-            text("auto_lab", 492, 172, 160, 24, "closed loop", P["white"], P["muted"]),
-            checkbox("cb_log", 448, 214, 1, a),
-            text("log_lab", 492, 220, 160, 24, "record log", P["white"], P["muted"]),
-            {"id": "sl0", "type": "slider", "x": 448, "y": 276, "w": 190, "h": 34, "value": 45, "style": style(P["paper"], cfg["accent2"], P["line"])},
-            text("slider_lab", 650, 282, 72, 24, "speed", P["white"], P["muted"]),
-            button("b_apply", 448, 330, 122, 44, "APPLY", a, P["white"], {"up": [f"printh 23 {cfg['code']} 31 01"]}),
-            button("b_back", 592, 330, 122, 44, "BACK", P["paper"], P["ink"], {"up": ["page page0"]}),
-        ]
-    )
+    kind = cfg["home_kind"]
+    widgets = header(cfg, PAGE1_ROLES[kind])
+    if kind == "power_flow":
+        widgets.extend([
+            panel("limit_panel", 24, 104, 350, 290), text("limit_title", 44, 122, 220, 24, "OUTPUT LIMITS", P["white"], a),
+            text("sp0_lab", 48, 170, 94, 22, "v_set", P["white"], P["muted"]), num("sp0", 150, 164, 100, 34, 5000, a),
+            text("i_lab", 48, 224, 94, 22, "i_limit", P["white"], P["muted"]), num("i_limit", 150, 218, 100, 34, 1000, a),
+            progress("load_step", 48, 286, 230, 30, 64, cfg["accent2"]), text("load_lab", 48, 324, 120, 22, "load step", P["white"], P["muted"]),
+            panel("prot_panel", 420, 104, 348, 290), text("prot_title", 444, 122, 190, 24, "PROTECTION MATRIX", P["white"], a),
+            checkbox("prot_latch", 448, 166, 1, a), text("latch_lab", 490, 172, 130, 22, "fault latch", P["white"], P["muted"]),
+            checkbox("soft_start", 448, 214, 1, a), text("soft_lab", 490, 220, 130, 22, "soft start", P["white"], P["muted"]),
+            button("b_apply", 448, 330, 122, 44, "ARM", a, P["white"], {"up": [f"printh 23 {cfg['code']} 31 01"]}),
+            button("b_back", 592, 330, 122, 44, "DISARM", P["paper"], P["ink"], {"up": ["run.val=0"]}),
+        ])
+    elif kind == "scope":
+        widgets.extend([
+            panel("acq_panel", 24, 104, 350, 290), text("acq_title", 44, 122, 220, 24, "ACQUISITION", P["white"], a),
+            text("range_lab", 48, 168, 80, 22, "range", P["white"], P["muted"]), num("sp0", 140, 162, 86, 34, 5, a),
+            text("depth_lab", 48, 222, 90, 22, "depth", P["white"], P["muted"]), num("sample_depth", 140, 216, 86, 34, 48, a),
+            checkbox("ch1_en", 48, 280, 1, a), text("ch1_lab", 90, 286, 80, 22, "CH1", P["white"], P["muted"]),
+            checkbox("ch2_en", 176, 280, 0, a), text("ch2_lab", 218, 286, 80, 22, "CH2", P["white"], P["muted"]),
+            panel("trig_panel", 420, 104, 348, 290), text("trig_title", 444, 122, 180, 24, "TRIGGER", P["white"], a),
+            button("trig_mode", 448, 166, 98, 38, "RISING", a, P["white"], {"up": [f"printh 23 {cfg['code']} 32 01"]}),
+            button("trig_fall", 560, 166, 98, 38, "FALL", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 32 02"]}),
+            {"id": "trig_slider", "type": "slider", "x": 448, "y": 246, "w": 210, "h": 34, "value": 52, "style": style(P["paper"], cfg["accent2"], P["line"])},
+            button("b_apply", 448, 330, 122, 44, "CAPTURE", a, P["white"], {"up": [f"printh 23 {cfg['code']} 32 03"]}),
+        ])
+    elif kind == "source":
+        widgets.extend([
+            panel("wave_panel", 24, 104, 350, 290), text("wave_title", 44, 122, 220, 24, "SYNTHESIS", P["white"], a),
+            button("wave_sine_sel", 48, 166, 82, 38, "SINE", a, P["white"], {"up": [f"printh 23 {cfg['code']} 33 01"]}),
+            button("wave_square_sel", 148, 166, 82, 38, "SQR", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 33 02"]}),
+            button("wave_tri_sel", 248, 166, 82, 38, "TRI", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 33 03"]}),
+            text("sp0_lab", 48, 232, 72, 22, "freq", P["white"], P["muted"]), num("sp0", 126, 226, 100, 34, 1000, a),
+            text("amp_lab", 48, 286, 72, 22, "amp", P["white"], P["muted"]), num("amp_cfg", 126, 280, 100, 34, 1800, a),
+            panel("mod_panel", 420, 104, 348, 290), text("mod_title", 444, 122, 160, 24, "SWEEP / MOD", P["white"], a),
+            checkbox("mod_en", 448, 166, 0, a), text("mod_lab", 490, 172, 120, 22, "mod enable", P["white"], P["muted"]),
+            progress("sweep_bar", 448, 230, 230, 30, 25, cfg["accent2"]), text("sweep_lab", 448, 268, 120, 22, "sweep span", P["white"], P["muted"]),
+            button("b_apply", 448, 330, 122, 44, "OUTPUT", a, P["white"], {"up": ["run.val=1"]}),
+        ])
+    elif kind == "comms":
+        widgets.extend([
+            panel("proto_panel", 24, 104, 350, 290), text("proto_title", 44, 122, 200, 24, "PROTOCOL", P["white"], a),
+            button("proto_uart", 48, 166, 88, 38, "UART", a, P["white"], {"up": [f"printh 23 {cfg['code']} 34 01"]}),
+            button("proto_can", 156, 166, 88, 38, "CAN", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 34 02"]}),
+            text("sp0_lab", 48, 232, 72, 22, "baud", P["white"], P["muted"]), num("sp0", 126, 226, 100, 34, 1152, a),
+            text("chan_lab", 48, 286, 72, 22, "chan", P["white"], P["muted"]), num("chan_num", 126, 280, 100, 34, 8, a),
+            panel("rf_panel", 420, 104, 348, 290), text("rf_title", 444, 122, 180, 24, "RF CHANNEL", P["white"], a),
+            progress("tx_power", 448, 172, 220, 30, 60, cfg["accent2"]), text("pwr_lab", 448, 210, 90, 22, "tx power", P["white"], P["muted"]),
+            checkbox("fec_en", 448, 254, 1, a), text("fec_lab", 490, 260, 90, 22, "FEC", P["white"], P["muted"]),
+            button("b_apply", 448, 330, 122, 44, "PAIR", a, P["white"], {"up": [f"printh 23 {cfg['code']} 34 03"]}),
+        ])
+    elif kind == "pid":
+        widgets.extend([
+            panel("gain_panel", 24, 104, 370, 290), text("gain_title", 44, 122, 200, 24, "GAIN TUNING", P["white"], a),
+            text("sp0_lab", 48, 166, 46, 22, "KP", P["white"], P["muted"]), num("sp0", 104, 160, 70, 34, 120, a), {"id": "kp_slider", "type": "slider", "x": 190, "y": 162, "w": 130, "h": 32, "value": 56, "style": style(P["paper"], cfg["accent2"], P["line"])},
+            text("ki_lab", 48, 222, 46, 22, "KI", P["white"], P["muted"]), num("ki_num", 104, 216, 70, 34, 18, a), {"id": "ki_slider", "type": "slider", "x": 190, "y": 218, "w": 130, "h": 32, "value": 18, "style": style(P["paper"], cfg["accent2"], P["line"])},
+            text("kd_lab", 48, 278, 46, 22, "KD", P["white"], P["muted"]), num("kd_num", 104, 272, 70, 34, 42, a),
+            panel("manual_panel", 420, 104, 348, 290), text("manual_title", 444, 122, 180, 24, "MANUAL OUTPUT", P["white"], a),
+            progress("manual_out", 448, 172, 220, 30, 42, cfg["accent2"]),
+            checkbox("anti_windup", 448, 236, 1, a), text("windup_lab", 490, 242, 130, 22, "anti windup", P["white"], P["muted"]),
+            button("b_apply", 448, 330, 122, 44, "APPLY", a, P["white"], {"up": [f"printh 23 {cfg['code']} 35 01"]}),
+        ])
+    elif kind == "motor":
+        widgets.extend([
+            panel("motion_panel", 24, 104, 350, 290), text("motion_title", 44, 122, 190, 24, "MOTION PROFILE", P["white"], a),
+            text("sp0_lab", 48, 170, 80, 22, "target", P["white"], P["muted"]), num("sp0", 140, 164, 92, 34, 2400, a),
+            text("acc_lab", 48, 224, 80, 22, "accel", P["white"], P["muted"]), num("profile_accel", 140, 218, 92, 34, 120, a),
+            progress("current_limit", 48, 286, 230, 30, 80, cfg["accent2"]),
+            panel("dir_panel", 420, 104, 348, 290), text("dir_title", 444, 122, 160, 24, "DIRECTION", P["white"], a),
+            button("dir_select", 448, 166, 92, 38, "FWD", a, P["white"], {"up": [f"printh 23 {cfg['code']} 36 01"]}),
+            button("dir_back", 560, 166, 92, 38, "REV", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 36 02"]}),
+            button("brake_cfg", 448, 250, 92, 38, "BRAKE", P["red"], P["white"], {"up": [f"printh 23 {cfg['code']} 36 03"]}),
+            button("b_apply", 448, 330, 122, 44, "RUN", a, P["white"], {"up": ["run.val=1"]}),
+        ])
+    elif kind == "daq":
+        widgets.extend([
+            panel("channel_panel", 24, 104, 350, 290), text("channel_title", 44, 122, 190, 24, "CHANNELS", P["white"], a),
+            checkbox("ch1_en", 48, 166, 1, a), text("ch1_lab", 90, 172, 80, 22, "CH1", P["white"], P["muted"]),
+            checkbox("ch2_en", 176, 166, 1, a), text("ch2_lab", 218, 172, 80, 22, "CH2", P["white"], P["muted"]),
+            checkbox("ch3_en", 48, 222, 0, a), text("ch3_lab", 90, 228, 80, 22, "CH3", P["white"], P["muted"]),
+            checkbox("ch4_en", 176, 222, 0, a), text("ch4_lab", 218, 228, 80, 22, "CH4", P["white"], P["muted"]),
+            text("sp0_lab", 48, 298, 80, 22, "rate", P["white"], P["muted"]), num("sp0", 140, 292, 92, 34, 100, a),
+            panel("filter_panel", 420, 104, 348, 290), text("filter_title", 444, 122, 180, 24, "FILTER / ALARM", P["white"], a),
+            num("avg_depth", 448, 166, 76, 34, 16, a), text("avg_lab", 534, 174, 80, 20, "avg", P["white"], P["muted"]),
+            progress("alarm_level", 448, 230, 220, 30, 80, cfg["accent2"]),
+            button("b_apply", 448, 330, 122, 44, "CAL", a, P["white"], {"up": [f"printh 23 {cfg['code']} 37 01"]}),
+        ])
+    elif kind == "robot":
+        widgets.extend([
+            panel("wp_panel", 24, 104, 370, 290), text("wp_title", 44, 122, 190, 24, "WAYPOINTS", P["white"], a),
+            button("wp_a", 48, 166, 82, 42, "A", a, P["white"], {"up": [f"printh 23 {cfg['code']} 38 01"]}),
+            button("wp_b", 150, 166, 82, 42, "B", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 38 02"]}),
+            button("wp_c", 252, 166, 82, 42, "C", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 38 03"]}),
+            text("sp0_lab", 48, 244, 80, 22, "speed", P["white"], P["muted"]), num("sp0", 140, 238, 92, 34, 360, a),
+            panel("task_panel", 420, 104, 348, 290), text("task_title", 444, 122, 160, 24, "TASK MODE", P["white"], a),
+            button("task_mode", 448, 166, 98, 38, "TRACK", a, P["white"], {"up": [f"printh 23 {cfg['code']} 38 04"]}),
+            button("task_pick", 560, 166, 98, 38, "PICK", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 38 05"]}),
+            progress("safe_dist", 448, 246, 210, 30, 42, cfg["accent2"]),
+            button("b_apply", 448, 330, 122, 44, "START", a, P["white"], {"up": ["run.val=1"]}),
+        ])
+    elif kind == "vision":
+        widgets.extend([
+            panel("roi_panel", 24, 104, 350, 290), text("roi_title", 44, 122, 190, 24, "ROI SETUP", P["white"], a),
+            text("sp0_lab", 48, 170, 54, 22, "roi", P["white"], P["muted"]), num("sp0", 112, 164, 76, 34, 1, a),
+            text("x_lab", 48, 224, 54, 22, "x", P["white"], P["muted"]), num("roi_x", 112, 218, 76, 34, 96, a),
+            text("y_lab", 204, 224, 54, 22, "y", P["white"], P["muted"]), num("roi_y", 268, 218, 76, 34, 64, a),
+            panel("detect_panel", 420, 104, 348, 290), text("detect_title", 444, 122, 180, 24, "DETECTION", P["white"], a),
+            button("detect_mode", 448, 166, 100, 38, "COLOR", a, P["white"], {"up": [f"printh 23 {cfg['code']} 39 01"]}),
+            button("detect_audio", 560, 166, 100, 38, "AUDIO", P["paper"], P["ink"], {"up": [f"printh 23 {cfg['code']} 39 02"]}),
+            progress("threshold_bar", 448, 244, 210, 30, 65, cfg["accent2"]),
+            button("b_apply", 448, 330, 122, 44, "SNAP", a, P["white"], {"up": [f"printh 23 {cfg['code']} 39 03"]}),
+        ])
+    else:
+        widgets.extend([
+            panel("svc_panel", 24, 104, 370, 290), text("svc_title", 44, 122, 190, 24, "SERVICE COMMANDS", P["white"], a),
+            text("sp0_lab", 48, 170, 80, 22, "mode", P["white"], P["muted"]), num("sp0", 140, 164, 92, 34, 2, a),
+            text("mask_lab", 48, 224, 80, 22, "mask", P["white"], P["muted"]), num("svc_mask", 140, 218, 92, 34, 255, a),
+            checkbox("safe_boot", 48, 286, 1, a), text("safe_lab", 90, 292, 100, 22, "safe boot", P["white"], P["muted"]),
+            panel("bus_panel", 420, 104, 348, 290), text("bus_title", 444, 122, 160, 24, "BUS CONTROL", P["white"], a),
+            checkbox("bus_uart_cfg", 448, 166, 1, a), text("uart_lab", 490, 172, 80, 22, "UART", P["white"], P["muted"]),
+            checkbox("bus_can_cfg", 448, 222, 1, a), text("can_lab", 490, 228, 80, 22, "CAN", P["white"], P["muted"]),
+            button("b_apply", 448, 330, 122, 44, "DUMP", a, P["white"], {"up": [f"printh 23 {cfg['code']} 3A 01"]}),
+            button("b_back", 592, 330, 122, 44, "RESET", P["red"], P["white"], {"up": [f"printh 23 {cfg['code']} 3A 02"]}),
+        ])
     widgets.extend(nav(1, a))
     return {"id": "page1", "layout": {"type": "absolute"}, "widgets": widgets}
 
 
 def make_log(cfg: dict[str, Any]) -> dict[str, Any]:
     a = cfg["accent"]
-    widgets = header(cfg, "log and service")
-    widgets.extend(
-        [
-            panel("log_panel", 24, 104, 476, 290),
-            text("log_title", 44, 122, 180, 24, "EVENT STREAM", P["white"], a),
-            {"id": "log0", "type": "scrolling-text", "x": 44, "y": 160, "w": 420, "h": 48, "text": cfg["log"], "style": style(P["paper"], a, P["line"])},
-            wave("wave0", 44, 232, 420, 92, cfg["accent2"]),
-            text("seq_lab", 44, 342, 70, 24, "seq", P["white"], P["muted"]),
-            num("seq", 118, 336, 90, 36, 0, a),
-            button("b_clear", 232, 336, 94, 40, "CLEAR", P["paper"], P["ink"], {"up": ["seq.val=0"]}),
-            button("b_mark", 346, 336, 94, 40, "MARK", a, P["white"], {"up": [f"printh 23 {cfg['code']} 40 01"]}),
-            panel("svc_panel", 530, 104, 238, 290),
-            text("svc_title", 552, 122, 140, 24, "SERVICE QR", P["white"], a),
-            {"id": "qr0", "type": "qrcode", "x": 574, "y": 160, "w": 128, "h": 128, "text": f"usarthmi:{cfg['slug']}", "style": style(P["white"], a, P["line"])},
-            text("qr_lab", 552, 306, 170, 24, cfg["slug"], P["white"], P["muted"]),
-            timer("tm1", 1000, "seq.val++"),
-        ]
-    )
+    kind = cfg["home_kind"]
+    widgets = header(cfg, PAGE2_ROLES[kind])
+    if kind == "power_flow":
+        widgets.extend([
+            panel("diag_panel", 24, 104, 500, 222), text("diag_title", 44, 122, 170, 24, "RIPPLE MONITOR", P["white"], a),
+            wave("diag_wave", 44, 160, 430, 110, cfg["accent2"]), progress("eff_hist", 44, 298, 260, 28, 91, cfg["accent2"]),
+            panel("fault_panel", 552, 104, 216, 222), text("fault_title", 574, 122, 120, 24, "FAULTS", P["white"], a),
+            checkbox("fault_ovp", 574, 166, 0, a), text("fovp_lab", 616, 172, 70, 22, "OVP", P["white"], P["muted"]),
+            checkbox("fault_ocp", 574, 214, 0, a), text("focp_lab", 616, 220, 70, 22, "OCP", P["white"], P["muted"]),
+        ])
+    elif kind == "scope":
+        widgets.extend([
+            panel("capture_panel", 24, 104, 500, 222), text("capture_title", 44, 122, 170, 24, "CAPTURE", P["white"], a),
+            wave("capture_wave", 44, 160, 430, 110, cfg["accent2"]),
+            panel("stat_panel", 552, 104, 216, 222), text("stat_title", 574, 122, 110, 24, "STATS", P["white"], a),
+            num("stat_min", 574, 166, 76, 32, 12, a), text("min_lab", 660, 174, 46, 20, "min", P["white"], P["muted"]),
+            num("stat_max", 574, 214, 76, 32, 3300, a), text("max_lab", 660, 222, 46, 20, "max", P["white"], P["muted"]),
+            num("cursor_delta", 574, 262, 76, 32, 88, a), text("cur_lab", 660, 270, 46, 20, "dT", P["white"], P["muted"]),
+        ])
+    elif kind == "source":
+        widgets.extend([
+            panel("monitor_panel", 24, 104, 500, 222), text("monitor_title", 44, 122, 170, 24, "OUTPUT MONITOR", P["white"], a),
+            wave("monitor_wave", 44, 160, 430, 110, cfg["accent2"]),
+            panel("quality_panel", 552, 104, 216, 222), text("quality_title", 574, 122, 120, 24, "QUALITY", P["white"], a),
+            progress("thd_bar", 574, 170, 132, 28, 6, cfg["accent2"]), text("thd_lab", 574, 208, 70, 20, "THD", P["white"], P["muted"]),
+            checkbox("sync_lock", 574, 246, 1, a), text("sync_lab", 616, 252, 70, 22, "SYNC", P["white"], P["muted"]),
+            checkbox("load_state", 574, 286, 1, a), text("load_lab", 616, 292, 70, 22, "LOAD", P["white"], P["muted"]),
+        ])
+    elif kind == "comms":
+        widgets.extend([
+            panel("packet_log", 24, 104, 500, 222, P["dark"]), text("packet_title", 44, 122, 130, 24, "PACKET LOG", P["dark"], cfg["accent2"]),
+            text("pkt_l0", 44, 160, 280, 22, "TX 23 34 10 01", P["dark"], P["white"]), text("pkt_l1", 44, 194, 280, 22, "RX ACK seq=42", P["dark"], P["white"]),
+            text("pkt_l2", 44, 228, 280, 22, "BER window clean", P["dark"], P["white"]),
+            panel("ber_panel", 552, 104, 216, 222), text("ber_title", 574, 122, 100, 24, "BER", P["white"], a),
+            num("rx_good", 574, 166, 76, 32, 4096, a), text("good_lab", 660, 174, 50, 20, "good", P["white"], P["muted"]),
+            num("rx_bad", 574, 214, 76, 32, 0, a), text("bad_lab", 660, 222, 50, 20, "bad", P["white"], P["muted"]),
+            progress("ber_hist", 574, 270, 132, 28, 2, cfg["accent2"]),
+        ])
+    elif kind == "pid":
+        widgets.extend([
+            panel("resp_panel", 24, 104, 500, 222), text("resp_title", 44, 122, 180, 24, "RESPONSE", P["white"], a),
+            wave("response_wave", 44, 160, 430, 110, cfg["accent2"]),
+            panel("pid_stat_panel", 552, 104, 216, 222), text("pid_stat_title", 574, 122, 120, 24, "ANALYSIS", P["white"], a),
+            num("settle_time", 574, 166, 76, 32, 230, a), text("settle_lab", 660, 174, 50, 20, "ms", P["white"], P["muted"]),
+            num("overshoot", 574, 214, 76, 32, 5, a), text("over_lab", 660, 222, 50, 20, "pct", P["white"], P["muted"]),
+            num("steady_err", 574, 262, 76, 32, 1, a), text("err_lab", 660, 270, 50, 20, "err", P["white"], P["muted"]),
+        ])
+    elif kind == "motor":
+        widgets.extend([
+            panel("enc_panel", 24, 104, 500, 222), text("enc_title", 44, 122, 180, 24, "ENCODER TRACE", P["white"], a),
+            wave("encoder_wave", 44, 160, 430, 110, cfg["accent2"]),
+            panel("drive_panel", 552, 104, 216, 222), text("drive_title", 574, 122, 130, 24, "DRIVE HEALTH", P["white"], a),
+            checkbox("drv_fault", 574, 166, 0, a), text("drv_lab", 616, 172, 70, 22, "FAULT", P["white"], P["muted"]),
+            progress("thermal_bar", 574, 222, 132, 28, 38, cfg["accent2"]), text("thermal_lab", 574, 260, 80, 20, "thermal", P["white"], P["muted"]),
+            num("stall_count", 574, 286, 76, 32, 0, a),
+        ])
+    elif kind == "daq":
+        widgets.extend([
+            panel("record_panel", 24, 104, 500, 222), text("record_title", 44, 122, 180, 24, "RECORD STREAM", P["white"], a),
+            wave("record_wave", 44, 160, 430, 110, cfg["accent2"]),
+            panel("alarm_panel", 552, 104, 216, 222), text("alarm_title", 574, 122, 110, 24, "ALARMS", P["white"], a),
+            num("alarm_ch", 574, 166, 76, 32, 2, a), text("alarm_lab", 660, 174, 46, 20, "ch", P["white"], P["muted"]),
+            progress("sd_fill", 574, 222, 132, 28, 28, cfg["accent2"]), text("sd_lab", 574, 260, 80, 20, "sd fill", P["white"], P["muted"]),
+            num("lost_count", 574, 286, 76, 32, 0, a),
+        ])
+    elif kind == "robot":
+        widgets.extend([
+            panel("path_trace", 24, 104, 500, 222), text("path_title", 44, 122, 180, 24, "PATH REPLAY", P["white"], a),
+            text("path_nodes", 60, 174, 360, 40, "A1 -> A2 -> B2 -> C3", P["white"], a),
+            progress("checkpoint", 60, 250, 360, 30, 66, cfg["accent2"]),
+            panel("pose_log", 552, 104, 216, 222), text("pose_title", 574, 122, 120, 24, "MISSION", P["white"], a),
+            num("miss_count", 574, 166, 76, 32, 0, a), text("miss_lab", 660, 174, 50, 20, "miss", P["white"], P["muted"]),
+            checkbox("dock_ok", 574, 230, 1, a), text("dock_lab", 616, 236, 60, 22, "dock", P["white"], P["muted"]),
+        ])
+    elif kind == "vision":
+        widgets.extend([
+            panel("result_frame", 24, 104, 500, 222, P["dark"]), text("result_title", 44, 122, 180, 24, "RESULT REVIEW", P["dark"], cfg["accent2"]),
+            text("bbox", 100, 170, 190, 90, "TARGET  id=3", P["paper"], a),
+            panel("result_panel", 552, 104, 216, 222), text("result_panel_title", 574, 122, 120, 24, "CLASSIFY", P["white"], a),
+            num("class_id", 574, 166, 76, 32, 3, a), text("class_lab", 660, 174, 50, 20, "class", P["white"], P["muted"]),
+            progress("confidence_bar", 574, 222, 132, 28, 92, cfg["accent2"]),
+            progress("latency_hist", 574, 284, 132, 28, 38, a),
+        ])
+    else:
+        widgets.extend([
+            panel("console_log", 24, 104, 500, 222, P["dark"]), text("console_title", 44, 122, 180, 24, "FAULT HISTORY", P["dark"], cfg["accent2"]),
+            text("log_l0", 44, 160, 300, 22, "E00 boot ok", P["dark"], P["white"]), text("log_l1", 44, 194, 300, 22, "W12 sensor lag", P["dark"], P["white"]),
+            text("log_l2", 44, 228, 300, 22, "I30 recovery armed", P["dark"], P["white"]),
+            panel("trace_panel", 552, 104, 216, 222), text("trace_title", 574, 122, 120, 24, "TRACE", P["white"], a),
+            num("fault_code", 574, 166, 76, 32, 12, a), text("code_lab", 660, 174, 50, 20, "code", P["white"], P["muted"]),
+            num("reset_count", 574, 214, 76, 32, 3, a), text("rst_lab", 660, 222, 50, 20, "rst", P["white"], P["muted"]),
+            {"id": "trace_qr", "type": "qrcode", "x": 604, "y": 262, "w": 58, "h": 58, "text": "debug:trace", "style": style(P["white"], a, P["line"])},
+        ])
+    widgets.extend([
+        text("seq_lab", 44, 350, 70, 24, "seq", P["white"], P["muted"]),
+        num("seq", 118, 344, 90, 36, 0, a),
+        button("b_clear", 232, 344, 94, 40, "CLEAR", P["paper"], P["ink"], {"up": ["seq.val=0"]}),
+        button("b_mark", 346, 344, 94, 40, "MARK", a, P["white"], {"up": [f"printh 23 {cfg['code']} 40 01"]}),
+        timer("tm1", 1000, "seq.val++"),
+    ])
     widgets.extend(nav(2, a))
     return {"id": "page2", "layout": {"type": "absolute"}, "widgets": widgets}
 
@@ -632,8 +869,18 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def ordered_unique(items: list[str]) -> list[str]:
+    seen = set()
+    result = []
+    for item in items:
+        if item not in seen:
+            result.append(item)
+            seen.add(item)
+    return result
+
+
 def main() -> None:
-    index = {"schema": "usarthmi.econtest_templates.v2", "canvas": {"width": CANVAS_W, "height": CANVAS_H}, "count": len(TEMPLATES), "templates": []}
+    index = {"schema": "usarthmi.econtest_templates.v3", "canvas": {"width": CANVAS_W, "height": CANVAS_H}, "count": len(TEMPLATES), "templates": []}
     for cfg in TEMPLATES:
         scene = make_scene(cfg)
         rel_scene = Path(cfg["slug"]) / "scene.json"
@@ -647,9 +894,18 @@ def main() -> None:
                 "home_kind": cfg["home_kind"],
                 "scene": rel_scene.as_posix(),
                 "pages": ["page0", "page1", "page2"],
+                "page_roles": {
+                    "page0": "problem dashboard",
+                    "page1": PAGE1_ROLES[cfg["home_kind"]],
+                    "page2": PAGE2_ROLES[cfg["home_kind"]],
+                },
                 "serial_prefix_hex": f"23 {cfg['code']}",
-                "primary_widgets": ["run", "tick", "sp0", "seq", *cfg["topic_widgets"]],
+                "primary_widgets": ordered_unique(
+                    ["run", "tick", "sp0", "seq", *cfg["topic_widgets"], *PAGE1_WIDGETS[cfg["home_kind"]], *PAGE2_WIDGETS[cfg["home_kind"]]]
+                ),
                 "topic_widgets": cfg["topic_widgets"],
+                "page1_widgets": PAGE1_WIDGETS[cfg["home_kind"]],
+                "page2_widgets": PAGE2_WIDGETS[cfg["home_kind"]],
             }
         )
     write_json(OUT_ROOT / "template_index.json", index)

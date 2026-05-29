@@ -485,7 +485,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "信号源与波形 | parameter panel",
+          "text": "信号源与波形 | waveform synthesis setup",
           "style": {
             "background_color": 19004,
             "foreground_color": 65503
@@ -507,7 +507,7 @@
           "value": 1
         },
         {
-          "id": "p_left",
+          "id": "wave_panel",
           "type": "text",
           "x": 24,
           "y": 104,
@@ -520,25 +520,82 @@
           }
         },
         {
-          "id": "p_title",
+          "id": "wave_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 230,
-          "h": 26,
-          "text": "TOPIC PARAMETERS",
+          "w": 220,
+          "h": 24,
+          "text": "SYNTHESIS",
           "style": {
             "background_color": 65503,
             "foreground_color": 19004
           }
         },
         {
+          "id": "wave_sine_sel",
+          "type": "button",
+          "x": 48,
+          "y": 166,
+          "w": 82,
+          "h": 38,
+          "text": "SINE",
+          "style": {
+            "background_color": 19004,
+            "foreground_color": 65503,
+            "border_color": 19004
+          },
+          "events": {
+            "up": [
+              "printh 23 33 33 01"
+            ]
+          }
+        },
+        {
+          "id": "wave_square_sel",
+          "type": "button",
+          "x": 148,
+          "y": 166,
+          "w": 82,
+          "h": 38,
+          "text": "SQR",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "printh 23 33 33 02"
+            ]
+          }
+        },
+        {
+          "id": "wave_tri_sel",
+          "type": "button",
+          "x": 248,
+          "y": 166,
+          "w": 82,
+          "h": 38,
+          "text": "TRI",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "printh 23 33 33 03"
+            ]
+          }
+        },
+        {
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 178,
-          "w": 104,
-          "h": 24,
+          "y": 232,
+          "w": 72,
+          "h": 22,
           "text": "freq",
           "style": {
             "background_color": 65503,
@@ -548,10 +605,10 @@
         {
           "id": "sp0",
           "type": "number",
-          "x": 168,
-          "y": 170,
-          "w": 96,
-          "h": 36,
+          "x": 126,
+          "y": 226,
+          "w": 100,
+          "h": 34,
           "value": 1000,
           "style": {
             "background_color": 65503,
@@ -561,12 +618,12 @@
           }
         },
         {
-          "id": "sp1_lab",
+          "id": "amp_lab",
           "type": "text",
           "x": 48,
-          "y": 232,
-          "w": 104,
-          "h": 24,
+          "y": 286,
+          "w": 72,
+          "h": 22,
           "text": "amp",
           "style": {
             "background_color": 65503,
@@ -574,12 +631,12 @@
           }
         },
         {
-          "id": "sp1",
+          "id": "amp_cfg",
           "type": "number",
-          "x": 168,
-          "y": 224,
-          "w": 96,
-          "h": 36,
+          "x": 126,
+          "y": 280,
+          "w": 100,
+          "h": 34,
           "value": 1800,
           "style": {
             "background_color": 65503,
@@ -589,112 +646,7 @@
           }
         },
         {
-          "id": "sp2_lab",
-          "type": "text",
-          "x": 48,
-          "y": 286,
-          "w": 104,
-          "h": 24,
-          "text": "offset",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sp2",
-          "type": "number",
-          "x": 168,
-          "y": 278,
-          "w": 96,
-          "h": 36,
-          "value": 0,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 19004,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "b_dec",
-          "type": "button",
-          "x": 286,
-          "y": 170,
-          "w": 58,
-          "h": 36,
-          "text": "-1",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val--"
-            ]
-          }
-        },
-        {
-          "id": "b_inc",
-          "type": "button",
-          "x": 286,
-          "y": 224,
-          "w": 58,
-          "h": 36,
-          "text": "+1",
-          "style": {
-            "background_color": 33919,
-            "foreground_color": 4291,
-            "border_color": 33919
-          },
-          "events": {
-            "up": [
-              "sp0.val++"
-            ]
-          }
-        },
-        {
-          "id": "b_save",
-          "type": "button",
-          "x": 48,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "SAVE",
-          "style": {
-            "background_color": 19004,
-            "foreground_color": 65503,
-            "border_color": 19004
-          },
-          "events": {
-            "up": [
-              "printh 23 33 30 01"
-            ]
-          }
-        },
-        {
-          "id": "b_rst",
-          "type": "button",
-          "x": 198,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "RESET",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val=0",
-              "printh 23 33 30 00"
-            ]
-          }
-        },
-        {
-          "id": "p_right",
+          "id": "mod_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -707,26 +659,26 @@
           }
         },
         {
-          "id": "mode_lab",
+          "id": "mod_title",
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 180,
+          "w": 160,
           "h": 24,
-          "text": "RUN OPTIONS",
+          "text": "SWEEP / MOD",
           "style": {
             "background_color": 65503,
             "foreground_color": 19004
           }
         },
         {
-          "id": "cb_auto",
+          "id": "mod_en",
           "type": "checkbox",
           "x": 448,
           "y": 166,
           "w": 30,
           "h": 30,
-          "value": 1,
+          "value": 0,
           "style": {
             "background_color": 65503,
             "foreground_color": 19004,
@@ -734,53 +686,26 @@
           }
         },
         {
-          "id": "auto_lab",
+          "id": "mod_lab",
           "type": "text",
-          "x": 492,
+          "x": 490,
           "y": 172,
-          "w": 160,
-          "h": 24,
-          "text": "closed loop",
+          "w": 120,
+          "h": 22,
+          "text": "mod enable",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "cb_log",
-          "type": "checkbox",
+          "id": "sweep_bar",
+          "type": "progress",
           "x": 448,
-          "y": 214,
-          "w": 30,
+          "y": 230,
+          "w": 230,
           "h": 30,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 19004,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "log_lab",
-          "type": "text",
-          "x": 492,
-          "y": 220,
-          "w": 160,
-          "h": 24,
-          "text": "record log",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sl0",
-          "type": "slider",
-          "x": 448,
-          "y": 276,
-          "w": 190,
-          "h": 34,
-          "value": 45,
+          "value": 25,
           "style": {
             "background_color": 63423,
             "foreground_color": 33919,
@@ -788,13 +713,13 @@
           }
         },
         {
-          "id": "slider_lab",
+          "id": "sweep_lab",
           "type": "text",
-          "x": 650,
-          "y": 282,
-          "w": 72,
-          "h": 24,
-          "text": "speed",
+          "x": 448,
+          "y": 268,
+          "w": 120,
+          "h": 22,
+          "text": "sweep span",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
@@ -807,7 +732,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "APPLY",
+          "text": "OUTPUT",
           "style": {
             "background_color": 19004,
             "foreground_color": 65503,
@@ -815,26 +740,7 @@
           },
           "events": {
             "up": [
-              "printh 23 33 31 01"
-            ]
-          }
-        },
-        {
-          "id": "b_back",
-          "type": "button",
-          "x": 592,
-          "y": 330,
-          "w": 122,
-          "h": 44,
-          "text": "BACK",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "page page0"
+              "run.val=1"
             ]
           }
         },
@@ -936,7 +842,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "信号源与波形 | log and service",
+          "text": "信号源与波形 | output quality monitor",
           "style": {
             "background_color": 19004,
             "foreground_color": 65503
@@ -958,12 +864,12 @@
           "value": 1
         },
         {
-          "id": "log_panel",
+          "id": "monitor_panel",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 476,
-          "h": 290,
+          "w": 500,
+          "h": 222,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -971,39 +877,25 @@
           }
         },
         {
-          "id": "log_title",
+          "id": "monitor_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 180,
+          "w": 170,
           "h": 24,
-          "text": "EVENT STREAM",
+          "text": "OUTPUT MONITOR",
           "style": {
             "background_color": 65503,
             "foreground_color": 19004
           }
         },
         {
-          "id": "log0",
-          "type": "scrolling-text",
-          "x": 44,
-          "y": 160,
-          "w": 420,
-          "h": 48,
-          "text": "DDS | OUT | SYNC",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 19004,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "wave0",
+          "id": "monitor_wave",
           "type": "waveform",
           "x": 44,
-          "y": 232,
-          "w": 420,
-          "h": 92,
+          "y": 160,
+          "w": 430,
+          "h": 110,
           "style": {
             "background_color": 2213,
             "foreground_color": 33919,
@@ -1011,10 +903,117 @@
           }
         },
         {
+          "id": "quality_panel",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 216,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "quality_title",
+          "type": "text",
+          "x": 574,
+          "y": 122,
+          "w": 120,
+          "h": 24,
+          "text": "QUALITY",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 19004
+          }
+        },
+        {
+          "id": "thd_bar",
+          "type": "progress",
+          "x": 574,
+          "y": 170,
+          "w": 132,
+          "h": 28,
+          "value": 6,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 33919,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "thd_lab",
+          "type": "text",
+          "x": 574,
+          "y": 208,
+          "w": 70,
+          "h": 20,
+          "text": "THD",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "sync_lock",
+          "type": "checkbox",
+          "x": 574,
+          "y": 246,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 19004,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "sync_lab",
+          "type": "text",
+          "x": 616,
+          "y": 252,
+          "w": 70,
+          "h": 22,
+          "text": "SYNC",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "load_state",
+          "type": "checkbox",
+          "x": 574,
+          "y": 286,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 19004,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "load_lab",
+          "type": "text",
+          "x": 616,
+          "y": 292,
+          "w": 70,
+          "h": 22,
+          "text": "LOAD",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
           "id": "seq_lab",
           "type": "text",
           "x": 44,
-          "y": 342,
+          "y": 350,
           "w": 70,
           "h": 24,
           "text": "seq",
@@ -1027,7 +1026,7 @@
           "id": "seq",
           "type": "number",
           "x": 118,
-          "y": 336,
+          "y": 344,
           "w": 90,
           "h": 36,
           "value": 0,
@@ -1042,7 +1041,7 @@
           "id": "b_clear",
           "type": "button",
           "x": 232,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "CLEAR",
@@ -1061,7 +1060,7 @@
           "id": "b_mark",
           "type": "button",
           "x": 346,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "MARK",
@@ -1074,59 +1073,6 @@
             "up": [
               "printh 23 33 40 01"
             ]
-          }
-        },
-        {
-          "id": "svc_panel",
-          "type": "text",
-          "x": 530,
-          "y": 104,
-          "w": 238,
-          "h": 290,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "svc_title",
-          "type": "text",
-          "x": 552,
-          "y": 122,
-          "w": 140,
-          "h": 24,
-          "text": "SERVICE QR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 19004
-          }
-        },
-        {
-          "id": "qr0",
-          "type": "qrcode",
-          "x": 574,
-          "y": 160,
-          "w": 128,
-          "h": 128,
-          "text": "usarthmi:signal_generator",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 19004,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "qr_lab",
-          "type": "text",
-          "x": 552,
-          "y": 306,
-          "w": 170,
-          "h": 24,
-          "text": "signal_generator",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {

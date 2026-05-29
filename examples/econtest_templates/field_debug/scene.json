@@ -444,7 +444,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "综合调试 | parameter panel",
+          "text": "综合调试 | service command panel",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503
@@ -466,11 +466,11 @@
           "value": 1
         },
         {
-          "id": "p_left",
+          "id": "svc_panel",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 350,
+          "w": 370,
           "h": 290,
           "text": "",
           "style": {
@@ -479,13 +479,13 @@
           }
         },
         {
-          "id": "p_title",
+          "id": "svc_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 230,
-          "h": 26,
-          "text": "TOPIC PARAMETERS",
+          "w": 190,
+          "h": 24,
+          "text": "SERVICE COMMANDS",
           "style": {
             "background_color": 65503,
             "foreground_color": 17069
@@ -495,9 +495,9 @@
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 178,
-          "w": 104,
-          "h": 24,
+          "y": 170,
+          "w": 80,
+          "h": 22,
           "text": "mode",
           "style": {
             "background_color": 65503,
@@ -507,10 +507,10 @@
         {
           "id": "sp0",
           "type": "number",
-          "x": 168,
-          "y": 170,
-          "w": 96,
-          "h": 36,
+          "x": 140,
+          "y": 164,
+          "w": 92,
+          "h": 34,
           "value": 2,
           "style": {
             "background_color": 65503,
@@ -520,40 +520,12 @@
           }
         },
         {
-          "id": "sp1_lab",
+          "id": "mask_lab",
           "type": "text",
           "x": 48,
-          "y": 232,
-          "w": 104,
-          "h": 24,
-          "text": "level",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sp1",
-          "type": "number",
-          "x": 168,
           "y": 224,
-          "w": 96,
-          "h": 36,
-          "value": 3,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "sp2_lab",
-          "type": "text",
-          "x": 48,
-          "y": 286,
-          "w": 104,
-          "h": 24,
+          "w": 80,
+          "h": 22,
           "text": "mask",
           "style": {
             "background_color": 65503,
@@ -561,12 +533,12 @@
           }
         },
         {
-          "id": "sp2",
+          "id": "svc_mask",
           "type": "number",
-          "x": 168,
-          "y": 278,
-          "w": 96,
-          "h": 36,
+          "x": 140,
+          "y": 218,
+          "w": 92,
+          "h": 34,
           "value": 255,
           "style": {
             "background_color": 65503,
@@ -576,84 +548,34 @@
           }
         },
         {
-          "id": "b_dec",
-          "type": "button",
-          "x": 286,
-          "y": 170,
-          "w": 58,
-          "h": 36,
-          "text": "-1",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val--"
-            ]
-          }
-        },
-        {
-          "id": "b_inc",
-          "type": "button",
-          "x": 286,
-          "y": 224,
-          "w": 58,
-          "h": 36,
-          "text": "+1",
-          "style": {
-            "background_color": 38167,
-            "foreground_color": 4291,
-            "border_color": 38167
-          },
-          "events": {
-            "up": [
-              "sp0.val++"
-            ]
-          }
-        },
-        {
-          "id": "b_save",
-          "type": "button",
+          "id": "safe_boot",
+          "type": "checkbox",
           "x": 48,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "SAVE",
+          "y": 286,
+          "w": 30,
+          "h": 30,
+          "value": 1,
           "style": {
-            "background_color": 17069,
-            "foreground_color": 65503,
-            "border_color": 17069
-          },
-          "events": {
-            "up": [
-              "printh 23 3A 30 01"
-            ]
+            "background_color": 65503,
+            "foreground_color": 17069,
+            "border_color": 52924
           }
         },
         {
-          "id": "b_rst",
-          "type": "button",
-          "x": 198,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "RESET",
+          "id": "safe_lab",
+          "type": "text",
+          "x": 90,
+          "y": 292,
+          "w": 100,
+          "h": 22,
+          "text": "safe boot",
           "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val=0",
-              "printh 23 3A 30 00"
-            ]
+            "background_color": 65503,
+            "foreground_color": 25521
           }
         },
         {
-          "id": "p_right",
+          "id": "bus_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -666,20 +588,20 @@
           }
         },
         {
-          "id": "mode_lab",
+          "id": "bus_title",
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 180,
+          "w": 160,
           "h": 24,
-          "text": "RUN OPTIONS",
+          "text": "BUS CONTROL",
           "style": {
             "background_color": 65503,
             "foreground_color": 17069
           }
         },
         {
-          "id": "cb_auto",
+          "id": "bus_uart_cfg",
           "type": "checkbox",
           "x": 448,
           "y": 166,
@@ -693,23 +615,23 @@
           }
         },
         {
-          "id": "auto_lab",
+          "id": "uart_lab",
           "type": "text",
-          "x": 492,
+          "x": 490,
           "y": 172,
-          "w": 160,
-          "h": 24,
-          "text": "closed loop",
+          "w": 80,
+          "h": 22,
+          "text": "UART",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "cb_log",
+          "id": "bus_can_cfg",
           "type": "checkbox",
           "x": 448,
-          "y": 214,
+          "y": 222,
           "w": 30,
           "h": 30,
           "value": 1,
@@ -720,40 +642,13 @@
           }
         },
         {
-          "id": "log_lab",
+          "id": "can_lab",
           "type": "text",
-          "x": 492,
-          "y": 220,
-          "w": 160,
-          "h": 24,
-          "text": "record log",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sl0",
-          "type": "slider",
-          "x": 448,
-          "y": 276,
-          "w": 190,
-          "h": 34,
-          "value": 45,
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 38167,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "slider_lab",
-          "type": "text",
-          "x": 650,
-          "y": 282,
-          "w": 72,
-          "h": 24,
-          "text": "speed",
+          "x": 490,
+          "y": 228,
+          "w": 80,
+          "h": 22,
+          "text": "CAN",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
@@ -766,7 +661,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "APPLY",
+          "text": "DUMP",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503,
@@ -774,7 +669,7 @@
           },
           "events": {
             "up": [
-              "printh 23 3A 31 01"
+              "printh 23 3A 3A 01"
             ]
           }
         },
@@ -785,15 +680,15 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "BACK",
+          "text": "RESET",
           "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
+            "background_color": 59944,
+            "foreground_color": 65503,
+            "border_color": 59944
           },
           "events": {
             "up": [
-              "page page0"
+              "printh 23 3A 3A 02"
             ]
           }
         },
@@ -895,7 +790,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "综合调试 | log and service",
+          "text": "综合调试 | console and fault history",
           "style": {
             "background_color": 17069,
             "foreground_color": 65503
@@ -917,12 +812,77 @@
           "value": 1
         },
         {
-          "id": "log_panel",
+          "id": "console_log",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 476,
-          "h": 290,
+          "w": 500,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "console_title",
+          "type": "text",
+          "x": 44,
+          "y": 122,
+          "w": 180,
+          "h": 24,
+          "text": "FAULT HISTORY",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 38167
+          }
+        },
+        {
+          "id": "log_l0",
+          "type": "text",
+          "x": 44,
+          "y": 160,
+          "w": 300,
+          "h": 22,
+          "text": "E00 boot ok",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "log_l1",
+          "type": "text",
+          "x": 44,
+          "y": 194,
+          "w": 300,
+          "h": 22,
+          "text": "W12 sensor lag",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "log_l2",
+          "type": "text",
+          "x": 44,
+          "y": 228,
+          "w": 300,
+          "h": 22,
+          "text": "I30 recovery armed",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 65503
+          }
+        },
+        {
+          "id": "trace_panel",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 216,
+          "h": 222,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -930,42 +890,85 @@
           }
         },
         {
-          "id": "log_title",
+          "id": "trace_title",
           "type": "text",
-          "x": 44,
+          "x": 574,
           "y": 122,
-          "w": 180,
+          "w": 120,
           "h": 24,
-          "text": "EVENT STREAM",
+          "text": "TRACE",
           "style": {
             "background_color": 65503,
             "foreground_color": 17069
           }
         },
         {
-          "id": "log0",
-          "type": "scrolling-text",
-          "x": 44,
-          "y": 160,
-          "w": 420,
-          "h": 48,
-          "text": "BUS | LOG | SAFE",
+          "id": "fault_code",
+          "type": "number",
+          "x": 574,
+          "y": 166,
+          "w": 76,
+          "h": 32,
+          "value": 12,
           "style": {
-            "background_color": 63423,
+            "background_color": 65503,
             "foreground_color": 17069,
-            "border_color": 52924
+            "border_color": 52924,
+            "length": 5
           }
         },
         {
-          "id": "wave0",
-          "type": "waveform",
-          "x": 44,
-          "y": 232,
-          "w": 420,
-          "h": 92,
+          "id": "code_lab",
+          "type": "text",
+          "x": 660,
+          "y": 174,
+          "w": 50,
+          "h": 20,
+          "text": "code",
           "style": {
-            "background_color": 2213,
-            "foreground_color": 38167,
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "reset_count",
+          "type": "number",
+          "x": 574,
+          "y": 214,
+          "w": 76,
+          "h": 32,
+          "value": 3,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 17069,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "rst_lab",
+          "type": "text",
+          "x": 660,
+          "y": 222,
+          "w": 50,
+          "h": 20,
+          "text": "rst",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "trace_qr",
+          "type": "qrcode",
+          "x": 604,
+          "y": 262,
+          "w": 58,
+          "h": 58,
+          "text": "debug:trace",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 17069,
             "border_color": 52924
           }
         },
@@ -973,7 +976,7 @@
           "id": "seq_lab",
           "type": "text",
           "x": 44,
-          "y": 342,
+          "y": 350,
           "w": 70,
           "h": 24,
           "text": "seq",
@@ -986,7 +989,7 @@
           "id": "seq",
           "type": "number",
           "x": 118,
-          "y": 336,
+          "y": 344,
           "w": 90,
           "h": 36,
           "value": 0,
@@ -1001,7 +1004,7 @@
           "id": "b_clear",
           "type": "button",
           "x": 232,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "CLEAR",
@@ -1020,7 +1023,7 @@
           "id": "b_mark",
           "type": "button",
           "x": 346,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "MARK",
@@ -1033,59 +1036,6 @@
             "up": [
               "printh 23 3A 40 01"
             ]
-          }
-        },
-        {
-          "id": "svc_panel",
-          "type": "text",
-          "x": 530,
-          "y": 104,
-          "w": 238,
-          "h": 290,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "svc_title",
-          "type": "text",
-          "x": 552,
-          "y": 122,
-          "w": 140,
-          "h": 24,
-          "text": "SERVICE QR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069
-          }
-        },
-        {
-          "id": "qr0",
-          "type": "qrcode",
-          "x": 574,
-          "y": 160,
-          "w": 128,
-          "h": 128,
-          "text": "usarthmi:field_debug",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 17069,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "qr_lab",
-          "type": "text",
-          "x": 552,
-          "y": 306,
-          "w": 170,
-          "h": 24,
-          "text": "field_debug",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {

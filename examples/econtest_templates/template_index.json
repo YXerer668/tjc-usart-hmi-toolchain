@@ -1,5 +1,5 @@
 {
-  "schema": "usarthmi.econtest_templates.v2",
+  "schema": "usarthmi.econtest_templates.v3",
   "canvas": {
     "width": 800,
     "height": 480
@@ -18,6 +18,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "limits and protection setup",
+        "page2": "ripple and fault diagnostics"
+      },
       "serial_prefix_hex": "23 31",
       "primary_widgets": [
         "run",
@@ -27,13 +32,32 @@
         "flow_in",
         "flow_out",
         "eff_bar",
-        "prot_ovp"
+        "prot_ovp",
+        "i_limit",
+        "load_step",
+        "prot_latch",
+        "diag_wave",
+        "fault_ovp",
+        "fault_ocp",
+        "eff_hist"
       ],
       "topic_widgets": [
         "flow_in",
         "flow_out",
         "eff_bar",
         "prot_ovp"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "i_limit",
+        "load_step",
+        "prot_latch"
+      ],
+      "page2_widgets": [
+        "diag_wave",
+        "fault_ovp",
+        "fault_ocp",
+        "eff_hist"
       ]
     },
     {
@@ -48,6 +72,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "acquisition and trigger setup",
+        "page2": "capture statistics"
+      },
       "serial_prefix_hex": "23 32",
       "primary_widgets": [
         "run",
@@ -57,13 +86,32 @@
         "scope_wave",
         "range_box",
         "trig_level",
-        "m0"
+        "m0",
+        "trig_mode",
+        "ch1_en",
+        "sample_depth",
+        "capture_wave",
+        "stat_min",
+        "stat_max",
+        "cursor_delta"
       ],
       "topic_widgets": [
         "scope_wave",
         "range_box",
         "trig_level",
         "m0"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "trig_mode",
+        "ch1_en",
+        "sample_depth"
+      ],
+      "page2_widgets": [
+        "capture_wave",
+        "stat_min",
+        "stat_max",
+        "cursor_delta"
       ]
     },
     {
@@ -78,6 +126,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "waveform synthesis setup",
+        "page2": "output quality monitor"
+      },
       "serial_prefix_hex": "23 33",
       "primary_widgets": [
         "run",
@@ -87,13 +140,32 @@
         "wave_sine",
         "freq_set",
         "amp_set",
-        "out_enable"
+        "out_enable",
+        "wave_sine_sel",
+        "mod_en",
+        "sweep_bar",
+        "monitor_wave",
+        "thd_bar",
+        "sync_lock",
+        "load_state"
       ],
       "topic_widgets": [
         "wave_sine",
         "freq_set",
         "amp_set",
         "out_enable"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "wave_sine_sel",
+        "mod_en",
+        "sweep_bar"
+      ],
+      "page2_widgets": [
+        "monitor_wave",
+        "thd_bar",
+        "sync_lock",
+        "load_state"
       ]
     },
     {
@@ -108,6 +180,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "protocol and channel setup",
+        "page2": "packet and BER diagnostics"
+      },
       "serial_prefix_hex": "23 34",
       "primary_widgets": [
         "run",
@@ -117,13 +194,32 @@
         "link_tx",
         "link_rx",
         "rssi_gauge",
-        "ber_bar"
+        "ber_bar",
+        "proto_uart",
+        "chan_num",
+        "tx_power",
+        "packet_log",
+        "rx_good",
+        "rx_bad",
+        "ber_hist"
       ],
       "topic_widgets": [
         "link_tx",
         "link_rx",
         "rssi_gauge",
         "ber_bar"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "proto_uart",
+        "chan_num",
+        "tx_power"
+      ],
+      "page2_widgets": [
+        "packet_log",
+        "rx_good",
+        "rx_bad",
+        "ber_hist"
       ]
     },
     {
@@ -138,6 +234,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "PID gain tuning",
+        "page2": "response analysis"
+      },
       "serial_prefix_hex": "23 35",
       "primary_widgets": [
         "run",
@@ -147,13 +248,32 @@
         "sp_value",
         "pv_value",
         "pid_wave",
-        "auto_mode"
+        "auto_mode",
+        "kp_slider",
+        "ki_slider",
+        "manual_out",
+        "response_wave",
+        "settle_time",
+        "overshoot",
+        "steady_err"
       ],
       "topic_widgets": [
         "sp_value",
         "pv_value",
         "pid_wave",
         "auto_mode"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "kp_slider",
+        "ki_slider",
+        "manual_out"
+      ],
+      "page2_widgets": [
+        "response_wave",
+        "settle_time",
+        "overshoot",
+        "steady_err"
       ]
     },
     {
@@ -168,6 +288,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "motion profile setup",
+        "page2": "encoder and drive diagnostics"
+      },
       "serial_prefix_hex": "23 36",
       "primary_widgets": [
         "run",
@@ -177,13 +302,32 @@
         "speed_gauge",
         "dir_fwd",
         "dir_rev",
-        "brake_btn"
+        "brake_btn",
+        "profile_accel",
+        "dir_select",
+        "current_limit",
+        "encoder_wave",
+        "drv_fault",
+        "thermal_bar",
+        "stall_count"
       ],
       "topic_widgets": [
         "speed_gauge",
         "dir_fwd",
         "dir_rev",
         "brake_btn"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "profile_accel",
+        "dir_select",
+        "current_limit"
+      ],
+      "page2_widgets": [
+        "encoder_wave",
+        "drv_fault",
+        "thermal_bar",
+        "stall_count"
       ]
     },
     {
@@ -198,6 +342,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "sensor channel setup",
+        "page2": "record and alarm diagnostics"
+      },
       "serial_prefix_hex": "23 37",
       "primary_widgets": [
         "run",
@@ -207,13 +356,32 @@
         "sensor_grid",
         "sample_bar",
         "cal_zero",
-        "store_bar"
+        "store_bar",
+        "ch1_en",
+        "avg_depth",
+        "alarm_level",
+        "record_wave",
+        "alarm_ch",
+        "sd_fill",
+        "lost_count"
       ],
       "topic_widgets": [
         "sensor_grid",
         "sample_bar",
         "cal_zero",
         "store_bar"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "ch1_en",
+        "avg_depth",
+        "alarm_level"
+      ],
+      "page2_widgets": [
+        "record_wave",
+        "alarm_ch",
+        "sd_fill",
+        "lost_count"
       ]
     },
     {
@@ -228,6 +396,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "task and waypoint setup",
+        "page2": "path replay diagnostics"
+      },
       "serial_prefix_hex": "23 38",
       "primary_widgets": [
         "run",
@@ -237,13 +410,32 @@
         "map_grid_0",
         "m0",
         "task_lane",
-        "obs_front"
+        "obs_front",
+        "wp_a",
+        "wp_b",
+        "task_mode",
+        "path_trace",
+        "checkpoint",
+        "miss_count",
+        "pose_log"
       ],
       "topic_widgets": [
         "map_grid_0",
         "m0",
         "task_lane",
         "obs_front"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "wp_a",
+        "wp_b",
+        "task_mode"
+      ],
+      "page2_widgets": [
+        "path_trace",
+        "checkpoint",
+        "miss_count",
+        "pose_log"
       ]
     },
     {
@@ -258,6 +450,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "ROI and detection setup",
+        "page2": "recognition result review"
+      },
       "serial_prefix_hex": "23 39",
       "primary_widgets": [
         "run",
@@ -267,13 +464,32 @@
         "camera_frame",
         "target_list",
         "conf_gauge",
-        "snap_btn"
+        "snap_btn",
+        "roi_x",
+        "threshold_bar",
+        "detect_mode",
+        "result_frame",
+        "class_id",
+        "confidence_bar",
+        "latency_hist"
       ],
       "topic_widgets": [
         "camera_frame",
         "target_list",
         "conf_gauge",
         "snap_btn"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "roi_x",
+        "threshold_bar",
+        "detect_mode"
+      ],
+      "page2_widgets": [
+        "result_frame",
+        "class_id",
+        "confidence_bar",
+        "latency_hist"
       ]
     },
     {
@@ -288,6 +504,11 @@
         "page1",
         "page2"
       ],
+      "page_roles": {
+        "page0": "problem dashboard",
+        "page1": "service command panel",
+        "page2": "console and fault history"
+      },
       "serial_prefix_hex": "23 3A",
       "primary_widgets": [
         "run",
@@ -297,13 +518,32 @@
         "console",
         "fault_count",
         "bus_uart",
-        "dump_btn"
+        "dump_btn",
+        "svc_mask",
+        "bus_uart_cfg",
+        "safe_boot",
+        "console_log",
+        "fault_code",
+        "reset_count",
+        "trace_qr"
       ],
       "topic_widgets": [
         "console",
         "fault_count",
         "bus_uart",
         "dump_btn"
+      ],
+      "page1_widgets": [
+        "sp0",
+        "svc_mask",
+        "bus_uart_cfg",
+        "safe_boot"
+      ],
+      "page2_widgets": [
+        "console_log",
+        "fault_code",
+        "reset_count",
+        "trace_qr"
       ]
     }
   ]

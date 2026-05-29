@@ -377,7 +377,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "图像与音频识别 | parameter panel",
+          "text": "图像与音频识别 | ROI and detection setup",
           "style": {
             "background_color": 16857,
             "foreground_color": 65503
@@ -399,7 +399,7 @@
           "value": 1
         },
         {
-          "id": "p_left",
+          "id": "roi_panel",
           "type": "text",
           "x": 24,
           "y": 104,
@@ -412,13 +412,13 @@
           }
         },
         {
-          "id": "p_title",
+          "id": "roi_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 230,
-          "h": 26,
-          "text": "TOPIC PARAMETERS",
+          "w": 190,
+          "h": 24,
+          "text": "ROI SETUP",
           "style": {
             "background_color": 65503,
             "foreground_color": 16857
@@ -428,9 +428,9 @@
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 178,
-          "w": 104,
-          "h": 24,
+          "y": 170,
+          "w": 54,
+          "h": 22,
           "text": "roi",
           "style": {
             "background_color": 65503,
@@ -440,10 +440,10 @@
         {
           "id": "sp0",
           "type": "number",
-          "x": 168,
-          "y": 170,
-          "w": 96,
-          "h": 36,
+          "x": 112,
+          "y": 164,
+          "w": 76,
+          "h": 34,
           "value": 1,
           "style": {
             "background_color": 65503,
@@ -453,26 +453,26 @@
           }
         },
         {
-          "id": "sp1_lab",
+          "id": "x_lab",
           "type": "text",
           "x": 48,
-          "y": 232,
-          "w": 104,
-          "h": 24,
-          "text": "thresh",
+          "y": 224,
+          "w": 54,
+          "h": 22,
+          "text": "x",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "sp1",
+          "id": "roi_x",
           "type": "number",
-          "x": 168,
-          "y": 224,
-          "w": 96,
-          "h": 36,
-          "value": 65,
+          "x": 112,
+          "y": 218,
+          "w": 76,
+          "h": 34,
+          "value": 96,
           "style": {
             "background_color": 65503,
             "foreground_color": 16857,
@@ -481,26 +481,26 @@
           }
         },
         {
-          "id": "sp2_lab",
+          "id": "y_lab",
           "type": "text",
-          "x": 48,
-          "y": 286,
-          "w": 104,
-          "h": 24,
-          "text": "gain",
+          "x": 204,
+          "y": 224,
+          "w": 54,
+          "h": 22,
+          "text": "y",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "sp2",
+          "id": "roi_y",
           "type": "number",
-          "x": 168,
-          "y": 278,
-          "w": 96,
-          "h": 36,
-          "value": 12,
+          "x": 268,
+          "y": 218,
+          "w": 76,
+          "h": 34,
+          "value": 64,
           "style": {
             "background_color": 65503,
             "foreground_color": 16857,
@@ -509,84 +509,7 @@
           }
         },
         {
-          "id": "b_dec",
-          "type": "button",
-          "x": 286,
-          "y": 170,
-          "w": 58,
-          "h": 36,
-          "text": "-1",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val--"
-            ]
-          }
-        },
-        {
-          "id": "b_inc",
-          "type": "button",
-          "x": 286,
-          "y": 224,
-          "w": 58,
-          "h": 36,
-          "text": "+1",
-          "style": {
-            "background_color": 33919,
-            "foreground_color": 4291,
-            "border_color": 33919
-          },
-          "events": {
-            "up": [
-              "sp0.val++"
-            ]
-          }
-        },
-        {
-          "id": "b_save",
-          "type": "button",
-          "x": 48,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "SAVE",
-          "style": {
-            "background_color": 16857,
-            "foreground_color": 65503,
-            "border_color": 16857
-          },
-          "events": {
-            "up": [
-              "printh 23 39 30 01"
-            ]
-          }
-        },
-        {
-          "id": "b_rst",
-          "type": "button",
-          "x": 198,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "RESET",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val=0",
-              "printh 23 39 30 00"
-            ]
-          }
-        },
-        {
-          "id": "p_right",
+          "id": "detect_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -599,97 +522,68 @@
           }
         },
         {
-          "id": "mode_lab",
+          "id": "detect_title",
           "type": "text",
           "x": 444,
           "y": 122,
           "w": 180,
           "h": 24,
-          "text": "RUN OPTIONS",
+          "text": "DETECTION",
           "style": {
             "background_color": 65503,
             "foreground_color": 16857
           }
         },
         {
-          "id": "cb_auto",
-          "type": "checkbox",
+          "id": "detect_mode",
+          "type": "button",
           "x": 448,
           "y": 166,
-          "w": 30,
-          "h": 30,
-          "value": 1,
+          "w": 100,
+          "h": 38,
+          "text": "COLOR",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 16857,
-            "border_color": 52924
+            "background_color": 16857,
+            "foreground_color": 65503,
+            "border_color": 16857
+          },
+          "events": {
+            "up": [
+              "printh 23 39 39 01"
+            ]
           }
         },
         {
-          "id": "auto_lab",
-          "type": "text",
-          "x": 492,
-          "y": 172,
-          "w": 160,
-          "h": 24,
-          "text": "closed loop",
+          "id": "detect_audio",
+          "type": "button",
+          "x": 560,
+          "y": 166,
+          "w": 100,
+          "h": 38,
+          "text": "AUDIO",
           "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
+            "background_color": 63423,
+            "foreground_color": 4291,
+            "border_color": 63423
+          },
+          "events": {
+            "up": [
+              "printh 23 39 39 02"
+            ]
           }
         },
         {
-          "id": "cb_log",
-          "type": "checkbox",
+          "id": "threshold_bar",
+          "type": "progress",
           "x": 448,
-          "y": 214,
-          "w": 30,
+          "y": 244,
+          "w": 210,
           "h": 30,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 16857,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "log_lab",
-          "type": "text",
-          "x": 492,
-          "y": 220,
-          "w": 160,
-          "h": 24,
-          "text": "record log",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sl0",
-          "type": "slider",
-          "x": 448,
-          "y": 276,
-          "w": 190,
-          "h": 34,
-          "value": 45,
+          "value": 65,
           "style": {
             "background_color": 63423,
             "foreground_color": 33919,
             "border_color": 52924
-          }
-        },
-        {
-          "id": "slider_lab",
-          "type": "text",
-          "x": 650,
-          "y": 282,
-          "w": 72,
-          "h": 24,
-          "text": "speed",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {
@@ -699,7 +593,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "APPLY",
+          "text": "SNAP",
           "style": {
             "background_color": 16857,
             "foreground_color": 65503,
@@ -707,26 +601,7 @@
           },
           "events": {
             "up": [
-              "printh 23 39 31 01"
-            ]
-          }
-        },
-        {
-          "id": "b_back",
-          "type": "button",
-          "x": 592,
-          "y": 330,
-          "w": 122,
-          "h": 44,
-          "text": "BACK",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "page page0"
+              "printh 23 39 39 03"
             ]
           }
         },
@@ -828,7 +703,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "图像与音频识别 | log and service",
+          "text": "图像与音频识别 | recognition result review",
           "style": {
             "background_color": 16857,
             "foreground_color": 65503
@@ -850,12 +725,51 @@
           "value": 1
         },
         {
-          "id": "log_panel",
+          "id": "result_frame",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 476,
-          "h": 290,
+          "w": 500,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "result_title",
+          "type": "text",
+          "x": 44,
+          "y": 122,
+          "w": 180,
+          "h": 24,
+          "text": "RESULT REVIEW",
+          "style": {
+            "background_color": 2213,
+            "foreground_color": 33919
+          }
+        },
+        {
+          "id": "bbox",
+          "type": "text",
+          "x": 100,
+          "y": 170,
+          "w": 190,
+          "h": 90,
+          "text": "TARGET  id=3",
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 16857
+          }
+        },
+        {
+          "id": "result_panel",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 216,
+          "h": 222,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -863,26 +777,68 @@
           }
         },
         {
-          "id": "log_title",
+          "id": "result_panel_title",
           "type": "text",
-          "x": 44,
+          "x": 574,
           "y": 122,
-          "w": 180,
+          "w": 120,
           "h": 24,
-          "text": "EVENT STREAM",
+          "text": "CLASSIFY",
           "style": {
             "background_color": 65503,
             "foreground_color": 16857
           }
         },
         {
-          "id": "log0",
-          "type": "scrolling-text",
-          "x": 44,
-          "y": 160,
-          "w": 420,
-          "h": 48,
-          "text": "FRAME | ROI | PUSH",
+          "id": "class_id",
+          "type": "number",
+          "x": 574,
+          "y": 166,
+          "w": 76,
+          "h": 32,
+          "value": 3,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 16857,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "class_lab",
+          "type": "text",
+          "x": 660,
+          "y": 174,
+          "w": 50,
+          "h": 20,
+          "text": "class",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "confidence_bar",
+          "type": "progress",
+          "x": 574,
+          "y": 222,
+          "w": 132,
+          "h": 28,
+          "value": 92,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 33919,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "latency_hist",
+          "type": "progress",
+          "x": 574,
+          "y": 284,
+          "w": 132,
+          "h": 28,
+          "value": 38,
           "style": {
             "background_color": 63423,
             "foreground_color": 16857,
@@ -890,23 +846,10 @@
           }
         },
         {
-          "id": "wave0",
-          "type": "waveform",
-          "x": 44,
-          "y": 232,
-          "w": 420,
-          "h": 92,
-          "style": {
-            "background_color": 2213,
-            "foreground_color": 33919,
-            "border_color": 52924
-          }
-        },
-        {
           "id": "seq_lab",
           "type": "text",
           "x": 44,
-          "y": 342,
+          "y": 350,
           "w": 70,
           "h": 24,
           "text": "seq",
@@ -919,7 +862,7 @@
           "id": "seq",
           "type": "number",
           "x": 118,
-          "y": 336,
+          "y": 344,
           "w": 90,
           "h": 36,
           "value": 0,
@@ -934,7 +877,7 @@
           "id": "b_clear",
           "type": "button",
           "x": 232,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "CLEAR",
@@ -953,7 +896,7 @@
           "id": "b_mark",
           "type": "button",
           "x": 346,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "MARK",
@@ -966,59 +909,6 @@
             "up": [
               "printh 23 39 40 01"
             ]
-          }
-        },
-        {
-          "id": "svc_panel",
-          "type": "text",
-          "x": 530,
-          "y": 104,
-          "w": 238,
-          "h": 290,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "svc_title",
-          "type": "text",
-          "x": 552,
-          "y": 122,
-          "w": 140,
-          "h": 24,
-          "text": "SERVICE QR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 16857
-          }
-        },
-        {
-          "id": "qr0",
-          "type": "qrcode",
-          "x": 574,
-          "y": 160,
-          "w": 128,
-          "h": 128,
-          "text": "usarthmi:vision_audio",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 16857,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "qr_lab",
-          "type": "text",
-          "x": 552,
-          "y": 306,
-          "w": 170,
-          "h": 24,
-          "text": "vision_audio",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {

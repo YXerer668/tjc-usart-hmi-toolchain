@@ -27,7 +27,7 @@ class EcontestTemplateTests(unittest.TestCase):
     def test_index_lists_ten_templates(self) -> None:
         index = _load_index()
 
-        self.assertEqual(index["schema"], "usarthmi.econtest_templates.v2")
+        self.assertEqual(index["schema"], "usarthmi.econtest_templates.v3")
         self.assertEqual(index["count"], 10)
         self.assertEqual(len(index["templates"]), 10)
         self.assertEqual({tuple(item["pages"]) for item in index["templates"]}, {("page0", "page1", "page2")})
@@ -41,6 +41,10 @@ class EcontestTemplateTests(unittest.TestCase):
         for item in index["templates"]:
             self.assertTrue(item["problem_type"])
             self.assertGreaterEqual(len(item["topic_widgets"]), 4)
+            self.assertGreaterEqual(len(item["page1_widgets"]), 4)
+            self.assertGreaterEqual(len(item["page2_widgets"]), 4)
+            self.assertEqual(set(item["page_roles"]), {"page0", "page1", "page2"})
+            self.assertNotEqual(item["page_roles"]["page1"], item["page_roles"]["page2"])
             self.assertTrue((TEMPLATE_ROOT / item["scene"]).exists(), item["scene"])
 
     def test_templates_validate_check_and_keep_touch_targets_separate(self) -> None:
@@ -55,6 +59,12 @@ class EcontestTemplateTests(unittest.TestCase):
                 page0_ids = {widget.id for widget in scene.pages[0].widgets}
                 for widget_id in item["topic_widgets"]:
                     self.assertIn(widget_id, page0_ids)
+                page1_ids = {widget.id for widget in scene.pages[1].widgets}
+                for widget_id in item["page1_widgets"]:
+                    self.assertIn(widget_id, page1_ids)
+                page2_ids = {widget.id for widget in scene.pages[2].widgets}
+                for widget_id in item["page2_widgets"]:
+                    self.assertIn(widget_id, page2_ids)
 
                 report = check_scene_project(scene_path, simulate_events=True, max_event_slots=80, max_steps=20)
                 self.assertTrue(report["summary"]["ok"], report["diagnostics"])

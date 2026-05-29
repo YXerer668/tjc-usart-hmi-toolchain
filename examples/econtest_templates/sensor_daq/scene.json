@@ -581,7 +581,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "传感采集 | parameter panel",
+          "text": "传感采集 | sensor channel setup",
           "style": {
             "background_color": 45697,
             "foreground_color": 65503
@@ -603,7 +603,7 @@
           "value": 1
         },
         {
-          "id": "p_left",
+          "id": "channel_panel",
           "type": "text",
           "x": 24,
           "y": 104,
@@ -616,25 +616,133 @@
           }
         },
         {
-          "id": "p_title",
+          "id": "channel_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 230,
-          "h": 26,
-          "text": "TOPIC PARAMETERS",
+          "w": 190,
+          "h": 24,
+          "text": "CHANNELS",
           "style": {
             "background_color": 65503,
             "foreground_color": 45697
           }
         },
         {
+          "id": "ch1_en",
+          "type": "checkbox",
+          "x": 48,
+          "y": 166,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "ch1_lab",
+          "type": "text",
+          "x": 90,
+          "y": 172,
+          "w": 80,
+          "h": 22,
+          "text": "CH1",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "ch2_en",
+          "type": "checkbox",
+          "x": 176,
+          "y": 166,
+          "w": 30,
+          "h": 30,
+          "value": 1,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "ch2_lab",
+          "type": "text",
+          "x": 218,
+          "y": 172,
+          "w": 80,
+          "h": 22,
+          "text": "CH2",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "ch3_en",
+          "type": "checkbox",
+          "x": 48,
+          "y": 222,
+          "w": 30,
+          "h": 30,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "ch3_lab",
+          "type": "text",
+          "x": 90,
+          "y": 228,
+          "w": 80,
+          "h": 22,
+          "text": "CH3",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "ch4_en",
+          "type": "checkbox",
+          "x": 176,
+          "y": 222,
+          "w": 30,
+          "h": 30,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "ch4_lab",
+          "type": "text",
+          "x": 218,
+          "y": 228,
+          "w": 80,
+          "h": 22,
+          "text": "CH4",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 178,
-          "w": 104,
-          "h": 24,
+          "y": 298,
+          "w": 80,
+          "h": 22,
           "text": "rate",
           "style": {
             "background_color": 65503,
@@ -644,10 +752,10 @@
         {
           "id": "sp0",
           "type": "number",
-          "x": 168,
-          "y": 170,
-          "w": 96,
-          "h": 36,
+          "x": 140,
+          "y": 292,
+          "w": 92,
+          "h": 34,
           "value": 100,
           "style": {
             "background_color": 65503,
@@ -657,140 +765,7 @@
           }
         },
         {
-          "id": "sp1_lab",
-          "type": "text",
-          "x": 48,
-          "y": 232,
-          "w": 104,
-          "h": 24,
-          "text": "avg",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sp1",
-          "type": "number",
-          "x": 168,
-          "y": 224,
-          "w": 96,
-          "h": 36,
-          "value": 16,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "sp2_lab",
-          "type": "text",
-          "x": 48,
-          "y": 286,
-          "w": 104,
-          "h": 24,
-          "text": "alarm",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sp2",
-          "type": "number",
-          "x": 168,
-          "y": 278,
-          "w": 96,
-          "h": 36,
-          "value": 80,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "b_dec",
-          "type": "button",
-          "x": 286,
-          "y": 170,
-          "w": 58,
-          "h": 36,
-          "text": "-1",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val--"
-            ]
-          }
-        },
-        {
-          "id": "b_inc",
-          "type": "button",
-          "x": 286,
-          "y": 224,
-          "w": 58,
-          "h": 36,
-          "text": "+1",
-          "style": {
-            "background_color": 64996,
-            "foreground_color": 4291,
-            "border_color": 64996
-          },
-          "events": {
-            "up": [
-              "sp0.val++"
-            ]
-          }
-        },
-        {
-          "id": "b_save",
-          "type": "button",
-          "x": 48,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "SAVE",
-          "style": {
-            "background_color": 45697,
-            "foreground_color": 65503,
-            "border_color": 45697
-          },
-          "events": {
-            "up": [
-              "printh 23 37 30 01"
-            ]
-          }
-        },
-        {
-          "id": "b_rst",
-          "type": "button",
-          "x": 198,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "RESET",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val=0",
-              "printh 23 37 30 00"
-            ]
-          }
-        },
-        {
-          "id": "p_right",
+          "id": "filter_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -803,97 +778,58 @@
           }
         },
         {
-          "id": "mode_lab",
+          "id": "filter_title",
           "type": "text",
           "x": 444,
           "y": 122,
           "w": 180,
           "h": 24,
-          "text": "RUN OPTIONS",
+          "text": "FILTER / ALARM",
           "style": {
             "background_color": 65503,
             "foreground_color": 45697
           }
         },
         {
-          "id": "cb_auto",
-          "type": "checkbox",
+          "id": "avg_depth",
+          "type": "number",
           "x": 448,
           "y": 166,
-          "w": 30,
-          "h": 30,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "auto_lab",
-          "type": "text",
-          "x": 492,
-          "y": 172,
-          "w": 160,
-          "h": 24,
-          "text": "closed loop",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "cb_log",
-          "type": "checkbox",
-          "x": 448,
-          "y": 214,
-          "w": 30,
-          "h": 30,
-          "value": 1,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "log_lab",
-          "type": "text",
-          "x": 492,
-          "y": 220,
-          "w": 160,
-          "h": 24,
-          "text": "record log",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sl0",
-          "type": "slider",
-          "x": 448,
-          "y": 276,
-          "w": 190,
+          "w": 76,
           "h": 34,
-          "value": 45,
+          "value": 16,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "avg_lab",
+          "type": "text",
+          "x": 534,
+          "y": 174,
+          "w": 80,
+          "h": 20,
+          "text": "avg",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "alarm_level",
+          "type": "progress",
+          "x": 448,
+          "y": 230,
+          "w": 220,
+          "h": 30,
+          "value": 80,
           "style": {
             "background_color": 63423,
             "foreground_color": 64996,
             "border_color": 52924
-          }
-        },
-        {
-          "id": "slider_lab",
-          "type": "text",
-          "x": 650,
-          "y": 282,
-          "w": 72,
-          "h": 24,
-          "text": "speed",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {
@@ -903,7 +839,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "APPLY",
+          "text": "CAL",
           "style": {
             "background_color": 45697,
             "foreground_color": 65503,
@@ -911,26 +847,7 @@
           },
           "events": {
             "up": [
-              "printh 23 37 31 01"
-            ]
-          }
-        },
-        {
-          "id": "b_back",
-          "type": "button",
-          "x": 592,
-          "y": 330,
-          "w": 122,
-          "h": 44,
-          "text": "BACK",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "page page0"
+              "printh 23 37 37 01"
             ]
           }
         },
@@ -1032,7 +949,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "传感采集 | log and service",
+          "text": "传感采集 | record and alarm diagnostics",
           "style": {
             "background_color": 45697,
             "foreground_color": 65503
@@ -1054,12 +971,12 @@
           "value": 1
         },
         {
-          "id": "log_panel",
+          "id": "record_panel",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 476,
-          "h": 290,
+          "w": 500,
+          "h": 222,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -1067,39 +984,25 @@
           }
         },
         {
-          "id": "log_title",
+          "id": "record_title",
           "type": "text",
           "x": 44,
           "y": 122,
           "w": 180,
           "h": 24,
-          "text": "EVENT STREAM",
+          "text": "RECORD STREAM",
           "style": {
             "background_color": 65503,
             "foreground_color": 45697
           }
         },
         {
-          "id": "log0",
-          "type": "scrolling-text",
-          "x": 44,
-          "y": 160,
-          "w": 420,
-          "h": 48,
-          "text": "SENS | CAL | REC",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 45697,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "wave0",
+          "id": "record_wave",
           "type": "waveform",
           "x": 44,
-          "y": 232,
-          "w": 420,
-          "h": 92,
+          "y": 160,
+          "w": 430,
+          "h": 110,
           "style": {
             "background_color": 2213,
             "foreground_color": 64996,
@@ -1107,10 +1010,106 @@
           }
         },
         {
+          "id": "alarm_panel",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 216,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "alarm_title",
+          "type": "text",
+          "x": 574,
+          "y": 122,
+          "w": 110,
+          "h": 24,
+          "text": "ALARMS",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697
+          }
+        },
+        {
+          "id": "alarm_ch",
+          "type": "number",
+          "x": 574,
+          "y": 166,
+          "w": 76,
+          "h": 32,
+          "value": 2,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
+          "id": "alarm_lab",
+          "type": "text",
+          "x": 660,
+          "y": 174,
+          "w": 46,
+          "h": 20,
+          "text": "ch",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "sd_fill",
+          "type": "progress",
+          "x": 574,
+          "y": 222,
+          "w": 132,
+          "h": 28,
+          "value": 28,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 64996,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "sd_lab",
+          "type": "text",
+          "x": 574,
+          "y": 260,
+          "w": 80,
+          "h": 20,
+          "text": "sd fill",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "lost_count",
+          "type": "number",
+          "x": 574,
+          "y": 286,
+          "w": 76,
+          "h": 32,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 45697,
+            "border_color": 52924,
+            "length": 5
+          }
+        },
+        {
           "id": "seq_lab",
           "type": "text",
           "x": 44,
-          "y": 342,
+          "y": 350,
           "w": 70,
           "h": 24,
           "text": "seq",
@@ -1123,7 +1122,7 @@
           "id": "seq",
           "type": "number",
           "x": 118,
-          "y": 336,
+          "y": 344,
           "w": 90,
           "h": 36,
           "value": 0,
@@ -1138,7 +1137,7 @@
           "id": "b_clear",
           "type": "button",
           "x": 232,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "CLEAR",
@@ -1157,7 +1156,7 @@
           "id": "b_mark",
           "type": "button",
           "x": 346,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "MARK",
@@ -1170,59 +1169,6 @@
             "up": [
               "printh 23 37 40 01"
             ]
-          }
-        },
-        {
-          "id": "svc_panel",
-          "type": "text",
-          "x": 530,
-          "y": 104,
-          "w": 238,
-          "h": 290,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "svc_title",
-          "type": "text",
-          "x": 552,
-          "y": 122,
-          "w": 140,
-          "h": 24,
-          "text": "SERVICE QR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697
-          }
-        },
-        {
-          "id": "qr0",
-          "type": "qrcode",
-          "x": 574,
-          "y": 160,
-          "w": 128,
-          "h": 128,
-          "text": "usarthmi:sensor_daq",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 45697,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "qr_lab",
-          "type": "text",
-          "x": 552,
-          "y": 306,
-          "w": 170,
-          "h": 24,
-          "text": "sensor_daq",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {

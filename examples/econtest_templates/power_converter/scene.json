@@ -567,7 +567,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "电源与功率变换 | parameter panel",
+          "text": "电源与功率变换 | limits and protection setup",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -589,7 +589,7 @@
           "value": 1
         },
         {
-          "id": "p_left",
+          "id": "limit_panel",
           "type": "text",
           "x": 24,
           "y": 104,
@@ -602,13 +602,13 @@
           }
         },
         {
-          "id": "p_title",
+          "id": "limit_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 230,
-          "h": 26,
-          "text": "TOPIC PARAMETERS",
+          "w": 220,
+          "h": 24,
+          "text": "OUTPUT LIMITS",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902
@@ -618,9 +618,9 @@
           "id": "sp0_lab",
           "type": "text",
           "x": 48,
-          "y": 178,
-          "w": 104,
-          "h": 24,
+          "y": 170,
+          "w": 94,
+          "h": 22,
           "text": "v_set",
           "style": {
             "background_color": 65503,
@@ -630,10 +630,10 @@
         {
           "id": "sp0",
           "type": "number",
-          "x": 168,
-          "y": 170,
-          "w": 96,
-          "h": 36,
+          "x": 150,
+          "y": 164,
+          "w": 100,
+          "h": 34,
           "value": 5000,
           "style": {
             "background_color": 65503,
@@ -643,12 +643,12 @@
           }
         },
         {
-          "id": "sp1_lab",
+          "id": "i_lab",
           "type": "text",
           "x": 48,
-          "y": 232,
-          "w": 104,
-          "h": 24,
+          "y": 224,
+          "w": 94,
+          "h": 22,
           "text": "i_limit",
           "style": {
             "background_color": 65503,
@@ -656,12 +656,12 @@
           }
         },
         {
-          "id": "sp1",
+          "id": "i_limit",
           "type": "number",
-          "x": 168,
-          "y": 224,
-          "w": 96,
-          "h": 36,
+          "x": 150,
+          "y": 218,
+          "w": 100,
+          "h": 34,
           "value": 1000,
           "style": {
             "background_color": 65503,
@@ -671,112 +671,34 @@
           }
         },
         {
-          "id": "sp2_lab",
-          "type": "text",
+          "id": "load_step",
+          "type": "progress",
           "x": 48,
           "y": 286,
-          "w": 104,
-          "h": 24,
-          "text": "ramp",
+          "w": 230,
+          "h": 30,
+          "value": 64,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 34402,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "load_lab",
+          "type": "text",
+          "x": 48,
+          "y": 324,
+          "w": 120,
+          "h": 22,
+          "text": "load step",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "sp2",
-          "type": "number",
-          "x": 168,
-          "y": 278,
-          "w": 96,
-          "h": 36,
-          "value": 50,
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902,
-            "border_color": 52924,
-            "length": 5
-          }
-        },
-        {
-          "id": "b_dec",
-          "type": "button",
-          "x": 286,
-          "y": 170,
-          "w": 58,
-          "h": 36,
-          "text": "-1",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val--"
-            ]
-          }
-        },
-        {
-          "id": "b_inc",
-          "type": "button",
-          "x": 286,
-          "y": 224,
-          "w": 58,
-          "h": 36,
-          "text": "+1",
-          "style": {
-            "background_color": 34402,
-            "foreground_color": 4291,
-            "border_color": 34402
-          },
-          "events": {
-            "up": [
-              "sp0.val++"
-            ]
-          }
-        },
-        {
-          "id": "b_save",
-          "type": "button",
-          "x": 48,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "SAVE",
-          "style": {
-            "background_color": 4902,
-            "foreground_color": 65503,
-            "border_color": 4902
-          },
-          "events": {
-            "up": [
-              "printh 23 31 30 01"
-            ]
-          }
-        },
-        {
-          "id": "b_rst",
-          "type": "button",
-          "x": 198,
-          "y": 330,
-          "w": 128,
-          "h": 44,
-          "text": "RESET",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4291,
-            "border_color": 63423
-          },
-          "events": {
-            "up": [
-              "sp0.val=0",
-              "printh 23 31 30 00"
-            ]
-          }
-        },
-        {
-          "id": "p_right",
+          "id": "prot_panel",
           "type": "text",
           "x": 420,
           "y": 104,
@@ -789,20 +711,20 @@
           }
         },
         {
-          "id": "mode_lab",
+          "id": "prot_title",
           "type": "text",
           "x": 444,
           "y": 122,
-          "w": 180,
+          "w": 190,
           "h": 24,
-          "text": "RUN OPTIONS",
+          "text": "PROTECTION MATRIX",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902
           }
         },
         {
-          "id": "cb_auto",
+          "id": "prot_latch",
           "type": "checkbox",
           "x": 448,
           "y": 166,
@@ -816,20 +738,20 @@
           }
         },
         {
-          "id": "auto_lab",
+          "id": "latch_lab",
           "type": "text",
-          "x": 492,
+          "x": 490,
           "y": 172,
-          "w": 160,
-          "h": 24,
-          "text": "closed loop",
+          "w": 130,
+          "h": 22,
+          "text": "fault latch",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
           }
         },
         {
-          "id": "cb_log",
+          "id": "soft_start",
           "type": "checkbox",
           "x": 448,
           "y": 214,
@@ -843,40 +765,13 @@
           }
         },
         {
-          "id": "log_lab",
+          "id": "soft_lab",
           "type": "text",
-          "x": 492,
+          "x": 490,
           "y": 220,
-          "w": 160,
-          "h": 24,
-          "text": "record log",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
-          }
-        },
-        {
-          "id": "sl0",
-          "type": "slider",
-          "x": 448,
-          "y": 276,
-          "w": 190,
-          "h": 34,
-          "value": 45,
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 34402,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "slider_lab",
-          "type": "text",
-          "x": 650,
-          "y": 282,
-          "w": 72,
-          "h": 24,
-          "text": "speed",
+          "w": 130,
+          "h": 22,
+          "text": "soft start",
           "style": {
             "background_color": 65503,
             "foreground_color": 25521
@@ -889,7 +784,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "APPLY",
+          "text": "ARM",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503,
@@ -908,7 +803,7 @@
           "y": 330,
           "w": 122,
           "h": 44,
-          "text": "BACK",
+          "text": "DISARM",
           "style": {
             "background_color": 63423,
             "foreground_color": 4291,
@@ -916,7 +811,7 @@
           },
           "events": {
             "up": [
-              "page page0"
+              "run.val=0"
             ]
           }
         },
@@ -1018,7 +913,7 @@
           "y": 44,
           "w": 500,
           "h": 20,
-          "text": "电源与功率变换 | log and service",
+          "text": "电源与功率变换 | ripple and fault diagnostics",
           "style": {
             "background_color": 4902,
             "foreground_color": 65503
@@ -1040,12 +935,12 @@
           "value": 1
         },
         {
-          "id": "log_panel",
+          "id": "diag_panel",
           "type": "text",
           "x": 24,
           "y": 104,
-          "w": 476,
-          "h": 290,
+          "w": 500,
+          "h": 222,
           "text": "",
           "style": {
             "background_color": 65503,
@@ -1053,39 +948,25 @@
           }
         },
         {
-          "id": "log_title",
+          "id": "diag_title",
           "type": "text",
           "x": 44,
           "y": 122,
-          "w": 180,
+          "w": 170,
           "h": 24,
-          "text": "EVENT STREAM",
+          "text": "RIPPLE MONITOR",
           "style": {
             "background_color": 65503,
             "foreground_color": 4902
           }
         },
         {
-          "id": "log0",
-          "type": "scrolling-text",
-          "x": 44,
-          "y": 160,
-          "w": 420,
-          "h": 48,
-          "text": "BUCK OK | OVP | LOAD",
-          "style": {
-            "background_color": 63423,
-            "foreground_color": 4902,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "wave0",
+          "id": "diag_wave",
           "type": "waveform",
           "x": 44,
-          "y": 232,
-          "w": 420,
-          "h": 92,
+          "y": 160,
+          "w": 430,
+          "h": 110,
           "style": {
             "background_color": 2213,
             "foreground_color": 34402,
@@ -1093,10 +974,104 @@
           }
         },
         {
+          "id": "eff_hist",
+          "type": "progress",
+          "x": 44,
+          "y": 298,
+          "w": 260,
+          "h": 28,
+          "value": 91,
+          "style": {
+            "background_color": 63423,
+            "foreground_color": 34402,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "fault_panel",
+          "type": "text",
+          "x": 552,
+          "y": 104,
+          "w": 216,
+          "h": 222,
+          "text": "",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4291
+          }
+        },
+        {
+          "id": "fault_title",
+          "type": "text",
+          "x": 574,
+          "y": 122,
+          "w": 120,
+          "h": 24,
+          "text": "FAULTS",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902
+          }
+        },
+        {
+          "id": "fault_ovp",
+          "type": "checkbox",
+          "x": 574,
+          "y": 166,
+          "w": 30,
+          "h": 30,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "fovp_lab",
+          "type": "text",
+          "x": 616,
+          "y": 172,
+          "w": 70,
+          "h": 22,
+          "text": "OVP",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
+          "id": "fault_ocp",
+          "type": "checkbox",
+          "x": 574,
+          "y": 214,
+          "w": 30,
+          "h": 30,
+          "value": 0,
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 4902,
+            "border_color": 52924
+          }
+        },
+        {
+          "id": "focp_lab",
+          "type": "text",
+          "x": 616,
+          "y": 220,
+          "w": 70,
+          "h": 22,
+          "text": "OCP",
+          "style": {
+            "background_color": 65503,
+            "foreground_color": 25521
+          }
+        },
+        {
           "id": "seq_lab",
           "type": "text",
           "x": 44,
-          "y": 342,
+          "y": 350,
           "w": 70,
           "h": 24,
           "text": "seq",
@@ -1109,7 +1084,7 @@
           "id": "seq",
           "type": "number",
           "x": 118,
-          "y": 336,
+          "y": 344,
           "w": 90,
           "h": 36,
           "value": 0,
@@ -1124,7 +1099,7 @@
           "id": "b_clear",
           "type": "button",
           "x": 232,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "CLEAR",
@@ -1143,7 +1118,7 @@
           "id": "b_mark",
           "type": "button",
           "x": 346,
-          "y": 336,
+          "y": 344,
           "w": 94,
           "h": 40,
           "text": "MARK",
@@ -1156,59 +1131,6 @@
             "up": [
               "printh 23 31 40 01"
             ]
-          }
-        },
-        {
-          "id": "svc_panel",
-          "type": "text",
-          "x": 530,
-          "y": 104,
-          "w": 238,
-          "h": 290,
-          "text": "",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4291
-          }
-        },
-        {
-          "id": "svc_title",
-          "type": "text",
-          "x": 552,
-          "y": 122,
-          "w": 140,
-          "h": 24,
-          "text": "SERVICE QR",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902
-          }
-        },
-        {
-          "id": "qr0",
-          "type": "qrcode",
-          "x": 574,
-          "y": 160,
-          "w": 128,
-          "h": 128,
-          "text": "usarthmi:power_converter",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 4902,
-            "border_color": 52924
-          }
-        },
-        {
-          "id": "qr_lab",
-          "type": "text",
-          "x": 552,
-          "y": 306,
-          "w": 170,
-          "h": 24,
-          "text": "power_converter",
-          "style": {
-            "background_color": 65503,
-            "foreground_color": 25521
           }
         },
         {

@@ -17,10 +17,12 @@ validation, serial readback, or camera proof from the real panel.
 - Inspect `.HMI` / `.TFT` files and render page previews.
 - Author JSON/YAML scenes, edit widgets and events, and generate agent handoff
   bundles.
-- Start from reusable 800x480 electronic-contest templates shaped around common
-  contest problem types: power conversion, measurement, signal generation,
-  communications, PID control, motor drive, sensor DAQ, robot tasks,
-  vision/audio recognition, and field debugging.
+- Start from reusable three-page 800x480 electronic-contest templates shaped
+  around common contest problem types: power conversion, measurement, signal
+  generation, communications, PID control, motor drive, sensor DAQ, robot
+  tasks, vision/audio recognition, and field debugging. Each template keeps
+  stable MCU-facing object names while giving page1/page2 problem-specific
+  setup and diagnostic widgets.
 - Build touch-safe cases through the official compiler without manual mouse
   clicks.
 - Catch visual overlaps and hidden touch hitbox mismatches before flashing.
@@ -174,8 +176,10 @@ The reusable surface is intentionally small:
   reasons.
 
 Reusable contest templates live in
-[`examples/econtest_templates`](examples/econtest_templates/). A small MCU-side
-C99 serial helper for STM32 or any UART driver lives in
+[`examples/econtest_templates`](examples/econtest_templates/). They are indexed
+with page roles and per-page widget lists so agents can verify that page0,
+page1, and page2 are problem-specific rather than color-only variants. A small
+MCU-side C99 serial helper for STM32 or any UART driver lives in
 [`firmware/usarthmi_serial`](firmware/usarthmi_serial/).
 
 When adding a new widget, update the registry first and let scene validation,
